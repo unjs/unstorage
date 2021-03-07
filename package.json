@@ -1,0 +1,37 @@
+{
+  "name": "unstorage",
+  "version": "0.0.0",
+  "description": "",
+  "repository": "unjsio/unstorage",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "siroc build",
+    "dev": "jest --watch",
+    "lint": "eslint --ext .ts .",
+    "prepublishOnly": "yarn build",
+    "release": "yarn test && standard-version && git push --follow-tags && npm publish",
+    "test": "yarn lint && jest"
+  },
+  "devDependencies": {
+    "@nuxtjs/eslint-config-typescript": "latest",
+    "@types/jest": "latest",
+    "@types/jsdom": "^16.2.6",
+    "@types/node": "latest",
+    "eslint": "latest",
+    "jest": "latest",
+    "jiti": "latest",
+    "jsdom": "^16.4.0",
+    "siroc": "latest",
+    "standard-version": "latest",
+    "ts-jest": "latest",
+    "typescript": "latest",
+    "vite": "^2.0.5"
+  }
+}

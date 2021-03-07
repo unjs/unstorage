@@ -1,5 +1,6 @@
 import { resolve } from 'path'
 import { JSDOM } from 'jsdom'
+import { rmRecursive } from '../src/utils/node-fs'
 import {
   Storage, StorageProvider, createStorage,
   memoryStorage, fsStorage, localStorage
@@ -10,9 +11,11 @@ describe('memoryStorage', () => {
 })
 
 describe('fsStorage', () => {
-  testProvider(() => fsStorage({
-    dir: resolve(__dirname, 'tmp')
-  }))
+  testProvider(async () => {
+    const dir = resolve(__dirname, 'tmp')
+    await rmRecursive(dir)
+    return fsStorage({ dir })
+  })
 })
 
 describe('localStorage', () => {

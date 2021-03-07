@@ -1,6 +1,5 @@
-import { promises as fsPromises } from 'fs'
+import { Dirent, promises as fsPromises } from 'fs'
 import { resolve, dirname } from 'path'
-import { Dirent } from 'node:fs'
 
 function isNotFound (err: any) {
   return err.code === 'ENOENT'
@@ -26,6 +25,11 @@ export function unlink (path: string) {
     .catch(err => isNotFound(err) ? undefined : Promise.reject(err))
 }
 
+export function readdir (dir: string): Promise<Dirent[]> {
+  return fsPromises.readdir(dir, { withFileTypes: true })
+    .catch(err => isNotFound(err) ? [] : Promise.reject(err))
+}
+
 export async function ensuredir (dir: string) {
   const _stat = await stat(dir)
   if (_stat && _stat.isDirectory()) {
@@ -36,8 +40,7 @@ export async function ensuredir (dir: string) {
 }
 
 export async function readdirRecursive (dir: string): Promise<string[]> {
-  const entries: Dirent[] = await fsPromises.readdir(dir, { withFileTypes: true })
-    .catch(err => isNotFound(err) ? [] : Promise.reject(err))
+  const entries: Dirent[] = await readdir(dir)
   const files: string[] = []
   await Promise.all(entries.map(async (entry) => {
     const entryPath = resolve(dir, entry.name)
@@ -52,7 +55,7 @@ export async function readdirRecursive (dir: string): Promise<string[]> {
 }
 
 export async function rmRecursive (dir: string): Promise<void> {
-  const entries = await fsPromises.readdir(dir, { withFileTypes: true })
+  const entries = await readdir(dir)
   await Promise.all(entries.map((entry) => {
     const entryPath = resolve(dir, entry.name)
     if (entry.isDirectory()) {

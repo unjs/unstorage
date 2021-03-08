@@ -8,7 +8,7 @@
 
 > Universal key-value Storage
 
-![unstorage](.github/unstorage.svg)
+![unstorage](./assets/unstorage.svg)
 
 - Works in all environments (Browser, NodeJS and Workers)
 - Asynchronous API

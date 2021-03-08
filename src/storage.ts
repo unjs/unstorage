@@ -12,30 +12,37 @@ export function createStorage (): Storage {
   const getAllProviders = () => [defaultStorage, ...Object.values(mounts)]
 
   const getProvider = (key: string) => {
+    key = normalizeKey(key)
     for (const base of mountKeys) {
       if (key.startsWith(base)) {
-        return mounts[base]
+        return {
+          provider: mounts[base],
+          key: key.substr(base.length)
+        }
       }
     }
-    return defaultStorage
+    return {
+      provider: defaultStorage,
+      key
+    }
   }
 
   const storage: Storage = {
-    hasItem (key) {
-      key = normalizeKey(key)
-      return asyncCall(getProvider(key).hasItem, key)
+    hasItem (_key) {
+      const { key, provider } = getProvider(_key)
+      return asyncCall(provider.hasItem, key)
     },
-    getItem (key) {
-      key = normalizeKey(key)
-      return asyncCall(getProvider(key).getItem, key)
+    getItem (_key) {
+      const { key, provider } = getProvider(_key)
+      return asyncCall(provider.getItem, key)
     },
-    setItem (key, vlaue) {
-      key = normalizeKey(key)
-      return asyncCall(getProvider(key).setItem, key, vlaue)
+    setItem (_key, vlaue) {
+      const { key, provider } = getProvider(_key)
+      return asyncCall(provider.setItem, key, vlaue)
     },
-    removeItem (key) {
-      key = normalizeKey(key)
-      return asyncCall(getProvider(key).removeItem, key)
+    removeItem (_key) {
+      const { key, provider } = getProvider(_key)
+      return asyncCall(provider.removeItem, key)
     },
     async getKeys () {
       const providerKeys = await Promise.all(getAllProviders().map(s => asyncCall(s.getKeys)))

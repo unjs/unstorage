@@ -1,40 +1,54 @@
 import { resolve } from 'path'
 import { JSDOM } from 'jsdom'
-import { rmRecursive } from '../src/utils/node-fs'
+import { readFile, rmRecursive } from '../src/utils/node-fs'
 import {
   Storage, StorageProvider, createStorage,
   memoryStorage, fsStorage, localStorage
 } from '../src'
 
 describe('memoryStorage', () => {
-  testProvider(() => memoryStorage())
+  testProvider(() => {
+    return {
+      provider: memoryStorage()
+    }
+  })
 })
 
 describe('fsStorage', () => {
   testProvider(async () => {
     const dir = resolve(__dirname, 'tmp')
     await rmRecursive(dir)
-    return fsStorage({ dir })
+    return {
+      provider: fsStorage({ dir }),
+      async verify () {
+        expect(await readFile(resolve(dir, 'foo/bar'))).toBe('test_data')
+      }
+    }
   })
 })
 
 describe('localStorage', () => {
   testProvider(() => {
-    const jsdom = new JSDOM('', {
-      url: 'http://localhost'
-    })
-    return localStorage({
-      localStorage: jsdom.window.localStorage
-    })
+    const jsdom = new JSDOM('', { url: 'http://localhost' })
+    return {
+      provider: localStorage({ localStorage: jsdom.window.localStorage })
+    }
   })
 })
 
-function testProvider (getProvider: () => StorageProvider | Promise<StorageProvider>) {
+interface TestParams {
+  provider: StorageProvider
+  verify?: (TestParams?) => void | Promise<void>
+}
+
+function testProvider (getParams: () => TestParams | Promise<TestParams>) {
   let storage: Storage
+  let params: TestParams
+
   it('init', async () => {
     storage = createStorage()
-    const provider = await getProvider()
-    storage.mount('/', provider)
+    params = await getParams()
+    storage.mount('/', params.provider)
     await storage.clear()
   })
 
@@ -49,6 +63,12 @@ function testProvider (getProvider: () => StorageProvider | Promise<StorageProvi
     expect(await storage.hasItem('foo:bar')).toBe(true)
     expect(await storage.getItem('foo:bar')).toBe('test_data')
     expect(await storage.getKeys()).toMatchObject(['foo:bar'])
+  })
+
+  it('verify', () => {
+    if (params.verify) {
+      return params.verify(params)
+    }
   })
 
   it('removeItem', async () => {

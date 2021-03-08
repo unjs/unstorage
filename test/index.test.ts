@@ -48,7 +48,8 @@ function testDriver (getParams: () => TestParams | Promise<TestParams>) {
   it('init', async () => {
     storage = createStorage()
     params = await getParams()
-    storage.mount('/', params.driver)
+    await storage.mount('/', params.driver, { initial: 'works' })
+    expect(await storage.getItem('initial')).toBe('works')
     await storage.clear()
   })
 

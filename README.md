@@ -16,11 +16,11 @@
 - Default in-memory storage
 - Tree-shakable and lightweight core
 - Native aware value serialization and deserialization
+- Restore initial state (hydration)
 
 WIP:
 
 - State compression
-- State hydration
 - Links (soft/junction)
 - Binary data
 - `getKeys` and `clear` with sub-path
@@ -84,8 +84,20 @@ await storage.getItem('foo:bar')
 
 Add Update a value to storage.
 
+If value is not string, it will be stringified.
+
+If value is `undefined`, it is same as calling `removeItem(key)`.
+
 ```js
 await storage.setItem('foo:bar', 'baz')
+```
+
+### `storage.setItems(base, items)`
+
+Batch update items. Internally calls one-by-one to the driver. Useful to restore/hydrate state.
+
+```js
+await storage.setItems('/', { 'foo:bar': 'baz' })
 ```
 
 ### `storage.removeItem(key)`
@@ -112,11 +124,15 @@ Removes all stored key/values.
 await storage.clear()
 ```
 
-### `storage.mount(mountpoint, driver)`
+### `storage.mount(mountpoint, driver, items?)`
 
 By default, everything is stored in memory. We can mount additional storage space in a Unix-like fashion.
 
 When operating with a `key` that starts with mountpoint, instead of default storage, mounted driver will be called.
+
+If `items` argument is provided, restores/hydrates state of mountpoint using `setItems`.
+
+<!-- TODO: Explain mountpoint hiding -->
 
 ```js
 import { createStorage } from 'unistorage'

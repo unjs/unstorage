@@ -16,9 +16,10 @@ export interface Storage {
   hasItem: (key: string) => Promise<boolean>
   getItem: (key: string) => Promise<StorageValue>
   setItem: (key: string, value: StorageValue) => Promise<void>
+  setItems: (base: string, items: Record<string, StorageValue>) => Promise<void>
   removeItem: (key: string) => Promise<void>
   getKeys: () => Promise<string[]>
   clear: () => Promise<void>
-  mount: (mountpoint: string, driver: Driver) => void
+  mount: (base: string, driver: Driver, initialState?: Record<string, string>) => Promise<void>
   dispose: () => Promise<void>
 }

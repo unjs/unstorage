@@ -44,6 +44,10 @@ export function createStorage (): Storage {
       const { key, driver } = getDriver(_key)
       return asyncCall(driver.setItem, key, stringify(value))
     },
+    async setItems (base, items) {
+      base = base ? (normalizeKey(base) + ':') : ''
+      await Promise.all(Object.entries(items).map(e => storage.setItem(base + e[0], e[1])))
+    },
     removeItem (_key) {
       const { key, driver } = getDriver(_key)
       return asyncCall(driver.removeItem, key)
@@ -58,7 +62,7 @@ export function createStorage (): Storage {
     async dispose () {
       await Promise.all(getAllDrivers().map(s => disposeStoage(s)))
     },
-    mount (base, driver) {
+    async mount (base, driver, initialState) {
       base = normalizeKey(base)
       if (!mountKeys.includes(base)) {
         mountKeys.push(base)
@@ -72,6 +76,9 @@ export function createStorage (): Storage {
         delete mounts[base]
       }
       mounts[base] = driver
+      if (initialState) {
+        await storage.setItems(base, initialState)
+      }
     }
   }
   return storage

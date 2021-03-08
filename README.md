@@ -8,6 +8,8 @@
 
 > Universal key-value Storage
 
+![unstorage](.github/unstorage.svg)
+
 - Works in all environments (Browser, NodeJS and Workers)
 - Asynchronous API
 - Unix-style mountable paths (multi provider)

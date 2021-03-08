@@ -1,6 +1,7 @@
+import destr from 'destr'
 import type { Storage, Driver } from './types'
 import memory from './drivers/memory'
-import { normalizeKey, asyncCall } from './utils'
+import { normalizeKey, asyncCall, stringify } from './utils'
 
 export function createStorage (): Storage {
   const defaultStorage = memory()
@@ -34,11 +35,14 @@ export function createStorage (): Storage {
     },
     getItem (_key) {
       const { key, driver } = getDriver(_key)
-      return asyncCall(driver.getItem, key)
+      return asyncCall(driver.getItem, key).then(val => destr(val))
     },
-    setItem (_key, vlaue) {
+    setItem (_key, value) {
+      if (value === undefined) {
+        return storage.removeItem(_key)
+      }
       const { key, driver } = getDriver(_key)
-      return asyncCall(driver.setItem, key, vlaue)
+      return asyncCall(driver.setItem, key, stringify(value))
     },
     removeItem (_key) {
       const { key, driver } = getDriver(_key)

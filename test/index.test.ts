@@ -65,6 +65,16 @@ function testDriver (getParams: () => TestParams | Promise<TestParams>) {
     expect(await storage.getKeys()).toMatchObject(['foo:bar'])
   })
 
+  it('serialize (object)', async () => {
+    await storage.setItem('test.json', { json: 'works' })
+    expect(await storage.getItem('test.json')).toMatchObject({ json: 'works' })
+  })
+
+  it('serialize (primitive)', async () => {
+    await storage.setItem('true.json', true)
+    expect(await storage.getItem('true.json')).toBe(true)
+  })
+
   it('verify', () => {
     if (params.verify) {
       return params.verify(params)
@@ -75,6 +85,10 @@ function testDriver (getParams: () => TestParams | Promise<TestParams>) {
     await storage.removeItem('foo:bar')
     expect(await storage.hasItem('foo:bar')).toBe(false)
     expect(await storage.getItem('foo:bar')).toBe(null)
+  })
+
+  it('clear', async () => {
+    await storage.clear()
     expect(await storage.getKeys()).toMatchObject([])
   })
 }

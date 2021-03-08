@@ -25,6 +25,7 @@
     "@types/jest": "latest",
     "@types/jsdom": "^16.2.6",
     "@types/node": "latest",
+    "destr": "^1.1.0",
     "eslint": "latest",
     "jest": "latest",
     "jiti": "latest",

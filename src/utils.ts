@@ -19,3 +19,12 @@ export function asyncCall<T extends (...args: any) => any>(fn: T, ...args: any[]
     return Promise.reject(err)
   }
 }
+
+export function isPrimitive (arg: any) {
+  const type = typeof arg
+  return arg === null || (type !== 'object' && type !== 'function')
+}
+
+export function stringify (arg: any) {
+  return isPrimitive(arg) ? (arg + '') : JSON.stringify(arg)
+}

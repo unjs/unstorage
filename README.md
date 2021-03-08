@@ -15,10 +15,10 @@
 - Unix-style mountable paths (multi driver)
 - Default in-memory storage
 - Tree-shakable and lightweight core
+- Native aware value serialization and deserialization
 
 WIP:
 
-- JSON serialization and native types (destr)
 - State compression
 - State hydration
 - Links (soft/junction)

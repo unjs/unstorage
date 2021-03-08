@@ -1,25 +1,25 @@
 import { resolve } from 'path'
 import { JSDOM } from 'jsdom'
-import { readFile, rmRecursive } from '../src/utils/node-fs'
-import {
-  Storage, StorageProvider, createStorage,
-  memoryStorage, fsStorage, localStorage
-} from '../src'
+import { readFile, rmRecursive } from '../src/drivers/utils/node-fs' // TODO
+import { Storage, Driver, createStorage } from '../src'
+import memoryDriver from '../src/drivers/memory'
+import fsDriver from '../src/drivers/fs'
+import localstorageDriver from '../src/drivers/localstorage'
 
 describe('memoryStorage', () => {
-  testProvider(() => {
+  testDriver(() => {
     return {
-      provider: memoryStorage()
+      driver: memoryDriver()
     }
   })
 })
 
 describe('fsStorage', () => {
-  testProvider(async () => {
+  testDriver(async () => {
     const dir = resolve(__dirname, 'tmp')
     await rmRecursive(dir)
     return {
-      provider: fsStorage({ dir }),
+      driver: fsDriver({ dir }),
       async verify () {
         expect(await readFile(resolve(dir, 'foo/bar'))).toBe('test_data')
       }
@@ -28,27 +28,27 @@ describe('fsStorage', () => {
 })
 
 describe('localStorage', () => {
-  testProvider(() => {
+  testDriver(() => {
     const jsdom = new JSDOM('', { url: 'http://localhost' })
     return {
-      provider: localStorage({ localStorage: jsdom.window.localStorage })
+      driver: localstorageDriver({ localStorage: jsdom.window.localStorage })
     }
   })
 })
 
 interface TestParams {
-  provider: StorageProvider
-  verify?: (TestParams?) => void | Promise<void>
+  driver: Driver
+  verify?: (params?: TestParams) => void | Promise<void>
 }
 
-function testProvider (getParams: () => TestParams | Promise<TestParams>) {
+function testDriver (getParams: () => TestParams | Promise<TestParams>) {
   let storage: Storage
   let params: TestParams
 
   it('init', async () => {
     storage = createStorage()
     params = await getParams()
-    storage.mount('/', params.provider)
+    storage.mount('/', params.driver)
     await storage.clear()
   })
 

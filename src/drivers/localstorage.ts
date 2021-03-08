@@ -1,10 +1,10 @@
-import type { StorageProviderFactory } from '../types'
+import type { DriverFactory } from '../types'
 
 export interface LocalStorageOptions {
   localStorage?: typeof window.localStorage
 }
 
-export const localStorage: StorageProviderFactory = (opts?: LocalStorageOptions) => {
+export default <DriverFactory> function (opts?: LocalStorageOptions) {
   const _localStorage = opts?.localStorage || (globalThis.localStorage as typeof window.localStorage)
   if (!_localStorage) {
     throw new Error('localStorage not available')

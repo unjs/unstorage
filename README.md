@@ -12,7 +12,7 @@
 
 - Works in all environments (Browser, NodeJS and Workers)
 - Asynchronous API
-- Unix-style mountable paths (multi provider)
+- Unix-style mountable paths (multi driver)
 - Default in-memory storage
 - Tree-shakable and lightweight core
 
@@ -29,20 +29,19 @@ WIP:
 - Watcher
 - Reactivity
 - Basic array operations
+- Key Expiration
 
-## Providers
+## Drivers
 
 - [x] Memory (Universal)
 - [x] Filesystem (NodeJS)
-  - [x] Nested
-  - [ ] Flat
 - [x] LocalStorage (Browser)
 - [ ] Cookies (Browser)
-- [ ] Location P
+- [ ] Location params (Browser)
 - [ ] HTTP (Universal)
-- [ ] S3
-- [ ] Cloudflare KV
-- [ ] Github
+- [ ] S3 (Universal)
+- [ ] Cloudflare KV (Workers and Universal)
+- [ ] Github (Universal)
 
 ## Usage
 
@@ -113,19 +112,20 @@ Removes all stored key/values.
 await storage.clear()
 ```
 
-### `storage.mount(mountpoint, provider)`
+### `storage.mount(mountpoint, driver)`
 
 By default, everything is stored in memory. We can mount additional storage space in a Unix-like fashion.
 
-When operating with a `key` that starts with mountpoint, instead of default storage, mounted provider will be called.
+When operating with a `key` that starts with mountpoint, instead of default storage, mounted driver will be called.
 
 ```js
-import { createStorage, fsStorage } from 'unistorage'
+import { createStorage } from 'unistorage'
+import fsDriver from 'unistorage/drivers/fs'
 
 // Create a storage container with default memory storage
 const storage = createStorage()
 
-storage.mount('/output', fsStorage({ dir: './output' }))
+storage.mount('/output', fsDriver({ dir: './output' }))
 
 //  Writes to ./output/test file
 await storage.setItem('/output/test', 'works')

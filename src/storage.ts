@@ -1,60 +1,60 @@
-import type { Storage, StorageProvider } from './types'
-import { memoryStorage } from './providers'
+import type { Storage, Driver } from './types'
+import memory from './drivers/memory'
 import { normalizeKey, asyncCall } from './utils'
 
 export function createStorage (): Storage {
-  const defaultStorage = memoryStorage()
+  const defaultStorage = memory()
 
   // TODO: refactor to SortedMap / SortedMap
-  const mounts: Record<string, StorageProvider> = {}
+  const mounts: Record<string, Driver> = {}
   const mountKeys: string[] = [] // sorted keys of mounts
 
-  const getAllProviders = () => [defaultStorage, ...Object.values(mounts)]
+  const getAllDrivers = () => [defaultStorage, ...Object.values(mounts)]
 
-  const getProvider = (key: string) => {
+  const getDriver = (key: string) => {
     key = normalizeKey(key)
     for (const base of mountKeys) {
       if (key.startsWith(base)) {
         return {
-          provider: mounts[base],
+          driver: mounts[base],
           key: key.substr(base.length)
         }
       }
     }
     return {
-      provider: defaultStorage,
+      driver: defaultStorage,
       key
     }
   }
 
   const storage: Storage = {
     hasItem (_key) {
-      const { key, provider } = getProvider(_key)
-      return asyncCall(provider.hasItem, key)
+      const { key, driver } = getDriver(_key)
+      return asyncCall(driver.hasItem, key)
     },
     getItem (_key) {
-      const { key, provider } = getProvider(_key)
-      return asyncCall(provider.getItem, key)
+      const { key, driver } = getDriver(_key)
+      return asyncCall(driver.getItem, key)
     },
     setItem (_key, vlaue) {
-      const { key, provider } = getProvider(_key)
-      return asyncCall(provider.setItem, key, vlaue)
+      const { key, driver } = getDriver(_key)
+      return asyncCall(driver.setItem, key, vlaue)
     },
     removeItem (_key) {
-      const { key, provider } = getProvider(_key)
-      return asyncCall(provider.removeItem, key)
+      const { key, driver } = getDriver(_key)
+      return asyncCall(driver.removeItem, key)
     },
     async getKeys () {
-      const providerKeys = await Promise.all(getAllProviders().map(s => asyncCall(s.getKeys)))
-      return providerKeys.flat().map(normalizeKey)
+      const driverKeys = await Promise.all(getAllDrivers().map(s => asyncCall(s.getKeys)))
+      return driverKeys.flat().map(normalizeKey)
     },
     async clear () {
-      await Promise.all(getAllProviders().map(s => asyncCall(s.clear)))
+      await Promise.all(getAllDrivers().map(s => asyncCall(s.clear)))
     },
     async dispose () {
-      await Promise.all(getAllProviders().map(s => disposeStoage(s)))
+      await Promise.all(getAllDrivers().map(s => disposeStoage(s)))
     },
-    mount (base, provider) {
+    mount (base, driver) {
       base = normalizeKey(base)
       if (!mountKeys.includes(base)) {
         mountKeys.push(base)
@@ -67,13 +67,13 @@ export function createStorage (): Storage {
         }
         delete mounts[base]
       }
-      mounts[base] = provider
+      mounts[base] = driver
     }
   }
   return storage
 }
 
-async function disposeStoage (storage: StorageProvider) {
+async function disposeStoage (storage: Driver) {
   if (typeof storage.dispose === 'function') {
     await asyncCall(storage.dispose)
   }

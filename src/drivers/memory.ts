@@ -1,6 +1,6 @@
-import type { StorageProviderFactory, StorageValue } from '../types'
+import type { DriverFactory, StorageValue } from '../types'
 
-export const memoryStorage: StorageProviderFactory = () => {
+export default <DriverFactory> function () {
   const data = new Map<string, StorageValue>()
 
   return {

@@ -9,10 +9,11 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "drivers"
   ],
   "scripts": {
-    "build": "siroc build",
+    "build": "siroc build && mkdist --src src/drivers --dist drivers",
     "dev": "jest --watch",
     "lint": "eslint --ext .ts .",
     "prepublishOnly": "yarn build",
@@ -28,6 +29,7 @@
     "jest": "latest",
     "jiti": "latest",
     "jsdom": "^16.4.0",
+    "mkdist": "^0.1.2",
     "siroc": "latest",
     "standard-version": "latest",
     "ts-jest": "latest",

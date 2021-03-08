@@ -1,6 +1,6 @@
 export type StorageValue = string | null
 
-export interface StorageProvider {
+export interface Driver {
   hasItem: (key: string) => boolean | Promise<boolean>
   getItem: (key: string) => StorageValue | Promise<StorageValue>
   setItem: (key: string, value: string) => void | Promise<void>
@@ -10,7 +10,7 @@ export interface StorageProvider {
   dispose?: () => void | Promise<void>
 }
 
-export type StorageProviderFactory<OptsT = any> = (opts?: OptsT) => StorageProvider
+export type DriverFactory<OptsT = any> = (opts?: OptsT) => Driver
 
 export interface Storage {
   hasItem: (key: string) => Promise<boolean>
@@ -19,6 +19,6 @@ export interface Storage {
   removeItem: (key: string) => Promise<void>
   getKeys: () => Promise<string[]>
   clear: () => Promise<void>
-  mount: (mountpoint: string, provider: StorageProvider) => void
+  mount: (mountpoint: string, driver: Driver) => void
   dispose: () => Promise<void>
 }

@@ -21,7 +21,7 @@ describe('fsStorage', () => {
     return {
       driver: fsDriver({ dir }),
       async verify () {
-        expect(await readFile(resolve(dir, 'foo/bar'))).toBe('test_data')
+        expect(await readFile(resolve(dir, 's1/a'))).toBe('test_data')
       }
     }
   })
@@ -54,26 +54,31 @@ function testDriver (getParams: () => TestParams | Promise<TestParams>) {
   })
 
   it('initial state', async () => {
-    expect(await storage.hasItem('foo:bar')).toBe(false)
-    expect(await storage.getItem('foo:bar')).toBe(null)
+    expect(await storage.hasItem('s1:a')).toBe(false)
+    expect(await storage.getItem('s2:a')).toBe(null)
     expect(await storage.getKeys()).toMatchObject([])
   })
 
   it('setItem', async () => {
-    await storage.setItem('/foo:bar/', 'test_data')
-    expect(await storage.hasItem('foo:bar')).toBe(true)
-    expect(await storage.getItem('foo:bar')).toBe('test_data')
-    expect(await storage.getKeys()).toMatchObject(['foo:bar'])
+    await storage.setItem('s1:a', 'test_data')
+    await storage.setItem('s2:a', 'test_data')
+    expect(await storage.hasItem('s1:a')).toBe(true)
+    expect(await storage.getItem('s1:a')).toBe('test_data')
+  })
+
+  it('getKeys', async () => {
+    expect(await storage.getKeys().then(k => k.sort())).toMatchObject(['s1:a', 's2:a'].sort())
+    expect(await storage.getKeys('s1').then(k => k.sort())).toMatchObject(['s1:a'].sort())
   })
 
   it('serialize (object)', async () => {
-    await storage.setItem('test.json', { json: 'works' })
-    expect(await storage.getItem('test.json')).toMatchObject({ json: 'works' })
+    await storage.setItem('/data/test.json', { json: 'works' })
+    expect(await storage.getItem('/data/test.json')).toMatchObject({ json: 'works' })
   })
 
   it('serialize (primitive)', async () => {
-    await storage.setItem('true.json', true)
-    expect(await storage.getItem('true.json')).toBe(true)
+    await storage.setItem('/data/true.json', true)
+    expect(await storage.getItem('/data/true.json')).toBe(true)
   })
 
   it('verify', () => {
@@ -83,9 +88,9 @@ function testDriver (getParams: () => TestParams | Promise<TestParams>) {
   })
 
   it('removeItem', async () => {
-    await storage.removeItem('foo:bar')
-    expect(await storage.hasItem('foo:bar')).toBe(false)
-    expect(await storage.getItem('foo:bar')).toBe(null)
+    await storage.removeItem('s1:a')
+    expect(await storage.hasItem('s1:a')).toBe(false)
+    expect(await storage.getItem('s1:a')).toBe(null)
   })
 
   it('clear', async () => {

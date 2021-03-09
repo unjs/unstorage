@@ -20,16 +20,11 @@
 
 WIP:
 
+- Unmount
+- Key expiration
+- State snapshot
 - State compression
-- Links (soft/junction)
-- Binary data
-- `getKeys` and `clear` with sub-path
-- IPC/HTTP interface
-- Virtual fs (fs-like interface)
 - Watcher
-- Reactivity
-- Basic array operations
-- Key Expiration
 
 ## Drivers
 
@@ -108,21 +103,16 @@ Remove a value from storage.
 await storage.removeItem('foo:bar')
 ```
 
-### `storage.getKeys()`
+### `storage.getKeys(base?)`
 
 Get all keys. Returns an array of `string`.
+
+If a base is provided, only keys starting with base will be returned also only mounts starting with base will be queried. Keys still have full path.
 
 ```js
 await storage.getKeys()
 ```
 
-### `storage.clear()`
-
-Removes all stored key/values.
-
-```js
-await storage.clear()
-```
 
 ### `storage.mount(mountpoint, driver, items?)`
 
@@ -150,9 +140,19 @@ await storage.setItem('/output/test', 'works')
 await storage.setItem('/foo', 'bar')
 ```
 
+### `storage.clear(base?)`
+
+Removes all stored key/values. If a base is provided, only mounts matching base will be cleared.
+
+```js
+await storage.clear()
+```
+
 ### `storage.dispose()`
 
 Disposes all mounted storages to ensure there are no open-handles left. Call it before exiting process.
+
+**Note:** Dispose also clears in-memory data.
 
 ```js
 await storage.dispose()

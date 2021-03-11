@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/unjsio/unstorage/compare/v0.0.2...v0.0.3) (2021-03-11)
+
+
+### Features
+
+* unstorage command for standalone server ([171eb37](https://github.com/unjsio/unstorage/commit/171eb37cdda061b24870c1a799a618e5b87126ad))
+* **server:** returns keys on get if val not found ([79fd997](https://github.com/unjsio/unstorage/commit/79fd997e59c27df78cc4db9e156052d16f764c95))
+* support more http methods ([45d4771](https://github.com/unjsio/unstorage/commit/45d47711c67dd73d1da4acfc56ebb5951cb2d387))
+* support storage server ([5240591](https://github.com/unjsio/unstorage/commit/5240591ea83df43a83d90c134d1a9cf47d0d6784))
+
+
+### Bug Fixes
+
+* handle mountpoints qurty shorter than mountpoint ([9cc1904](https://github.com/unjsio/unstorage/commit/9cc1904c0d68a1d319a850f743cd2d48ef573040))
+
 ### [0.0.2](https://github.com/unjsio/unstorage/compare/v0.0.1...v0.0.2) (2021-03-11)
 
 

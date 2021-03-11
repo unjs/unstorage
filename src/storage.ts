@@ -114,13 +114,7 @@ export function createStorage (): Storage {
         ctx.mountpoints.push(base)
         ctx.mountpoints.sort((a, b) => b.length - a.length)
       }
-      if (ctx.mounts[base]) {
-        if (ctx.mounts[base].dispose) {
-          // eslint-disable-next-line no-console
-          await dispose(ctx.mounts[base]!)
-        }
-        delete ctx.mounts[base]
-      }
+      await storage.unmount(base)
       ctx.mounts[base] = driver
       if (ctx.watching) {
         await watch(driver, onChange, base)

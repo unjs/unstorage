@@ -35,7 +35,7 @@ export function createStorage (): Storage {
 
   const getMounts = (base: string) => {
     return ctx.mountpoints
-      .filter(mountpoint => base!.startsWith(mountpoint))
+      .filter(mountpoint => base!.length < mountpoint.length || base!.startsWith(mountpoint))
       .map(mountpoint => ({
         mountpoint,
         driver: ctx.mounts[mountpoint]

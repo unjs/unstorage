@@ -41,6 +41,7 @@
   - [`storage.watch(callback)`](#storagewatchcallback)
 - [Utils](#utils)
   - [`snapshot(storage, base?)`](#snapshotstorage-base)
+- [Storage Server](#storage-server)
 - [Drivers](#drivers-1)
   - [`fs` (node)](#fs-node)
   - [`localStorage` (browser)](#localstorage-browser)

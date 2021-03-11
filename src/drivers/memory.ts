@@ -10,19 +10,19 @@ export default <DriverFactory> function () {
     getItem (key) {
       return data.get(key) || null
     },
-    setItem (key, value) {
+    setItem(key, value) {
       data.set(key, value)
     },
     removeItem (key) {
       data.delete(key)
     },
-    getKeys () {
+    getKeys() {
       return Array.from(data.keys())
     },
-    clear () {
+    clear() {
       data.clear()
     },
-    dispose () {
+    dispose() {
       data.clear()
     }
   }

@@ -21,5 +21,6 @@ export interface Storage {
   getKeys: (base?: string) => Promise<string[]>
   clear: (base?: string) => Promise<void>
   mount: (base: string, driver: Driver, initialState?: Record<string, string>) => Promise<void>
+  unmount: (base: string, dispose?: boolean) => Promise<void>
   dispose: () => Promise<void>
 }

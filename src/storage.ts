@@ -5,18 +5,18 @@ import { normalizeKey, normalizeBase, asyncCall, stringify } from './utils'
 
 interface StorageCTX {
   mounts: Record<string, Driver>
-  mountKeys: string[]
+  mountpoints: string[]
 }
 
 export function createStorage (): Storage {
   const ctx: StorageCTX = {
     mounts: { '': memory() },
-    mountKeys: ['']
+    mountpoints: ['']
   }
 
   const getMount = (key?: string) => {
     key = normalizeKey(key)
-    for (const base of ctx.mountKeys) {
+    for (const base of ctx.mountpoints) {
       if (key.startsWith(base)) {
         return {
           relativeKey: key.substr(base.length),
@@ -32,9 +32,12 @@ export function createStorage (): Storage {
 
   const getMounts = (base?: string) => {
     base = normalizeBase(base)
-    return ctx.mountKeys
-      .filter(key => base!.startsWith(key))
-      .map(key => getMount(key))
+    return ctx.mountpoints
+      .filter(mountpoint => base!.startsWith(mountpoint))
+      .map(mountpoint => ({
+        mountpoint,
+        driver: ctx.mounts[mountpoint]
+      }))
   }
 
   const storage: Storage = {
@@ -63,8 +66,11 @@ export function createStorage (): Storage {
     },
     async getKeys (base) {
       base = normalizeBase(base)
-      const rawKeys = await Promise.all(getMounts(base).map(m => asyncCall(m.driver.getKeys)))
-      const keys = rawKeys.flat().map(key => normalizeKey(key))
+      const keyGroups = await Promise.all(getMounts(base).map(async (mount) => {
+        const rawKeys = await asyncCall(mount.driver.getKeys)
+        return rawKeys.map(key => mount.mountpoint + normalizeKey(key))
+      }))
+      const keys = keyGroups.flat()
       return base ? keys.filter(key => key.startsWith(base!)) : keys
     },
     async clear (base) {
@@ -74,15 +80,15 @@ export function createStorage (): Storage {
       await Promise.all(Object.values(ctx.mounts).map(driver => dispose(driver)))
     },
     async mount (base, driver, initialState) {
-      base = normalizeKey(base)
-      if (!ctx.mountKeys.includes(base)) {
-        ctx.mountKeys.push(base)
-        ctx.mountKeys.sort((a, b) => b.length - a.length)
+      base = normalizeBase(base)
+      if (!ctx.mountpoints.includes(base)) {
+        ctx.mountpoints.push(base)
+        ctx.mountpoints.sort((a, b) => b.length - a.length)
       }
       if (ctx.mounts[base]) {
         if (ctx.mounts[base].dispose) {
           // eslint-disable-next-line no-console
-          dispose(ctx.mounts[base]!).catch(console.error)
+          await dispose(ctx.mounts[base]!)
         }
         delete ctx.mounts[base]
       }
@@ -90,6 +96,17 @@ export function createStorage (): Storage {
       if (initialState) {
         await storage.setItems(base, initialState)
       }
+    },
+    async unmount (base: string, _dispose = true) {
+      base = normalizeBase(base)
+      if (!base /* root */ || !ctx.mounts[base]) {
+        return
+      }
+      if (_dispose) {
+        await dispose(ctx.mounts[base])
+      }
+      ctx.mountpoints = ctx.mountpoints.filter(key => key !== base)
+      delete ctx.mounts[base]
     }
   }
 

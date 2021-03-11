@@ -21,10 +21,9 @@
 
 WIP:
 
-- Unmount
+- State watching
 - Key expiration
-- State compression
-- Watcher
+- Storage server
 
 ## Drivers
 
@@ -113,6 +112,23 @@ If a base is provided, only keys starting with base will be returned also only m
 await storage.getKeys()
 ```
 
+### `storage.clear(base?)`
+
+Removes all stored key/values. If a base is provided, only mounts matching base will be cleared.
+
+```js
+await storage.clear()
+```
+
+### `storage.dispose()`
+
+Disposes all mounted storages to ensure there are no open-handles left. Call it before exiting process.
+
+**Note:** Dispose also clears in-memory data.
+
+```js
+await storage.dispose()
+```
 
 ### `storage.mount(mountpoint, driver, items?)`
 
@@ -140,13 +156,9 @@ await storage.setItem('/output/test', 'works')
 await storage.setItem('/foo', 'bar')
 ```
 
-### `storage.clear(base?)`
+### `storage.unmount(mountpoint, dispose = true)`
 
-Removes all stored key/values. If a base is provided, only mounts matching base will be cleared.
-
-```js
-await storage.clear()
-```
+Unregisters a mountpoint. Has no effect if mountpoint is not found or is root.
 
 ### `snapshot(storage, base?)`
 
@@ -155,16 +167,6 @@ Snapshot from all keys in specified base into a plain javascript object (string:
 import { snapshot } from 'unstorage'
 
 const data = await snapshot(storage, '/etc')
-```
-
-### `storage.dispose()`
-
-Disposes all mounted storages to ensure there are no open-handles left. Call it before exiting process.
-
-**Note:** Dispose also clears in-memory data.
-
-```js
-await storage.dispose()
 ```
 
 ## Contribution

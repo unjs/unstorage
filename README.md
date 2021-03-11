@@ -46,6 +46,7 @@
   - [`localStorage` (browser)](#localstorage-browser)
   - [`memory` (universal)](#memory-universal)
   - [`http` (universal)](#http-universal)
+- [Custom drivers](#custom-drivers)
 - [Contribution](#contribution)
 - [License](#license)
 
@@ -294,6 +295,42 @@ await storage.mount('local', lsDriver({ base: 'http://myapp.com' }))
 - `setItem`: Maps to http `PUT`. Sends serialized value using body
 - `removeIterm`: Maps to `DELETE`
 - `clear`: Not supported
+
+## Custom drivers
+
+It is possible to extend unstorage by creating custom driver and mounting it.
+
+- Keys are always normalized in `foo:bar` convention
+- Mount base is removed
+- Returning promise or direct value is optional
+- You should cleanup any open watcher and handlers in `dispose`
+- Value returned by `getItem` can be a serializable object or string
+- Having `watch` method, disables default handler for mountpoint. You are responsible to emit event on `getItem`, `setItem` and `removeItem`.
+
+See [src/drivers](./src/drivers) to inspire how to implement them. Methods can
+
+**Example:**
+
+```js
+import { createStorage } from 'unstorage'
+
+const storage = createStorage()
+
+const myStorageDriver = () => {
+  return {
+    async hasItem (key) {},
+    async getItem (key) {},
+    async setItem(key, value) {},
+    async removeItem (key) {},
+    async getKeys() {},
+    async clear() {},
+    async dispose() {},
+    // async watch(callback) {}
+  }
+}
+
+await storage.mount('/custom', myStorageDriver())
+```
 
 ## Contribution
 

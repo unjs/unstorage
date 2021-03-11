@@ -96,6 +96,16 @@ export function createStorage (): Storage {
   return storage
 }
 
+export async function snapshot (storage: Storage, base: string) {
+  base = normalizeBase(base)
+  const keys = await storage.getKeys(base)
+  const snapshot: any = {}
+  await Promise.all(keys.map(async (key) => {
+    snapshot[key.substr(base.length)] = await storage.getItem(key)
+  }))
+  return snapshot
+}
+
 async function dispose (storage: Driver) {
   if (typeof storage.dispose === 'function') {
     await asyncCall(storage.dispose)

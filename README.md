@@ -17,12 +17,12 @@
 - Tree-shakable and lightweight core
 - Native aware value serialization and deserialization
 - Restore initial state (hydration)
+- State snapshot
 
 WIP:
 
 - Unmount
 - Key expiration
-- State snapshot
 - State compression
 - Watcher
 
@@ -146,6 +146,15 @@ Removes all stored key/values. If a base is provided, only mounts matching base 
 
 ```js
 await storage.clear()
+```
+
+### `snapshot(storage, base?)`
+
+Snapshot from all keys in specified base into a plain javascript object (string: string). Base is removed from keys.
+```js
+import { snapshot } from 'unstorage'
+
+const data = await snapshot(storage, '/etc')
 ```
 
 ### `storage.dispose()`

@@ -52,18 +52,6 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Drivers
-
-- [x] Memory (Universal)
-- [x] Filesystem (NodeJS)
-- [x] LocalStorage (Browser)
-- [x] HTTP (Universal)
-- [ ] Cookies (Browser)
-- [ ] Location params (Browser)
-- [ ] S3 (Universal)
-- [ ] Cloudflare KV (Workers and Universal)
-- [ ] Github (Universal)
-
 ## Usage
 
 Install `unistorage` npm package:

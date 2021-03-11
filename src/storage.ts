@@ -53,10 +53,8 @@ export function createStorage (): Storage {
   const startWatch = async () => {
     if (ctx.watching) { return }
     ctx.watching = true
-    for (const storage of Object.values(ctx.mounts)) {
-      if (storage.watch) {
-        await storage.watch(onChange)
-      }
+    for (const mountpoint in ctx.mounts) {
+      await watch(ctx.mounts[mountpoint], onChange, mountpoint)
     }
   }
 
@@ -124,8 +122,8 @@ export function createStorage (): Storage {
         delete ctx.mounts[base]
       }
       ctx.mounts[base] = driver
-      if (ctx.watching && driver.watch) {
-        driver.watch(onChange)
+      if (ctx.watching) {
+        await watch(driver, onChange, base)
       }
       if (initialState) {
         await storage.setItems(base, initialState)
@@ -159,6 +157,12 @@ export async function snapshot (storage: Storage, base: string) {
     snapshot[key.substr(base.length)] = await storage.getItem(key)
   }))
   return snapshot
+}
+
+function watch (storage: Driver, onChange: WatchCallback, base: string) {
+  if (storage.watch) {
+    return storage.watch((event, key) => onChange(event, base + key))
+  }
 }
 
 async function dispose (storage: Driver) {

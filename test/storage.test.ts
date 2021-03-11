@@ -22,8 +22,9 @@ describe('storage', () => {
   it('watch', async () => {
     const onChange = jest.fn()
     const storage = createStorage()
-    storage.watch(onChange)
-    await storage.setItems('', data)
-    expect(onChange).toHaveBeenCalledWith('update', 'data:foo')
+    await storage.mount('/mnt', memory(), data)
+    await storage.watch(onChange)
+    await storage.setItems('/mnt', data)
+    expect(onChange).toHaveBeenCalledWith('update', 'mnt:data:foo')
   })
 })

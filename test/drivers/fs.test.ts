@@ -7,7 +7,7 @@ describe('drivers: fs', () => {
   const dir = resolve(__dirname, 'tmp')
 
   testDriver({
-    driver: driver({ dir }),
+    driver: driver({ base: dir }),
     additionalTests(ctx) {
       it('check filesystem', async () => {
         expect(await readFile(resolve(dir, 's1/a'))).toBe('test_data')

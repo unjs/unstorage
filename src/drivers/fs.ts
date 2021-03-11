@@ -5,13 +5,13 @@ import type { DriverFactory } from '../types'
 import { readFile, writeFile, readdirRecursive, rmRecursive, unlink } from './utils/node-fs'
 
 export interface FSStorageOptions {
-  dir: string
+  base: string
   ingore: string[]
   watchOptions: WatchOptions
 }
 
 export default <DriverFactory> function (opts: FSStorageOptions) {
-  if (!opts.dir) {
+  if (!opts.base) {
     throw new Error('dir is required')
   }
 
@@ -21,8 +21,8 @@ export default <DriverFactory> function (opts: FSStorageOptions) {
     ]
   }
 
-  opts.dir = resolve(opts.dir)
-  const r = (key: string) => join(opts.dir, key.replace(/:/g, '/'))
+  opts.base = resolve(opts.base)
+  const r = (key: string) => join(opts.base, key.replace(/:/g, '/'))
 
   let _watcher: FSWatcher
 
@@ -55,7 +55,7 @@ export default <DriverFactory> function (opts: FSStorageOptions) {
         return
       }
       return new Promise((resolve, reject) => {
-        _watcher = watch(opts.dir, {
+        _watcher = watch(opts.base, {
           ignoreInitial: true,
           ignored: opts.ingore,
           ...opts.watchOptions
@@ -63,7 +63,7 @@ export default <DriverFactory> function (opts: FSStorageOptions) {
           .on('ready', resolve)
           .on('error', reject)
           .on('all', (eventName, path) => {
-            path = relative(opts.dir, path)
+            path = relative(opts.base, path)
             if (eventName === 'change' || eventName === 'add') {
               callback('update', path)
             } else if (eventName === 'unlink') {

@@ -1,16 +1,16 @@
 import { existsSync } from 'fs'
 import { resolve, relative, join } from 'path'
 import { FSWatcher, WatchOptions, watch } from 'chokidar'
-import type { DriverFactory } from '../types'
+import { defineDriver } from '../utils'
 import { readFile, writeFile, readdirRecursive, rmRecursive, unlink } from './utils/node-fs'
 
 export interface FSStorageOptions {
-  base: string
-  ingore: string[]
-  watchOptions: WatchOptions
+  base?: string
+  ingore?: string[]
+  watchOptions?: WatchOptions
 }
 
-export default <DriverFactory> function (opts: FSStorageOptions) {
+export default defineDriver((opts: FSStorageOptions = {}) => {
   if (!opts.base) {
     throw new Error('dir is required')
   }
@@ -22,7 +22,7 @@ export default <DriverFactory> function (opts: FSStorageOptions) {
   }
 
   opts.base = resolve(opts.base)
-  const r = (key: string) => join(opts.base, key.replace(/:/g, '/'))
+  const r = (key: string) => join(opts.base!, key.replace(/:/g, '/'))
 
   let _watcher: FSWatcher
 
@@ -55,7 +55,7 @@ export default <DriverFactory> function (opts: FSStorageOptions) {
         return
       }
       return new Promise((resolve, reject) => {
-        _watcher = watch(opts.base, {
+        _watcher = watch(opts.base!, {
           ignoreInitial: true,
           ignored: opts.ingore,
           ...opts.watchOptions
@@ -63,7 +63,7 @@ export default <DriverFactory> function (opts: FSStorageOptions) {
           .on('ready', resolve)
           .on('error', reject)
           .on('all', (eventName, path) => {
-            path = relative(opts.base, path)
+            path = relative(opts.base!, path)
             if (eventName === 'change' || eventName === 'add') {
               callback('update', path)
             } else if (eventName === 'unlink') {
@@ -73,4 +73,4 @@ export default <DriverFactory> function (opts: FSStorageOptions) {
       })
     }
   }
-}
+})

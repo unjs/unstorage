@@ -5,7 +5,7 @@ export type WatchCallback = (event: WatchEvent, key: string) => any
 
 export interface Driver {
   hasItem: (key: string) => boolean | Promise<boolean>
-  getItem: (key: string) => string | Promise<string>
+  getItem: (key: string) => StorageValue
   setItem: (key: string, value: string) => void | Promise<void>
   removeItem: (key: string) => void | Promise<void>
   getKeys: () => string[] | Promise<string[]>
@@ -13,8 +13,6 @@ export interface Driver {
   dispose?: () => void | Promise<void>
   watch?: (callback: WatchCallback) => void | Promise<void>
 }
-
-export type DriverFactory<OptsT = any> = (opts?: OptsT) => Driver
 
 export interface Storage {
   hasItem: (key: string) => Promise<boolean>

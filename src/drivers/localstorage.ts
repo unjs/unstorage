@@ -1,4 +1,4 @@
-import type { DriverFactory } from '../types'
+import { defineDriver } from '../utils'
 
 export interface LocalStorageOptions {
   base?: string
@@ -6,7 +6,7 @@ export interface LocalStorageOptions {
   localStorage?: typeof window.localStorage
 }
 
-export default <DriverFactory>function (opts: LocalStorageOptions = {}) {
+export default defineDriver((opts: LocalStorageOptions = {}) => {
   if (!opts.window) {
     opts.window = typeof window !== 'undefined' ? window : undefined
   }
@@ -61,4 +61,4 @@ export default <DriverFactory>function (opts: LocalStorageOptions = {}) {
       }
     }
   }
-}
+})

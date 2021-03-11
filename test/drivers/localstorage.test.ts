@@ -9,7 +9,7 @@ describe('drivers: localstorage', () => {
   jsdom.virtualConsole.sendTo(console)
 
   testDriver({
-    driver: driver({ window: jsdom.window }),
+    driver: driver({ window: jsdom.window as unknown as typeof window }),
     additionalTests: (ctx => {
       it('check localstorage', () => {
         expect(jsdom.window.localStorage.getItem('s1:a')).toBe('test_data')

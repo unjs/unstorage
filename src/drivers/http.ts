@@ -1,14 +1,14 @@
-import type { DriverFactory } from '../types'
+import { defineDriver } from '../utils'
 import { stringify } from '../utils'
 import { $fetch } from 'ohmyfetch/node'
 import { joinURL } from 'ufo'
 
 export interface HTTPOptions {
-  base: string
+  base?: string
 }
 
-export default <DriverFactory>function (opts: HTTPOptions) {
-  const r = (key: string) => joinURL(opts.base, key.replace(/:/g, '/'))
+export default defineDriver((opts: HTTPOptions = {}) => {
+  const r = (key: string) => joinURL(opts.base!, key.replace(/:/g, '/'))
 
   return {
     hasItem(key) {
@@ -34,4 +34,4 @@ export default <DriverFactory>function (opts: HTTPOptions) {
       // Not supported
     }
   }
-}
+})

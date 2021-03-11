@@ -1,6 +1,7 @@
-import type { DriverFactory, StorageValue } from '../types'
+import { defineDriver } from '../utils'
+import type { StorageValue } from '../types'
 
-export default <DriverFactory> function () {
+export default defineDriver(() => {
   const data = new Map<string, StorageValue>()
 
   return {
@@ -26,4 +27,4 @@ export default <DriverFactory> function () {
       data.clear()
     }
   }
-}
+})

@@ -312,11 +312,11 @@ See [src/drivers](./src/drivers) to inspire how to implement them. Methods can
 **Example:**
 
 ```js
-import { createStorage } from 'unstorage'
+import { createStorage, defineDriver } from 'unstorage'
 
 const storage = createStorage()
 
-const myStorageDriver = () => {
+const myStorageDriver = defineDriver((_opts) => {
   return {
     async hasItem (key) {},
     async getItem (key) {},
@@ -327,7 +327,7 @@ const myStorageDriver = () => {
     async dispose() {},
     // async watch(callback) {}
   }
-}
+})
 
 await storage.mount('/custom', myStorageDriver())
 ```

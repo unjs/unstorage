@@ -1,4 +1,5 @@
-import type { DriverFactory, StorageValue } from '../types'
+import type { DriverFactory } from '../types'
+import { stringify } from '../utils'
 import { $fetch } from 'ohmyfetch/node'
 import { joinURL } from 'ufo'
 
@@ -15,18 +16,19 @@ export default <DriverFactory>function (opts: HTTPOptions) {
         .then(() => true)
         .catch(() => false)
     },
-    getItem (key) {
-      return $fetch(r(key))
+    async getItem (key) {
+      const value = $fetch(r(key))
+      return value
     },
-    setItem(_key, _value) {
-      // Not supported
+    async setItem(key, value) {
+      await $fetch(r(key), { method: 'PUT', body: stringify(value) })
     },
-    removeItem (_key) {
-      // Not supported
+    async removeItem (key) {
+      await $fetch(r(key), { method: 'DELETE' })
     },
     getKeys() {
-      // Not supported
-      return []
+      const value = $fetch(r(''))
+      return Array.isArray(value) ? value : []
     },
     clear() {
       // Not supported

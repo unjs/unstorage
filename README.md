@@ -28,9 +28,25 @@
 - [Drivers](#drivers)
 - [Usage](#usage)
 - [Storage Interface](#storage-interface)
+  - [`storage.hasItem(key)`](#storagehasitemkey)
+  - [`storage.getItem(key)`](#storagegetitemkey)
+  - [`storage.setItem(key, value)`](#storagesetitemkey-value)
+  - [`storage.setItems(base, items)`](#storagesetitemsbase-items)
+  - [`storage.removeItem(key)`](#storageremoveitemkey)
+  - [`storage.getKeys(base?)`](#storagegetkeysbase)
+  - [`storage.clear(base?)`](#storageclearbase)
+  - [`storage.dispose()`](#storagedispose)
+  - [`storage.mount(mountpoint, driver, initialState?)`](#storagemountmountpoint-driver-initialstate)
+  - [`storage.unmount(mountpoint, dispose = true)`](#storageunmountmountpoint-dispose--true)
+  - [`storage.watch(callback)`](#storagewatchcallback)
 - [Utils](#utils)
+  - [`snapshot(storage, base?)`](#snapshotstorage-base)
 - [Storage Server](#storage-server)
 - [Drivers](#drivers-1)
+  - [`fs` (node)](#fs-node)
+  - [`localStorage` (browser)](#localstorage-browser)
+  - [`memory` (universal)](#memory-universal)
+  - [`http` (universal)](#http-universal)
 - [Contribution](#contribution)
 - [License](#license)
 
@@ -270,6 +286,27 @@ import memoryDriver from 'unstorage/drivers/memory'
 storage.mount('/tmp', memory())
 ```
 
+### `http` (universal)
+
+Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server](#storage-server) methods.
+
+```js
+import httpDriver from 'unstorage/drivers/http'
+
+await storage.mount('local', lsDriver({ base: 'http://myapp.com' }))
+```
+
+**Options:**
+
+- `base`: Base URL for urls
+
+**Supported HTTP Methods:**
+
+- `getItem`: Maps to http `GET`. Returns deserialized value if response is ok
+- `hasItem`: Maps to http `HEAD`. Returns `true` if response is ok (200)
+- `setItem`: Maps to http `PUT`. Sends serialized value using body
+- `removeIterm`: Maps to `DELETE`
+- `clear`: Not supported
 
 ## Contribution
 

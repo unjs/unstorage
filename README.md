@@ -25,7 +25,6 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Drivers](#drivers)
 - [Usage](#usage)
 - [Storage Interface](#storage-interface)
   - [`storage.hasItem(key)`](#storagehasitemkey)
@@ -42,7 +41,7 @@
 - [Utils](#utils)
   - [`snapshot(storage, base?)`](#snapshotstorage-base)
 - [Storage Server](#storage-server)
-- [Drivers](#drivers-1)
+- [Drivers](#drivers)
   - [`fs` (node)](#fs-node)
   - [`localStorage` (browser)](#localstorage-browser)
   - [`memory` (universal)](#memory-universal)

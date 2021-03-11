@@ -1,21 +1,24 @@
 import destr from 'destr'
-import type { Storage, Driver } from './types'
+import type { Storage, Driver, WatchCallback } from './types'
 import memory from './drivers/memory'
 import { normalizeKey, normalizeBase, asyncCall, stringify } from './utils'
 
 interface StorageCTX {
   mounts: Record<string, Driver>
   mountpoints: string[]
+  watching: boolean
+  watchListeners: Function[]
 }
 
 export function createStorage (): Storage {
   const ctx: StorageCTX = {
     mounts: { '': memory() },
-    mountpoints: ['']
+    mountpoints: [''],
+    watching: false,
+    watchListeners: []
   }
 
-  const getMount = (key?: string) => {
-    key = normalizeKey(key)
+  const getMount = (key: string) => {
     for (const base of ctx.mountpoints) {
       if (key.startsWith(base)) {
         return {
@@ -30,8 +33,7 @@ export function createStorage (): Storage {
     }
   }
 
-  const getMounts = (base?: string) => {
-    base = normalizeBase(base)
+  const getMounts = (base: string) => {
     return ctx.mountpoints
       .filter(mountpoint => base!.startsWith(mountpoint))
       .map(mountpoint => ({
@@ -40,29 +42,57 @@ export function createStorage (): Storage {
       }))
   }
 
+  const onChange: WatchCallback = (event, key) => {
+    if (!ctx.watching) { return }
+    key = normalizeKey(key)
+    for (const listener of ctx.watchListeners) {
+      listener(event, key)
+    }
+  }
+
+  const startWatch = async () => {
+    if (ctx.watching) { return }
+    ctx.watching = true
+    for (const storage of Object.values(ctx.mounts)) {
+      if (storage.watch) {
+        await storage.watch(onChange)
+      }
+    }
+  }
+
   const storage: Storage = {
     hasItem (key) {
+      key = normalizeKey(key)
       const { relativeKey, driver } = getMount(key)
       return asyncCall(driver.hasItem, relativeKey)
     },
     getItem (key) {
+      key = normalizeKey(key)
       const { relativeKey, driver } = getMount(key)
       return asyncCall(driver.getItem, relativeKey).then(val => destr(val))
     },
-    setItem (key, value) {
+    async setItem (key, value) {
       if (value === undefined) {
         return storage.removeItem(key)
       }
+      key = normalizeKey(key)
       const { relativeKey, driver } = getMount(key)
-      return asyncCall(driver.setItem, relativeKey, stringify(value))
+      await asyncCall(driver.setItem, relativeKey, stringify(value))
+      if (!driver.watch) {
+        onChange('update', key)
+      }
     },
     async setItems (base, items) {
       base = normalizeBase(base)
       await Promise.all(Object.entries(items).map(e => storage.setItem(base + e[0], e[1])))
     },
-    removeItem (key) {
+    async removeItem (key) {
+      key = normalizeKey(key)
       const { relativeKey, driver } = getMount(key)
-      return asyncCall(driver.removeItem, relativeKey)
+      await asyncCall(driver.removeItem, relativeKey)
+      if (!driver.watch) {
+        onChange('remove', key)
+      }
     },
     async getKeys (base) {
       base = normalizeBase(base)
@@ -74,6 +104,7 @@ export function createStorage (): Storage {
       return base ? keys.filter(key => key.startsWith(base!)) : keys
     },
     async clear (base) {
+      base = normalizeBase(base)
       await Promise.all(getMounts(base).map(m => asyncCall(m.driver.clear)))
     },
     async dispose () {
@@ -93,6 +124,9 @@ export function createStorage (): Storage {
         delete ctx.mounts[base]
       }
       ctx.mounts[base] = driver
+      if (ctx.watching && driver.watch) {
+        driver.watch(onChange)
+      }
       if (initialState) {
         await storage.setItems(base, initialState)
       }
@@ -107,6 +141,10 @@ export function createStorage (): Storage {
       }
       ctx.mountpoints = ctx.mountpoints.filter(key => key !== base)
       delete ctx.mounts[base]
+    },
+    async watch (callback) {
+      await startWatch()
+      ctx.watchListeners.push(callback)
     }
   }
 

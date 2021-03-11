@@ -1,5 +1,8 @@
 export type StorageValue = null | string | String | number | Number | boolean | Boolean | object
 
+export type WatchEvent = 'update' | 'remove'
+export type WatchCallback = (event: WatchEvent, key: string) => any
+
 export interface Driver {
   hasItem: (key: string) => boolean | Promise<boolean>
   getItem: (key: string) => string | Promise<string>
@@ -8,6 +11,7 @@ export interface Driver {
   getKeys: () => string[] | Promise<string[]>
   clear: () => void | Promise<void>
   dispose?: () => void | Promise<void>
+  watch?: (callback: WatchCallback) => void | Promise<void>
 }
 
 export type DriverFactory<OptsT = any> = (opts?: OptsT) => Driver
@@ -20,7 +24,8 @@ export interface Storage {
   removeItem: (key: string) => Promise<void>
   getKeys: (base?: string) => Promise<string[]>
   clear: (base?: string) => Promise<void>
-  mount: (base: string, driver: Driver, initialState?: Record<string, string>) => Promise<void>
+  mount: (base: string, driver: Driver, initialState?: Record<string, StorageValue>) => Promise<void>
   unmount: (base: string, dispose?: boolean) => Promise<void>
   dispose: () => Promise<void>
+  watch: (callback: WatchCallback) => Promise<void>
 }

@@ -18,10 +18,10 @@
 - Native aware value serialization and deserialization
 - Restore initial state (hydration)
 - State snapshot
+- Abstract watcher
 
 WIP:
 
-- State watching
 - Key expiration
 - Storage server
 

@@ -3,7 +3,7 @@ import memory from '../src/drivers/memory'
 
 const data = {
   'etc:conf': 'test',
-  'data:foo': 'bar'
+  'data:foo': 123
 }
 
 describe('storage', () => {
@@ -17,5 +17,13 @@ describe('storage', () => {
     const storage = createStorage()
     await storage.setItems('', data)
     expect(await snapshot(storage, '')).toMatchObject(data)
+  })
+
+  it('watch', async () => {
+    const onChange = jest.fn()
+    const storage = createStorage()
+    storage.watch(onChange)
+    await storage.setItems('', data)
+    expect(onChange).toHaveBeenCalledWith('update', 'data:foo')
   })
 })

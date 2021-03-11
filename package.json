@@ -20,6 +20,9 @@
     "release": "yarn test && standard-version && git push --follow-tags && npm publish",
     "test": "yarn lint && jest"
   },
+  "dependencies": {
+    "chokidar": "^3.5.1"
+  },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "latest",
     "@types/jest": "latest",

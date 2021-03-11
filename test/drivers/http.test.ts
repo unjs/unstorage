@@ -5,10 +5,10 @@ import { listen } from 'listhen'
 describe('drivers: http', () => {
   it('basic', async () => {
     const { url, close } = await listen((req, res) => {
-      if (req.url.includes('404')) {
+      if (req.url!.includes('404')) {
         res.writeHead(404)
       }
-      res.end(req.url)
+      res.end(req.url!)
     })
 
     const storage = createStorage()

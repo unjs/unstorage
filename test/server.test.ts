@@ -8,16 +8,17 @@ describe('server', () => {
     const storageServer = createStorageServer(storage)
     const { $fetch, close } = await listen(storageServer.handle)
 
-    await expect(() => $fetch('foo', {})).rejects.toMatchObject({ name: 'FetchError', data: null })
+    expect(await $fetch('foo', {})).toMatchObject([])
 
-    await storage.setItem('foo', 'bar')
-    expect(await $fetch('foo')).toBe('bar')
+    await storage.setItem('foo/bar', 'bar')
+    expect(await $fetch('foo/bar')).toBe('bar')
 
-    expect(await $fetch('foo', { method: 'PUT', body: 'updated' })).toBe('OK')
-    expect(await $fetch('foo')).toBe('updated')
+    expect(await $fetch('foo/bar', { method: 'PUT', body: 'updated' })).toBe('OK')
+    expect(await $fetch('foo/bar')).toBe('updated')
+    expect(await $fetch('/')).toMatchObject(['foo/bar'])
 
-    expect(await $fetch('foo', { method: 'DELETE' })).toBe('OK')
-    await expect(() => $fetch('foo', {})).rejects.toMatchObject({ name: 'FetchError', data: null })
+    expect(await $fetch('foo/bar', { method: 'DELETE' })).toBe('OK')
+    expect(await $fetch('foo/bar', {})).toMatchObject([])
 
     await close()
   })

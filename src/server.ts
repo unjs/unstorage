@@ -17,7 +17,8 @@ export function createStorageServer (storage: Storage, _opts: StorageServerOptio
     if (req.method === 'GET') {
       const val = await storage.getItem(req.url!)
       if (!val) {
-        return storage.getKeys(req.url)
+        const keys = await storage.getKeys(req.url)
+        return keys.map(key => key.replace(/:/g, '/'))
       }
       return stringify(val)
     }

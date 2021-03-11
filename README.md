@@ -169,6 +169,14 @@ import { snapshot } from 'unstorage'
 const data = await snapshot(storage, '/etc')
 ```
 
+### `storage.watch(callback)`
+
+Starts watching on all mountpoints. If driver does not supports watching, only emits even when `storage.*` methods are called.
+
+```js
+storage.watch((event, key) => { })
+```
+
 ## Contribution
 
 - Clone repository

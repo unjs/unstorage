@@ -22,7 +22,9 @@
     "doctoc": "doctoc README.md --notitle"
   },
   "dependencies": {
-    "chokidar": "^3.5.1"
+    "chokidar": "^3.5.1",
+    "ohmyfetch": "^0.1.8",
+    "ufo": "^0.6.10"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "latest",
@@ -35,6 +37,7 @@
     "jest": "latest",
     "jiti": "latest",
     "jsdom": "^16.4.0",
+    "listhen": "^0.1.4",
     "mkdist": "^0.1.2",
     "siroc": "latest",
     "standard-version": "latest",

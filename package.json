@@ -5,15 +5,26 @@
   "repository": "unjsio/unstorage",
   "license": "MIT",
   "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/unstorage.mjs",
+      "require": "./dist/unstorage.js"
+    },
+    "./server": {
+      "import": "./server.mjs",
+      "require": "./server.js"
+    }
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "drivers"
+    "drivers",
+    "server*"
   ],
   "scripts": {
-    "build": "siroc build && mkdist --src src/drivers --dist drivers",
+    "build": "siroc build && mkdist --src src/drivers --dist drivers --format cjs",
     "dev": "jest --watch",
     "lint": "eslint --ext .ts .",
     "prepublishOnly": "yarn build",
@@ -23,14 +34,17 @@
   },
   "dependencies": {
     "chokidar": "^3.5.1",
+    "h3": "^0.2.5",
     "ohmyfetch": "^0.1.8",
-    "ufo": "^0.6.10"
+    "ufo": "^0.6.10",
+    "ws": "^7.4.4"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "latest",
     "@types/jest": "latest",
     "@types/jsdom": "^16.2.6",
     "@types/node": "latest",
+    "@types/ws": "^7.4.0",
     "destr": "^1.1.0",
     "doctoc": "^2.0.0",
     "eslint": "latest",

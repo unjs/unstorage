@@ -6,3 +6,4 @@ coverage
 dist
 tmp
 /drivers
+/server*

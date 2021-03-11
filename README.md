@@ -6,9 +6,9 @@
 [![Codecov][codecov-src]][codecov-href]
 [![bundle][bundle-src]][bundle-href]
 
-> Universal key-value Storage
+> Universal Storage Layer
 
-![unstorage](./assets/unstorage.svg)
+<!-- ![unstorage](./assets/unstorage.svg) -->
 
 - Works in all environments (Browser, NodeJS and Workers)
 - Asynchronous API
@@ -18,12 +18,8 @@
 - Native aware value serialization and deserialization
 - Restore initial state (hydration)
 - State snapshot
-- Abstract watcher
-
-WIP:
-
-- Key expiration
-- Storage server
+- Driver agnostic watcher
+- Access storage via HTTP server
 
 **Table of Contents**
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -208,14 +204,41 @@ await storage.watch((event, key) => { })
 ### `snapshot(storage, base?)`
 
 Snapshot from all keys in specified base into a plain javascript object (string: string). Base is removed from keys.
+
 ```js
 import { snapshot } from 'unstorage'
 
 const data = await snapshot(storage, '/etc')
 ```
 
-## Drivers
+## Storage Server
 
+We can easily expose unstorage instance to a http server to allow remote connections.
+Request url is mapped to key and method/body mapped to function. See below for supported http methods.
+
+**🛡️ Security Note:** Server is unprotected by default. You need to add your own authentication/security middleware like basic authentication.
+Also consider that even with authentication, unstorage should not be exposed to untrusted users since it has no protection for abuse (DDOS, Filesystem escalation, etc)
+
+```js
+import { listen } from 'listhen'
+import { createStorage } from 'unstorage'
+import { createStorageServer } from 'unstorage/server'
+
+const storage = createStorage()
+const storageServer = createStorageServer(storage)
+
+// Alternatively we can use `storage.handle` as a middleware
+await listen(storage.handle)
+```
+
+**Supported HTTP Methods:**
+
+- `GET`: Maps to `storage.getItem`. Returns strigified value or 404/null if not found.
+- `HEAD`: Maps to `storage.hasItem`. Returns 404 if not found.
+- `PUT`: Maps to `storage.setItem`. Value is read from body and returns `OK` if operation succeeded.
+- `DELETE`: Maps to `storage.removeIterm`. Returns `OK` if operation succeeded.
+
+## Drivers
 
 ### `fs` (node)
 

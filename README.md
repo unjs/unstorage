@@ -25,6 +25,31 @@ WIP:
 - Key expiration
 - Storage server
 
+**Table of Contents**
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Drivers](#drivers)
+- [Usage](#usage)
+- [Storage Interface](#storage-interface)
+  - [`storage.hasItem(key)`](#storagehasitemkey)
+  - [`storage.getItem(key)`](#storagegetitemkey)
+  - [`storage.setItem(key, value)`](#storagesetitemkey-value)
+  - [`storage.setItems(base, items)`](#storagesetitemsbase-items)
+  - [`storage.removeItem(key)`](#storageremoveitemkey)
+  - [`storage.getKeys(base?)`](#storagegetkeysbase)
+  - [`storage.clear(base?)`](#storageclearbase)
+  - [`storage.dispose()`](#storagedispose)
+  - [`storage.mount(mountpoint, driver, initialState?)`](#storagemountmountpoint-driver-initialstate)
+  - [`storage.unmount(mountpoint, dispose = true)`](#storageunmountmountpoint-dispose--true)
+  - [`storage.watch(callback)`](#storagewatchcallback)
+- [Utils](#utils)
+  - [`snapshot(storage, base?)`](#snapshotstorage-base)
+- [Contribution](#contribution)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Drivers
 
 - [x] Memory (Universal)
@@ -57,6 +82,8 @@ await storage.getItem('foo:bar')
 // or
 await storage.getItem('/foo/bar')
 ```
+
+## Storage Interface
 
 ### `storage.hasItem(key)`
 
@@ -130,13 +157,13 @@ Disposes all mounted storages to ensure there are no open-handles left. Call it 
 await storage.dispose()
 ```
 
-### `storage.mount(mountpoint, driver, items?)`
+### `storage.mount(mountpoint, driver, initialState?)`
 
 By default, everything is stored in memory. We can mount additional storage space in a Unix-like fashion.
 
 When operating with a `key` that starts with mountpoint, instead of default storage, mounted driver will be called.
 
-If `items` argument is provided, restores/hydrates state of mountpoint using `setItems`.
+If `initialState` argument is provided, restores/hydrates state of mountpoint using `setItems`.
 
 <!-- TODO: Explain mountpoint hiding -->
 
@@ -160,15 +187,6 @@ await storage.setItem('/foo', 'bar')
 
 Unregisters a mountpoint. Has no effect if mountpoint is not found or is root.
 
-### `snapshot(storage, base?)`
-
-Snapshot from all keys in specified base into a plain javascript object (string: string). Base is removed from keys.
-```js
-import { snapshot } from 'unstorage'
-
-const data = await snapshot(storage, '/etc')
-```
-
 ### `storage.watch(callback)`
 
 Starts watching on all mountpoints. If driver does not supports watching, only emits even when `storage.*` methods are called.
@@ -177,6 +195,16 @@ Starts watching on all mountpoints. If driver does not supports watching, only e
 storage.watch((event, key) => { })
 ```
 
+## Utils
+
+### `snapshot(storage, base?)`
+
+Snapshot from all keys in specified base into a plain javascript object (string: string). Base is removed from keys.
+```js
+import { snapshot } from 'unstorage'
+
+const data = await snapshot(storage, '/etc')
+```
 ## Contribution
 
 - Clone repository

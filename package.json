@@ -18,7 +18,8 @@
     "lint": "eslint --ext .ts .",
     "prepublishOnly": "yarn build",
     "release": "yarn test && standard-version && git push --follow-tags && npm publish",
-    "test": "yarn lint && jest"
+    "test": "yarn lint && jest",
+    "doctoc": "doctoc README.md --notitle"
   },
   "dependencies": {
     "chokidar": "^3.5.1"
@@ -29,6 +30,7 @@
     "@types/jsdom": "^16.2.6",
     "@types/node": "latest",
     "destr": "^1.1.0",
+    "doctoc": "^2.0.0",
     "eslint": "latest",
     "jest": "latest",
     "jiti": "latest",

@@ -16,7 +16,9 @@ export function createStorageServer (storage: Storage, _opts: StorageServerOptio
     // GET => getItem
     if (req.method === 'GET') {
       const val = await storage.getItem(req.url!)
-      res.statusCode = val ? 200 : 404
+      if (!val) {
+        return storage.getKeys(req.url)
+      }
       return stringify(val)
     }
     // HEAD => hasItem

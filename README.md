@@ -223,7 +223,7 @@ await listen(storage.handle)
 
 **Supported HTTP Methods:**
 
-- `GET`: Maps to `storage.getItem`. Returns strigified value or 404/null if not found.
+- `GET`: Maps to `storage.getItem`. Returns list of keys on path if value not found.
 - `HEAD`: Maps to `storage.hasItem`. Returns 404 if not found.
 - `PUT`: Maps to `storage.setItem`. Value is read from body and returns `OK` if operation succeeded.
 - `DELETE`: Maps to `storage.removeIterm`. Returns `OK` if operation succeeded.

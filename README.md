@@ -187,12 +187,16 @@ await storage.setItem('/foo', 'bar')
 
 Unregisters a mountpoint. Has no effect if mountpoint is not found or is root.
 
+```js
+await storage.unmount('/output')
+```
+
 ### `storage.watch(callback)`
 
 Starts watching on all mountpoints. If driver does not supports watching, only emits even when `storage.*` methods are called.
 
 ```js
-storage.watch((event, key) => { })
+await storage.watch((event, key) => { })
 ```
 
 ## Utils

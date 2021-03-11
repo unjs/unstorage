@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.2](https://github.com/unjsio/unstorage/compare/v0.0.1...v0.0.2) (2021-03-11)
+
+
+### Features
+
+* http driver ([438db64](https://github.com/unjsio/unstorage/commit/438db6427602a08343c8836a3386b9d712ca6ee9))
+* support base for drivers ([6844cd1](https://github.com/unjsio/unstorage/commit/6844cd11373c7aeee49780322d4c23c48342eb8a))
+* watcher ([ebcf1f1](https://github.com/unjsio/unstorage/commit/ebcf1f1a742756b78adaa955bdc90615554404cf))
+
+
+### Bug Fixes
+
+* add mount prefix to watch key ([0bb634d](https://github.com/unjsio/unstorage/commit/0bb634dcc51de2f32f2b2b892efa9090ef2c6885))
+
 ### 0.0.1 (2021-03-11)
 
 

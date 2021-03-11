@@ -30,7 +30,7 @@
     "prepublishOnly": "yarn build",
     "release": "yarn test && standard-version && git push --follow-tags && npm publish",
     "test": "yarn lint && jest",
-    "doctoc": "doctoc README.md --notitle"
+    "doctoc": "doctoc README.md --notitle --maxlevel 2"
   },
   "dependencies": {
     "chokidar": "^3.5.1",

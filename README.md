@@ -19,7 +19,7 @@
 - Restore initial state (hydration)
 - State snapshot
 - Driver agnostic watcher
-- Access storage via HTTP server
+- HTTP Storage server (cli and programmatic)
 
 **Table of Contents**
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -209,6 +209,8 @@ Request url is mapped to key and method/body mapped to function. See below for s
 **🛡️ Security Note:** Server is unprotected by default. You need to add your own authentication/security middleware like basic authentication.
 Also consider that even with authentication, unstorage should not be exposed to untrusted users since it has no protection for abuse (DDOS, Filesystem escalation, etc)
 
+**Programmatic usage:**
+
 ```js
 import { listen } from 'listhen'
 import { createStorage } from 'unstorage'
@@ -219,6 +221,12 @@ const storageServer = createStorageServer(storage)
 
 // Alternatively we can use `storage.handle` as a middleware
 await listen(storage.handle)
+```
+
+**Using CLI:**
+
+```sh
+npx unstorage .
 ```
 
 **Supported HTTP Methods:**

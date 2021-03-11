@@ -3,10 +3,11 @@ import { resolve, relative, join } from 'path'
 import { FSWatcher, WatchOptions, watch } from 'chokidar'
 import { defineDriver } from '../utils'
 import { readFile, writeFile, readdirRecursive, rmRecursive, unlink } from './utils/node-fs'
+import anymatch from 'anymatch'
 
 export interface FSStorageOptions {
   base?: string
-  ingore?: string[]
+  ignore?: string[]
   watchOptions?: WatchOptions
 }
 
@@ -15,9 +16,10 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     throw new Error('dir is required')
   }
 
-  if (!opts.ingore) {
-    opts.ingore = [
-      'node_modules'
+  if (!opts.ignore) {
+    opts.ignore = [
+      '**/node_modules/**',
+      '**/.git/**'
     ]
   }
 
@@ -40,7 +42,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       return unlink(r(key))
     },
     getKeys () {
-      return readdirRecursive(r('.'))
+      return readdirRecursive(r('.'), anymatch(opts.ignore || []))
     },
     async clear () {
       await rmRecursive(r('.'))
@@ -57,7 +59,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       return new Promise((resolve, reject) => {
         _watcher = watch(opts.base!, {
           ignoreInitial: true,
-          ignored: opts.ingore,
+          ignored: opts.ignore,
           ...opts.watchOptions
         })
           .on('ready', resolve)

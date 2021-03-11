@@ -2,7 +2,7 @@ import { Dirent, promises as fsPromises } from 'fs'
 import { resolve, dirname } from 'path'
 
 function isNotFound (err: any) {
-  return err.code === 'ENOENT'
+  return err.code === 'ENOENT' || err.code === 'EISDIR'
 }
 
 export async function writeFile (path: string, data: string) {
@@ -39,16 +39,21 @@ export async function ensuredir (dir: string) {
   await fsPromises.mkdir(dir)
 }
 
-export async function readdirRecursive (dir: string): Promise<string[]> {
+export async function readdirRecursive(dir: string, ignore?: (p: string) => boolean): Promise<string[]> {
+  if (ignore && ignore(dir)) {
+    return []
+  }
   const entries: Dirent[] = await readdir(dir)
   const files: string[] = []
   await Promise.all(entries.map(async (entry) => {
     const entryPath = resolve(dir, entry.name)
     if (entry.isDirectory()) {
-      const dirFiles = await readdirRecursive(entryPath)
+      const dirFiles = await readdirRecursive(entryPath, ignore)
       files.push(...dirFiles.map(f => entry.name + '/' + f))
     } else {
-      files.push(entry.name)
+      if (ignore && !ignore(entry.name)) {
+        files.push(entry.name)
+      }
     }
   }))
   return files

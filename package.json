@@ -18,6 +18,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "bin": "./dist/cli.js",
   "files": [
     "dist",
     "drivers",
@@ -30,11 +31,15 @@
     "prepublishOnly": "yarn build",
     "release": "yarn test && standard-version && git push --follow-tags && npm publish",
     "test": "yarn lint && jest",
-    "doctoc": "doctoc README.md --notitle --maxlevel 3"
+    "doctoc": "doctoc README.md --notitle --maxlevel 3",
+    "unstorage": "yarn jiti src/cli"
   },
   "dependencies": {
+    "anymatch": "^3.1.1",
     "chokidar": "^3.5.1",
     "h3": "^0.2.5",
+    "listhen": "^0.1.4",
+    "mri": "^1.1.6",
     "ohmyfetch": "^0.1.8",
     "ufo": "^0.6.10",
     "ws": "^7.4.4"
@@ -51,7 +56,6 @@
     "jest": "latest",
     "jiti": "latest",
     "jsdom": "^16.4.0",
-    "listhen": "^0.1.4",
     "mkdist": "^0.1.2",
     "siroc": "latest",
     "standard-version": "latest",

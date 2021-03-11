@@ -1,5 +1,4 @@
 import { resolve } from 'path'
-import { existsSync, promises as fsp } from 'fs'
 import mri from 'mri'
 import { listen } from 'listhen'
 import { createStorage } from './storage'

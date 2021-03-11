@@ -48,6 +48,7 @@
     "@nuxtjs/eslint-config-typescript": "latest",
     "@types/jest": "latest",
     "@types/jsdom": "^16.2.6",
+    "@types/mri": "^1.1.0",
     "@types/node": "latest",
     "@types/ws": "^7.4.0",
     "destr": "^1.1.0",

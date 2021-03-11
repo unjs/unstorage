@@ -45,6 +45,10 @@ WIP:
   - [`storage.watch(callback)`](#storagewatchcallback)
 - [Utils](#utils)
   - [`snapshot(storage, base?)`](#snapshotstorage-base)
+- [Drivers](#drivers-1)
+  - [`fs` (node)](#fs-node)
+  - [`localStorage` (browser)](#localstorage-browser)
+  - [`memory` (universal)](#memory-universal)
 - [Contribution](#contribution)
 - [License](#license)
 
@@ -55,9 +59,9 @@ WIP:
 - [x] Memory (Universal)
 - [x] Filesystem (NodeJS)
 - [x] LocalStorage (Browser)
+- [x] HTTP (Universal)
 - [ ] Cookies (Browser)
 - [ ] Location params (Browser)
-- [ ] HTTP (Universal)
 - [ ] S3 (Universal)
 - [ ] Cloudflare KV (Workers and Universal)
 - [ ] Github (Universal)
@@ -209,6 +213,55 @@ import { snapshot } from 'unstorage'
 
 const data = await snapshot(storage, '/etc')
 ```
+
+## Drivers
+
+
+### `fs` (node)
+
+Maps data to real filesystem using directory structure for nested keys. Supports watching using [chokidar](https://github.com/paulmillr/chokidar).
+
+```js
+import fsDriver from 'unstorage/drivers/memory'
+
+await storage.mount('/tmp', fsDriver({ base: './tmp' }))
+```
+
+**Options:**
+
+- `base`: Base directory to isolate operations on this directory
+- `ignore`: Ignore patterns for watch <!-- and key listing -->
+- `watchOptions`: Additional [chokidar](https://github.com/paulmillr/chokidar) options.
+
+### `localStorage` (browser)
+
+Store data in [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
+
+```js
+import lsDriver from 'unstorage/drivers/memory'
+
+await storage.mount('local', lsDriver({ base: 'myapp' }))
+```
+
+**Options:**
+
+- `base`: Add `${base}:` to all keys to avoid collision
+- `localStorage`: Optionally provide `localStorage` object
+- `window`: Optionally provide `window` object
+
+### `memory` (universal)
+
+Keeps data in memory using [Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set).
+
+By default it is mounted to top level so it is unlikely you need to mount it again.
+
+```js
+import memoryDriver from 'unstorage/drivers/memory'
+
+storage.mount('/tmp', memory())
+```
+
+
 ## Contribution
 
 - Clone repository

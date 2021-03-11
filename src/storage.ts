@@ -1,7 +1,7 @@
 import destr from 'destr'
 import type { Storage, Driver } from './types'
 import memory from './drivers/memory'
-import { normalizeKey, asyncCall, stringify } from './utils'
+import { normalizeKey, normalizeBase, asyncCall, stringify } from './utils'
 
 interface StorageCTX {
   mounts: Record<string, Driver>
@@ -14,59 +14,64 @@ export function createStorage (): Storage {
     mountKeys: ['']
   }
 
-  const getMount = (key: string = '') => {
+  const getMount = (key?: string) => {
     key = normalizeKey(key)
     for (const base of ctx.mountKeys) {
       if (key.startsWith(base)) {
         return {
-          driver: ctx.mounts[base],
-          key: key.substr(base.length)
+          relativeKey: key.substr(base.length),
+          driver: ctx.mounts[base]
         }
       }
     }
-    return { driver: ctx.mounts[''], key }
+    return {
+      relativeKey: key,
+      driver: ctx.mounts['']
+    }
   }
 
-  const getMounts = (base: string = '') => {
-    base = normalizeKey(base)
+  const getMounts = (base?: string) => {
+    base = normalizeBase(base)
     return ctx.mountKeys
-      .filter(key => base.startsWith(key))
+      .filter(key => base!.startsWith(key))
       .map(key => getMount(key))
   }
 
   const storage: Storage = {
-    hasItem (_key) {
-      const { key, driver } = getMount(_key)
-      return asyncCall(driver.hasItem, key)
+    hasItem (key) {
+      const { relativeKey, driver } = getMount(key)
+      return asyncCall(driver.hasItem, relativeKey)
     },
-    getItem (_key) {
-      const { key, driver } = getMount(_key)
-      return asyncCall(driver.getItem, key).then(val => destr(val))
+    getItem (key) {
+      const { relativeKey, driver } = getMount(key)
+      return asyncCall(driver.getItem, relativeKey).then(val => destr(val))
     },
-    setItem (_key, value) {
+    setItem (key, value) {
       if (value === undefined) {
-        return storage.removeItem(_key)
+        return storage.removeItem(key)
       }
-      const { key, driver } = getMount(_key)
-      return asyncCall(driver.setItem, key, stringify(value))
+      const { relativeKey, driver } = getMount(key)
+      return asyncCall(driver.setItem, relativeKey, stringify(value))
     },
     async setItems (base, items) {
-      base = base ? (normalizeKey(base) + ':') : ''
+      base = normalizeBase(base)
       await Promise.all(Object.entries(items).map(e => storage.setItem(base + e[0], e[1])))
     },
-    removeItem (_key) {
-      const { key, driver } = getMount(_key)
-      return asyncCall(driver.removeItem, key)
+    removeItem (key) {
+      const { relativeKey, driver } = getMount(key)
+      return asyncCall(driver.removeItem, relativeKey)
     },
-    async getKeys (base = '') {
-      const driverKeys = await Promise.all(getMounts(base).map(m => asyncCall(m.driver.getKeys)))
-      return driverKeys.flat().map(normalizeKey).filter(key => key.startsWith(base))
+    async getKeys (base) {
+      base = normalizeBase(base)
+      const rawKeys = await Promise.all(getMounts(base).map(m => asyncCall(m.driver.getKeys)))
+      const keys = rawKeys.flat().map(key => normalizeKey(key))
+      return base ? keys.filter(key => key.startsWith(base!)) : keys
     },
     async clear (base) {
       await Promise.all(getMounts(base).map(m => asyncCall(m.driver.clear)))
     },
     async dispose () {
-      await Promise.all(Object.values(ctx.mounts).map(driver => disposeStoage(driver)))
+      await Promise.all(Object.values(ctx.mounts).map(driver => dispose(driver)))
     },
     async mount (base, driver, initialState) {
       base = normalizeKey(base)
@@ -77,7 +82,7 @@ export function createStorage (): Storage {
       if (ctx.mounts[base]) {
         if (ctx.mounts[base].dispose) {
           // eslint-disable-next-line no-console
-          disposeStoage(ctx.mounts[base]!).catch(console.error)
+          dispose(ctx.mounts[base]!).catch(console.error)
         }
         delete ctx.mounts[base]
       }
@@ -91,7 +96,7 @@ export function createStorage (): Storage {
   return storage
 }
 
-async function disposeStoage (storage: Driver) {
+async function dispose (storage: Driver) {
   if (typeof storage.dispose === 'function') {
     await asyncCall(storage.dispose)
   }

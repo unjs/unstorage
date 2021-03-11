@@ -1,5 +1,11 @@
-export function normalizeKey (key: string) {
+export function normalizeKey (key: string | undefined): string {
+  if (!key) { return '' }
   return key.replace(/[/\\]/g, ':').replace(/^:|:$/g, '')
+}
+
+export function normalizeBase (base: string | undefined): string {
+  base = normalizeKey(base)
+  return base ? (base + ':') : ''
 }
 
 type Awaited<T> = T extends Promise<infer U> ? Awaited<U> : T;

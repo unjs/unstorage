@@ -27,6 +27,7 @@
   "scripts": {
     "build": "siroc build && mkdist --src src/drivers --dist drivers --format cjs",
     "dev": "jest --watch",
+    "demo": "vite demo",
     "lint": "eslint --ext .ts .",
     "prepublishOnly": "yarn build",
     "release": "yarn test && standard-version && git push --follow-tags && npm publish",
@@ -51,6 +52,8 @@
     "@types/mri": "^1.1.0",
     "@types/node": "latest",
     "@types/ws": "^7.4.0",
+    "@vitejs/plugin-vue": "^1.1.5",
+    "@vue/compiler-sfc": "^3.0.5",
     "destr": "^1.1.0",
     "doctoc": "^2.0.0",
     "eslint": "latest",
@@ -58,10 +61,12 @@
     "jiti": "latest",
     "jsdom": "^16.4.0",
     "mkdist": "^0.1.2",
+    "monaco-editor": "^0.23.0",
     "siroc": "latest",
     "standard-version": "latest",
     "ts-jest": "latest",
     "typescript": "latest",
-    "vite": "^2.0.5"
+    "vite": "^2.0.5",
+    "vue": "^3.0.5"
   }
 }

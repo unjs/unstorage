@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.4](https://github.com/unjsio/unstorage/compare/v0.0.3...v0.0.4) (2021-03-12)
+
+
+### Bug Fixes
+
+* **http:** getKeys await ([59b87c5](https://github.com/unjsio/unstorage/commit/59b87c53f24413a3fce7843f9ff73d05f77c8139))
+
 ### [0.0.3](https://github.com/unjsio/unstorage/compare/v0.0.2...v0.0.3) (2021-03-11)
 
 

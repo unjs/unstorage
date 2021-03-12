@@ -26,8 +26,8 @@ export default defineDriver((opts: HTTPOptions = {}) => {
     async removeItem (key) {
       await $fetch(r(key), { method: 'DELETE' })
     },
-    getKeys() {
-      const value = $fetch(r(''))
+    async getKeys() {
+      const value = await $fetch(r(''))
       return Array.isArray(value) ? value : []
     },
     clear() {

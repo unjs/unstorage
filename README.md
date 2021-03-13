@@ -151,9 +151,9 @@ import { createStorage } from 'unstorage'
 import fsDriver from 'unstorage/drivers/fs'
 
 // Create a storage container with default memory storage
-const storage = createStorage()
+const storage = createStorage({})
 
-storage.mount('/output', fsDriver({ dir: './output' }))
+storage.mount('/output', fsDriver({ base: './output' }))
 
 //  Writes to ./output/test file
 await storage.setItem('/output/test', 'works')

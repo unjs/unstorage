@@ -54,16 +54,16 @@
 
 ## Usage
 
-Install `unistorage` npm package:
+Install `unstorage` npm package:
 
 ```sh
-yarn add unistorage
+yarn add unstorage
 # or
-npm i unistorage
+npm i unstorage
 ```
 
 ```js
-import { createStorage } from 'unistorage'
+import { createStorage } from 'unstorage'
 
 const storage = createStorage(/* opts */)
 
@@ -147,8 +147,8 @@ By default, everything is stored in memory. We can mount additional storage spac
 When operating with a `key` that starts with mountpoint, instead of default storage, mounted driver will be called.
 
 ```js
-import { createStorage } from 'unistorage'
-import fsDriver from 'unistorage/drivers/fs'
+import { createStorage } from 'unstorage'
+import fsDriver from 'unstorage/drivers/fs'
 
 // Create a storage container with default memory storage
 const storage = createStorage()

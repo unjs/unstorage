@@ -22,7 +22,7 @@ export interface Storage {
   removeItem: (key: string) => Promise<void>
   getKeys: (base?: string) => Promise<string[]>
   clear: (base?: string) => Promise<void>
-  mount: (base: string, driver: Driver, initialState?: Record<string, StorageValue>) => Promise<void>
+  mount: (base: string, driver: Driver) => Storage
   unmount: (base: string, dispose?: boolean) => Promise<void>
   dispose: () => Promise<void>
   watch: (callback: WatchCallback) => Promise<void>

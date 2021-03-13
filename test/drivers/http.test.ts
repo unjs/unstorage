@@ -9,7 +9,7 @@ describe('drivers: http', () => {
     const server = createStorageServer(storage)
 
     const { url, close } = await listen(server.handle)
-    await storage.mount('/http', driver({ base: url }))
+    storage.mount('/http', driver({ base: url }))
 
     expect(await storage.hasItem('/http/foo')).toBe(false)
 

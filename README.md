@@ -245,7 +245,7 @@ Maps data to real filesystem using directory structure for nested keys. Supports
 ```js
 import fsDriver from 'unstorage/drivers/memory'
 
-await storage.mount('/tmp', fsDriver({ base: './tmp' }))
+storage.mount('/tmp', fsDriver({ base: './tmp' }))
 ```
 
 **Options:**
@@ -261,7 +261,7 @@ Store data in [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Wi
 ```js
 import lsDriver from 'unstorage/drivers/memory'
 
-await storage.mount('local', lsDriver({ base: 'myapp' }))
+storage.mount('local', lsDriver({ base: 'myapp' }))
 ```
 
 **Options:**
@@ -289,7 +289,7 @@ Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server
 ```js
 import httpDriver from 'unstorage/drivers/http'
 
-await storage.mount('local', lsDriver({ base: 'http://myapp.com' }))
+storage.mount('local', lsDriver({ base: 'http://myapp.com' }))
 ```
 
 **Options:**
@@ -337,7 +337,7 @@ const myStorageDriver = defineDriver((_opts) => {
   }
 })
 
-await storage.mount('/custom', myStorageDriver())
+storage.mount('/custom', myStorageDriver())
 ```
 
 ## Contribution

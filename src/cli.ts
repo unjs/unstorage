@@ -18,7 +18,7 @@ async function main () {
   const storageServer = createStorageServer(storage)
 
   const rootDir = resolve(args._[0] || '.')
-  await storage.mount('/', fsDriver({ base: rootDir }))
+  storage.mount('/', fsDriver({ base: rootDir }))
 
   await listen(storageServer.handle, {
     name: 'Storage server',

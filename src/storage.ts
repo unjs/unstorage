@@ -108,20 +108,20 @@ export function createStorage (): Storage {
     async dispose () {
       await Promise.all(Object.values(ctx.mounts).map(driver => dispose(driver)))
     },
-    async mount (base, driver, initialState) {
+    mount (base, driver) {
       base = normalizeBase(base)
-      if (!ctx.mountpoints.includes(base)) {
+      if (base && ctx.mounts[base]) {
+        throw new Error(`already mounted at ${base}`)
+      }
+      if (base) {
         ctx.mountpoints.push(base)
         ctx.mountpoints.sort((a, b) => b.length - a.length)
       }
-      await storage.unmount(base)
       ctx.mounts[base] = driver
       if (ctx.watching) {
-        await watch(driver, onChange, base)
+        Promise.resolve(watch(driver, onChange, base)).catch(console.error)
       }
-      if (initialState) {
-        await storage.setItems(base, initialState)
-      }
+      return storage
     },
     async unmount (base: string, _dispose = true) {
       base = normalizeBase(base)

@@ -16,10 +16,10 @@ export default defineConfig({
     vue(),
     {
       name: 'app',
-      async configureServer (server) {
+      configureServer (server) {
         const storage = createStorage()
         const storageServer = createStorageServer(storage)
-        await storage.mount('/src', fsdriver({ base: resolve(__dirname, '..') }))
+        storage.mount('/src', fsdriver({ base: resolve(__dirname, '..') }))
         server.middlewares.use('/storage', storageServer.handle)
       }
     }

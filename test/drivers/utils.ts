@@ -17,7 +17,8 @@ export function testDriver (opts: TestOptions) {
   }
 
   it('init', async () => {
-    await ctx.storage.mount('/', ctx.driver, { initial: 'works' })
+    await ctx.storage.mount('/', ctx.driver)
+    await ctx.storage.setItems('', { initial: 'works' })
     expect(await ctx.storage.getItem('initial')).toBe('works')
     await ctx.storage.clear()
   })

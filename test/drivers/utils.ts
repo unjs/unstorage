@@ -1,4 +1,4 @@
-import { Storage, Driver, createStorage } from '../../src'
+import { Storage, Driver, createStorage, restoreSnapshot } from '../../src'
 
 export interface TestContext {
   storage: Storage
@@ -18,7 +18,7 @@ export function testDriver (opts: TestOptions) {
 
   it('init', async () => {
     await ctx.storage.mount('/', ctx.driver)
-    await ctx.storage.setItems('', { initial: 'works' })
+    await restoreSnapshot(ctx.storage, { initial: 'works' })
     expect(await ctx.storage.getItem('initial')).toBe('works')
     await ctx.storage.clear()
   })

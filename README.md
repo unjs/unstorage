@@ -30,7 +30,6 @@
   - [`storage.hasItem(key)`](#storagehasitemkey)
   - [`storage.getItem(key)`](#storagegetitemkey)
   - [`storage.setItem(key, value)`](#storagesetitemkey-value)
-  - [`storage.setItems(base, items)`](#storagesetitemsbase-items)
   - [`storage.removeItem(key)`](#storageremoveitemkey)
   - [`storage.getKeys(base?)`](#storagegetkeysbase)
   - [`storage.clear(base?)`](#storageclearbase)
@@ -40,6 +39,7 @@
   - [`storage.watch(callback)`](#storagewatchcallback)
 - [Utils](#utils)
   - [`snapshot(storage, base?)`](#snapshotstorage-base)
+  - [`restoreSnapshot(storage, data, base?)`](#restoresnapshotstorage-data-base)
 - [Storage Server](#storage-server)
 - [Drivers](#drivers)
   - [`fs` (node)](#fs-node)
@@ -101,14 +101,6 @@ If value is `undefined`, it is same as calling `removeItem(key)`.
 
 ```js
 await storage.setItem('foo:bar', 'baz')
-```
-
-### `storage.setItems(base, items)`
-
-Batch update items. Internally calls one-by-one to the driver. Useful to restore/hydrate state.
-
-```js
-await storage.setItems('/', { 'foo:bar': 'baz' })
 ```
 
 ### `storage.removeItem(key)`
@@ -199,6 +191,14 @@ Snapshot from all keys in specified base into a plain javascript object (string:
 import { snapshot } from 'unstorage'
 
 const data = await snapshot(storage, '/etc')
+```
+
+### `restoreSnapshot(storage, data, base?)`
+
+Restore snapshot created by `snapshot()`.
+
+```js
+await restoreSnapshot(storage, { 'foo:bar': 'baz' }, '/etc2')
 ```
 
 ## Storage Server

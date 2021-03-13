@@ -18,7 +18,6 @@ export interface Storage {
   hasItem: (key: string) => Promise<boolean>
   getItem: (key: string) => Promise<StorageValue>
   setItem: (key: string, value: StorageValue) => Promise<void>
-  setItems: (base: string, items: Record<string, StorageValue>) => Promise<void>
   removeItem: (key: string) => Promise<void>
   getKeys: (base?: string) => Promise<string[]>
   clear: (base?: string) => Promise<void>

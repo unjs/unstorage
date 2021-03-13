@@ -1,5 +1,5 @@
 import destr from 'destr'
-import type { Storage, Driver, WatchCallback } from './types'
+import type { Storage, Driver, WatchCallback, StorageValue } from './types'
 import memory from './drivers/memory'
 import { normalizeKey, normalizeBase, asyncCall, stringify } from './utils'
 
@@ -80,10 +80,6 @@ export function createStorage (): Storage {
         onChange('update', key)
       }
     },
-    async setItems (base, items) {
-      base = normalizeBase(base)
-      await Promise.all(Object.entries(items).map(e => storage.setItem(base + e[0], e[1])))
-    },
     async removeItem (key) {
       key = normalizeKey(key)
       const { relativeKey, driver } = getMount(key)
@@ -143,7 +139,9 @@ export function createStorage (): Storage {
   return storage
 }
 
-export async function snapshot (storage: Storage, base: string) {
+export type Snapshot<T=string> = Record<string, T>
+
+export async function snapshot (storage: Storage, base: string): Promise<Snapshot<string>> {
   base = normalizeBase(base)
   const keys = await storage.getKeys(base)
   const snapshot: any = {}
@@ -151,6 +149,11 @@ export async function snapshot (storage: Storage, base: string) {
     snapshot[key.substr(base.length)] = await storage.getItem(key)
   }))
   return snapshot
+}
+
+export async function restoreSnapshot (storage: Storage, snapshot: Snapshot<StorageValue>, base: string = '') {
+  base = normalizeBase(base)
+  await Promise.all(Object.entries(snapshot).map(e => storage.setItem(base + e[0], e[1])))
 }
 
 function watch (storage: Driver, onChange: WatchCallback, base: string) {

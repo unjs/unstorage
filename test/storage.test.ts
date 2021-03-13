@@ -1,4 +1,4 @@
-import { createStorage, snapshot } from '../src'
+import { createStorage, snapshot, restoreSnapshot } from '../src'
 import memory from '../src/drivers/memory'
 
 const data = {
@@ -9,13 +9,13 @@ const data = {
 describe('storage', () => {
   it('mount/unmount', async () => {
     const storage = createStorage().mount('/mnt', memory())
-    await storage.setItems('/mnt', data)
+    await restoreSnapshot(storage, data, 'mnt')
     expect(await snapshot(storage, '/mnt')).toMatchObject(data)
   })
 
   it('snapshot', async () => {
     const storage = createStorage()
-    await storage.setItems('', data)
+    await restoreSnapshot(storage, data)
     expect(await snapshot(storage, '')).toMatchObject(data)
   })
 
@@ -23,7 +23,7 @@ describe('storage', () => {
     const onChange = jest.fn()
     const storage = createStorage().mount('/mnt', memory())
     await storage.watch(onChange)
-    await storage.setItems('/mnt', data)
+    await restoreSnapshot(storage, data, 'mnt')
     expect(onChange).toHaveBeenCalledWith('update', 'mnt:data:foo')
   })
 })

@@ -8,7 +8,7 @@
             <span @click="openTab(tab.path)">{{ tab.name }} </span><span @click="closeTab(tab.path)">(x)</span>
           </div>
         </div>
-        <Editor class="editor" :value="state.source" :language="state.language" />
+        <Editor class="editor" :value="state.source" :language="state.language" @change="updateFile" />
       </div>
     </div>
   </Suspense>
@@ -51,10 +51,17 @@ export default defineComponent({
       state.tabs = state.tabs.filter(t => t.path !== path)
     }
 
+    const updateFile = async (body) => {
+      if (state.path) {
+        await storage.setItem(state.path, body)
+      }
+    }
+
     return {
       state,
       openTab,
-      closeTab
+      closeTab,
+      updateFile
     }
   }
 })

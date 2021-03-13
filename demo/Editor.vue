@@ -22,7 +22,9 @@ export default defineComponent({
       this.editor.setValue(newValue)
     },
     language (newValue) {
-      this.editor.setModelLanguage(this.editor.getModule(), newValue)
+      if (this.editor && this.editor.getModule) {
+        this.editor.setModelLanguage(this.editor.getModule(), newValue)
+      }
     }
   },
   mounted () {
@@ -30,6 +32,17 @@ export default defineComponent({
       value: this.value,
       language: this.language
     })
+
+    this.editor.onDidChangeModelContent(this.onContentChange)
+  },
+  methods: {
+    onContentChange (event) {
+      const value = this.editor.getValue()
+
+      if (this.value !== value) {
+        this.$emit('change', value, event)
+      }
+    }
   }
 })
 </script>

@@ -1,7 +1,7 @@
 import { existsSync } from 'fs'
 import { resolve, relative, join } from 'path'
 import { FSWatcher, WatchOptions, watch } from 'chokidar'
-import { defineDriver } from '../utils'
+import { defineDriver } from './utils'
 import { readFile, writeFile, readdirRecursive, rmRecursive, unlink } from './utils/node-fs'
 import anymatch from 'anymatch'
 

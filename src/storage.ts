@@ -1,7 +1,7 @@
 import destr from 'destr'
 import type { Storage, Driver, WatchCallback, StorageValue } from './types'
 import memory from './drivers/memory'
-import { normalizeKey, normalizeBase, asyncCall, stringify } from './utils'
+import { normalizeKey, normalizeBase, asyncCall, stringify } from './_utils'
 
 interface StorageCTX {
   mounts: Record<string, Driver>
@@ -119,7 +119,8 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       }
       ctx.mounts[base] = driver
       if (ctx.watching) {
-        Promise.resolve(watch(driver, onChange, base)).catch(console.error)
+        Promise.resolve(watch(driver, onChange, base))
+          .catch(console.error) // eslint-disable-line no-console
       }
       return storage
     },

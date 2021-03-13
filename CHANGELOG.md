@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/unjsio/unstorage/compare/v0.1.0...v0.1.1) (2021-03-13)
+
+
+### Bug Fixes
+
+* move defineDriver to driver/utils ([6ddaceb](https://github.com/unjsio/unstorage/commit/6ddaceb3d08c50a5f7d3c7f0d58455422ec7d490))
+
 ## [0.1.0](https://github.com/unjsio/unstorage/compare/v0.0.4...v0.1.0) (2021-03-13)
 
 

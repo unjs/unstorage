@@ -1,6 +1,6 @@
 {
   "name": "unstorage",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "repository": "unjsio/unstorage",
   "license": "MIT",
@@ -16,9 +16,9 @@
       "require": "./server.js"
     }
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/unstorage.js",
+  "module": "./dist/unstorage.mjs",
+  "types": "./dist/unstorage.d.ts",
   "bin": "./dist/cli.js",
   "files": [
     "dist",

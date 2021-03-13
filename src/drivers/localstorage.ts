@@ -1,4 +1,4 @@
-import { defineDriver } from '../utils'
+import { defineDriver } from './utils'
 
 export interface LocalStorageOptions {
   base?: string

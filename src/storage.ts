@@ -119,7 +119,8 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       }
       ctx.mounts[base] = driver
       if (ctx.watching) {
-        Promise.resolve(watch(driver, onChange, base)).catch(console.error)
+        Promise.resolve(watch(driver, onChange, base))
+          .catch(console.error) // eslint-disable-line no-console
       }
       return storage
     },

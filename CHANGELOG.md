@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/unjsio/unstorage/compare/v0.0.4...v0.1.0) (2021-03-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* restoreSnapshot
+* simplify mount usage
+
+### Features
+
+* allow passing default driver to factory fn ([bbca3c3](https://github.com/unjsio/unstorage/commit/bbca3c3ca031a5193b89d2dedc63e6b22c15a431))
+* restoreSnapshot ([6e75a61](https://github.com/unjsio/unstorage/commit/6e75a615c85a79bc98eb0c839fbd2ae8fedac535))
+* simplify mount usage ([3eccf84](https://github.com/unjsio/unstorage/commit/3eccf8471154a4cac4c2c9e006e5fa2d3607ed5b))
+
+
+### Bug Fixes
+
+* **pkg:** fix exports ([a846fc0](https://github.com/unjsio/unstorage/commit/a846fc0d9bc1ae034c893d168c177fc066c26711))
+
 ### [0.0.4](https://github.com/unjsio/unstorage/compare/v0.0.3...v0.0.4) (2021-03-12)
 
 

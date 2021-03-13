@@ -65,13 +65,14 @@ npm i unistorage
 ```js
 import { createStorage } from 'unistorage'
 
-// Create a storage container with default memory storage
-const storage = createStorage()
+const storage = createStorage(/* opts */)
 
-await storage.getItem('foo:bar')
-// or
-await storage.getItem('/foo/bar')
+await storage.getItem('foo:bar') // or storage.getItem('/foo/bar')
 ```
+
+**Options:**
+
+- `driver`: Default driver (using memory if not provided)
 
 ## Storage Interface
 
@@ -239,9 +240,12 @@ npx unstorage .
 Maps data to real filesystem using directory structure for nested keys. Supports watching using [chokidar](https://github.com/paulmillr/chokidar).
 
 ```js
+import { createStorage } from 'unstorage'
 import fsDriver from 'unstorage/drivers/memory'
 
-storage.mount('/tmp', fsDriver({ base: './tmp' }))
+const storage = createStorage({
+  driver: fsDriver({ base: './tmp' })
+})
 ```
 
 **Options:**
@@ -255,9 +259,12 @@ storage.mount('/tmp', fsDriver({ base: './tmp' }))
 Store data in [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
 
 ```js
-import lsDriver from 'unstorage/drivers/memory'
+import { createStorage } from 'unstorage'
+import localStorageDriver from 'unstorage/drivers/memory'
 
-storage.mount('local', lsDriver({ base: 'myapp' }))
+const storage = createStorage({
+  driver: localStorageDriver({ base: 'app:' })
+})
 ```
 
 **Options:**
@@ -273,9 +280,12 @@ Keeps data in memory using [Set](https://developer.mozilla.org/en-US/docs/Web/Ja
 By default it is mounted to top level so it is unlikely you need to mount it again.
 
 ```js
+import { createStorage } from 'unstorage'
 import memoryDriver from 'unstorage/drivers/memory'
 
-storage.mount('/tmp', memory())
+const storage = createStorage({
+  driver: memoryDriver()
+})
 ```
 
 ### `http` (universal)
@@ -283,9 +293,12 @@ storage.mount('/tmp', memory())
 Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server](#storage-server) methods.
 
 ```js
+import { createStorage } from 'unstorage'
 import httpDriver from 'unstorage/drivers/http'
 
-storage.mount('local', lsDriver({ base: 'http://myapp.com' }))
+const storage = createStorage({
+  driver: httpDriver({ base: 'http://cdn.com' })
+})
 ```
 
 **Options:**
@@ -300,9 +313,9 @@ storage.mount('local', lsDriver({ base: 'http://myapp.com' }))
 - `removeIterm`: Maps to `DELETE`
 - `clear`: Not supported
 
-## Custom drivers
+## Making custom drivers
 
-It is possible to extend unstorage by creating custom driver and mounting it.
+It is possible to extend unstorage by creating custom drives.
 
 - Keys are always normalized in `foo:bar` convention
 - Mount base is removed
@@ -318,8 +331,6 @@ See [src/drivers](./src/drivers) to inspire how to implement them. Methods can
 ```js
 import { createStorage, defineDriver } from 'unstorage'
 
-const storage = createStorage()
-
 const myStorageDriver = defineDriver((_opts) => {
   return {
     async hasItem (key) {},
@@ -333,7 +344,9 @@ const myStorageDriver = defineDriver((_opts) => {
   }
 })
 
-storage.mount('/custom', myStorageDriver())
+const storage = createStorage({
+  driver: myStorageDriver()
+})
 ```
 
 ## Contribution

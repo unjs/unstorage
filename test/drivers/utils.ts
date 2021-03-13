@@ -17,7 +17,7 @@ export function testDriver (opts: TestOptions) {
   }
 
   it('init', async () => {
-    await ctx.storage.mount('/', ctx.driver)
+    ctx.storage = createStorage({ driver: opts.driver })
     await restoreSnapshot(ctx.storage, { initial: 'works' })
     expect(await ctx.storage.getItem('initial')).toBe('works')
     await ctx.storage.clear()

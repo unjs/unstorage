@@ -14,11 +14,13 @@ async function main () {
     process.exit(0)
   }
 
-  const storage = createStorage()
-  const storageServer = createStorageServer(storage)
-
   const rootDir = resolve(args._[0] || '.')
-  storage.mount('/', fsDriver({ base: rootDir }))
+
+  const storage = createStorage({
+    driver: fsDriver({ base: rootDir })
+  })
+
+  const storageServer = createStorageServer(storage)
 
   await listen(storageServer.handle, {
     name: 'Storage server',

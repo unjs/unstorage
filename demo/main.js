@@ -4,8 +4,9 @@ import httpDriver from '../src/drivers/http'
 import App from './App.vue'
 
 function main () {
-  const storage = createStorage()
-    .mount('/', httpDriver({ base: location.origin + '/storage' }))
+  const storage = createStorage({
+    driver: httpDriver({ base: location.origin + '/storage' })
+  })
   const app = createApp(App)
   app.provide('storage', storage)
   app.mount('#app')

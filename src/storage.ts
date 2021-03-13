@@ -10,9 +10,13 @@ interface StorageCTX {
   watchListeners: Function[]
 }
 
-export function createStorage (): Storage {
+export interface CreateStorageOptions {
+  driver?: Driver
+}
+
+export function createStorage (opts: CreateStorageOptions = {}): Storage {
   const ctx: StorageCTX = {
-    mounts: { '': memory() },
+    mounts: { '': opts.driver || memory() },
     mountpoints: [''],
     watching: false,
     watchListeners: []
@@ -151,19 +155,19 @@ export async function snapshot (storage: Storage, base: string): Promise<Snapsho
   return snapshot
 }
 
-export async function restoreSnapshot (storage: Storage, snapshot: Snapshot<StorageValue>, base: string = '') {
+export async function restoreSnapshot (driver: Storage, snapshot: Snapshot<StorageValue>, base: string = '') {
   base = normalizeBase(base)
-  await Promise.all(Object.entries(snapshot).map(e => storage.setItem(base + e[0], e[1])))
+  await Promise.all(Object.entries(snapshot).map(e => driver.setItem(base + e[0], e[1])))
 }
 
-function watch (storage: Driver, onChange: WatchCallback, base: string) {
-  if (storage.watch) {
-    return storage.watch((event, key) => onChange(event, base + key))
+function watch (driver: Driver, onChange: WatchCallback, base: string) {
+  if (driver.watch) {
+    return driver.watch((event, key) => onChange(event, base + key))
   }
 }
 
-async function dispose (storage: Driver) {
-  if (typeof storage.dispose === 'function') {
-    await asyncCall(storage.dispose)
+async function dispose (driver: Driver) {
+  if (typeof driver.dispose === 'function') {
+    await asyncCall(driver.dispose)
   }
 }

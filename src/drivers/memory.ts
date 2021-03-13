@@ -1,4 +1,4 @@
-import { defineDriver } from '../utils'
+import { defineDriver } from './utils'
 import type { StorageValue } from '../types'
 
 export default defineDriver(() => {

@@ -1,5 +1,5 @@
-import { defineDriver } from '../utils'
-import { stringify } from '../utils'
+import { defineDriver } from './utils'
+import { stringify } from '../_utils'
 import { $fetch } from 'ohmyfetch/node'
 import { joinURL } from 'ufo'
 

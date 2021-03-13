@@ -13,7 +13,7 @@ export interface FSStorageOptions {
 
 export default defineDriver((opts: FSStorageOptions = {}) => {
   if (!opts.base) {
-    throw new Error('dir is required')
+    throw new Error('base is required')
   }
 
   if (!opts.ignore) {

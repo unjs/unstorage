@@ -34,7 +34,7 @@
   - [`storage.getKeys(base?)`](#storagegetkeysbase)
   - [`storage.clear(base?)`](#storageclearbase)
   - [`storage.dispose()`](#storagedispose)
-  - [`storage.mount(mountpoint, driver, initialState?)`](#storagemountmountpoint-driver-initialstate)
+  - [`storage.mount(mountpoint, driver)`](#storagemountmountpoint-driver)
   - [`storage.unmount(mountpoint, dispose = true)`](#storageunmountmountpoint-dispose--true)
   - [`storage.watch(callback)`](#storagewatchcallback)
 - [Utils](#utils)
@@ -139,15 +139,11 @@ Disposes all mounted storages to ensure there are no open-handles left. Call it 
 await storage.dispose()
 ```
 
-### `storage.mount(mountpoint, driver, initialState?)`
+### `storage.mount(mountpoint, driver)`
 
 By default, everything is stored in memory. We can mount additional storage space in a Unix-like fashion.
 
 When operating with a `key` that starts with mountpoint, instead of default storage, mounted driver will be called.
-
-If `initialState` argument is provided, restores/hydrates state of mountpoint using `setItems`.
-
-<!-- TODO: Explain mountpoint hiding -->
 
 ```js
 import { createStorage } from 'unistorage'

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/unjsio/unstorage/compare/v0.1.1...v0.1.2) (2021-03-24)
+
+
+### Bug Fixes
+
+* **fs-drivers:** typo in error message ([0e7e063](https://github.com/unjsio/unstorage/commit/0e7e0631bee635032d35b0a39228981a2891cee4))
+* **pkg:** avoid extra index build ([5233de6](https://github.com/unjsio/unstorage/commit/5233de6545615c5c513b658343169b5c11d1ceb5))
+
 ### [0.1.1](https://github.com/unjsio/unstorage/compare/v0.1.0...v0.1.1) (2021-03-13)
 
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/unjsio/unstorage/compare/v0.1.2...v0.1.3) (2021-04-14)
+
+
+### Features
+
+* redis driver ([7562af2](https://github.com/unjsio/unstorage/commit/7562af24795594653c8a5e590131e7d0398be83e))
+
 ### [0.1.2](https://github.com/unjsio/unstorage/compare/v0.1.1...v0.1.2) (2021-03-24)
 
 

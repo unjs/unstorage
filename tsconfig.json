@@ -12,7 +12,10 @@
     "types": [
       "node",
       "jest"
-    ]
+    ],
+    "paths": {
+      "unstorage": [ "./src/types.ts" ]
+    }
   },
   "include": [
     "src"

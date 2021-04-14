@@ -1,5 +1,7 @@
-import type { Driver } from '../../types'
+import type { Driver } from 'unstorage'
 
-export function defineDriver<T = any>(factory: (opts?: T) => Driver) {
+type DriverFactory<T> = (opts?: T) => Driver
+
+export function defineDriver<T = any>(factory: DriverFactory<T>): DriverFactory<T> {
   return factory
 }

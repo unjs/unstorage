@@ -40,6 +40,7 @@
     "anymatch": "^3.1.1",
     "chokidar": "^3.5.1",
     "h3": "^0.2.5",
+    "ioredis": "^4.26.0",
     "listhen": "^0.1.4",
     "mri": "^1.1.6",
     "ohmyfetch": "^0.1.8",
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "latest",
+    "@types/ioredis": "^4.22.3",
     "@types/jest": "latest",
     "@types/jsdom": "^16.2.6",
     "@types/mri": "^1.1.0",

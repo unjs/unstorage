@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://github.com/unjsio/unstorage/compare/v0.1.4...v0.1.5) (2021-04-16)
+
+
+### Bug Fixes
+
+* **fs:** race condition for ensuredir ([437cc76](https://github.com/unjsio/unstorage/commit/437cc76824fea7121107aaa45a17bd47155a6201))
+
 ### [0.1.4](https://github.com/unjsio/unstorage/compare/v0.1.3...v0.1.4) (2021-04-14)
 
 ### [0.1.3](https://github.com/unjsio/unstorage/compare/v0.1.2...v0.1.3) (2021-04-14)

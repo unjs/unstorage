@@ -1,8 +1,12 @@
-import { Dirent, promises as fsPromises } from 'fs'
+import { Dirent, existsSync, promises as fsPromises } from 'fs'
 import { resolve, dirname } from 'path'
 
-function isNotFound (err: any) {
-  return err.code === 'ENOENT' || err.code === 'EISDIR'
+function ignoreNotfound (err: any) {
+  return (err.code === 'ENOENT' || err.code === 'EISDIR') ? null : err
+}
+
+function ignoreExists (err: any) {
+  return (err.code === 'EEXIST') ? null : err
 }
 
 export async function writeFile (path: string, data: string) {
@@ -11,32 +15,25 @@ export async function writeFile (path: string, data: string) {
 }
 
 export function readFile (path: string) {
-  return fsPromises.readFile(path, 'utf8')
-    .catch(err => isNotFound(err) ? null : Promise.reject(err))
+  return fsPromises.readFile(path, 'utf8').catch(ignoreNotfound)
 }
 
 export function stat (path: string) {
-  return fsPromises.stat(path)
-    .catch(err => isNotFound(err) ? null : Promise.reject(err))
+  return fsPromises.stat(path).catch(ignoreNotfound)
 }
 
 export function unlink (path: string) {
-  return fsPromises.unlink(path)
-    .catch(err => isNotFound(err) ? undefined : Promise.reject(err))
+  return fsPromises.unlink(path).catch(ignoreNotfound)
 }
 
 export function readdir (dir: string): Promise<Dirent[]> {
-  return fsPromises.readdir(dir, { withFileTypes: true })
-    .catch(err => isNotFound(err) ? [] : Promise.reject(err))
+  return fsPromises.readdir(dir, { withFileTypes: true }).catch(ignoreNotfound)
 }
 
 export async function ensuredir (dir: string) {
-  const _stat = await stat(dir)
-  if (_stat && _stat.isDirectory()) {
-    return
-  }
-  await ensuredir(dirname(dir))
-  await fsPromises.mkdir(dir)
+  if (existsSync(dir)) { return }
+  await ensuredir(dirname(dir)).catch(ignoreExists)
+  await fsPromises.mkdir(dir).catch(ignoreExists)
 }
 
 export async function readdirRecursive(dir: string, ignore?: (p: string) => boolean): Promise<string[]> {

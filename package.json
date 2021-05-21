@@ -6,7 +6,7 @@
   "license": "MIT",
   "sideEffects": false,
   "exports": {
-    "./": "./",
+    "./drivers/*": "./drivers/*.js",
     ".": {
       "import": "./dist/unstorage.mjs",
       "require": "./dist/unstorage.js"
@@ -63,9 +63,9 @@
     "jest": "latest",
     "jiti": "latest",
     "jsdom": "latest",
-    "mkdist": "latest",
+    "mkdist": "0.2.1",
     "monaco-editor": "latest",
-    "siroc": "latest",
+    "siroc": "0.10.1",
     "standard-version": "latest",
     "ts-jest": "latest",
     "typescript": "latest",

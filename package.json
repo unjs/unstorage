@@ -6,7 +6,10 @@
   "license": "MIT",
   "sideEffects": false,
   "exports": {
-    "./*": "./*",
+    "./drivers/*": {
+      "import": "./drivers/*.mjs",
+      "require": "./drivers/*.js"
+    },
     ".": {
       "import": "./dist/unstorage.mjs",
       "require": "./dist/unstorage.js"
@@ -26,11 +29,11 @@
     "server*"
   ],
   "scripts": {
-    "build": "siroc build && mkdist --src src/drivers --dist drivers -d",
+    "build": "unbuild",
     "dev": "jest --watch",
     "demo": "vite demo",
     "lint": "eslint --ext .ts .",
-    "prepublishOnly": "yarn build",
+    "prepack": "yarn build",
     "release": "yarn test && standard-version && git push --follow-tags && npm publish",
     "test": "yarn lint && jest",
     "doctoc": "doctoc README.md --notitle --maxlevel 3",
@@ -39,6 +42,7 @@
   "dependencies": {
     "anymatch": "^3.1.1",
     "chokidar": "^3.5.1",
+    "destr": "^1.1.0",
     "h3": "^0.2.10",
     "ioredis": "^4.27.3",
     "listhen": "^0.2.4",
@@ -57,7 +61,6 @@
     "@types/ws": "latest",
     "@vitejs/plugin-vue": "latest",
     "@vue/compiler-sfc": "latest",
-    "destr": "latest",
     "doctoc": "latest",
     "eslint": "latest",
     "jest": "latest",
@@ -65,10 +68,10 @@
     "jsdom": "latest",
     "mkdist": "latest",
     "monaco-editor": "latest",
-    "siroc": "latest",
     "standard-version": "latest",
     "ts-jest": "latest",
     "typescript": "latest",
+    "unbuild": "latest",
     "vite": "latest",
     "vue": "^3.0.5"
   }

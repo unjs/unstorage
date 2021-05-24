@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.com/unjsio/unstorage/compare/v0.1.5...v0.1.6) (2021-05-24)
+
+
+### Bug Fixes
+
+* fallback value for readdir ([ea7d73b](https://github.com/unjsio/unstorage/commit/ea7d73bd786e278ff1f49e7555c6e7bd7d690908))
+
 ### [0.1.5](https://github.com/unjsio/unstorage/compare/v0.1.4...v0.1.5) (2021-04-16)
 
 

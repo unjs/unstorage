@@ -2,7 +2,7 @@
   "name": "unstorage",
   "version": "0.1.6",
   "description": "",
-  "repository": "unjsio/unstorage",
+  "repository": "unjs/unstorage",
   "license": "MIT",
   "sideEffects": false,
   "exports": {

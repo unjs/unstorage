@@ -4467,9 +4467,9 @@ mkdirp@1.x, mkdirp@^1.0.4:
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
 mkdist@^0.3.0, mkdist@latest:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/mkdist/-/mkdist-0.3.0.tgz#c82e84744c951310246449c761d3b0891c08ede8"
-  integrity sha512-w0Vd5/hzuCSz3nG/gdfKYFbVBCNn/ANMMJwhrxS1YKw18UtCqiqwyZpEQyC1RB/xAMP/+dvl3mAXE7r4j4nfvg==
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/mkdist/-/mkdist-0.3.1.tgz#db78956a7f059968527c86cedbdfe92d6c590e2f"
+  integrity sha512-Xk2kANwOU2B7lES7PQ/yL1sz4H1k9ymOCBtXL3TQE9R25KikPJgf2x1riKzmrz+y3Qpg4R3mhYyuimEjIX9bkw==
   dependencies:
     defu "^3.2.2"
     esbuild "^0.11.6"

@@ -6,7 +6,7 @@
   "license": "MIT",
   "sideEffects": false,
   "exports": {
-    "./": "./",
+    "./": "./*",
     ".": {
       "import": "./dist/unstorage.mjs",
       "require": "./dist/unstorage.js"
@@ -26,7 +26,7 @@
     "server*"
   ],
   "scripts": {
-    "build": "siroc build && mkdist --src src/drivers --dist drivers --format cjs -d",
+    "build": "siroc build && mkdist --src src/drivers --dist drivers -d",
     "dev": "jest --watch",
     "demo": "vite demo",
     "lint": "eslint --ext .ts .",
@@ -39,13 +39,13 @@
   "dependencies": {
     "anymatch": "^3.1.1",
     "chokidar": "^3.5.1",
-    "h3": "^0.2.5",
-    "ioredis": "^4.26.0",
-    "listhen": "^0.1.4",
+    "h3": "^0.2.10",
+    "ioredis": "^4.27.3",
+    "listhen": "^0.2.4",
     "mri": "^1.1.6",
-    "ohmyfetch": "^0.1.8",
-    "ufo": "^0.6.10",
-    "ws": "^7.4.4"
+    "ohmyfetch": "^0.2.0",
+    "ufo": "^0.7.5",
+    "ws": "^7.4.5"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "latest",

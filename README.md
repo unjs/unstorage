@@ -392,11 +392,11 @@ const storage = createStorage({
 [npm-downloads-src]: https://img.shields.io/npm/dm/unstorage?style=flat-square
 [npm-downloads-href]: https://npmjs.com/package/unstorage
 
-[github-actions-src]: https://img.shields.io/github/workflow/status/unjsio/unstorage/ci/main?style=flat-square
-[github-actions-href]: https://github.com/unjsio/unstorage/actions?query=workflow%3Aci
+[github-actions-src]: https://img.shields.io/github/workflow/status/unjs/unstorage/ci/main?style=flat-square
+[github-actions-href]: https://github.com/unjs/unstorage/actions?query=workflow%3Aci
 
-[codecov-src]: https://img.shields.io/codecov/c/gh/unjsio/unstorage/main?style=flat-square
-[codecov-href]: https://codecov.io/gh/unjsio/unstorage
+[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/unstorage/main?style=flat-square
+[codecov-href]: https://codecov.io/gh/unjs/unstorage
 
 [bundle-src]: https://img.shields.io/bundlephobia/minzip/unstorage?style=flat-square
 [bundle-href]: https://bundlephobia.com/result?p=unstorage

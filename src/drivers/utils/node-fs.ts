@@ -27,7 +27,7 @@ export function unlink (path: string) {
 }
 
 export function readdir (dir: string): Promise<Dirent[]> {
-  return fsPromises.readdir(dir, { withFileTypes: true }).catch(ignoreNotfound)
+  return fsPromises.readdir(dir, { withFileTypes: true }).catch(ignoreNotfound).then(r => r || [])
 }
 
 export async function ensuredir (dir: string) {

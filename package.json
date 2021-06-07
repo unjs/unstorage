@@ -11,18 +11,17 @@
       "require": "./drivers/*.js"
     },
     ".": {
-      "import": "./dist/unstorage.mjs",
-      "require": "./dist/unstorage.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./server": {
       "import": "./server.mjs",
       "require": "./server.js"
     }
   },
-  "main": "./dist/unstorage.js",
-  "module": "./dist/unstorage.mjs",
-  "types": "./dist/unstorage.d.ts",
-  "bin": "./dist/cli.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "drivers",

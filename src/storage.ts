@@ -80,6 +80,9 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       }
       key = normalizeKey(key)
       const { relativeKey, driver } = getMount(key)
+      if (!driver.setItem) {
+        return // Readonly
+      }
       await asyncCall(driver.setItem, relativeKey, stringify(value))
       if (!driver.watch) {
         onChange('update', key)
@@ -88,6 +91,9 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     async removeItem (key, removeMeta = true) {
       key = normalizeKey(key)
       const { relativeKey, driver } = getMount(key)
+      if (!driver.removeItem) {
+        return // Readonly
+      }
       await asyncCall(driver.removeItem, relativeKey)
       if (removeMeta) {
         await asyncCall(driver.removeItem, relativeKey + '$')
@@ -136,7 +142,17 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     // Utils
     async clear (base) {
       base = normalizeBase(base)
-      await Promise.all(getMounts(base).map(m => asyncCall(m.driver.clear)))
+      await Promise.all(getMounts(base).map(async (m) => {
+        if (m.driver.clear) {
+          return asyncCall(m.driver.clear)
+        }
+        // Fallback to remove all keys if clear not implemented
+        if (m.driver.removeItem) {
+          const keys = await m.driver.getKeys()
+          return Promise.all(keys.map(key => m.driver.removeItem!(key)))
+        }
+        // Readonly
+      }))
     },
     async dispose () {
       await Promise.all(Object.values(ctx.mounts).map(driver => dispose(driver)))

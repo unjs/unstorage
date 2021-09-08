@@ -11,11 +11,11 @@ export interface StorageMeta {
 export interface Driver {
   hasItem: (key: string) => boolean | Promise<boolean>
   getItem: (key: string) => StorageValue
-  setItem: (key: string, value: string) => void | Promise<void>
-  removeItem: (key: string) => void | Promise<void>
+  setItem?: (key: string, value: string) => void | Promise<void>
+  removeItem?: (key: string) => void | Promise<void>
   getMeta?: (key: string) => StorageMeta | Promise<StorageMeta>
   getKeys: () => string[] | Promise<string[]>
-  clear: () => void | Promise<void>
+  clear?: () => void | Promise<void>
   dispose?: () => void | Promise<void>
   watch?: (callback: WatchCallback) => void | Promise<void>
 }

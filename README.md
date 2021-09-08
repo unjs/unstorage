@@ -9,11 +9,13 @@
 > 🌍 💾 Universal Storage Layer
 
 
-**❓ Why**
+**Why ❓**
 
-Typically, we can choose our data storage based on use-case like a filesystem (NodeJS), a database like Redis or localStorage for browsers but it will soon start to be a headache for supporting and combining more than one and also for javascript libraries that usually end up with supporting one or two of them making libraries platform-specific.
+Typically, we choose our one or many data backends based on our use-case like filesystem, a database like Redis or Mongo or LocalStorage for browsers but it will soon start to be lots of trouble for supporting and combining more than one or swtiching between them. For javascript library authors this usually means they have to decide how many platforms they support and implement storage for each.
 
-💡 Unstorage provides a solution by allowing to make super simple async drivers that can be built-in or provided by the user and in the top layer, a unified and powerful interface that allows combining them and adding conventional features like mounting, watching, and working with metadata.
+💡 Unstorage gives a by providing a unified and powerful interface that allows combining drivers that are either built-in or can be implemented via a super simple interface and adding conventional features like mounting, watching, and working with metadata.
+
+Comparing to similar solutions like [localforage](https://localforage.github.io/), unstorage core is almost 6x smaller (28.9 kB vs 4.7 kB), using modern ESM/Typescript/Async syntax and many more features to be used unversally.
 
 <br>
 ✔️ Works in all environments (Browser, NodeJS, and Workers) <br>
@@ -30,8 +32,10 @@ Typically, we can choose our data storage based on use-case like a filesystem (N
 ✔️ HTTP Storage server (cli and programmatic) <br>
 ✔️ Namespaced storage <br>
 <br>
-🚧 Overlay storage (usable for Copy-on-write for read-only storage) <br>
-🚧 Node FS API (for virtual fs) <br>
+🚧 Overlay storage (copy-on-write) <br>
+🚧 Virtual `fs` interface <br>
+🚧 Cached storage <br>
+🚧 More drivers: MongoDB, S3 an IndexedDB<br>
 <br>
 
 **📚 Table of Contents**

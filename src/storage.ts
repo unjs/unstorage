@@ -129,7 +129,9 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
         return rawKeys.map(key => mount.mountpoint + normalizeKey(key))
       }))
       const keys = keyGroups.flat()
-      return base ? keys.filter(key => key.startsWith(base!)) : keys
+      return base
+        ? keys.filter(key => key.startsWith(base!) && !key.endsWith('$'))
+        : keys.filter(key => !key.endsWith('$'))
     },
     // Utils
     async clear (base) {

@@ -292,7 +292,7 @@ This driver implements meta for each key including `mtime` (last modified time),
 
 ```js
 import { createStorage } from 'unstorage'
-import fsDriver from 'unstorage/drivers/memory'
+import fsDriver from 'unstorage/drivers/fs'
 
 const storage = createStorage({
   driver: fsDriver({ base: './tmp' })
@@ -311,7 +311,7 @@ Store data in [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Wi
 
 ```js
 import { createStorage } from 'unstorage'
-import localStorageDriver from 'unstorage/drivers/memory'
+import localStorageDriver from 'unstorage/drivers/localstorage'
 
 const storage = createStorage({
   driver: localStorageDriver({ base: 'app:' })

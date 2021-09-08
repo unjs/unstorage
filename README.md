@@ -8,21 +8,24 @@
 
 > 🌍 💾 Universal Storage Layer
 
-✔️ Works in all environments (Browser, NodeJS and Workers)
-✔️ Multiple built in drivers (memory, fs, localStorage, http, redis)
-✔️ Asynchronous API
-✔️ Unix-style mountable paths (multi driver)
-✔️ Default in-memory storage
-✔️ Tree-shakable utils and tiny core
-✔️ Driver native and custom user metadata support
-✔️ Native aware value serialization and deserialization
-✔️ Restore initial state (hydration)
-✔️ State snapshot
-✔️ Driver agnostic watcher
-✔️ HTTP Storage server (cli and programmatic)
-🚧 Overlay storage (usable for Copy-On-Write for readonly storage)
-🚧 Namespaced storage
-🚧 Node FS api (for virtual fs)
+<br>
+✔️ Works in all environments (Browser, NodeJS and Workers) <br>
+✔️ Multiple built in drivers (memory, fs, localStorage, http, redis) <br>
+✔️ Asynchronous API <br>
+✔️ Unix-style mountable paths (multi driver) <br>
+✔️ Default in-memory storage <br>
+✔️ Tree-shakable utils and tiny core <br>
+✔️ Driver native and custom user metadata support <br>
+✔️ Native aware value serialization and deserialization <br>
+✔️ Restore initial state (hydration) <br>
+✔️ State snapshot <br>
+✔️ Driver agnostic watcher <br>
+✔️ HTTP Storage server (cli and programmatic) <br>
+<br>
+🚧 Overlay storage (usable for Copy-On-Write for readonly storage) <br>
+🚧 Namespaced storage <br>
+🚧 Node FS api (for virtual fs) <br>
+<br>
 
 **📚 Table of Contents**
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->

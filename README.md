@@ -6,23 +6,25 @@
 [![Codecov][codecov-src]][codecov-href]
 [![bundle][bundle-src]][bundle-href]
 
-> Universal Storage Layer
+> 🌍 💾 Universal Storage Layer
 
-<!-- ![unstorage](./assets/unstorage.svg) -->
+✔️ Works in all environments (Browser, NodeJS and Workers)
+✔️ Multiple built in drivers (memory, fs, localStorage, http, redis)
+✔️ Asynchronous API
+✔️ Unix-style mountable paths (multi driver)
+✔️ Default in-memory storage
+✔️ Tree-shakable utils and tiny core
+✔️ Driver native and custom user metadata support
+✔️ Native aware value serialization and deserialization
+✔️ Restore initial state (hydration)
+✔️ State snapshot
+✔️ Driver agnostic watcher
+✔️ HTTP Storage server (cli and programmatic)
+🚧 Overlay storage (usable for Copy-On-Write for readonly storage)
+🚧 Namespaced storage
+🚧 Node FS api (for virtual fs)
 
-- Works in all environments (Browser, NodeJS and Workers)
-- Asynchronous API
-- Unix-style mountable paths (multi driver)
-- Default in-memory storage
-- Tree-shakable and lightweight core
-- Driver native and custom user metadata support
-- Native aware value serialization and deserialization
-- Restore initial state (hydration)
-- State snapshot
-- Driver agnostic watcher
-- HTTP Storage server (cli and programmatic)
-
-**Table of Contents**
+**📚 Table of Contents**
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 

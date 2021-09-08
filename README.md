@@ -28,9 +28,9 @@ Typically, we can choose our data storage based on use-case like a filesystem (N
 ✔️ State snapshot <br>
 ✔️ Driver agnostic watcher <br>
 ✔️ HTTP Storage server (cli and programmatic) <br>
+✔️ Namespaced storage <br>
 <br>
 🚧 Overlay storage (usable for Copy-on-write for read-only storage) <br>
-🚧 Namespaced storage <br>
 🚧 Node FS API (for virtual fs) <br>
 <br>
 
@@ -56,6 +56,7 @@ Typically, we can choose our data storage based on use-case like a filesystem (N
 - [Utils](#utils)
   - [`snapshot(storage, base?)`](#snapshotstorage-base)
   - [`restoreSnapshot(storage, data, base?)`](#restoresnapshotstorage-data-base)
+  - [`prefixStorage(storage, data, base?)`](#prefixstoragestorage-data-base)
 - [Storage Server](#storage-server)
 - [Drivers](#drivers)
   - [`fs` (node)](#fs-node)
@@ -245,6 +246,22 @@ Restore snapshot created by `snapshot()`.
 
 ```js
 await restoreSnapshot(storage, { 'foo:bar': 'baz' }, '/etc2')
+```
+
+### `prefixStorage(storage, data, base?)`
+
+Create a namespaced instance of main storage.
+
+All operations are virtually prefixed. Useful to create shorcuts and limit access.
+
+```js
+import { createStorage, prefixStorage } from 'unstorage'
+
+const storage = createStorage()
+const assetsStorage = prefixStorage(storage, 'assets')
+
+// Same as storage.setItem('assets:x', 'hello!')
+await assetsStorage.setItem('x', 'hello!')
 ```
 
 ## Storage Server

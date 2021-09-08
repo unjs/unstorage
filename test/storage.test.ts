@@ -1,4 +1,4 @@
-import { createStorage, snapshot, restoreSnapshot } from '../src'
+import { createStorage, snapshot, restoreSnapshot, prefixStorage } from '../src'
 import memory from '../src/drivers/memory'
 
 const data = {
@@ -25,5 +25,14 @@ describe('storage', () => {
     await storage.watch(onChange)
     await restoreSnapshot(storage, data, 'mnt')
     expect(onChange).toHaveBeenCalledWith('update', 'mnt:data:foo')
+  })
+})
+
+describe('utils', () => {
+  it('prefixStorage', async () => {
+    const storage = createStorage()
+    const pStorage = prefixStorage(storage, 'foo')
+    await pStorage.setItem('x', 'bar')
+    expect(await storage.getItem('foo:x')).toBe('bar')
   })
 })

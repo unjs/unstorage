@@ -8,23 +8,30 @@
 
 > 🌍 💾 Universal Storage Layer
 
+
+**❓ Why**
+
+Typically, we can choose our data storage based on use-case like a filesystem (NodeJS), a database like Redis or localStorage for browsers but it will soon start to be a headache for supporting and combining more than one and also for javascript libraries that usually end up with supporting one or two of them making libraries platform-specific.
+
+💡 Unstorage provides a solution by allowing to make super simple async drivers that can be built-in or provided by the user and in the top layer, a unified and powerful interface that allows combining them and adding conventional features like mounting, watching, and working with metadata.
+
 <br>
-✔️ Works in all environments (Browser, NodeJS and Workers) <br>
-✔️ Multiple built in drivers (memory, fs, localStorage, http, redis) <br>
+✔️ Works in all environments (Browser, NodeJS, and Workers) <br>
+✔️ Multiple built-in drivers (Memory, FS, LocalStorage, HTTP, Redis) <br>
 ✔️ Asynchronous API <br>
-✔️ Unix-style mountable paths (multi driver) <br>
+✔️ Unix-style driver mounting to combine storages<br>
 ✔️ Default in-memory storage <br>
 ✔️ Tree-shakable utils and tiny core <br>
-✔️ Driver native and custom user metadata support <br>
+✔️ Driver native and user provided metadata <br>
 ✔️ Native aware value serialization and deserialization <br>
 ✔️ Restore initial state (hydration) <br>
 ✔️ State snapshot <br>
 ✔️ Driver agnostic watcher <br>
 ✔️ HTTP Storage server (cli and programmatic) <br>
 <br>
-🚧 Overlay storage (usable for Copy-On-Write for readonly storage) <br>
+🚧 Overlay storage (usable for Copy-on-write for read-only storage) <br>
 🚧 Namespaced storage <br>
-🚧 Node FS api (for virtual fs) <br>
+🚧 Node FS API (for virtual fs) <br>
 <br>
 
 **📚 Table of Contents**
@@ -96,7 +103,7 @@ await storage.hasItem('foo:bar')
 
 ### `storage.getItem(key)`
 
-Gets value of a key in storage. Resolves to either `string` or `null`.
+Gets the value of a key in storage. Resolves to either `string` or `null`.
 
 ```js
 await storage.getItem('foo:bar')
@@ -104,9 +111,9 @@ await storage.getItem('foo:bar')
 
 ### `storage.setItem(key, value)`
 
-Add Update a value to storage.
+Add Update a value to the storage.
 
-If value is not string, it will be stringified.
+If the value is not a string, it will be stringified.
 
 If value is `undefined`, it is same as calling `removeItem(key)`.
 
@@ -154,11 +161,11 @@ await storage.removeMeta('foo:bar',)
 
 ### `storage.getKeys(base?)`
 
-Get all keys. Returns an array of `string`.
+Get all keys. Returns an array of strings.
 
 Meta keys (ending with `$`) will be filtered.
 
-If a base is provided, only keys starting with base will be returned also only mounts starting with base will be queried. Keys still have full path.
+If a base is provided, only keys starting with the base will be returned also only mounts starting with base will be queried. Keys still have a full path.
 
 ```js
 await storage.getKeys()
@@ -242,7 +249,7 @@ await restoreSnapshot(storage, { 'foo:bar': 'baz' }, '/etc2')
 
 ## Storage Server
 
-We can easily expose unstorage instance to a http server to allow remote connections.
+We can easily expose unstorage instance to an http server to allow remote connections.
 Request url is mapped to key and method/body mapped to function. See below for supported http methods.
 
 **🛡️ Security Note:** Server is unprotected by default. You need to add your own authentication/security middleware like basic authentication.
@@ -279,7 +286,7 @@ npx unstorage .
 
 ### `fs` (node)
 
-Maps data to real filesystem using directory structure for nested keys. Supports watching using [chokidar](https://github.com/paulmillr/chokidar).
+Maps data to the real filesystem using directory structure for nested keys. Supports watching using [chokidar](https://github.com/paulmillr/chokidar).
 
 This driver implements meta for each key including `mtime` (last modified time), `atime` (last access time), and `size` (file size) using `fs.stat`.
 
@@ -424,7 +431,7 @@ const storage = createStorage({
 - Clone repository
 - Install dependencies with `yarn install`
 - Use `yarn dev` to start jest watcher verifying changes
-- Use `yarn test` before push to ensure all tests and lint checks passing
+- Use `yarn test` before pushing to ensure all tests and lint checks passing
 
 ## License
 

@@ -15,6 +15,7 @@
 - Unix-style mountable paths (multi driver)
 - Default in-memory storage
 - Tree-shakable and lightweight core
+- Driver native and custom user metadata support
 - Native aware value serialization and deserialization
 - Restore initial state (hydration)
 - State snapshot
@@ -30,7 +31,10 @@
   - [`storage.hasItem(key)`](#storagehasitemkey)
   - [`storage.getItem(key)`](#storagegetitemkey)
   - [`storage.setItem(key, value)`](#storagesetitemkey-value)
-  - [`storage.removeItem(key)`](#storageremoveitemkey)
+  - [`storage.removeItem(key, removeMeta = true)`](#storageremoveitemkey-removemeta--true)
+  - [`storage.getMeta(key, nativeOnly?)`](#storagegetmetakey-nativeonly)
+  - [`storage.setMeta(key)`](#storagesetmetakey)
+  - [`storage.removeMeta(key)`](#storageremovemetakey)
   - [`storage.getKeys(base?)`](#storagegetkeysbase)
   - [`storage.clear(base?)`](#storageclearbase)
   - [`storage.dispose()`](#storagedispose)
@@ -105,17 +109,49 @@ If value is `undefined`, it is same as calling `removeItem(key)`.
 await storage.setItem('foo:bar', 'baz')
 ```
 
-### `storage.removeItem(key)`
+### `storage.removeItem(key, removeMeta = true)`
 
-Remove a value from storage.
+Remove a value (and it's meta) from storage.
 
 ```js
 await storage.removeItem('foo:bar')
 ```
 
+### `storage.getMeta(key, nativeOnly?)`
+
+Get metadata object for a specific key.
+
+This data is fetched from two sources:
+- Driver native meta (like file creation time)
+- Custom meta set by `storage.setMeta` (overrides driver native meta)
+
+```js
+await storage.getMeta('foo:bar') // For fs driver returns an object like { mtime, atime, size }
+```
+
+### `storage.setMeta(key)`
+
+Set custom meta for a specific key by adding a `$` suffix.
+
+```js
+await storage.setMeta('foo:bar', { flag: 1 })
+// Same as storage.setItem('foo:bar$', { flag: 1 })
+```
+
+### `storage.removeMeta(key)`
+
+Remove meta for a specific key by adding a `$` suffix.
+
+```js
+await storage.removeMeta('foo:bar',)
+// Same as storage.removeMeta('foo:bar$')
+```
+
 ### `storage.getKeys(base?)`
 
 Get all keys. Returns an array of `string`.
+
+Meta keys (ending with `$`) will be filtered.
 
 If a base is provided, only keys starting with base will be returned also only mounts starting with base will be queried. Keys still have full path.
 
@@ -240,6 +276,8 @@ npx unstorage .
 
 Maps data to real filesystem using directory structure for nested keys. Supports watching using [chokidar](https://github.com/paulmillr/chokidar).
 
+This driver implements meta for each key including `mtime` (last modified time), `atime` (last access time), and `size` (file size) using `fs.stat`.
+
 ```js
 import { createStorage } from 'unstorage'
 import fsDriver from 'unstorage/drivers/memory'
@@ -292,6 +330,8 @@ const storage = createStorage({
 ### `http` (universal)
 
 Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server](#storage-server) methods.
+
+This driver implements meta for each key including `mtime` (last modified time) and `status` from HTTP headers by making a `HEAD` request.
 
 ```js
 import { createStorage } from 'unstorage'

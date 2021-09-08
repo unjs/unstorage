@@ -12,6 +12,12 @@ describe('drivers: fs', () => {
       it('check filesystem', async () => {
         expect(await readFile(resolve(dir, 's1/a'))).toBe('test_data')
       })
+      it('native meta', async () => {
+        const meta = await ctx.storage.getMeta('/s1/a')
+        expect(meta.atime?.constructor.name).toBe('Date')
+        expect(meta.mtime?.constructor.name).toBe('Date')
+        expect(meta.size).toBeGreaterThan(0)
+      })
       it('watch filesystem', async () => {
         const watcher = jest.fn()
         await ctx.storage.watch(watcher)

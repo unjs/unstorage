@@ -14,11 +14,12 @@ describe('server', () => {
     expect(await fetchStorage('foo', {})).toMatchObject([])
 
     await storage.setItem('foo/bar', 'bar')
+    await storage.setMeta('foo/bar', { mtime: new Date() })
     expect(await fetchStorage('foo/bar')).toBe('bar')
 
     expect(await fetchStorage('foo/bar', { method: 'PUT', body: 'updated' })).toBe('OK')
     expect(await fetchStorage('foo/bar')).toBe('updated')
-    expect(await fetchStorage('/')).toMatchObject(['foo/bar'])
+    expect(await fetchStorage('/')).toMatchObject(['foo/bar', 'foo/bar$'])
 
     expect(await fetchStorage('foo/bar', { method: 'DELETE' })).toBe('OK')
     expect(await fetchStorage('foo/bar', {})).toMatchObject([])

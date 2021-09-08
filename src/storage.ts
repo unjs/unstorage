@@ -63,6 +63,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
   }
 
   const storage: Storage = {
+    // Item
     hasItem (key) {
       key = normalizeKey(key)
       const { relativeKey, driver } = getMount(key)
@@ -84,14 +85,43 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
         onChange('update', key)
       }
     },
-    async removeItem (key) {
+    async removeItem (key, removeMeta = true) {
       key = normalizeKey(key)
       const { relativeKey, driver } = getMount(key)
       await asyncCall(driver.removeItem, relativeKey)
+      if (removeMeta) {
+        await asyncCall(driver.removeItem, relativeKey + '$')
+      }
       if (!driver.watch) {
         onChange('remove', key)
       }
     },
+    // Meta
+    async getMeta (key, nativeMetaOnly) {
+      key = normalizeKey(key)
+      const { relativeKey, driver } = getMount(key)
+      const meta = Object.create(null)
+      if (driver.getMeta) {
+        Object.assign(meta, await asyncCall(driver.getMeta, relativeKey))
+      }
+      if (!nativeMetaOnly) {
+        const val = await asyncCall(driver.getItem, relativeKey + '$').then(val => destr(val))
+        if (val && typeof val === 'object') {
+          // TODO: Support date by destr?
+          if (typeof val.atime === 'string') { val.atime = new Date(val.atime) }
+          if (typeof val.mtime === 'string') { val.mtime = new Date(val.mtime) }
+          Object.assign(meta, val)
+        }
+      }
+      return meta
+    },
+    setMeta (key: string, value: any) {
+      return this.setItem(key + '$', value)
+    },
+    removeMeta (key: string) {
+      return this.removeItem(key + '$')
+    },
+    // Keys
     async getKeys (base) {
       base = normalizeBase(base)
       const keyGroups = await Promise.all(getMounts(base).map(async (mount) => {
@@ -101,6 +131,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       const keys = keyGroups.flat()
       return base ? keys.filter(key => key.startsWith(base!)) : keys
     },
+    // Utils
     async clear (base) {
       base = normalizeBase(base)
       await Promise.all(getMounts(base).map(m => asyncCall(m.driver.clear)))
@@ -108,6 +139,11 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     async dispose () {
       await Promise.all(Object.values(ctx.mounts).map(driver => dispose(driver)))
     },
+    async watch (callback) {
+      await startWatch()
+      ctx.watchListeners.push(callback)
+    },
+    // Mount
     mount (base, driver) {
       base = normalizeBase(base)
       if (base && ctx.mounts[base]) {
@@ -134,10 +170,6 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       }
       ctx.mountpoints = ctx.mountpoints.filter(key => key !== base)
       delete ctx.mounts[base]
-    },
-    async watch (callback) {
-      await startWatch()
-      ctx.watchListeners.push(callback)
     }
   }
 

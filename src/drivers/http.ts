@@ -17,8 +17,18 @@ export default defineDriver((opts: HTTPOptions = {}) => {
         .catch(() => false)
     },
     async getItem (key) {
-      const value = $fetch(r(key))
+      const value = await $fetch(r(key))
       return value
+    },
+    async getMeta (key) {
+      const res = await $fetch.raw(r(key), { method: 'HEAD' })
+      let mtime = undefined
+      const _lastModified = res.headers.get('last-modified')
+      if (_lastModified) { mtime = new Date(_lastModified) }
+      return {
+        status: res.status,
+        mtime
+      }
     },
     async setItem(key, value) {
       await $fetch(r(key), { method: 'PUT', body: stringify(value) })

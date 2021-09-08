@@ -22,10 +22,16 @@ export function createStorageServer (storage: Storage, _opts: StorageServerOptio
       }
       return stringify(val)
     }
-    // HEAD => hasItem
+    // HEAD => hasItem + meta (mtime)
     if (req.method === 'HEAD') {
       const _hasItem = await storage.hasItem(req.url!)
       res.statusCode = _hasItem ? 200 : 404
+      if (_hasItem) {
+        const meta = await storage.getMeta(req.url!)
+        if (meta.mtime) {
+          res.setHeader('Last-Modified', new Date(meta.mtime).toUTCString())
+        }
+      }
       return ''
     }
     // PUT => setItem

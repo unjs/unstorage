@@ -1,4 +1,4 @@
-import { existsSync } from 'fs'
+import { existsSync, promises as fsp } from 'fs'
 import { resolve, relative, join } from 'path'
 import { FSWatcher, WatchOptions, watch } from 'chokidar'
 import { defineDriver } from './utils'
@@ -34,6 +34,11 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     },
     getItem (key) {
       return readFile(r(key))
+    },
+    async getMeta (key) {
+      const { atime, mtime, size } = await fsp.stat(r(key))
+        .catch(() => ({ atime: undefined, mtime: undefined, size: undefined }))
+      return { atime, mtime, size }
     },
     setItem (key, value) {
       return writeFile(r(key), value)

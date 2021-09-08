@@ -17,6 +17,11 @@ describe('drivers: http', () => {
     expect(await storage.getItem('http:foo')).toBe('bar')
     expect(await storage.hasItem('/http/foo')).toBe(true)
 
+    const date = new Date()
+    await storage.setMeta('/http/foo', { mtime: date })
+
+    expect(await storage.getMeta('/http/foo')).toMatchObject({ mtime: date, status: 200 })
+
     await close()
   })
 })

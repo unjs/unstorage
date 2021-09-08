@@ -1,6 +1,6 @@
 import { defineDriver } from './utils'
 import { stringify } from './utils'
-import { $fetch } from 'ohmyfetch/node'
+import { $fetch } from 'ohmyfetch'
 import { joinURL } from 'ufo'
 
 export interface HTTPOptions {

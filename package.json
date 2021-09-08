@@ -40,15 +40,15 @@
   },
   "dependencies": {
     "anymatch": "^3.1.1",
-    "chokidar": "^3.5.1",
+    "chokidar": "^3.5.2",
     "destr": "^1.1.0",
     "h3": "^0.2.10",
-    "ioredis": "^4.27.3",
+    "ioredis": "^4.27.9",
     "listhen": "^0.2.4",
     "mri": "^1.1.6",
-    "ohmyfetch": "^0.2.0",
-    "ufo": "^0.7.5",
-    "ws": "^7.4.5"
+    "ohmyfetch": "^0.3.1",
+    "ufo": "^0.7.9",
+    "ws": "^8.2.1"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "latest",

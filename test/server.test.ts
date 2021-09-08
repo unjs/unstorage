@@ -1,5 +1,5 @@
 import { listen } from 'listhen'
-import { $fetch } from 'ohmyfetch/node'
+import { $fetch } from 'ohmyfetch'
 import { createStorage } from '../src'
 import { createStorageServer } from '../src/server'
 

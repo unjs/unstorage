@@ -8,18 +8,18 @@
   "exports": {
     "./drivers/*": {
       "import": "./drivers/*.mjs",
-      "require": "./drivers/*.cjs"
+      "require": "./drivers/*.js"
     },
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.js"
     },
     "./server": {
       "import": "./server.mjs",
-      "require": "./server.cjs"
+      "require": "./server.js"
     }
   },
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [

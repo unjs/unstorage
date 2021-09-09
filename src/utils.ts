@@ -1,5 +1,5 @@
 import type { Storage } from './types'
-import { normalizeBase, normalizeKey } from './_utils'
+import { normalizeBase } from './_utils'
 
 const storageKeyProps: (keyof Storage)[] = [
   'hasItem',
@@ -23,7 +23,7 @@ export function prefixStorage (storage: Storage, base: string): Storage {
   const nsStorage: Storage = { ...storage }
   for (const prop of storageKeyProps) {
     // @ts-ignore Better types?
-    nsStorage[prop] = (key: string = '', ...args) => storage[prop](normalizeKey(base + key), ...args)
+    nsStorage[prop] = (key: string = '', ...args) => storage[prop](base + key, ...args)
   }
   return nsStorage
 }

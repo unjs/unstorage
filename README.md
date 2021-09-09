@@ -35,7 +35,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
 🚧 Overlay storage (copy-on-write) <br>
 🚧 Virtual `fs` interface <br>
 🚧 Cached storage <br>
-🚧 More drivers: MongoDB, S3 an IndexedDB<br>
+🚧 More drivers: MongoDB, S3 and IndexedDB<br>
 <br>
 
 **📚 Table of Contents**
@@ -116,7 +116,7 @@ await storage.getItem('foo:bar')
 
 ### `storage.setItem(key, value)`
 
-Add Update a value to the storage.
+Add/Update a value to the storage.
 
 If the value is not a string, it will be stringified.
 

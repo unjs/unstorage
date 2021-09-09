@@ -33,6 +33,17 @@ describe('utils', () => {
     const storage = createStorage()
     const pStorage = prefixStorage(storage, 'foo')
     await pStorage.setItem('x', 'bar')
+    await pStorage.setItem('y', 'baz')
     expect(await storage.getItem('foo:x')).toBe('bar')
+    expect(await pStorage.getKeys()).toStrictEqual(['foo:x', 'foo:y'])
+
+    // Higher order storage
+    const secondStorage = createStorage()
+    secondStorage.mount('/mnt', storage)
+    const mntStorage = prefixStorage(secondStorage, 'mnt')
+
+    expect(await mntStorage.getKeys()).toStrictEqual(['mnt:foo:x', 'mnt:foo:y'])
+    // Get keys from sub-storage
+    expect(await mntStorage.getKeys('foo')).toStrictEqual(['mnt:foo:x', 'mnt:foo:y'])
   })
 })

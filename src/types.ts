@@ -14,7 +14,7 @@ export interface Driver {
   setItem?: (key: string, value: string) => void | Promise<void>
   removeItem?: (key: string) => void | Promise<void>
   getMeta?: (key: string) => StorageMeta | Promise<StorageMeta>
-  getKeys: () => string[] | Promise<string[]>
+  getKeys: (base?: string) => string[] | Promise<string[]>
   clear?: () => void | Promise<void>
   dispose?: () => void | Promise<void>
   watch?: (callback: WatchCallback) => void | Promise<void>

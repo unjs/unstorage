@@ -39,8 +39,9 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
 
   const getMounts = (base: string) => {
     return ctx.mountpoints
-      .filter(mountpoint => base!.length < mountpoint.length || base!.startsWith(mountpoint))
+      .filter(mountpoint => mountpoint.startsWith(base) || base!.startsWith(mountpoint))
       .map(mountpoint => ({
+        relativeBase: base.length > mountpoint.length ? base!.substr(mountpoint.length) : undefined,
         mountpoint,
         driver: ctx.mounts[mountpoint]
       }))
@@ -131,7 +132,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     async getKeys (base) {
       base = normalizeBase(base)
       const keyGroups = await Promise.all(getMounts(base).map(async (mount) => {
-        const rawKeys = await asyncCall(mount.driver.getKeys)
+        const rawKeys = await asyncCall(mount.driver.getKeys, mount.relativeBase)
         return rawKeys.map(key => mount.mountpoint + normalizeKey(key))
       }))
       const keys = keyGroups.flat()

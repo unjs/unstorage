@@ -8,18 +8,18 @@
   "exports": {
     "./drivers/*": {
       "import": "./drivers/*.mjs",
-      "require": "./drivers/*.js"
+      "require": "./drivers/*.cjs"
     },
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs"
     },
     "./server": {
       "import": "./server.mjs",
-      "require": "./server.js"
+      "require": "./server.cjs"
     }
   },
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
@@ -42,11 +42,11 @@
     "anymatch": "^3.1.1",
     "chokidar": "^3.5.2",
     "destr": "^1.1.0",
-    "h3": "^0.2.10",
+    "h3": "^0.3.3",
     "ioredis": "^4.27.9",
     "listhen": "^0.2.4",
     "mri": "^1.1.6",
-    "ohmyfetch": "^0.3.1",
+    "ohmyfetch": "^0.4.2",
     "ufo": "^0.7.9",
     "ws": "^8.2.1"
   },
@@ -61,7 +61,7 @@
     "@vitejs/plugin-vue": "latest",
     "@vue/compiler-sfc": "latest",
     "doctoc": "latest",
-    "eslint": "latest",
+    "eslint": "^7",
     "jest": "latest",
     "jiti": "latest",
     "jsdom": "latest",

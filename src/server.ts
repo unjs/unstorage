@@ -12,7 +12,7 @@ export interface StorageServer {
 
 export function createStorageServer (storage: Storage, _opts: StorageServerOptions = {}): StorageServer {
   const app = createApp()
-  app.useAsync(async (req, res) => {
+  app.use(async (req, res) => {
     // GET => getItem
     if (req.method === 'GET') {
       const val = await storage.getItem(req.url!)

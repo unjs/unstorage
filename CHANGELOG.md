@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/unjs/unstorage/compare/v0.2.9...v0.3.0) (2021-10-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **pkg:** update depenencies and use explicit `cjs` extension
+
+### Features
+
+* **pkg:** update depenencies and use explicit `cjs` extension ([477aa26](https://github.com/unjs/unstorage/commit/477aa263d55cb20a3a95eaabd0bd2c30b25fe297))
+
 ### [0.2.9](https://github.com/unjs/unstorage/compare/v0.2.8...v0.2.9) (2021-10-06)
 
 

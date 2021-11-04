@@ -46,7 +46,7 @@
     "ioredis": "^4.27.9",
     "listhen": "^0.2.4",
     "mri": "^1.1.6",
-    "ohmyfetch": "^0.4.2",
+    "ohmyfetch": "^0.4.4",
     "ufo": "^0.7.9",
     "ws": "^8.2.1"
   },
@@ -61,7 +61,7 @@
     "@vitejs/plugin-vue": "latest",
     "@vue/compiler-sfc": "latest",
     "doctoc": "latest",
-    "eslint": "^7",
+    "eslint": "latest",
     "jest": "latest",
     "jiti": "latest",
     "jsdom": "latest",

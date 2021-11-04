@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.1](https://github.com/unjs/unstorage/compare/v0.3.0...v0.3.1) (2021-11-04)
+
+
+### Bug Fixes
+
+* **build:** use cjs extension for drivers ([#29](https://github.com/unjs/unstorage/issues/29)) ([e42cea2](https://github.com/unjs/unstorage/commit/e42cea28623b447a13880d26850e3be56b1df1c8))
+
 ## [0.3.0](https://github.com/unjs/unstorage/compare/v0.2.9...v0.3.0) (2021-10-22)
 
 

@@ -30,8 +30,7 @@ export default defineDriver((opts: KVOptions = { binding: '__STATIC_CONTENT' }) 
     async clear() {
       const keys = await this.getKeys()
       await Promise.all(keys.map(key => binding.delete(key)))
-    },
-    dispose() { },
+    }
   }
 })
 

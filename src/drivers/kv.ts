@@ -2,11 +2,13 @@ import { defineDriver } from './utils'
 import type { CloudflareWorkerKV } from 'types-cloudflare-worker'
 
 export interface KVOptions {
-  binding?: string
+  binding: string
 }
 
-export default defineDriver((opts: KVOptions = {}) => {
-  const binding = (globalThis as any)[opts.binding!] as CloudflareWorkerKV
+// https://developers.cloudflare.com/workers/runtime-apis/kv
+
+export default defineDriver((opts: KVOptions = { binding: '__STATIC_CONTENT' }) => {
+  const binding = getGlobalBinding(opts.binding)
 
   const getKeys = async () => {
     const kvList = await binding.list()
@@ -30,6 +32,14 @@ export default defineDriver((opts: KVOptions = {}) => {
       const keys = await getKeys()
       await Promise.all(keys.map(key => binding.delete(key)))
     },
-    dispose() {},
+    dispose() { },
   }
 })
+
+function getGlobalBinding(name: string): CloudflareWorkerKV {
+  const binding = (globalThis as any)[name]
+  if (!binding) {
+    throw new Error(`Cannot access Cloudflare KV binding ${name} from globalThis. Are you using driver in Cloudflare workers? Learn more how to assign bindings: https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings`)
+  }
+  return binding
+}

@@ -4392,10 +4392,10 @@ object.values@^1.1.5:
     define-properties "^1.1.3"
     es-abstract "^1.19.1"
 
-ohmyfetch@^0.4.4:
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/ohmyfetch/-/ohmyfetch-0.4.4.tgz#c25cd9835cbb0feea2870c7492cfbba883ec935c"
-  integrity sha512-X2dPtBEy3fglyXCTtS6ep8fpE/zq7duW0wv5IOpKz7KCg97rXuHf/HRUHghythcre5r5H1uZLuHaIrdM1SlW3w==
+ohmyfetch@^0.4.5:
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/ohmyfetch/-/ohmyfetch-0.4.5.tgz#662bc3f62293978d1f19c4930b8b58b1957b66f6"
+  integrity sha512-2d+c5nYKdLZKI93kfDQLA6+ZWsROu41Enwl/W9wnDIY1F4D0+J9CyKruV5gQiNqNwMAyHlxNsyl3nzdFfAJ41Q==
   dependencies:
     destr "^1.1.0"
     node-fetch "^3.0.0"

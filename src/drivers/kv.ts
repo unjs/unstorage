@@ -19,7 +19,7 @@ export default defineDriver((opts: KVOptions = { binding: '__STATIC_CONTENT' }) 
       return (await binding.get(key)) !== null
     },
     getItem(key) {
-      return binding.get(key, 'json')
+      return binding.get(key)
     },
     setItem(key, value) {
       binding.put(key, value)

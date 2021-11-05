@@ -68,6 +68,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`memory` (universal)](#memory-universal)
   - [`http` (universal)](#http-universal)
   - [`redis`](#redis)
+  - [`kv`](#kv)
 - [Making custom drivers](#making-custom-drivers)
 - [Contribution](#contribution)
 - [License](#license)
@@ -410,6 +411,28 @@ const storage = createStorage({
 See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 
 `lazyConnect` option is enabled by default so that connection happens on first redis operation.
+
+
+### `kv`
+
+Store data in a Cloudflare KV Store
+
+```js
+import { createStorage } from 'unstorage'
+import kvDriver from 'unstorage/drivers/kv'
+
+const storage = createStorage({
+  driver: kvDriver({
+    binding: 'CACHE'
+  })
+})
+```
+
+**Options:**
+
+- `binding`: Name of KV namespace binding
+
+See [KV](https://developers.cloudflare.com/workers/runtime-apis/kv) for more information about KV store.
 
 ## Making custom drivers
 

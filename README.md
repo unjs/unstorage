@@ -417,32 +417,35 @@ See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-h
 
 Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv).
 
+You need to create and assign a KV. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
+
 ```js
 import { createStorage } from 'unstorage'
 import cloudflareKVDriver from 'unstorage/drivers/cloudflare-kv'
 
 // Using binding name to be picked from globalThis
 const storage = createStorage({
-  driver: cloudflareKVDriver({ binding: 'CACHE' })
+  driver: cloudflareKVDriver({ binding: 'STORAGE' })
 })
 
 // Directly setting binding
 const storage = createStorage({
-  driver: cloudflareKVDriver({ binding: globalThis.CACHE })
+  driver: cloudflareKVDriver({ binding: globalThis.STORAGE })
 })
 
 // Using from Durable Objects and Workers using Modules Syntax
 const storage = createStorage({
-  driver: cloudflareKVDriver({ binding: this.env.CACHE })
+  driver: cloudflareKVDriver({ binding: this.env.STORAGE })
 })
 
-// Using outside of CloudflareWorkers (like Node.js)
+// Using outside of Cloudflare Workers (like Node.js)
 // Not supported Yet!
 ```
 
 **Options:**
 
-- `binding`: KV binding or name of namespace. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information about how to assign a binding. Default is `STORAGE`.
+- `binding`: KV binding or name of namespace. Default is `STORAGE`.
+
 
 ## Making custom drivers
 

@@ -39,7 +39,12 @@ export default defineDriver((opts: KVOptions = { binding: '__STATIC_CONTENT' }) 
 function getGlobalBinding(name: string): CloudflareWorkerKV {
   const binding = (globalThis as any)[name]
   if (!binding) {
-    throw new Error(`Cannot access Cloudflare KV binding ${name} from globalThis. Are you using driver in Cloudflare workers? Learn more how to assign bindings: https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings`)
+    throw new Error(`Cannot access Cloudflare KV binding '${name}' from globalThis. Are you using driver in Cloudflare workers? Learn more how to assign bindings: https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings`)
+  }
+  for (const key of ['get', 'put', 'delete']) {
+    if (!binding[key]) {
+      throw new Error(`Invalid Cloudflare KV binding '${name}': '${key}' key is missing`)
+    }
   }
   return binding
 }

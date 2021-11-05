@@ -415,7 +415,7 @@ See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-h
 
 ### `kv`
 
-Store data in a Cloudflare KV Store
+Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv).
 
 ```js
 import { createStorage } from 'unstorage'
@@ -428,11 +428,16 @@ const storage = createStorage({
 })
 ```
 
+**Current limitations:**
+
+- Can be only used in Cloudflare Workers (Cannot be used in Modules, Durable Objects and Node.js)
+- Native meta and expiring keys are not supported
+
 **Options:**
 
 - `binding`: Name of KV namespace binding
 
-See [KV](https://developers.cloudflare.com/workers/runtime-apis/kv) for more information about KV store.
+See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information about how to assign a binding.
 
 ## Making custom drivers
 

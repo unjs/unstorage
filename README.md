@@ -68,6 +68,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`memory` (universal)](#memory-universal)
   - [`http` (universal)](#http-universal)
   - [`redis`](#redis)
+  - [`cloudflare-kv`](#cloudflare-kv)
 - [Making custom drivers](#making-custom-drivers)
 - [Contribution](#contribution)
 - [License](#license)
@@ -410,6 +411,41 @@ const storage = createStorage({
 See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 
 `lazyConnect` option is enabled by default so that connection happens on first redis operation.
+
+
+### `cloudflare-kv`
+
+Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv).
+
+You need to create and assign a KV. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
+
+```js
+import { createStorage } from 'unstorage'
+import cloudflareKVDriver from 'unstorage/drivers/cloudflare-kv'
+
+// Using binding name to be picked from globalThis
+const storage = createStorage({
+  driver: cloudflareKVDriver({ binding: 'STORAGE' })
+})
+
+// Directly setting binding
+const storage = createStorage({
+  driver: cloudflareKVDriver({ binding: globalThis.STORAGE })
+})
+
+// Using from Durable Objects and Workers using Modules Syntax
+const storage = createStorage({
+  driver: cloudflareKVDriver({ binding: this.env.STORAGE })
+})
+
+// Using outside of Cloudflare Workers (like Node.js)
+// Not supported Yet!
+```
+
+**Options:**
+
+- `binding`: KV binding or name of namespace. Default is `STORAGE`.
+
 
 ## Making custom drivers
 

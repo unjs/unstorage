@@ -69,6 +69,7 @@
     "monaco-editor": "latest",
     "standard-version": "latest",
     "ts-jest": "latest",
+    "types-cloudflare-worker": "^1.2.0",
     "typescript": "latest",
     "unbuild": "latest",
     "vite": "latest",

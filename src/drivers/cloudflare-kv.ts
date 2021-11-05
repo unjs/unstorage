@@ -10,6 +10,11 @@ export interface KVOptions {
 export default defineDriver((opts: KVOptions = {}) => {
   const binding = getBinding(opts.binding)
 
+  async function getKeys(base?: string) {
+    const kvList = await binding.list(base)
+    return kvList.keys.map(key => key.name)
+  }
+
   return {
     async hasItem(key) {
       return (await binding.get(key)) !== null
@@ -23,12 +28,10 @@ export default defineDriver((opts: KVOptions = {}) => {
     removeItem(key) {
       return binding.delete(key)
     },
-    async getKeys(base) {
-      const kvList = await binding.list(base)
-      return kvList.keys.map(key => key.name)
-    },
+    // TODO: use this.getKeys once core is fixed
+    getKeys,
     async clear() {
-      const keys = await this.getKeys()
+      const keys = await getKeys()
       await Promise.all(keys.map(key => binding.delete(key)))
     }
   }

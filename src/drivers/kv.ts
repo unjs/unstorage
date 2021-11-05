@@ -18,10 +18,10 @@ export default defineDriver((opts: KVOptions = { binding: '__STATIC_CONTENT' }) 
       return binding.get(key)
     },
     setItem(key, value) {
-      binding.put(key, value)
+      return binding.put(key, value)
     },
     removeItem(key) {
-      binding.delete(key)
+      return binding.delete(key)
     },
     async getKeys(base) {
       const kvList = await binding.list(base)

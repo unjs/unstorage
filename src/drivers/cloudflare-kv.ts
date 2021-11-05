@@ -2,13 +2,13 @@ import { defineDriver } from './utils'
 import type { CloudflareWorkerKV } from 'types-cloudflare-worker'
 
 export interface KVOptions {
-  binding: string
+  binding?: string | CloudflareWorkerKV
 }
 
 // https://developers.cloudflare.com/workers/runtime-apis/kv
 
-export default defineDriver((opts: KVOptions = { binding: '__STATIC_CONTENT' }) => {
-  const binding = getGlobalBinding(opts.binding)
+export default defineDriver((opts: KVOptions = {}) => {
+  const binding = getBinding(opts.binding)
 
   return {
     async hasItem(key) {
@@ -34,15 +34,24 @@ export default defineDriver((opts: KVOptions = { binding: '__STATIC_CONTENT' }) 
   }
 })
 
-function getGlobalBinding(name: string): CloudflareWorkerKV {
-  const binding = (globalThis as any)[name]
-  if (!binding) {
-    throw new Error(`Cannot access Cloudflare KV binding '${name}' from globalThis. Are you using driver in Cloudflare workers? Learn more how to assign bindings: https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings`)
+
+function getBinding(binding: CloudflareWorkerKV | string = 'STORAGE'): CloudflareWorkerKV {
+  let bindingName = '[binding]'
+
+  if (typeof binding === 'string') {
+    bindingName = binding
+    binding = (globalThis as any)[bindingName] as CloudflareWorkerKV
   }
+
+  if (!binding) {
+    throw new Error(`Invalid Cloudflare KV binding '${bindingName}': ${binding}`)
+  }
+
   for (const key of ['get', 'put', 'delete']) {
-    if (!binding[key]) {
-      throw new Error(`Invalid Cloudflare KV binding '${name}': '${key}' key is missing`)
+    if (!(key in binding)) {
+      throw new Error(`Invalid Cloudflare KV binding '${bindingName}': '${key}' key is missing`)
     }
   }
+
   return binding
 }

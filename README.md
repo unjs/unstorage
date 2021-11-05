@@ -421,23 +421,28 @@ Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-
 import { createStorage } from 'unstorage'
 import cloudflareKVDriver from 'unstorage/drivers/cloudflare-kv'
 
+// Using binding name to be picked from globalThis
 const storage = createStorage({
-  driver: cloudflareKVDriver({
-    binding: 'CACHE'
-  })
+  driver: cloudflareKVDriver({ binding: 'CACHE' })
 })
+
+// Directly setting binding
+const storage = createStorage({
+  driver: cloudflareKVDriver({ binding: globalThis.CACHE })
+})
+
+// Using from Durable Objects and Workers using Modules Syntax
+const storage = createStorage({
+  driver: cloudflareKVDriver({ binding: this.env.CACHE })
+})
+
+// Using outside of CloudflareWorkers (like Node.js)
+// Not supported Yet!
 ```
-
-**Current limitations:**
-
-- Can be only used in Cloudflare Workers (Cannot be used in Modules, Durable Objects and Node.js)
-- Native meta and expiring keys are not supported
 
 **Options:**
 
-- `binding`: Name of KV namespace binding
-
-See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information about how to assign a binding.
+- `binding`: KV binding or name of namespace. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information about how to assign a binding. Default is `STORAGE`.
 
 ## Making custom drivers
 

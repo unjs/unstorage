@@ -10,10 +10,6 @@ export interface KVOptions {
 export default defineDriver((opts: KVOptions = { binding: '__STATIC_CONTENT' }) => {
   const binding = getGlobalBinding(opts.binding)
 
-  const getKeys = async () => {
-    const kvList = await binding.list()
-    return kvList.keys.map(key => key.name)
-  }
   return {
     async hasItem(key) {
       return (await binding.get(key)) !== null
@@ -27,9 +23,12 @@ export default defineDriver((opts: KVOptions = { binding: '__STATIC_CONTENT' }) 
     removeItem(key) {
       binding.delete(key)
     },
-    getKeys,
+    async getKeys(base) {
+      const kvList = await binding.list(base)
+      return kvList.keys.map(key => key.name)
+    },
     async clear() {
-      const keys = await getKeys()
+      const keys = await this.getKeys()
       await Promise.all(keys.map(key => binding.delete(key)))
     },
     dispose() { },

@@ -25,5 +25,12 @@ export function prefixStorage (storage: Storage, base: string): Storage {
     // @ts-ignore Better types?
     nsStorage[prop] = (key: string = '', ...args) => storage[prop](base + key, ...args)
   }
+  const prefixRegex = new RegExp(`^${base}`)
+  nsStorage.getKeys = (key: string = '', ...args) =>
+    storage
+      .getKeys(base + key, ...args)
+      // Remove Prefix
+      .then(keys => keys.map(key => key.replace(prefixRegex, '')))
+
   return nsStorage
 }

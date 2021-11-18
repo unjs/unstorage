@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.3](https://github.com/unjs/unstorage/compare/v0.3.2...v0.3.3) (2021-11-18)
+
+
+### Bug Fixes
+
+* **prefixStorage:** strip keys ([#34](https://github.com/unjs/unstorage/issues/34)) ([644f1a9](https://github.com/unjs/unstorage/commit/644f1a9bd8dc1bc99568f0423e2b697502126989))
+
 ### [0.3.2](https://github.com/unjs/unstorage/compare/v0.3.1...v0.3.2) (2021-11-05)
 
 

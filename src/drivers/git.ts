@@ -22,8 +22,16 @@ export default defineDriver((opts: DriverOptions = {}) => {
     noTags: true,
     depth: 1
   }
-  let initiated = false
-  const clone = async () => git.clone(gitOpts)
+
+  let isInitialized = false
+  let initialTask: Promise<any>
+  const ensureInitialized = async () => {
+    if (!isInitialized) {
+      if (!initialTask) initialTask = git.clone(gitOpts)
+      await initialTask
+      isInitialized = true
+    }
+  }
   
   const resolve = (...path: string[]) => join(gitOpts.dir, ...path)
   
@@ -32,48 +40,34 @@ export default defineDriver((opts: DriverOptions = {}) => {
   return {
     
     async hasItem (key) {
-      if (!initiated) {
-        await clone()
-        initiated = true
-      }
+      await ensureInitialized()
+
       return existsSync(r(key))
     },
     async getItem (key) {
-      if (!initiated) {
-        await clone()
-        initiated = true
-      }
+      await ensureInitialized()
+
       return readFile(r(key))
     },
     async setItem (key, value) {
-      if (!initiated) {
-        await clone()
-        initiated = true
-      }
+      await ensureInitialized()
       
       return writeFile(r(key), value)
     },
     async removeItem (key) { 
-      if (!initiated) {
-        await clone()
-        initiated = true
-      }
+      await ensureInitialized()
+
       return unlink(r(key))
     },
     async getMeta (key) {
-      if (!initiated) {
-        await clone()
-        initiated = true
-      }
+      await ensureInitialized()
+
       const { atime, mtime, size } = await fsp.stat(r(key))
         .catch(() => ({ atime: undefined, mtime: undefined, size: undefined }))
       return { atime, mtime, size: size as number }
     },
     async getKeys () {
-      if (!initiated) {
-        await clone()
-        initiated = true
-      }
+      await ensureInitialized()
       
       return readdirRecursive(r('.'), () => false)
     },

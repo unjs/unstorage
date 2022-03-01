@@ -1,6 +1,6 @@
 import fs, { existsSync, promises as fsp } from 'fs'
 import git from 'isomorphic-git'
-import http from 'isomorphic-git/http/node'
+import http from 'isomorphic-git/http/web'
 import { defineDriver } from '..'
 import { join } from 'path'
 import { readdirRecursive, rmRecursive, writeFile, readFile, unlink } from './utils/node-fs'

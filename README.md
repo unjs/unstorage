@@ -69,6 +69,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`http` (universal)](#http-universal)
   - [`redis`](#redis)
   - [`cloudflare-kv`](#cloudflare-kv)
+  - [`git`](#git)
 - [Making custom drivers](#making-custom-drivers)
 - [Contribution](#contribution)
 - [License](#license)
@@ -446,6 +447,33 @@ const storage = createStorage({
 
 - `binding`: KV binding or name of namespace. Default is `STORAGE`.
 
+### `git`
+
+Read data from a git repository
+
+```js
+import { createStorage } from 'unstorage'
+import gitDriver from 'unstorage/drivers/git'
+
+// Using repository url
+const storage = createStorage({
+  driver: gitDriver({ url: 'https://github.com/unjs/unstorage' })
+})
+
+// Using different branch
+const storage = createStorage({
+  driver: gitDriver({ url: 'https://github.com/unjs/unstorage', ref: 'my-branch' })
+})
+
+```
+
+**Options:**
+
+- `url`: The URL of the remote repository
+- `ref`: Which branch to checkout. By default this is the designated "main branch" of the repository.
+- `path`: Which path inside repository should be used as storage root.
+- `auth.username`: Username for authorizing private repository. 
+- `auth.password`: Password for authorizing private repository. 
 
 ## Making custom drivers
 

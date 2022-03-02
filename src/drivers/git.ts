@@ -9,6 +9,10 @@ interface DriverOptions {
   url?: string
   ref?: string
   path?: string
+  auth?: {
+    username: string
+    password: string
+  }
 }
 
 export default defineDriver((opts: DriverOptions = {}) => {
@@ -20,7 +24,8 @@ export default defineDriver((opts: DriverOptions = {}) => {
     ref: opts.ref,
     singleBranch: true,
     noTags: true,
-    depth: 1
+    depth: 1,
+    onAuth: () => opts.auth || { cancel: true }
   }
 
   let isInitialized = false

@@ -44,6 +44,7 @@
     "destr": "^1.1.0",
     "h3": "^0.3.3",
     "ioredis": "^4.27.9",
+    "isomorphic-git": "^1.12.1",
     "listhen": "^0.2.4",
     "mri": "^1.1.6",
     "ohmyfetch": "^0.4.5",

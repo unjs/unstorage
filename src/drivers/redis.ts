@@ -1,8 +1,7 @@
 import { defineDriver } from './utils'
+import Redis, { RedisOptions as _RedisOptions } from 'ioredis'
 
-import Redis from 'ioredis'
-
-export interface RedisOptions extends Redis.RedisOptions {
+export interface RedisOptions extends _RedisOptions {
   base: string
   url: string
 }

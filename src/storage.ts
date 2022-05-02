@@ -26,7 +26,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     for (const base of ctx.mountpoints) {
       if (key.startsWith(base)) {
         return {
-          relativeKey: key.substr(base.length),
+          relativeKey: key.substring(base.length),
           driver: ctx.mounts[base]
         }
       }
@@ -41,7 +41,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     return ctx.mountpoints
       .filter(mountpoint => mountpoint.startsWith(base) || base!.startsWith(mountpoint))
       .map(mountpoint => ({
-        relativeBase: base.length > mountpoint.length ? base!.substr(mountpoint.length) : undefined,
+        relativeBase: base.length > mountpoint.length ? base!.substring(mountpoint.length) : undefined,
         mountpoint,
         driver: ctx.mounts[mountpoint]
       }))
@@ -131,14 +131,23 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     // Keys
     async getKeys (base) {
       base = normalizeBase(base)
-      const keyGroups = await Promise.all(getMounts(base).map(async (mount) => {
+      const mounts = getMounts(base)
+      let maskedMounts = []
+      const allKeys = []
+      for (const mount of mounts) {
         const rawKeys = await asyncCall(mount.driver.getKeys, mount.relativeBase)
-        return rawKeys.map(key => mount.mountpoint + normalizeKey(key))
-      }))
-      const keys = keyGroups.flat()
+        const keys = rawKeys
+          .map(key => mount.mountpoint + normalizeKey(key))
+          .filter(key => !maskedMounts.find(p => key.startsWith(p)))
+        allKeys.push(...keys)
+
+        // When /mnt/foo is processed, any key in /mnt with /mnt/foo prefix should be masked
+        // Using filter to improve performance. /mnt mask already covers /mnt/foo
+        maskedMounts = [mount.mountpoint].concat(maskedMounts.filter(p => !p.startsWith(mount.mountpoint)))
+      }
       return base
-        ? keys.filter(key => key.startsWith(base!) && !key.endsWith('$'))
-        : keys.filter(key => !key.endsWith('$'))
+        ? allKeys.filter(key => key.startsWith(base!) && !key.endsWith('$'))
+        : allKeys.filter(key => !key.endsWith('$'))
     },
     // Utils
     async clear (base) {

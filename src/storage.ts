@@ -37,9 +37,9 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     }
   }
 
-  const getMounts = (base: string) => {
+  const getMounts = (base: string, includeParent: boolean) => {
     return ctx.mountpoints
-      .filter(mountpoint => mountpoint.startsWith(base) || base!.startsWith(mountpoint))
+      .filter(mountpoint => (mountpoint.startsWith(base)) || (includeParent && base!.startsWith(mountpoint)))
       .map(mountpoint => ({
         relativeBase: base.length > mountpoint.length ? base!.substring(mountpoint.length) : undefined,
         mountpoint,
@@ -131,7 +131,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     // Keys
     async getKeys (base) {
       base = normalizeBase(base)
-      const mounts = getMounts(base)
+      const mounts = getMounts(base, true)
       let maskedMounts = []
       const allKeys = []
       for (const mount of mounts) {
@@ -152,7 +152,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     // Utils
     async clear (base) {
       base = normalizeBase(base)
-      await Promise.all(getMounts(base).map(async (m) => {
+      await Promise.all(getMounts(base, false).map(async (m) => {
         if (m.driver.clear) {
           return asyncCall(m.driver.clear)
         }

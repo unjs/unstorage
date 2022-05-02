@@ -56,6 +56,7 @@ describe('storage', () => {
       ]
     `)
 
+    await storage.clear('/mnt')
     await storage.unmount('/mnt')
     expect(await storage.getKeys()).toMatchObject(initialKeys)
     expect(await storage.getItem('/mnt/test.txt')).toBe('v1')

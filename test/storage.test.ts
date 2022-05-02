@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest'
 import { createStorage, snapshot, restoreSnapshot, prefixStorage } from '../src'
 import memory from '../src/drivers/memory'
 
@@ -20,7 +21,7 @@ describe('storage', () => {
   })
 
   it('watch', async () => {
-    const onChange = jest.fn()
+    const onChange = vi.fn()
     const storage = createStorage().mount('/mnt', memory())
     await storage.watch(onChange)
     await restoreSnapshot(storage, data, 'mnt')

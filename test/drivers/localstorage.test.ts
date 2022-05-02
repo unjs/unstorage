@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest'
 import driver from '../../src/drivers/localstorage'
 import { testDriver } from './utils'
 import { JSDOM } from 'jsdom'
@@ -15,7 +16,7 @@ describe('drivers: localstorage', () => {
         expect(jsdom.window.localStorage.getItem('s1:a')).toBe('test_data')
       })
       it('watch localstorage', async () => {
-        const watcher = jest.fn()
+        const watcher = vi.fn()
         await ctx.storage.watch(watcher)
 
         // Emulate

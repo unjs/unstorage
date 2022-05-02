@@ -29,14 +29,14 @@
   ],
   "scripts": {
     "build": "unbuild",
-    "dev": "jest --watch",
     "demo": "vite demo",
-    "lint": "eslint --ext .ts .",
-    "prepack": "yarn build",
-    "release": "yarn test && standard-version && git push --follow-tags && npm publish",
-    "test": "yarn lint",
+    "dev": "vitest",
     "doctoc": "doctoc README.md --notitle --maxlevel 3",
-    "unstorage": "yarn jiti src/cli"
+    "lint": "eslint --ext .ts .",
+    "prepack": "pnpm build",
+    "release": "pnpm test && standard-version && git push --follow-tags && pnpm publish",
+    "test": "pnpm lint && vitest run",
+    "unstorage": "pnpm jiti src/cli"
   },
   "dependencies": {
     "anymatch": "^3.1.2",
@@ -53,26 +53,26 @@
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "latest",
     "@types/ioredis": "latest",
-    "@types/jest": "latest",
     "@types/jsdom": "latest",
     "@types/mri": "latest",
     "@types/node": "latest",
     "@types/ws": "latest",
     "@vitejs/plugin-vue": "latest",
     "@vue/compiler-sfc": "latest",
+    "c8": "^7.11.2",
     "doctoc": "latest",
     "eslint": "latest",
-    "jest": "latest",
     "jiti": "latest",
     "jsdom": "latest",
     "mkdist": "latest",
     "monaco-editor": "latest",
     "standard-version": "latest",
-    "ts-jest": "latest",
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "latest",
     "unbuild": "latest",
     "vite": "latest",
+    "vitest": "^0.10.0",
     "vue": "^3.2.33"
-  }
+  },
+  "packageManager": "pnpm@6.32.3"
 }

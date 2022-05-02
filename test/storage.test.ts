@@ -1,4 +1,3 @@
-import exp from 'constants'
 import { describe, it, expect, vi } from 'vitest'
 import { createStorage, snapshot, restoreSnapshot, prefixStorage } from '../src'
 import memory from '../src/drivers/memory'

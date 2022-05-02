@@ -1,3 +1,4 @@
+import exp from 'constants'
 import { describe, it, expect, vi } from 'vitest'
 import { createStorage, snapshot, restoreSnapshot, prefixStorage } from '../src'
 import memory from '../src/drivers/memory'
@@ -27,7 +28,29 @@ describe('storage', () => {
     await restoreSnapshot(storage, data, 'mnt')
     expect(onChange).toHaveBeenCalledWith('update', 'mnt:data:foo')
   })
+
+  it('mount overides', async () => {
+    const storage = createStorage()
+    const subStorage = memory()
+
+    await storage.setItem('/mnt/test.txt', 'v1')
+    await storage.setItem('/mnt/test.base.txt', 'v1')
+
+    storage.mount('/mnt', subStorage)
+    await storage.setItem('/mnt/test.txt', 'v2')
+
+    expect(await storage.getItem('/mnt/test.txt')).toBe('v2')
+
+    expect(await storage.getKeys()).toMatchInlineSnapshot(`
+      [
+        "mnt:test.txt",
+        "mnt:test.txt",
+        "mnt:test.base.txt",
+      ]
+    `)
+  })
 })
+
 
 describe('utils', () => {
   it('prefixStorage', async () => {

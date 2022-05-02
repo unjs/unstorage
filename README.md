@@ -66,6 +66,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`fs` (node)](#fs-node)
   - [`localStorage` (browser)](#localstorage-browser)
   - [`memory` (universal)](#memory-universal)
+  - [`overlay` (universal)](#overlay-universal)
   - [`http` (universal)](#http-universal)
   - [`redis`](#redis)
   - [`cloudflare-kv`](#cloudflare-kv)

@@ -62,7 +62,6 @@ describe('storage', () => {
   })
 })
 
-
 describe('utils', () => {
   it('prefixStorage', async () => {
     const storage = createStorage()

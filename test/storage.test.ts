@@ -27,6 +27,40 @@ describe('storage', () => {
     await restoreSnapshot(storage, data, 'mnt')
     expect(onChange).toHaveBeenCalledWith('update', 'mnt:data:foo')
   })
+
+  it('mount overides', async () => {
+    const mainStorage = memory()
+    const storage = createStorage({ driver: mainStorage })
+    await storage.setItem('/mnt/test.txt', 'v1')
+    await storage.setItem('/mnt/test.base.txt', 'v1')
+
+    const initialKeys = await storage.getKeys()
+    expect(initialKeys).toMatchInlineSnapshot(`
+      [
+        "mnt:test.txt",
+        "mnt:test.base.txt",
+      ]
+    `)
+
+    storage.mount('/mnt', memory())
+    await storage.setItem('/mnt/test.txt', 'v2')
+
+    await storage.setItem('/mnt/foo/test.txt', 'v3')
+    storage.mount('/mnt/foo', memory())
+    expect(await storage.getItem('/mnt/foo/test.txt')).toBe(null)
+
+    expect(await storage.getItem('/mnt/test.txt')).toBe('v2')
+    expect(await storage.getKeys()).toMatchInlineSnapshot(`
+      [
+        "mnt:test.txt",
+      ]
+    `)
+
+    await storage.clear('/mnt')
+    await storage.unmount('/mnt')
+    expect(await storage.getKeys()).toMatchObject(initialKeys)
+    expect(await storage.getItem('/mnt/test.txt')).toBe('v1')
+  })
 })
 
 describe('utils', () => {

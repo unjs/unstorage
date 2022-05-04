@@ -24,5 +24,3 @@ export function isPrimitive (arg: any) {
 export function stringify (arg: any) {
   return isPrimitive(arg) ? (arg + '') : JSON.stringify(arg)
 }
-
-

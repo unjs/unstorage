@@ -1,7 +1,8 @@
 import destr from 'destr'
 import type { Storage, Driver, WatchCallback, StorageValue } from './types'
 import memory from './drivers/memory'
-import { normalizeKey, normalizeBase, asyncCall, stringify } from './_utils'
+import { asyncCall, stringify } from './_utils'
+import { normalizeKey, normalizeBaseKey } from './utils'
 
 interface StorageCTX {
   mounts: Record<string, Driver>
@@ -130,7 +131,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     },
     // Keys
     async getKeys (base) {
-      base = normalizeBase(base)
+      base = normalizeBaseKey(base)
       const mounts = getMounts(base, true)
       let maskedMounts = []
       const allKeys = []
@@ -151,7 +152,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     },
     // Utils
     async clear (base) {
-      base = normalizeBase(base)
+      base = normalizeBaseKey(base)
       await Promise.all(getMounts(base, false).map(async (m) => {
         if (m.driver.clear) {
           return asyncCall(m.driver.clear)
@@ -173,7 +174,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     },
     // Mount
     mount (base, driver) {
-      base = normalizeBase(base)
+      base = normalizeBaseKey(base)
       if (base && ctx.mounts[base]) {
         throw new Error(`already mounted at ${base}`)
       }
@@ -189,7 +190,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       return storage
     },
     async unmount (base: string, _dispose = true) {
-      base = normalizeBase(base)
+      base = normalizeBaseKey(base)
       if (!base /* root */ || !ctx.mounts[base]) {
         return
       }
@@ -207,7 +208,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
 export type Snapshot<T=string> = Record<string, T>
 
 export async function snapshot (storage: Storage, base: string): Promise<Snapshot<string>> {
-  base = normalizeBase(base)
+  base = normalizeBaseKey(base)
   const keys = await storage.getKeys(base)
   const snapshot: any = {}
   await Promise.all(keys.map(async (key) => {
@@ -217,7 +218,7 @@ export async function snapshot (storage: Storage, base: string): Promise<Snapsho
 }
 
 export async function restoreSnapshot (driver: Storage, snapshot: Snapshot<StorageValue>, base: string = '') {
-  base = normalizeBase(base)
+  base = normalizeBaseKey(base)
   await Promise.all(Object.entries(snapshot).map(e => driver.setItem(base + e[0], e[1])))
 }
 

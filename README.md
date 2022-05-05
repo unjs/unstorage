@@ -31,8 +31,8 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
 ✔️ Driver agnostic watcher <br>
 ✔️ HTTP Storage server (cli and programmatic) <br>
 ✔️ Namespaced storage <br>
+✔️ Overlay storage (copy-on-write) <br>
 <br>
-🚧 Overlay storage (copy-on-write) <br>
 🚧 Virtual `fs` interface <br>
 🚧 Cached storage <br>
 🚧 More drivers: MongoDB, S3 and IndexedDB<br>
@@ -374,7 +374,7 @@ In the example below, we create an in-memory overlay on top of fs. No changes wi
 
 ```js
 import { createStorage } from 'unstorage'
-import overlay from 'unstorage/drivers/memory'
+import overlay from 'unstorage/drivers/overlay'
 import memory from 'unstorage/drivers/memory'
 import fs from 'unstorage/drivers/fs'
 

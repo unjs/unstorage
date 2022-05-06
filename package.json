@@ -47,7 +47,7 @@
     "listhen": "^0.2.11",
     "mri": "^1.2.0",
     "ohmyfetch": "^0.4.16",
-    "ufo": "^0.8.3",
+    "ufo": "^0.8.4",
     "ws": "^8.6.0"
   },
   "devDependencies": {
@@ -71,7 +71,7 @@
     "typescript": "latest",
     "unbuild": "latest",
     "vite": "latest",
-    "vitest": "^0.10.4",
+    "vitest": "^0.10.5",
     "vue": "^3.2.33"
   },
   "packageManager": "pnpm@7.0.0"

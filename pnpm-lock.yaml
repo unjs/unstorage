@@ -27,10 +27,10 @@ specifiers:
   standard-version: latest
   types-cloudflare-worker: ^1.2.0
   typescript: latest
-  ufo: ^0.8.3
+  ufo: ^0.8.4
   unbuild: latest
   vite: latest
-  vitest: ^0.10.4
+  vitest: ^0.10.5
   vue: ^3.2.33
   ws: ^8.6.0
 
@@ -43,7 +43,7 @@ dependencies:
   listhen: 0.2.11
   mri: 1.2.0
   ohmyfetch: 0.4.16
-  ufo: 0.8.3
+  ufo: 0.8.4
   ws: 8.6.0
 
 devDependencies:
@@ -67,7 +67,7 @@ devDependencies:
   typescript: 4.6.4
   unbuild: 0.7.4
   vite: 2.9.8
-  vitest: 0.10.4_c8@7.11.2+jsdom@19.0.0
+  vitest: 0.10.5_c8@7.11.2+jsdom@19.0.0
   vue: 3.2.33
 
 packages:
@@ -2778,7 +2778,7 @@ packages:
       cookie-es: 0.5.0
       destr: 1.1.1
       radix3: 0.1.2
-      ufo: 0.8.3
+      ufo: 0.8.4
     dev: false
 
   /handlebars/4.7.7:
@@ -3884,7 +3884,7 @@ packages:
     dependencies:
       destr: 1.1.1
       node-fetch: 3.2.4
-      ufo: 0.8.3
+      ufo: 0.8.4
       undici: 5.1.1
     dev: false
 
@@ -4776,8 +4776,8 @@ packages:
     hasBin: true
     dev: true
 
-  /ufo/0.8.3:
-    resolution: {integrity: sha512-AIkk06G21y/P+NCatfU+1qldCmI0XCszZLn8AkuKotffF3eqCvlce0KuwM7ZemLE/my0GSYADOAeM5zDYWMB+A==}
+  /ufo/0.8.4:
+    resolution: {integrity: sha512-/+BmBDe8GvlB2nIflWasLLAInjYG0bC9HRnfEpNi4sw77J2AJNnEVnTDReVrehoh825+Q/evF3THXTAweyam2g==}
     dev: false
 
   /uglify-js/3.15.4:
@@ -4964,8 +4964,8 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /vitest/0.10.4_c8@7.11.2+jsdom@19.0.0:
-    resolution: {integrity: sha512-FJ2av2PVozmyz9nqHRoC3H8j2z0OQXj8P8jS5oyMY9mfPWB06GS5k/1Ot++TkVBLQRHZCcVzjbK4BO7zqAJZGQ==}
+  /vitest/0.10.5_c8@7.11.2+jsdom@19.0.0:
+    resolution: {integrity: sha512-4qXdNbHwAd9YcsztJoVMWUQGcMATVlY9Xd95I3KQ2JJwDLTL97f/jgfGRotqptvNxdlmme5TBY0Gv+l6+JSYvA==}
     engines: {node: '>=v14.16.0'}
     hasBin: true
     peerDependencies:

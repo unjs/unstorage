@@ -70,6 +70,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`http` (universal)](#http-universal)
   - [`redis`](#redis)
   - [`cloudflare-kv`](#cloudflare-kv)
+  - [`cloudflare-kv-http` (universal)](#cloudflare-kv-http-universal)
 - [Making custom drivers](#making-custom-drivers)
 - [Contribution](#contribution)
 - [License](#license)

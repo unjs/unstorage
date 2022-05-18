@@ -66,6 +66,7 @@
     "jsdom": "latest",
     "mkdist": "latest",
     "monaco-editor": "latest",
+    "msw": "^0.40.0",
     "standard-version": "latest",
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "latest",

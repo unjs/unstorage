@@ -36,6 +36,26 @@ export interface KVHTTPOptions {
   userServiceKey?: string
 }
 
+type CloudflareAuthorizationHeaders =
+  | {
+      'X-Auth-Email': string
+      'X-Auth-Key': string
+      'X-Auth-User-Service-Key'?: string
+      Authorization?: `Bearer ${string}`
+    }
+  | {
+      'X-Auth-Email'?: string
+      'X-Auth-Key'?: string
+      'X-Auth-User-Service-Key': string
+      Authorization?: `Bearer ${string}`
+    }
+  | {
+      'X-Auth-Email'?: string
+      'X-Auth-Key'?: string
+      'X-Auth-User-Service-Key'?: string
+      Authorization: `Bearer ${string}`
+    }
+
 export default defineDriver<KVHTTPOptions>((opts = {}) => {
   if (!opts.accountId) {
     throw new Error('`accountId` is required')
@@ -44,15 +64,14 @@ export default defineDriver<KVHTTPOptions>((opts = {}) => {
     throw new Error('`namespaceId` is required')
   }
 
-  const headers = new Headers()
+  let headers: CloudflareAuthorizationHeaders
 
   if (opts.apiToken) {
-    headers.set('Authorization', `Bearer ${opts.apiToken}`)
+    headers = { Authorization: `Bearer ${opts.apiToken}` }
   } else if (opts.userServiceKey) {
-    headers.set('X-Auth-User-Service-Key', opts.userServiceKey)
+    headers = { 'X-Auth-User-Service-Key': opts.userServiceKey }
   } else if (opts.email && opts.apiKey) {
-    headers.set('X-Auth-Email', opts.email)
-    headers.set('X-Auth-Key', opts.apiKey)
+    headers = { 'X-Auth-Email': opts.email, 'X-Auth-Key': opts.apiKey }
   } else {
     throw new Error(
       'One of `apiToken`, `userServiceKey`, or a combination of `email` and `apiKey` is required'
@@ -67,12 +86,13 @@ export default defineDriver<KVHTTPOptions>((opts = {}) => {
   })
 
   const hasItem = async (key: string) => {
-    const result = await kvFetch(`/values/${key}`)
-    return result.success
+    const { success } = await kvFetch(`/values/${key}`)
+    return success
   }
 
   const getItem = async (key: string) => {
-    return await kvFetch(`/values/${key}`)
+    const { result } = await kvFetch(`/values/${key}`)
+    return result
   }
 
   const setItem = async (key: string, value: any) => {
@@ -93,7 +113,8 @@ export default defineDriver<KVHTTPOptions>((opts = {}) => {
 
     const firstPage = await kvFetch('/keys', { params })
     firstPage.result.forEach(({ name }: { name: string }) => keys.push(name))
-    const cursor = firstPage.result.result_info.cursor
+
+    const cursor = firstPage.result_info.cursor
     if (cursor !== '') {
       params.set('cursor', cursor)
     }

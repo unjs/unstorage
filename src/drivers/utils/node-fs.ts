@@ -36,7 +36,7 @@ export async function ensuredir (dir: string) {
   await fsPromises.mkdir(dir).catch(ignoreExists)
 }
 
-export async function readdirRecursive(dir: string, ignore?: (p: string) => boolean): Promise<string[]> {
+export async function readdirRecursive(dir: string, ignore?: (p: string) => boolean) {
   if (ignore && ignore(dir)) {
     return []
   }
@@ -56,7 +56,7 @@ export async function readdirRecursive(dir: string, ignore?: (p: string) => bool
   return files
 }
 
-export async function rmRecursive (dir: string): Promise<void> {
+export async function rmRecursive (dir: string) {
   const entries = await readdir(dir)
   await Promise.all(entries.map((entry) => {
     const entryPath = resolve(dir, entry.name)

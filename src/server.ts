@@ -3,8 +3,7 @@ import { createApp, createError, useBody } from 'h3'
 import { Storage } from './types'
 import { stringify } from './_utils'
 
-export interface StorageServerOptions {
-}
+export interface StorageServerOptions {}
 
 export interface StorageServer {
   handle: RequestListener

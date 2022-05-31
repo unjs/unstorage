@@ -43,12 +43,12 @@
     "chokidar": "^3.5.3",
     "destr": "^1.1.1",
     "h3": "^0.7.8",
-    "ioredis": "^5.0.4",
+    "ioredis": "^5.0.6",
     "listhen": "^0.2.11",
     "mri": "^1.2.0",
-    "ohmyfetch": "^0.4.16",
+    "ohmyfetch": "^0.4.18",
     "ufo": "^0.8.4",
-    "ws": "^8.6.0"
+    "ws": "^8.7.0"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "latest",
@@ -59,7 +59,7 @@
     "@types/ws": "latest",
     "@vitejs/plugin-vue": "latest",
     "@vue/compiler-sfc": "latest",
-    "c8": "^7.11.2",
+    "c8": "^7.11.3",
     "doctoc": "latest",
     "eslint": "latest",
     "jiti": "latest",
@@ -71,8 +71,8 @@
     "typescript": "latest",
     "unbuild": "latest",
     "vite": "latest",
-    "vitest": "^0.10.5",
-    "vue": "^3.2.33"
+    "vitest": "^0.13.0",
+    "vue": "^3.2.36"
   },
-  "packageManager": "pnpm@7.0.0"
+  "packageManager": "pnpm@7.1.7"
 }

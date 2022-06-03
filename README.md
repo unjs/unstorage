@@ -303,7 +303,7 @@ npx unstorage .
 - `GET`: Maps to `storage.getItem`. Returns list of keys on path if value not found.
 - `HEAD`: Maps to `storage.hasItem`. Returns 404 if not found.
 - `PUT`: Maps to `storage.setItem`. Value is read from body and returns `OK` if operation succeeded.
-- `DELETE`: Maps to `storage.removeIterm`. Returns `OK` if operation succeeded.
+- `DELETE`: Maps to `storage.removeItem`. Returns `OK` if operation succeeded.
 
 ## Drivers
 
@@ -412,7 +412,7 @@ const storage = createStorage({
 - `getItem`: Maps to http `GET`. Returns deserialized value if response is ok
 - `hasItem`: Maps to http `HEAD`. Returns `true` if response is ok (200)
 - `setItem`: Maps to http `PUT`. Sends serialized value using body
-- `removeIterm`: Maps to `DELETE`
+- `removeItem`: Maps to `DELETE`
 - `clear`: Not supported
 
 ### `redis`

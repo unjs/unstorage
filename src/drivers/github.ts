@@ -3,7 +3,6 @@ import { $fetch } from 'ohmyfetch'
 import { withTrailingSlash } from 'ufo'
 
 export interface GithubOptions {
-  org: string
   repo: string
   /**
    * @default "main"
@@ -13,30 +12,36 @@ export interface GithubOptions {
    * @default ""
    */
   dir: string
-  token?: string
-
   /**
    * @default 600
    */
   ttl: number
+  token?: string
 }
 
-export default defineDriver((options: GithubOptions) => {
-  const { org, repo, branch = 'main', dir, token, ttl = 600 } = options
-  const rawUrl = `https://raw.githubusercontent.com/${org}/${repo}/${branch}/${dir}`
+const GITHUB_URL = 'https://api.github.com'
+const GITHUB_CDN_URL = 'https://raw.githubusercontent.com'
+
+export default defineDriver((_opts: GithubOptions) => {
+  const opts = { branch: 'main', ttl: 600, ..._opts }
+  const rawUrl = `${GITHUB_CDN_URL}/${opts.repo}/${opts.branch}/${opts.dir}`
   
   let files = {}
   let lastCheck = 0
-  let isInitialized = false
   let initialTask: Promise<any>
 
   const syncFiles = async () => {
-    if (!isInitialized || (lastCheck + ttl * 1000) < Date.now()) {
-      if (!initialTask) initialTask = fetchFiles(options)
-      files = await initialTask
-      isInitialized = true
-      lastCheck = Date.now()
+    if ((lastCheck + opts.ttl * 1000) > Date.now()) {
+      return 
     }
+
+    if (!initialTask) {
+      initialTask = fetchFiles(opts)
+    }
+
+    files = await initialTask
+    lastCheck = Date.now()
+    initialTask = undefined
   }
 
   return {
@@ -48,7 +53,7 @@ export default defineDriver((options: GithubOptions) => {
     async hasItem (key) {
       await syncFiles()
 
-      return !!files[key]
+      return key in files
     },
     async getItem (key) {
       await syncFiles()
@@ -63,12 +68,11 @@ export default defineDriver((options: GithubOptions) => {
         try {
           item.body = await $fetch(`${rawUrl}/${key.replace(/:/g, '/')}`, {
             headers: {
-              Authorization: token ? `token ${token}` : undefined
+              Authorization: opts.token ? `token ${opts.token}` : undefined
             }
           })
         } catch (e) {
-          // eslint-disable-next-line no-console
-          console.log(`Failed to fetch file "${key}"`, e)
+          throw new Error(`Failed to fetch file "${key}"`, { cause: e })
         }
       }
       return item.body
@@ -77,37 +81,38 @@ export default defineDriver((options: GithubOptions) => {
       await syncFiles()
 
       const item = files[key]
-      if (!item) {
-        return null
-      }
-      return item.meta
+
+      return item ? item.meta : null
     }
   }
 })
-async function fetchFiles(options: GithubOptions) {
-  const { dir, token, branch, org, repo } = options
-  const prefix = withTrailingSlash(dir)
+async function fetchFiles(opts: GithubOptions) {
+  const prefix = withTrailingSlash(opts.dir)
   const files = {}
   try {
-    const tree = await $fetch(`https://api.github.com/repos/${org}/${repo}/git/trees/${branch}?recursive=1`, {
+    const trees = await $fetch(`${GITHUB_URL}/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`, {
       headers: {
-        Authorization: token ? `token ${token}` : undefined
+        Authorization: opts.token ? `token ${opts.token}` : undefined
       }
     })
-    tree.tree.forEach((node) => {
-      if (node.type === 'blob' && node.path.startsWith(prefix)) {
-        const key = node.path.substring(prefix.length).replace(/\//g, ':')
-        files[key] = {
-          sha: node.sha,
-          meta: {
-            size: node.size
-          }
+
+    for (const node of trees.tree) {
+      if (node.type !== 'blob') {
+        continue
+      }
+      if (!node.path.startsWith(prefix)) {
+        continue
+      }
+      const key = node.path.substring(prefix.length).replace(/\//g, ':')
+      files[key] = {
+        sha: node.sha,
+        meta: {
+          size: node.size
         }
       }
-    })
+    }
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log('Failed to fetch git tree', e)
+    throw new Error(`Failed to fetch git tree`, { cause: e })
   }
   return files
 }

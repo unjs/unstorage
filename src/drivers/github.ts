@@ -1,6 +1,6 @@
 import { defineDriver } from './utils'
 import { $fetch } from 'ohmyfetch'
-import { withTrailingSlash } from 'ufo'
+import { withTrailingSlash, joinURL } from 'ufo'
 
 export interface GithubOptions {
   repo: string
@@ -17,31 +17,44 @@ export interface GithubOptions {
    */
   ttl: number
   token?: string
+  /**
+   * @default "https://api.github.com"
+   */
+  apiUrl?: string
+  /**
+   * @default "https://raw.githubusercontent.com"
+   */
+  cdnUrl?: string 
 }
 
-const GITHUB_URL = 'https://api.github.com'
-const GITHUB_CDN_URL = 'https://raw.githubusercontent.com'
+const defaultOptions = {
+  branch: 'main',
+  ttl: 600,
+  dir: '',
+  apiUrl: 'https://api.github.com',
+  cdnUrl: 'https://raw.githubusercontent.com'
+}
 
 export default defineDriver((_opts: GithubOptions) => {
-  const opts = { branch: 'main', ttl: 600, ..._opts }
-  const rawUrl = `${GITHUB_CDN_URL}/${opts.repo}/${opts.branch}/${opts.dir}`
+  const opts = { ...defaultOptions, ..._opts }
+  const rawUrl = joinURL(opts.cdnUrl, opts.repo, opts.branch, opts.dir)
   
   let files = {}
   let lastCheck = 0
-  let initialTask: Promise<any>
+  let syncPromise: Promise<any>
 
   const syncFiles = async () => {
     if ((lastCheck + opts.ttl * 1000) > Date.now()) {
       return 
     }
 
-    if (!initialTask) {
-      initialTask = fetchFiles(opts)
+    if (!syncPromise) {
+      syncPromise = fetchFiles(opts)
     }
 
-    files = await initialTask
+    files = await syncPromise
     lastCheck = Date.now()
-    initialTask = undefined
+    syncPromise = undefined
   }
 
   return {
@@ -66,7 +79,8 @@ export default defineDriver((_opts: GithubOptions) => {
 
       if (!item.body) {
         try {
-          item.body = await $fetch(`${rawUrl}/${key.replace(/:/g, '/')}`, {
+          item.body = await $fetch(key.replace(/:/g, '/'), {
+            baseURL: rawUrl,
             headers: {
               Authorization: opts.token ? `token ${opts.token}` : undefined
             }
@@ -90,23 +104,22 @@ async function fetchFiles(opts: GithubOptions) {
   const prefix = withTrailingSlash(opts.dir)
   const files = {}
   try {
-    const trees = await $fetch(`${GITHUB_URL}/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`, {
+    const trees = await $fetch(`/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`, {
+      baseURL: opts.apiUrl,
       headers: {
         Authorization: opts.token ? `token ${opts.token}` : undefined
       }
     })
 
     for (const node of trees.tree) {
-      if (node.type !== 'blob') {
-        continue
-      }
-      if (!node.path.startsWith(prefix)) {
+      if (node.type !== 'blob' || !node.path.startsWith(prefix)) {
         continue
       }
       const key = node.path.substring(prefix.length).replace(/\//g, ':')
       files[key] = {
-        sha: node.sha,
         meta: {
+          sha: node.sha,
+          mode: node.mode,
           size: node.size
         }
       }

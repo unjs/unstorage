@@ -70,6 +70,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`http` (universal)](#http-universal)
   - [`redis`](#redis)
   - [`cloudflare-kv`](#cloudflare-kv)
+  - [`github`](#github)
 - [Making custom drivers](#making-custom-drivers)
 - [Contribution](#contribution)
 - [License](#license)
@@ -472,6 +473,34 @@ const storage = createStorage({
 **Options:**
 
 - `binding`: KV binding or name of namespace. Default is `STORAGE`.
+
+
+### `github`
+
+Read files from remote github repository.
+
+```js
+import { createStorage } from 'unstorage'
+import githubDriver from 'unstorage/drivers/github'
+
+const storage = createStorage({
+  driver: githubDriver({
+    repo: 'nuxt/framework',
+    branch: 'main',
+    dir: '/docs/content'
+  })
+})
+```
+
+**Options:**
+
+- `repo`: Github repository. 
+- `branch`: Target branch. Default is `main`
+- `token`: Github API token.
+- `dir`: Use a directory as driver root.
+- `ttl`: Cache revalidate time. Default is `600`
+- `apiUrl`: Github API domain. Default is `https://api.github.com`
+- `cdnUrl`: Github RAW CDN Url. Default is `https://raw.githubusercontent.com`
 
 
 ## Making custom drivers

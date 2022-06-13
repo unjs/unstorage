@@ -477,7 +477,9 @@ const storage = createStorage({
 
 ### `github`
 
-Read files from remote github repository.
+Map files from a remote github repository. (readonly)
+
+This driver fetches all possible keys once and keep it in cache for 10 minutes. Because of github rate limit, it is highly recommanded to provide a token. It only applies to fetching keys.
 
 ```js
 import { createStorage } from 'unstorage'
@@ -494,14 +496,13 @@ const storage = createStorage({
 
 **Options:**
 
-- `repo`: Github repository. 
+- **`repo`**: Github repository. Format is `username/repo` or `org/repo`. (Required!)
+- **`token`**: Github API token. (Recommended!)
 - `branch`: Target branch. Default is `main`
-- `token`: Github API token.
 - `dir`: Use a directory as driver root.
-- `ttl`: Cache revalidate time. Default is `600`
-- `apiUrl`: Github API domain. Default is `https://api.github.com`
-- `cdnUrl`: Github RAW CDN Url. Default is `https://raw.githubusercontent.com`
-
+- `ttl`: Filenames cache revalidate time. Default is `600` seconds (10 minutes)
+- `apiURL`: Github API domain. Default is `https://api.github.com`
+- `cdnURL`: Github RAW CDN Url. Default is `https://raw.githubusercontent.com`
 
 ## Making custom drivers
 

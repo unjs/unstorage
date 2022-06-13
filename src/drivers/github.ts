@@ -3,8 +3,13 @@ import { $fetch } from 'ohmyfetch'
 import { withTrailingSlash, joinURL } from 'ufo'
 
 export interface GithubOptions {
+  /**
+   * The name of the repository. (e.g. `username/my-repo`)
+   * Required
+   */
   repo: string
   /**
+   * The branch to fetch. (e.g. `dev`)
    * @default "main"
    */
   branch: string
@@ -16,36 +21,44 @@ export interface GithubOptions {
    * @default 600
    */
   ttl: number
+  /**
+   * Github API token (recommended)
+   */
   token?: string
   /**
    * @default "https://api.github.com"
    */
-  apiUrl?: string
+  apiURL?: string
   /**
    * @default "https://raw.githubusercontent.com"
    */
-  cdnUrl?: string 
+  cdnURL?: string
 }
 
-const defaultOptions = {
+const defaultOptions: GithubOptions = {
+  repo: null,
   branch: 'main',
   ttl: 600,
   dir: '',
-  apiUrl: 'https://api.github.com',
-  cdnUrl: 'https://raw.githubusercontent.com'
+  apiURL: 'https://api.github.com',
+  cdnURL: 'https://raw.githubusercontent.com'
 }
 
 export default defineDriver((_opts: GithubOptions) => {
   const opts = { ...defaultOptions, ..._opts }
-  const rawUrl = joinURL(opts.cdnUrl, opts.repo, opts.branch, opts.dir)
-  
+  const rawUrl = joinURL(opts.cdnURL, opts.repo, opts.branch, opts.dir)
+
   let files = {}
   let lastCheck = 0
   let syncPromise: Promise<any>
 
+  if (!opts.repo) {
+    throw new Error('[unstorage] [github] Missing required option "repo"')
+  }
+
   const syncFiles = async () => {
     if ((lastCheck + opts.ttl * 1000) > Date.now()) {
-      return 
+      return
     }
 
     if (!syncPromise) {
@@ -58,17 +71,15 @@ export default defineDriver((_opts: GithubOptions) => {
   }
 
   return {
-    async getKeys () {
+    async getKeys() {
       await syncFiles()
-
       return Object.keys(files)
     },
-    async hasItem (key) {
+    async hasItem(key) {
       await syncFiles()
-
       return key in files
     },
-    async getItem (key) {
+    async getItem(key) {
       await syncFiles()
 
       const item = files[key]
@@ -85,27 +96,26 @@ export default defineDriver((_opts: GithubOptions) => {
               Authorization: opts.token ? `token ${opts.token}` : undefined
             }
           })
-        } catch (e) {
-          throw new Error(`Failed to fetch file "${key}"`, { cause: e })
+        } catch (err) {
+          throw new Error(`[unstorage] [github] Failed to fetch "${key}"`, { cause: err })
         }
       }
       return item.body
     },
-    async getMeta (key) {
+    async getMeta(key) {
       await syncFiles()
-
       const item = files[key]
-
       return item ? item.meta : null
     }
   }
 })
+
 async function fetchFiles(opts: GithubOptions) {
   const prefix = withTrailingSlash(opts.dir)
   const files = {}
   try {
     const trees = await $fetch(`/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`, {
-      baseURL: opts.apiUrl,
+      baseURL: opts.apiURL,
       headers: {
         Authorization: opts.token ? `token ${opts.token}` : undefined
       }
@@ -124,8 +134,8 @@ async function fetchFiles(opts: GithubOptions) {
         }
       }
     }
-  } catch (e) {
-    throw new Error(`Failed to fetch git tree`, { cause: e })
+  } catch (err) {
+    throw new Error(`[unstorage] [github] Failed to fetch git tree`, { cause: err })
   }
   return files
 }

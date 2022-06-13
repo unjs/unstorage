@@ -38,7 +38,7 @@ export default defineDriver((opts: KVOptions = {}) => {
 })
 
 
-function getBinding(binding: CloudflareWorkerKV | string = 'STORAGE'): CloudflareWorkerKV {
+function getBinding(binding: CloudflareWorkerKV | string = 'STORAGE') {
   let bindingName = '[binding]'
 
   if (typeof binding === 'string') {

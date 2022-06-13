@@ -1,6 +1,6 @@
 import { describe } from 'vitest'
 import { createStorage } from '../../src'
-import CloudflareKV from '../../src/drivers/cloudflare-kv'
+import CloudflareKVBinding from '../../src/drivers/cloudflare-kv-binding'
 import { testDriver } from './utils'
 import type { CloudflareWorkerKV } from 'types-cloudflare-worker'
 
@@ -14,6 +14,6 @@ const mockBinding: CloudflareWorkerKV = {
 
 describe('drivers: cloudflare-kv', () => {
   testDriver({
-    driver: CloudflareKV({ binding: mockBinding })
+    driver: CloudflareKVBinding({ binding: mockBinding })
   })
 })

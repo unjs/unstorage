@@ -69,8 +69,8 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`overlay` (universal)](#overlay-universal)
   - [`http` (universal)](#http-universal)
   - [`redis`](#redis)
-  - [`cloudflare-kv`](#cloudflare-kv)
-  - [`cloudflare-kv-http` (universal)](#cloudflare-kv-http-universal)
+  - [`cloudflare-kv-http`](#cloudflare-kv-http)
+  - [`cloudflare-kv-binding`](#cloudflare-kv-binding)
   - [`github`](#github)
 - [Making custom drivers](#making-custom-drivers)
 - [Contribution](#contribution)
@@ -441,45 +441,13 @@ See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-h
 
 `lazyConnect` option is enabled by default so that connection happens on first redis operation.
 
-
-### `cloudflare-kv`
-
-Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv).
-
-You need to create and assign a KV. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
-
-```js
-import { createStorage } from 'unstorage'
-import cloudflareKVDriver from 'unstorage/drivers/cloudflare-kv'
-
-// Using binding name to be picked from globalThis
-const storage = createStorage({
-  driver: cloudflareKVDriver({ binding: 'STORAGE' })
-})
-
-// Directly setting binding
-const storage = createStorage({
-  driver: cloudflareKVDriver({ binding: globalThis.STORAGE })
-})
-
-// Using from Durable Objects and Workers using Modules Syntax
-const storage = createStorage({
-  driver: cloudflareKVDriver({ binding: this.env.STORAGE })
-})
-
-// Using outside of Cloudflare Workers (like Node.js)
-// Not supported Yet!
-```
-
-**Options:**
-
-- `binding`: KV binding or name of namespace. Default is `STORAGE`.
-
-### `cloudflare-kv-http` (universal)
+### `cloudflare-kv-http`
 
 Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/learning/how-kv-works/) using the [Cloudflare API v4](https://api.cloudflare.com/).
 
 You need to create a KV namespace. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
+
+**Note:** This driver uses native fetch and works universally! For using directly in a cloudflare worker environemnt, please use `cloudflare-kv-binding` driver for best performance!
 
 ```js
 import { createStorage } from 'unstorage'
@@ -532,6 +500,41 @@ const storage = createStorage({
 - `removeItem`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-key-value-pair) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
 - `getKeys`: Maps to [List a Namespace's Keys](https://api.cloudflare.com/#workers-kv-namespace-list-a-namespace-s-keys) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/keys`
 - `clear`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-multiple-key-value-pairs) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/bulk`
+
+### `cloudflare-kv-binding`
+
+Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv) and access from worker bindings.
+
+**Note:** This driver only works in a cloudflare worker environment! Use `cloudflare-kv-http` for other environments.
+
+You need to create and assign a KV. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
+
+```js
+import { createStorage } from 'unstorage'
+import cloudflareKVBindingDriver from 'unstorage/drivers/cloudflare-kv-binding'
+
+// Using binding name to be picked from globalThis
+const storage = createStorage({
+  driver: cloudflareKVBindingDriver({ binding: 'STORAGE' })
+})
+
+// Directly setting binding
+const storage = createStorage({
+  driver: cloudflareKVBindingDriver({ binding: globalThis.STORAGE })
+})
+
+// Using from Durable Objects and Workers using Modules Syntax
+const storage = createStorage({
+  driver: cloudflareKVBindingDriver({ binding: this.env.STORAGE })
+})
+
+// Using outside of Cloudflare Workers (like Node.js)
+// Use cloudflare-kv-http!
+```
+
+**Options:**
+
+- `binding`: KV binding or name of namespace. Default is `STORAGE`.
 
 ### `github`
 

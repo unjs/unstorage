@@ -44,7 +44,7 @@ const server = setupServer(
   }),
 
   rest.get(`${baseURL}/keys`, (req, res, ctx) => {
-    const prefix = req.url.searchParams.get('prefix')
+    const prefix = req.url.searchParams.get('prefix') || ''
     let keys = Object.keys(store)
     if (req.url.searchParams.has('prefix')) {
       keys = keys.filter((key) => key.startsWith(prefix))

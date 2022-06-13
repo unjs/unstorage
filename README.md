@@ -483,6 +483,7 @@ You need to create a KV namespace. See [KV Bindings](https://developers.cloudfla
 ```js
 import { createStorage } from 'unstorage'
 import cloudflareKVHTTPDriver from 'unstorage/drivers/cloudflare-kv-http'
+
 // Using `apiToken`
 const storage = createStorage({
   driver: cloudflareKVHTTPDriver({
@@ -491,6 +492,7 @@ const storage = createStorage({
     apiToken: 'supersecret-api-token',
   }),
 })
+
 // Using `email` and `apiKey`
 const storage = createStorage({
   driver: cloudflareKVHTTPDriver({
@@ -500,6 +502,7 @@ const storage = createStorage({
     apiKey: 'my-api-key',
   }),
 })
+
 // Using `userServiceKey`
 const storage = createStorage({
   driver: cloudflareKVHTTPDriver({
@@ -513,13 +516,14 @@ const storage = createStorage({
 **Options:**
 
 - `accountId`: Cloudflare account ID.
-- `namespaceId`: The ID of the KV namespace to target. Note: be sure to use the namespace's ID, and not the name or binding used in a worker environment.
+- `namespaceId`: The ID of the KV namespace to target. **Note:** be sure to use the namespace's ID, and not the name or binding used in a worker environment.
 - `apiToken`: API Token generated from the [User Profile 'API Tokens' page](https://dash.cloudflare.com/profile/api-tokens).
 - `email`: Email address associated with your account. May be used along with `apiKey` to authenticate in place of `apiToken`.
 - `apiKey`: API key generated on the "My Account" page of the Cloudflare console. May be used along with `email` to authenticate in place of `apiToken`.
 - `userServiceKey`: A special Cloudflare API key good for a restricted set of endpoints. Always begins with "v1.0-", may vary in length. May be used to authenticate in place of `apiToken` or `apiKey` and `email`.
+- `apiURL`: Custom API URL. Default is `https://api.cloudflare.com`.
 
-**Supported methods**
+**Supported methods:**
 
 - `getItem`: Maps to [Read key-value pair](https://api.cloudflare.com/#workers-kv-namespace-read-key-value-pair) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
 - `hasItem`: Maps to [Read key-value pair](https://api.cloudflare.com/#workers-kv-namespace-read-key-value-pair) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`. Returns `true` if `<parsed response body>.success` is `true`.

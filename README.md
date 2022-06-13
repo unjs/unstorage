@@ -71,6 +71,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`redis`](#redis)
   - [`cloudflare-kv`](#cloudflare-kv)
   - [`cloudflare-kv-http` (universal)](#cloudflare-kv-http-universal)
+  - [`github`](#github)
 - [Making custom drivers](#making-custom-drivers)
 - [Contribution](#contribution)
 - [License](#license)
@@ -304,7 +305,7 @@ npx unstorage .
 - `GET`: Maps to `storage.getItem`. Returns list of keys on path if value not found.
 - `HEAD`: Maps to `storage.hasItem`. Returns 404 if not found.
 - `PUT`: Maps to `storage.setItem`. Value is read from body and returns `OK` if operation succeeded.
-- `DELETE`: Maps to `storage.removeIterm`. Returns `OK` if operation succeeded.
+- `DELETE`: Maps to `storage.removeItem`. Returns `OK` if operation succeeded.
 
 ## Drivers
 
@@ -413,7 +414,7 @@ const storage = createStorage({
 - `getItem`: Maps to http `GET`. Returns deserialized value if response is ok
 - `hasItem`: Maps to http `HEAD`. Returns `true` if response is ok (200)
 - `setItem`: Maps to http `PUT`. Sends serialized value using body
-- `removeIterm`: Maps to `DELETE`
+- `removeItem`: Maps to `DELETE`
 - `clear`: Not supported
 
 ### `redis`
@@ -531,6 +532,35 @@ const storage = createStorage({
 - `removeItem`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-key-value-pair) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
 - `getKeys`: Maps to [List a Namespace's Keys](https://api.cloudflare.com/#workers-kv-namespace-list-a-namespace-s-keys) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/keys`
 - `clear`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-multiple-key-value-pairs) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/bulk`
+
+### `github`
+
+Map files from a remote github repository. (readonly)
+
+This driver fetches all possible keys once and keep it in cache for 10 minutes. Because of github rate limit, it is highly recommanded to provide a token. It only applies to fetching keys.
+
+```js
+import { createStorage } from 'unstorage'
+import githubDriver from 'unstorage/drivers/github'
+
+const storage = createStorage({
+  driver: githubDriver({
+    repo: 'nuxt/framework',
+    branch: 'main',
+    dir: '/docs/content'
+  })
+})
+```
+
+**Options:**
+
+- **`repo`**: Github repository. Format is `username/repo` or `org/repo`. (Required!)
+- **`token`**: Github API token. (Recommended!)
+- `branch`: Target branch. Default is `main`
+- `dir`: Use a directory as driver root.
+- `ttl`: Filenames cache revalidate time. Default is `600` seconds (10 minutes)
+- `apiURL`: Github API domain. Default is `https://api.github.com`
+- `cdnURL`: Github RAW CDN Url. Default is `https://raw.githubusercontent.com`
 
 ## Making custom drivers
 

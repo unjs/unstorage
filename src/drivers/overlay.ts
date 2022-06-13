@@ -1,5 +1,5 @@
 import { defineDriver } from './utils'
-import type { Driver, StorageValue } from '../types'
+import type { Driver } from '../types'
 import { normalizeKey } from './utils'
 
 export interface OverlayStorageOptions {

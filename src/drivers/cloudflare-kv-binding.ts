@@ -1,8 +1,7 @@
+/// <reference types="@cloudflare/workers-types" />
 import { defineDriver } from './utils'
-import type { CloudflareWorkerKV } from 'types-cloudflare-worker'
-
 export interface KVOptions {
-  binding?: string | CloudflareWorkerKV
+  binding?: string | KVNamespace
 }
 
 // https://developers.cloudflare.com/workers/runtime-apis/kv
@@ -38,12 +37,12 @@ export default defineDriver((opts: KVOptions = {}) => {
 })
 
 
-function getBinding(binding: CloudflareWorkerKV | string = 'STORAGE') {
+function getBinding(binding: KVNamespace | string = 'STORAGE') {
   let bindingName = '[binding]'
 
   if (typeof binding === 'string') {
     bindingName = binding
-    binding = (globalThis as any)[bindingName] as CloudflareWorkerKV
+    binding = (globalThis as any)[bindingName] as KVNamespace
   }
 
   if (!binding) {

@@ -42,9 +42,9 @@
     "anymatch": "^3.1.2",
     "chokidar": "^3.5.3",
     "destr": "^1.1.1",
-    "h3": "^0.7.9",
+    "h3": "^0.7.10",
     "ioredis": "^5.0.6",
-    "listhen": "^0.2.11",
+    "listhen": "^0.2.13",
     "mri": "^1.2.0",
     "ohmyfetch": "^0.4.18",
     "ufo": "^0.8.4",
@@ -66,14 +66,14 @@
     "jsdom": "latest",
     "mkdist": "latest",
     "monaco-editor": "latest",
-    "msw": "^0.42.1",
+    "msw": "^0.42.2",
     "standard-version": "latest",
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "latest",
     "unbuild": "latest",
     "vite": "latest",
-    "vitest": "^0.14.2",
+    "vitest": "^0.15.2",
     "vue": "^3.2.37"
   },
-  "packageManager": "pnpm@7.2.1"
+  "packageManager": "pnpm@7.3.0"
 }

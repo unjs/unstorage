@@ -11,8 +11,7 @@ export default defineDriver((opts: KVOptions = {}) => {
   const binding = getBinding(opts.binding)
 
   async function getKeys(base?: string) {
-    const prefix = base ? { prefix: base } : undefined
-    const kvList = await binding.list(prefix)
+    const kvList = await binding.list(base ? { prefix: base } : undefined)
     return kvList.keys.map(key => key.name)
   }
 

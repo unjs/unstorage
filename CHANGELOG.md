@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.1](https://github.com/unjs/unstorage/compare/v0.5.0...v0.5.1) (2022-06-22)
+
+
+### Bug Fixes
+
+* **cloudflare:** add prefix key for cloudflare kv list operation ([#64](https://github.com/unjs/unstorage/issues/64)) ([ad13230](https://github.com/unjs/unstorage/commit/ad132304b372e5271c6a7e9ed1c4b2f29a7b1b67))
+* **cloudflare:** use `@cloudflare/workers-types` ([eeeac83](https://github.com/unjs/unstorage/commit/eeeac838961682a6af60ffa4f732ceb4dc2e0caf))
+
 ## [0.5.0](https://github.com/unjs/unstorage/compare/v0.4.1...v0.5.0) (2022-06-13)
 
 

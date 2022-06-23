@@ -24,7 +24,7 @@ specifiers:
   mkdist: latest
   monaco-editor: latest
   mri: ^1.2.0
-  msw: ^0.42.2
+  msw: ^0.42.3
   ohmyfetch: ^0.4.18
   standard-version: latest
   types-cloudflare-worker: ^1.2.0
@@ -65,7 +65,7 @@ devDependencies:
   jsdom: 20.0.0
   mkdist: 0.3.10_typescript@4.7.4
   monaco-editor: 0.33.0
-  msw: 0.42.2_typescript@4.7.4
+  msw: 0.42.3_typescript@4.7.4
   standard-version: 9.5.0
   types-cloudflare-worker: 1.2.0
   typescript: 4.7.4
@@ -3994,8 +3994,8 @@ packages:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
     dev: true
 
-  /msw/0.42.2_typescript@4.7.4:
-    resolution: {integrity: sha512-7iViQ6t0L1kiTZZNHO/sm8XodKa0CT0qQqNzcbCuNl37vzSb5e4BLTimOsvkSXYYCQXp6MRQw36AIgyofOFjZA==}
+  /msw/0.42.3_typescript@4.7.4:
+    resolution: {integrity: sha512-zrKBIGCDsNUCZLd3DLSeUtRruZ0riwJgORg9/bSDw3D0PTI8XUGAK3nC0LJA9g0rChGuKaWK/SwObA8wpFrz4g==}
     engines: {node: '>=14'}
     hasBin: true
     requiresBuild: true

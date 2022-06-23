@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.2](https://github.com/unjs/unstorage/compare/v0.5.1...v0.5.2) (2022-06-23)
+
+
+### Bug Fixes
+
+* upgrade mkdist ([ad216c6](https://github.com/unjs/unstorage/commit/ad216c6e02dac05d7695a955672042141b688d43))
+
 ### [0.5.1](https://github.com/unjs/unstorage/compare/v0.5.0...v0.5.1) (2022-06-22)
 
 

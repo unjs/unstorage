@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.4](https://github.com/unjs/unstorage/compare/v0.5.3...v0.5.4) (2022-06-29)
+
+
+### Bug Fixes
+
+* update builtinDrivers mapping ([ebf8d1b](https://github.com/unjs/unstorage/commit/ebf8d1b4d5853e339204b9277845de942182da51))
+
 ### [0.5.3](https://github.com/unjs/unstorage/compare/v0.5.2...v0.5.3) (2022-06-29)
 
 

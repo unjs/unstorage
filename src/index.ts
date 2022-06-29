@@ -5,9 +5,9 @@ export { defineDriver } from './drivers/utils'
 
 export const builtinDrivers = {
   cloudflareKVHTTP: 'unstorage/drivers/cloudflare-kv-http',
-  cloudflareKVBinding: 'unstorage/drivers/cloudflare-kv',
+  cloudflareKVBinding: 'unstorage/drivers/cloudflare-kv-binding',
   'cloudflare-kv-http': 'unstorage/drivers/cloudflare-kv-http',
-  'cloudflare-kv-binding': 'unstorage/drivers/cloudflare-kv',
+  'cloudflare-kv-binding': 'unstorage/drivers/cloudflare-kv-binding',
   fs: 'unstorage/drivers/fs',
   github: 'unstorage/drivers/github',
   http: 'unstorage/drivers/http',

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.3](https://github.com/unjs/unstorage/compare/v0.5.2...v0.5.3) (2022-06-29)
+
+
+### Features
+
+* export `BuiltinDriverName` type and kebab-case names ([f6a941c](https://github.com/unjs/unstorage/commit/f6a941c59443340c1bd3101ab7f842e01abe5bcb))
+
 ### [0.5.2](https://github.com/unjs/unstorage/compare/v0.5.1...v0.5.2) (2022-06-23)
 
 

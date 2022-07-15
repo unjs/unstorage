@@ -111,7 +111,7 @@ export default defineDriver((_opts: GithubOptions) => {
 })
 
 async function fetchFiles(opts: GithubOptions) {
-  const prefix = withTrailingSlash(opts.dir)
+  const prefix = withTrailingSlash(opts.dir).replace(/^\//, '')
   const files = {}
   try {
     const trees = await $fetch(`/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`, {

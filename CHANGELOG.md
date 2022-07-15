@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.5](https://github.com/unjs/unstorage/compare/v0.5.4...v0.5.5) (2022-07-15)
+
+
+### Bug Fixes
+
+* **github:** trim leading slash on `dir` prefix paths ([#74](https://github.com/unjs/unstorage/issues/74)) ([3a117b7](https://github.com/unjs/unstorage/commit/3a117b7a95176c929f30cc2412815ac715bddc2a))
+* **redis:** fix reference in `clear()` method ([#70](https://github.com/unjs/unstorage/issues/70)) ([7aea0ff](https://github.com/unjs/unstorage/commit/7aea0ffb74e15f50a8a7e06ecaa3e3d1b50f7af6))
+
 ### [0.5.4](https://github.com/unjs/unstorage/compare/v0.5.3...v0.5.4) (2022-06-29)
 
 

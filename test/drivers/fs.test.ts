@@ -26,6 +26,24 @@ describe('drivers: fs', () => {
         await new Promise(resolve => setTimeout(resolve, 500))
         expect(watcher).toHaveBeenCalledWith('update', 's1:random_file')
       })
+
+      const invalidKeys = [
+        '../foobar',
+        '..:foobar',
+        '../',
+        '..:',
+        '..'
+      ]
+      for (const key of invalidKeys) {
+        it('disallow path travesal: ' , async () => {
+          await expect(ctx.storage.getItem(key)).rejects.toThrow('Invalid key')
+        })
+      }
+
+      it('allow double dots in filename: ' , async () => {
+        await ctx.storage.setItem('s1/te..st..js', 'ok')
+        expect(await ctx.storage.getItem('s1/te..st..js')).toBe('ok')
+      })
     }
   })
 })

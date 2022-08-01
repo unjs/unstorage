@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.6](https://github.com/unjs/unstorage/compare/v0.5.5...v0.5.6) (2022-08-01)
+
+
+### Bug Fixes
+
+* **fs:** disallow keys containing `..` ([d628fab](https://github.com/unjs/unstorage/commit/d628fab73b4cf83758f08817b275a223725714ab))
+
 ### [0.5.5](https://github.com/unjs/unstorage/compare/v0.5.4...v0.5.5) (2022-07-15)
 
 

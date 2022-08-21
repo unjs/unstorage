@@ -14,19 +14,23 @@ const server = setupServer(
     const key = req.params.key as string
     const result = store[key] ?? null
 
+    if (result !== null) {
+      return res(ctx.status(200), ctx.json(result))
+    }
+
     const data = {
       result,
-      success: !!result,
+      success: false,
       errors: [
-        !result && {
+        {
           code: 10009,
           message: "get: 'key not found'",
         },
-      ].filter(Boolean),
+      ],
       messages: [],
     }
 
-    return res(ctx.status(200), ctx.json(data))
+    return res(ctx.status(404), ctx.json(data))
   }),
 
   rest.put(`${baseURL}/values/:key`, (req, res, ctx) => {

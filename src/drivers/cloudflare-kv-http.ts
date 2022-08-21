@@ -105,12 +105,12 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   }
 
   const getItem = async (key: string) => {
-    // Cloudflare API returns with `content-type: application/octet-stream`
-    let result = await kvFetch(`/values/${key}`, { parseResponse: txt => txt })
     try {
-      result = JSON.parse(result)
-    } catch {}
-    return result
+      // Cloudflare API returns with `content-type: application/octet-stream`
+      return await kvFetch(`/values/${key}`, { parseResponse: txt => txt })
+    } catch {
+      return null
+    }
   }
 
   const setItem = async (key: string, value: any) => {

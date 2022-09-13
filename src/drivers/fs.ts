@@ -75,7 +75,9 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
           ignored: opts.ignore,
           ...opts.watchOptions
         })
-          .on('ready', resolve)
+          .on('ready', () => {
+            resolve(() => _watcher.close().then(() => _watcher = undefined))
+          })
           .on('error', reject)
           .on('all', (eventName, path) => {
             path = relative(opts.base!, path)

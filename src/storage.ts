@@ -1,5 +1,5 @@
 import destr from 'destr'
-import type { Storage, Driver, WatchCallback, StorageValue } from './types'
+import type { Storage, Driver, WatchCallback, Unwatcher, StorageValue } from './types'
 import memory from './drivers/memory'
 import { asyncCall, stringify } from './_utils'
 import { normalizeKey, normalizeBaseKey } from './utils'
@@ -8,6 +8,7 @@ interface StorageCTX {
   mounts: Record<string, Driver>
   mountpoints: string[]
   watching: boolean
+  unwatchers: Unwatcher[]
   watchListeners: Function[]
 }
 
@@ -20,7 +21,8 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     mounts: { '': opts.driver || memory() },
     mountpoints: [''],
     watching: false,
-    watchListeners: []
+    watchListeners: [],
+    unwatchers: []
   }
 
   const getMount = (key: string) => {
@@ -59,9 +61,22 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
   const startWatch = async () => {
     if (ctx.watching) { return }
     ctx.watching = true
+
+    ctx.unwatchers = []
     for (const mountpoint in ctx.mounts) {
-      await watch(ctx.mounts[mountpoint], onChange, mountpoint)
+      ctx.unwatchers.push(await watch(ctx.mounts[mountpoint], onChange, mountpoint))
     }
+  }
+
+  const stopWatch = async () => {
+    if (!ctx.watching) { return }
+
+    for (const unwatcher of ctx.unwatchers) {
+      await unwatcher()
+    }
+
+    ctx.unwatchers = []
+    ctx.watching = false
   }
 
   const storage: Storage = {
@@ -171,6 +186,18 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     async watch (callback) {
       await startWatch()
       ctx.watchListeners.push(callback)
+
+      return async () => {
+        ctx.watchListeners = ctx.watchListeners.filter(listener => listener !== callback)
+
+        if (ctx.watchListeners.length) {
+          await stopWatch()
+        }
+      }
+    },
+    async unwatch () {
+      ctx.watchListeners = []
+      await stopWatch()
     },
     // Mount
     mount (base, driver) {
@@ -225,6 +252,8 @@ export async function restoreSnapshot (driver: Storage, snapshot: Snapshot<Stora
 function watch (driver: Driver, onChange: WatchCallback, base: string) {
   if (driver.watch) {
     return driver.watch((event, key) => onChange(event, base + key))
+  } else {
+    return () => undefined
   }
 }
 

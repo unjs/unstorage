@@ -46,7 +46,7 @@ describe('drivers: localstorage', () => {
         const ev2 = jsdom.window.document.createEvent('CustomEvent')
         ev2.initEvent('storage', true)
         // @ts-ignore
-        ev2.key = 's1:random_file'
+        ev2.key = 's1:random_file2'
         // @ts-ignore
         ev2.newValue = 'random'
         

@@ -190,7 +190,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       return async () => {
         ctx.watchListeners = ctx.watchListeners.filter(listener => listener !== callback)
 
-        if (ctx.watchListeners.length) {
+        if (ctx.watchListeners.length === 0) {
           await stopWatch()
         }
       }

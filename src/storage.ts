@@ -8,7 +8,7 @@ interface StorageCTX {
   mounts: Record<string, Driver>
   mountpoints: string[]
   watching: boolean
-  unwatchers: Unwatcher[]
+  unwatchers: Record<string, Unwatcher>
   watchListeners: Function[]
 }
 
@@ -22,7 +22,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     mountpoints: [''],
     watching: false,
     watchListeners: [],
-    unwatchers: []
+    unwatchers: {}
   }
 
   const getMount = (key: string) => {
@@ -62,20 +62,19 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     if (ctx.watching) { return }
     ctx.watching = true
 
-    ctx.unwatchers = []
     for (const mountpoint in ctx.mounts) {
-      ctx.unwatchers.push(await watch(ctx.mounts[mountpoint], onChange, mountpoint))
+      ctx.unwatchers[mountpoint] = await watch(ctx.mounts[mountpoint], onChange, mountpoint)
     }
   }
 
   const stopWatch = async () => {
     if (!ctx.watching) { return }
 
-    for (const unwatcher of ctx.unwatchers) {
-      await unwatcher()
+    for (const mountpoint in ctx.unwatchers) {
+      await ctx.unwatchers[mountpoint]()
     }
 
-    ctx.unwatchers = []
+    ctx.unwatchers = {}
     ctx.watching = false
   }
 
@@ -213,7 +212,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       if (ctx.watching) {
         Promise.resolve(watch(driver, onChange, base))
           .then((unwatcher) => {
-            ctx.unwatchers.push(unwatcher)
+            ctx.unwatchers[base] = unwatcher
           })
           .catch(console.error) // eslint-disable-line no-console
       }
@@ -223,6 +222,10 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       base = normalizeBaseKey(base)
       if (!base /* root */ || !ctx.mounts[base]) {
         return
+      }
+      if (ctx.watching && base in ctx.unwatchers) {
+        ctx.unwatchers[base]()
+        delete ctx.unwatchers[base]
       }
       if (_dispose) {
         await dispose(ctx.mounts[base])

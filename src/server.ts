@@ -46,7 +46,7 @@ export function createStorageServer (storage: Storage, _opts: StorageServerOptio
     }
     throw createError({
       statusCode: 405,
-      statusMessage: 'Method Not Allowd'
+      statusMessage: 'Method Not Allowed'
     })
   })
 

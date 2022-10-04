@@ -3,7 +3,7 @@ import { createApp, createError, useBody } from 'h3'
 import { Storage } from './types'
 import { stringify } from './_utils'
 
-export interface StorageServerOptions {}
+export interface StorageServerOptions { }
 
 export interface StorageServer {
   handle: RequestListener
@@ -33,8 +33,8 @@ export function createStorageServer (storage: Storage, _opts: StorageServerOptio
       }
       return ''
     }
-    // PUT => setItem
-    if (req.method === 'PUT') {
+    // PUT, POST, PATCH => setItem
+    if (['PUT', 'POST', 'PATCH'].includes(req.method)) {
       const val = await useBody(req)
       await storage.setItem(req.url!, val)
       return 'OK'

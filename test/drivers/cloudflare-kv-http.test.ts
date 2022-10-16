@@ -12,29 +12,24 @@ const store: Record<string, any> = {}
 const server = setupServer(
   rest.get(`${baseURL}/values/:key`, (req, res, ctx) => {
     const key = req.params.key as string
-    const result = store[key] ?? null
-
-    const data = {
-      result,
-      success: !!result,
-      errors: [
-        !result && {
-          code: 10009,
-          message: "get: 'key not found'",
-        },
-      ].filter(Boolean),
-      messages: [],
+    if (!(key in store)) {
+      return res(ctx.status(404), ctx.json(null))
     }
+    return res(ctx.status(200), ctx.set('content-type', 'application/octet-stream'), ctx.json(store[key]))
+  }),
 
-    return res(ctx.status(200), ctx.json(data))
+  rest.get(`${baseURL}/metadata/:key`, (req, res, ctx) => {
+    const key = req.params.key as string
+    if (!(key in store)) {
+      return res(ctx.status(404), ctx.json({ success: false }))
+    }
+    return res(ctx.status(200), ctx.json({ success: true }))
   }),
 
   rest.put(`${baseURL}/values/:key`, (req, res, ctx) => {
     const key = req.params.key as string
-    const value = req.body
-
-    store[key] = value
-    return res(ctx.status(204))
+    store[key] = req.body
+    return res(ctx.status(204), ctx.json(null))
   }),
 
   rest.delete(`${baseURL}/values/:key`, (req, res, ctx) => {

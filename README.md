@@ -302,8 +302,8 @@ import { createStorageServer } from 'unstorage/server'
 const storage = createStorage()
 const storageServer = createStorageServer(storage)
 
-// Alternatively we can use `storage.handle` as a middleware
-await listen(storage.handle)
+// Alternatively we can use `storageServer.handle` as a middleware
+await listen(storageServer.handle)
 ```
 
 **Using CLI:**

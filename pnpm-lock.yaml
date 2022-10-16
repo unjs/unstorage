@@ -9,6 +9,7 @@ specifiers:
   '@types/node': ^18.11.0
   '@types/ws': ^8.5.3
   '@vitejs/plugin-vue': ^3.1.2
+  '@vitest/coverage-c8': ^0.24.3
   '@vue/compiler-sfc': ^3.2.41
   anymatch: ^3.1.2
   c8: ^7.12.0
@@ -59,6 +60,7 @@ devDependencies:
   '@types/node': 18.11.0
   '@types/ws': 8.5.3
   '@vitejs/plugin-vue': 3.1.2_vite@3.1.8+vue@3.2.41
+  '@vitest/coverage-c8': 0.24.3_jsdom@20.0.1
   '@vue/compiler-sfc': 3.2.41
   c8: 7.12.0
   doctoc: 2.2.1
@@ -877,6 +879,24 @@ packages:
     dependencies:
       vite: 3.1.8
       vue: 3.2.41
+    dev: true
+
+  /@vitest/coverage-c8/0.24.3_jsdom@20.0.1:
+    resolution: {integrity: sha512-tAmMyHxWYnAwGeJb7QgTuEX8aLasTg4X1/6INobXa/7wYGEJ28CACFO5iLn1HzFVPoLvhsS3luQjiflGjjSMRQ==}
+    dependencies:
+      c8: 7.12.0
+      vitest: 0.24.3_jsdom@20.0.1
+    transitivePeerDependencies:
+      - '@edge-runtime/vm'
+      - '@vitest/browser'
+      - '@vitest/ui'
+      - happy-dom
+      - jsdom
+      - less
+      - sass
+      - stylus
+      - supports-color
+      - terser
     dev: true
 
   /@vue/compiler-core/3.2.41:

@@ -35,7 +35,7 @@
     "lint": "eslint --ext .ts .",
     "prepack": "pnpm build",
     "release": "pnpm test && standard-version && git push --follow-tags && pnpm publish",
-    "test": "pnpm lint && vitest run",
+    "test": "pnpm lint && vitest run --coverage",
     "unstorage": "pnpm jiti src/cli"
   },
   "dependencies": {
@@ -60,6 +60,7 @@
     "@types/node": "^18.11.0",
     "@types/ws": "^8.5.3",
     "@vitejs/plugin-vue": "^3.1.2",
+    "@vitest/coverage-c8": "^0.24.3",
     "@vue/compiler-sfc": "^3.2.41",
     "c8": "^7.12.0",
     "doctoc": "^2.2.1",

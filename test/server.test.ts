@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { listen } from 'listhen'
 import { $fetch } from 'ohmyfetch'
 import { createStorage } from '../src'
@@ -7,7 +8,9 @@ describe('server', () => {
   it('basic', async () => {
     const storage = createStorage()
     const storageServer = createStorageServer(storage)
-    const { close, url: serverURL } = await listen(storageServer.handle)
+    const { close, url: serverURL } = await listen(storageServer.handle, {
+      port: { random: true }
+    })
 
     const fetchStorage = (url: string, opts?: any) => $fetch(url, { baseURL: serverURL, ...opts })
 

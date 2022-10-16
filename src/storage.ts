@@ -1,12 +1,14 @@
 import destr from 'destr'
-import type { Storage, Driver, WatchCallback, StorageValue } from './types'
+import type { Storage, Driver, WatchCallback, Unwatch, StorageValue } from './types'
 import memory from './drivers/memory'
-import { normalizeKey, normalizeBase, asyncCall, stringify } from './_utils'
+import { asyncCall, stringify } from './_utils'
+import { normalizeKey, normalizeBaseKey } from './utils'
 
 interface StorageCTX {
   mounts: Record<string, Driver>
   mountpoints: string[]
   watching: boolean
+  unwatch: Record<string, Unwatch>
   watchListeners: Function[]
 }
 
@@ -19,14 +21,15 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     mounts: { '': opts.driver || memory() },
     mountpoints: [''],
     watching: false,
-    watchListeners: []
+    watchListeners: [],
+    unwatch: {}
   }
 
   const getMount = (key: string) => {
     for (const base of ctx.mountpoints) {
       if (key.startsWith(base)) {
         return {
-          relativeKey: key.substr(base.length),
+          relativeKey: key.substring(base.length),
           driver: ctx.mounts[base]
         }
       }
@@ -37,11 +40,11 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     }
   }
 
-  const getMounts = (base: string) => {
+  const getMounts = (base: string, includeParent: boolean) => {
     return ctx.mountpoints
-      .filter(mountpoint => mountpoint.startsWith(base) || base!.startsWith(mountpoint))
+      .filter(mountpoint => (mountpoint.startsWith(base)) || (includeParent && base!.startsWith(mountpoint)))
       .map(mountpoint => ({
-        relativeBase: base.length > mountpoint.length ? base!.substr(mountpoint.length) : undefined,
+        relativeBase: base.length > mountpoint.length ? base!.substring(mountpoint.length) : undefined,
         mountpoint,
         driver: ctx.mounts[mountpoint]
       }))
@@ -59,8 +62,17 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     if (ctx.watching) { return }
     ctx.watching = true
     for (const mountpoint in ctx.mounts) {
-      await watch(ctx.mounts[mountpoint], onChange, mountpoint)
+      ctx.unwatch[mountpoint] = await watch(ctx.mounts[mountpoint], onChange, mountpoint)
     }
+  }
+
+  const stopWatch = async () => {
+    if (!ctx.watching) { return }
+    for (const mountpoint in ctx.unwatch) {
+      await ctx.unwatch[mountpoint]()
+    }
+    ctx.unwatch = {}
+    ctx.watching = false
   }
 
   const storage: Storage = {
@@ -130,20 +142,29 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     },
     // Keys
     async getKeys (base) {
-      base = normalizeBase(base)
-      const keyGroups = await Promise.all(getMounts(base).map(async (mount) => {
+      base = normalizeBaseKey(base)
+      const mounts = getMounts(base, true)
+      let maskedMounts = []
+      const allKeys = []
+      for (const mount of mounts) {
         const rawKeys = await asyncCall(mount.driver.getKeys, mount.relativeBase)
-        return rawKeys.map(key => mount.mountpoint + normalizeKey(key))
-      }))
-      const keys = keyGroups.flat()
+        const keys = rawKeys
+          .map(key => mount.mountpoint + normalizeKey(key))
+          .filter(key => !maskedMounts.find(p => key.startsWith(p)))
+        allKeys.push(...keys)
+
+        // When /mnt/foo is processed, any key in /mnt with /mnt/foo prefix should be masked
+        // Using filter to improve performance. /mnt mask already covers /mnt/foo
+        maskedMounts = [mount.mountpoint].concat(maskedMounts.filter(p => !p.startsWith(mount.mountpoint)))
+      }
       return base
-        ? keys.filter(key => key.startsWith(base!) && !key.endsWith('$'))
-        : keys.filter(key => !key.endsWith('$'))
+        ? allKeys.filter(key => key.startsWith(base!) && !key.endsWith('$'))
+        : allKeys.filter(key => !key.endsWith('$'))
     },
     // Utils
     async clear (base) {
-      base = normalizeBase(base)
-      await Promise.all(getMounts(base).map(async (m) => {
+      base = normalizeBaseKey(base)
+      await Promise.all(getMounts(base, false).map(async (m) => {
         if (m.driver.clear) {
           return asyncCall(m.driver.clear)
         }
@@ -161,10 +182,20 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     async watch (callback) {
       await startWatch()
       ctx.watchListeners.push(callback)
+      return async () => {
+        ctx.watchListeners = ctx.watchListeners.filter(listener => listener !== callback)
+        if (ctx.watchListeners.length === 0) {
+          await stopWatch()
+        }
+      }
+    },
+    async unwatch () {
+      ctx.watchListeners = []
+      await stopWatch()
     },
     // Mount
     mount (base, driver) {
-      base = normalizeBase(base)
+      base = normalizeBaseKey(base)
       if (base && ctx.mounts[base]) {
         throw new Error(`already mounted at ${base}`)
       }
@@ -175,14 +206,21 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       ctx.mounts[base] = driver
       if (ctx.watching) {
         Promise.resolve(watch(driver, onChange, base))
+          .then((unwatcher) => {
+            ctx.unwatch[base] = unwatcher
+          })
           .catch(console.error) // eslint-disable-line no-console
       }
       return storage
     },
     async unmount (base: string, _dispose = true) {
-      base = normalizeBase(base)
+      base = normalizeBaseKey(base)
       if (!base /* root */ || !ctx.mounts[base]) {
         return
+      }
+      if (ctx.watching && base in ctx.unwatch) {
+        ctx.unwatch[base]()
+        delete ctx.unwatch[base]
       }
       if (_dispose) {
         await dispose(ctx.mounts[base])
@@ -198,7 +236,7 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
 export type Snapshot<T=string> = Record<string, T>
 
 export async function snapshot (storage: Storage, base: string): Promise<Snapshot<string>> {
-  base = normalizeBase(base)
+  base = normalizeBaseKey(base)
   const keys = await storage.getKeys(base)
   const snapshot: any = {}
   await Promise.all(keys.map(async (key) => {
@@ -208,13 +246,15 @@ export async function snapshot (storage: Storage, base: string): Promise<Snapsho
 }
 
 export async function restoreSnapshot (driver: Storage, snapshot: Snapshot<StorageValue>, base: string = '') {
-  base = normalizeBase(base)
+  base = normalizeBaseKey(base)
   await Promise.all(Object.entries(snapshot).map(e => driver.setItem(base + e[0], e[1])))
 }
 
 function watch (driver: Driver, onChange: WatchCallback, base: string) {
   if (driver.watch) {
     return driver.watch((event, key) => onChange(event, base + key))
+  } else {
+    return () => undefined
   }
 }
 

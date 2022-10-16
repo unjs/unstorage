@@ -11,6 +11,8 @@ export interface FSStorageOptions {
   watchOptions?: WatchOptions
 }
 
+const PATH_TRAVERSE_RE = /\.\.\:|\.\.$/
+
 export default defineDriver((opts: FSStorageOptions = {}) => {
   if (!opts.base) {
     throw new Error('base is required')
@@ -24,7 +26,13 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   }
 
   opts.base = resolve(opts.base)
-  const r = (key: string) => join(opts.base!, key.replace(/:/g, '/'))
+  const r = (key: string) => {
+    if (PATH_TRAVERSE_RE.test(key)) {
+      throw new Error('[unstorage] [fs] Invalid key. It should not contain `..` segments: ' + key)
+    }
+    const resolved = join(opts.base!, key.replace(/:/g, '/'))
+    return resolved
+  }
 
   let _watcher: FSWatcher
 
@@ -67,7 +75,9 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
           ignored: opts.ignore,
           ...opts.watchOptions
         })
-          .on('ready', resolve)
+          .on('ready', () => {
+            resolve(() => _watcher.close().then(() => _watcher = undefined))
+          })
           .on('error', reject)
           .on('all', (eventName, path) => {
             path = relative(opts.base!, path)

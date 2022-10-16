@@ -1,3 +1,4 @@
+import { it, expect } from 'vitest'
 import { Storage, Driver, createStorage, restoreSnapshot } from '../../src'
 
 export interface TestContext {

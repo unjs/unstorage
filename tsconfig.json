@@ -1,21 +1,9 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "lib": [
-      "ES2019",
-      "DOM"
-    ],
+    "module": "ESNext",
     "moduleResolution": "Node",
-    "esModuleInterop": true,
-    "outDir": "dist",
-    "strict": true,
-    "types": [
-      "node",
-      "jest"
-    ],
-    "paths": {
-      "unstorage": [ "./src/types.ts" ]
-    }
+    "esModuleInterop": true
   },
   "include": [
     "src"

@@ -2,6 +2,94 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.5.6](https://github.com/unjs/unstorage/compare/v0.5.5...v0.5.6) (2022-08-01)
+
+
+### Bug Fixes
+
+* **fs:** disallow keys containing `..` ([d628fab](https://github.com/unjs/unstorage/commit/d628fab73b4cf83758f08817b275a223725714ab))
+
+### [0.5.5](https://github.com/unjs/unstorage/compare/v0.5.4...v0.5.5) (2022-07-15)
+
+
+### Bug Fixes
+
+* **github:** trim leading slash on `dir` prefix paths ([#74](https://github.com/unjs/unstorage/issues/74)) ([3a117b7](https://github.com/unjs/unstorage/commit/3a117b7a95176c929f30cc2412815ac715bddc2a))
+* **redis:** fix reference in `clear()` method ([#70](https://github.com/unjs/unstorage/issues/70)) ([7aea0ff](https://github.com/unjs/unstorage/commit/7aea0ffb74e15f50a8a7e06ecaa3e3d1b50f7af6))
+
+### [0.5.4](https://github.com/unjs/unstorage/compare/v0.5.3...v0.5.4) (2022-06-29)
+
+
+### Bug Fixes
+
+* update builtinDrivers mapping ([ebf8d1b](https://github.com/unjs/unstorage/commit/ebf8d1b4d5853e339204b9277845de942182da51))
+
+### [0.5.3](https://github.com/unjs/unstorage/compare/v0.5.2...v0.5.3) (2022-06-29)
+
+
+### Features
+
+* export `BuiltinDriverName` type and kebab-case names ([f6a941c](https://github.com/unjs/unstorage/commit/f6a941c59443340c1bd3101ab7f842e01abe5bcb))
+
+### [0.5.2](https://github.com/unjs/unstorage/compare/v0.5.1...v0.5.2) (2022-06-23)
+
+
+### Bug Fixes
+
+* upgrade mkdist ([ad216c6](https://github.com/unjs/unstorage/commit/ad216c6e02dac05d7695a955672042141b688d43))
+
+### [0.5.1](https://github.com/unjs/unstorage/compare/v0.5.0...v0.5.1) (2022-06-22)
+
+
+### Bug Fixes
+
+* **cloudflare:** add prefix key for cloudflare kv list operation ([#64](https://github.com/unjs/unstorage/issues/64)) ([ad13230](https://github.com/unjs/unstorage/commit/ad132304b372e5271c6a7e9ed1c4b2f29a7b1b67))
+* **cloudflare:** use `@cloudflare/workers-types` ([eeeac83](https://github.com/unjs/unstorage/commit/eeeac838961682a6af60ffa4f732ceb4dc2e0caf))
+
+## [0.5.0](https://github.com/unjs/unstorage/compare/v0.4.1...v0.5.0) (2022-06-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename `cloudflare-kv` to `cloudflare-kv-binding`
+
+### Features
+
+* `cloudflare-kv-http` driver ([#55](https://github.com/unjs/unstorage/issues/55)) ([b2159d7](https://github.com/unjs/unstorage/commit/b2159d7afc71523d1651fc3c6dd7a730ceb55182))
+* `github` driver ([#61](https://github.com/unjs/unstorage/issues/61)) ([5ddb41a](https://github.com/unjs/unstorage/commit/5ddb41ae84ef98b8100636f42c8c0e79cc1916b0))
+* expose `builtinDrivers` ([be34d5e](https://github.com/unjs/unstorage/commit/be34d5e71861162321103dd57ba6767e8bad9e4d))
+
+
+* rename `cloudflare-kv` to `cloudflare-kv-binding` ([e361f36](https://github.com/unjs/unstorage/commit/e361f36484325587ce2bc1fcdeac3ab602bcf1dc))
+
+### [0.4.1](https://github.com/unjs/unstorage/compare/v0.4.0...v0.4.1) (2022-05-04)
+
+
+### Features
+
+* expose key utils `normalizeKey`, `joinKeys` and `normalizeBaseKey` ([be81fa8](https://github.com/unjs/unstorage/commit/be81fa892740d35c29c162fc2efc97924518d520))
+
+## [0.4.0](https://github.com/unjs/unstorage/compare/v0.3.3...v0.4.0) (2022-05-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* use `./dist` for all subpath exports
+
+### Features
+
+* overlay driver ([588881e](https://github.com/unjs/unstorage/commit/588881eb878ba3fad4ab306cf981f0b2dd9f4f9b))
+
+
+### Bug Fixes
+
+* handle mount overrides ([#45](https://github.com/unjs/unstorage/issues/45)) ([092e539](https://github.com/unjs/unstorage/commit/092e539302b1f51e109dd4756099aab71452755c))
+
+
+### build
+
+* use `./dist` for all subpath exports ([4f2a211](https://github.com/unjs/unstorage/commit/4f2a211a1497afc34c8bd19183ae065ecac3d51c))
+
 ### [0.3.3](https://github.com/unjs/unstorage/compare/v0.3.2...v0.3.3) (2021-11-18)
 
 

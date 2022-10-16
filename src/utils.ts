@@ -1,7 +1,8 @@
 import type { Storage } from './types'
-import { normalizeBase } from './_utils'
 
-const storageKeyProps: (keyof Storage)[] = [
+type StorageKeys = Array<keyof Storage>
+
+const storageKeyProps: StorageKeys = [
   'hasItem',
   'getItem',
   'setItem',
@@ -15,8 +16,8 @@ const storageKeyProps: (keyof Storage)[] = [
   'unmount'
 ]
 
-export function prefixStorage (storage: Storage, base: string): Storage {
-  base = normalizeBase(base)
+export function prefixStorage (storage: Storage, base: string) {
+  base = normalizeBaseKey(base)
   if (!base) {
     return storage
   }
@@ -32,4 +33,18 @@ export function prefixStorage (storage: Storage, base: string): Storage {
       .then(keys => keys.map(key => key.substr(base.length)))
 
   return nsStorage
+}
+
+export function normalizeKey (key?: string) {
+  if (!key) { return '' }
+  return key.replace(/[/\\]/g, ':').replace(/:+/g, ':').replace(/^:|:$/g, '')
+}
+
+export function joinKeys (...keys: string[]) {
+  return normalizeKey(keys.join(':'))
+}
+
+export function normalizeBaseKey (base?: string) {
+  base = normalizeKey(base)
+  return base ? (base + ':') : ''
 }

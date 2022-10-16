@@ -14,3 +14,8 @@ export function isPrimitive (arg: any) {
 export function stringify (arg: any) {
   return isPrimitive(arg) ? (arg + '') : JSON.stringify(arg)
 }
+
+export function normalizeKey (key: string | undefined): string {
+  if (!key) { return '' }
+  return key.replace(/[/\\]/g, ':').replace(/^:|:$/g, '')
+}

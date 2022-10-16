@@ -1,8 +1,7 @@
 import { defineDriver } from './utils'
+import Redis, { RedisOptions as _RedisOptions } from 'ioredis'
 
-import Redis from 'ioredis'
-
-export interface RedisOptions extends Redis.RedisOptions {
+export interface RedisOptions extends _RedisOptions {
   base: string
   url: string
 }
@@ -32,7 +31,7 @@ export default defineDriver<RedisOptions>((_opts) => {
       return redis.keys(r('*'))
     },
     async clear() {
-      const keys = await this.getKeys()
+      const keys = await redis.keys(r('*'))
       return redis.del(keys.map(key => r(key))).then(() => {})
     },
     dispose() {

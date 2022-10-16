@@ -31,8 +31,8 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
 ✔️ Driver agnostic watcher <br>
 ✔️ HTTP Storage server (cli and programmatic) <br>
 ✔️ Namespaced storage <br>
+✔️ Overlay storage (copy-on-write) <br>
 <br>
-🚧 Overlay storage (copy-on-write) <br>
 🚧 Virtual `fs` interface <br>
 🚧 Cached storage <br>
 🚧 More drivers: MongoDB, S3 and IndexedDB<br>
@@ -57,6 +57,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`storage.mount(mountpoint, driver)`](#storagemountmountpoint-driver)
   - [`storage.unmount(mountpoint, dispose = true)`](#storageunmountmountpoint-dispose--true)
   - [`storage.watch(callback)`](#storagewatchcallback)
+  - [`storage.unwatch()`](#storageunwatch)
 - [Utils](#utils)
   - [`snapshot(storage, base?)`](#snapshotstorage-base)
   - [`restoreSnapshot(storage, data, base?)`](#restoresnapshotstorage-data-base)
@@ -66,9 +67,11 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`fs` (node)](#fs-node)
   - [`localStorage` (browser)](#localstorage-browser)
   - [`memory` (universal)](#memory-universal)
+  - [`overlay` (universal)](#overlay-universal)
   - [`http` (universal)](#http-universal)
   - [`redis`](#redis)
-  - [`cloudflare-kv`](#cloudflare-kv)
+  - [`cloudflare-kv-http`](#cloudflare-kv-http)
+  - [`cloudflare-kv-binding`](#cloudflare-kv-binding)
   - [`git`](#git)
 - [Making custom drivers](#making-custom-drivers)
 - [Contribution](#contribution)
@@ -231,8 +234,19 @@ await storage.unmount('/output')
 Starts watching on all mountpoints. If driver does not supports watching, only emits even when `storage.*` methods are called.
 
 ```js
-await storage.watch((event, key) => { })
+const unwatch = await storage.watch((event, key) => { })
+// to stop this watcher
+await unwatch()
 ```
+
+### `storage.unwatch()`
+
+Stop all watchers on all mountpoints.
+
+```js
+await storage.unwatch()
+```
+
 
 ## Utils
 
@@ -288,8 +302,8 @@ import { createStorageServer } from 'unstorage/server'
 const storage = createStorage()
 const storageServer = createStorageServer(storage)
 
-// Alternatively we can use `storage.handle` as a middleware
-await listen(storage.handle)
+// Alternatively we can use `storageServer.handle` as a middleware
+await listen(storageServer.handle)
 ```
 
 **Using CLI:**
@@ -303,7 +317,7 @@ npx unstorage .
 - `GET`: Maps to `storage.getItem`. Returns list of keys on path if value not found.
 - `HEAD`: Maps to `storage.hasItem`. Returns 404 if not found.
 - `PUT`: Maps to `storage.setItem`. Value is read from body and returns `OK` if operation succeeded.
-- `DELETE`: Maps to `storage.removeIterm`. Returns `OK` if operation succeeded.
+- `DELETE`: Maps to `storage.removeItem`. Returns `OK` if operation succeeded.
 
 ## Drivers
 
@@ -362,6 +376,32 @@ const storage = createStorage({
 })
 ```
 
+### `overlay` (universal)
+
+This is a special driver that creates a multi-layer overlay driver.
+
+All write operations happen on the top level layer while values are read from all layers.
+
+When removing a key, a special value `__OVERLAY_REMOVED__` will be set on the top level layer internally.
+
+In the example below, we create an in-memory overlay on top of fs. No changes will be actually written to the disk.
+
+```js
+import { createStorage } from 'unstorage'
+import overlay from 'unstorage/drivers/overlay'
+import memory from 'unstorage/drivers/memory'
+import fs from 'unstorage/drivers/fs'
+
+const storage = createStorage({
+  driver: overlay({
+    layers: [
+      memory(),
+      fs({ base: './data' })
+    ]
+  })
+})
+```
+
 ### `http` (universal)
 
 Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server](#storage-server) methods.
@@ -386,7 +426,7 @@ const storage = createStorage({
 - `getItem`: Maps to http `GET`. Returns deserialized value if response is ok
 - `hasItem`: Maps to http `HEAD`. Returns `true` if response is ok (200)
 - `setItem`: Maps to http `PUT`. Sends serialized value using body
-- `removeIterm`: Maps to `DELETE`
+- `removeItem`: Maps to `DELETE`
 - `clear`: Not supported
 
 ### `redis`
@@ -413,39 +453,129 @@ See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-h
 
 `lazyConnect` option is enabled by default so that connection happens on first redis operation.
 
+### `cloudflare-kv-http`
 
-### `cloudflare-kv`
+Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/learning/how-kv-works/) using the [Cloudflare API v4](https://api.cloudflare.com/).
 
-Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv).
+You need to create a KV namespace. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
+
+**Note:** This driver uses native fetch and works universally! For using directly in a cloudflare worker environemnt, please use `cloudflare-kv-binding` driver for best performance!
+
+```js
+import { createStorage } from 'unstorage'
+import cloudflareKVHTTPDriver from 'unstorage/drivers/cloudflare-kv-http'
+
+// Using `apiToken`
+const storage = createStorage({
+  driver: cloudflareKVHTTPDriver({
+    accountId: 'my-account-id',
+    namespaceId: 'my-kv-namespace-id',
+    apiToken: 'supersecret-api-token',
+  }),
+})
+
+// Using `email` and `apiKey`
+const storage = createStorage({
+  driver: cloudflareKVHTTPDriver({
+    accountId: 'my-account-id',
+    namespaceId: 'my-kv-namespace-id',
+    email: 'me@example.com',
+    apiKey: 'my-api-key',
+  }),
+})
+
+// Using `userServiceKey`
+const storage = createStorage({
+  driver: cloudflareKVHTTPDriver({
+    accountId: 'my-account-id',
+    namespaceId: 'my-kv-namespace-id',
+    userServiceKey: 'v1.0-my-service-key',
+  }),
+})
+```
+
+**Options:**
+
+- `accountId`: Cloudflare account ID.
+- `namespaceId`: The ID of the KV namespace to target. **Note:** be sure to use the namespace's ID, and not the name or binding used in a worker environment.
+- `apiToken`: API Token generated from the [User Profile 'API Tokens' page](https://dash.cloudflare.com/profile/api-tokens).
+- `email`: Email address associated with your account. May be used along with `apiKey` to authenticate in place of `apiToken`.
+- `apiKey`: API key generated on the "My Account" page of the Cloudflare console. May be used along with `email` to authenticate in place of `apiToken`.
+- `userServiceKey`: A special Cloudflare API key good for a restricted set of endpoints. Always begins with "v1.0-", may vary in length. May be used to authenticate in place of `apiToken` or `apiKey` and `email`.
+- `apiURL`: Custom API URL. Default is `https://api.cloudflare.com`.
+
+**Supported methods:**
+
+- `getItem`: Maps to [Read key-value pair](https://api.cloudflare.com/#workers-kv-namespace-read-key-value-pair) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
+- `hasItem`: Maps to [Read key-value pair](https://api.cloudflare.com/#workers-kv-namespace-read-key-value-pair) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`. Returns `true` if `<parsed response body>.success` is `true`.
+- `setItem`: Maps to [Write key-value pair](https://api.cloudflare.com/#workers-kv-namespace-write-key-value-pair) `PUT accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
+- `removeItem`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-key-value-pair) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
+- `getKeys`: Maps to [List a Namespace's Keys](https://api.cloudflare.com/#workers-kv-namespace-list-a-namespace-s-keys) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/keys`
+- `clear`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-multiple-key-value-pairs) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/bulk`
+
+### `cloudflare-kv-binding`
+
+Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv) and access from worker bindings.
+
+**Note:** This driver only works in a cloudflare worker environment! Use `cloudflare-kv-http` for other environments.
 
 You need to create and assign a KV. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
 
 ```js
 import { createStorage } from 'unstorage'
-import cloudflareKVDriver from 'unstorage/drivers/cloudflare-kv'
+import cloudflareKVBindingDriver from 'unstorage/drivers/cloudflare-kv-binding'
 
 // Using binding name to be picked from globalThis
 const storage = createStorage({
-  driver: cloudflareKVDriver({ binding: 'STORAGE' })
+  driver: cloudflareKVBindingDriver({ binding: 'STORAGE' })
 })
 
 // Directly setting binding
 const storage = createStorage({
-  driver: cloudflareKVDriver({ binding: globalThis.STORAGE })
+  driver: cloudflareKVBindingDriver({ binding: globalThis.STORAGE })
 })
 
 // Using from Durable Objects and Workers using Modules Syntax
 const storage = createStorage({
-  driver: cloudflareKVDriver({ binding: this.env.STORAGE })
+  driver: cloudflareKVBindingDriver({ binding: this.env.STORAGE })
 })
 
 // Using outside of Cloudflare Workers (like Node.js)
-// Not supported Yet!
+// Use cloudflare-kv-http!
 ```
 
 **Options:**
 
 - `binding`: KV binding or name of namespace. Default is `STORAGE`.
+
+### `github`
+
+Map files from a remote github repository. (readonly)
+
+This driver fetches all possible keys once and keep it in cache for 10 minutes. Because of github rate limit, it is highly recommanded to provide a token. It only applies to fetching keys.
+
+```js
+import { createStorage } from 'unstorage'
+import githubDriver from 'unstorage/drivers/github'
+
+const storage = createStorage({
+  driver: githubDriver({
+    repo: 'nuxt/framework',
+    branch: 'main',
+    dir: '/docs/content'
+  })
+})
+```
+
+**Options:**
+
+- **`repo`**: Github repository. Format is `username/repo` or `org/repo`. (Required!)
+- **`token`**: Github API token. (Recommended!)
+- `branch`: Target branch. Default is `main`
+- `dir`: Use a directory as driver root.
+- `ttl`: Filenames cache revalidate time. Default is `600` seconds (10 minutes)
+- `apiURL`: Github API domain. Default is `https://api.github.com`
+- `cdnURL`: Github RAW CDN Url. Default is `https://raw.githubusercontent.com`
 
 ### `git`
 
@@ -464,7 +594,6 @@ const storage = createStorage({
 const storage = createStorage({
   driver: gitDriver({ url: 'https://github.com/unjs/unstorage', ref: 'my-branch' })
 })
-
 ```
 
 **Options:**
@@ -472,8 +601,8 @@ const storage = createStorage({
 - `url`: The URL of the remote repository
 - `ref`: Which branch to checkout. By default this is the designated "main branch" of the repository.
 - `path`: Which path inside repository should be used as storage root.
-- `auth.username`: Username for authorizing private repository. 
-- `auth.password`: Password for authorizing private repository. 
+- `auth.username`: Username for authorizing private repository.
+- `auth.password`: Password for authorizing private repository.
 
 ## Making custom drivers
 

@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import driver from '../../src/drivers/http'
 import { createStorage } from '../../src'
 import { createStorageServer } from '../../src/server'
@@ -8,7 +9,9 @@ describe('drivers: http', () => {
     const storage = createStorage()
     const server = createStorageServer(storage)
 
-    const { url, close } = await listen(server.handle)
+    const { url, close } = await listen(server.handle, {
+      port: { random: true }
+    })
     storage.mount('/http', driver({ base: url }))
 
     expect(await storage.hasItem('/http/foo')).toBe(false)

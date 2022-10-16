@@ -98,7 +98,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const hasItem = async (key: string) => {
     try {
       const res = await kvFetch(`/metadata/${key}`)
-      return !!(res?.success)
+      return res?.success === true
     } catch (err) {
       if (!err.response) { throw err }
       if (err.response.status === 404) { return false }

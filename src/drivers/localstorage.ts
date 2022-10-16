@@ -51,22 +51,19 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
       }
     },
     watch(callback) {
-      let unwatcher = () => undefined
-      
-      if (opts.window) {
-        _storageListener = (ev: StorageEvent) => {
-          if (ev.key) {
-            callback(ev.newValue ? 'update' : 'remove', ev.key)
-          }
-        }
-        unwatcher = () => {
-          opts.window.removeEventListener('storage', _storageListener)
-          _storageListener = undefined
-        }
-        opts.window.addEventListener('storage', _storageListener)
+      if (!opts.window) {
+        return
       }
-
-      return unwatcher
+      _storageListener = (ev: StorageEvent) => {
+        if (ev.key) {
+          callback(ev.newValue ? 'update' : 'remove', ev.key)
+        }
+      }
+      opts.window.addEventListener('storage', _storageListener)
+      return () => {
+        opts.window.removeEventListener('storage', _storageListener)
+        _storageListener = undefined
+      }
     }
   }
 })

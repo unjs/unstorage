@@ -3,7 +3,8 @@ export type WatchEvent = 'update' | 'remove'
 export type WatchCallback = (event: WatchEvent, key: string) => any
 
 type MaybePromise<T> = T | Promise<T>
-export type Unwatcher = () => MaybePromise<void>
+
+export type Unwatch = () => MaybePromise<void>
 
 export interface StorageMeta {
   atime?: Date
@@ -20,7 +21,7 @@ export interface Driver {
   getKeys: (base?: string) => MaybePromise<string[]>
   clear?: () => MaybePromise<void>
   dispose?: () => MaybePromise<void>
-  watch?: (callback: WatchCallback) => MaybePromise<Unwatcher>
+  watch?: (callback: WatchCallback) => MaybePromise<Unwatch>
 }
 
 export interface Storage {
@@ -38,7 +39,7 @@ export interface Storage {
   // Utils
   clear: (base?: string) => Promise<void>
   dispose: () => Promise<void>
-  watch: (callback: WatchCallback) => Promise<Unwatcher>
+  watch: (callback: WatchCallback) => Promise<Unwatch>
   unwatch: () => Promise<void>
   // Mount
   mount: (base: string, driver: Driver) => Storage

@@ -28,6 +28,7 @@ specifiers:
   monaco-editor: ^0.34.0
   mri: ^1.2.0
   msw: ^0.47.4
+  node-fetch-native: ^0.1.8
   ohmyfetch: ^0.4.19
   standard-version: ^9.5.0
   types-cloudflare-worker: ^1.2.0
@@ -49,6 +50,7 @@ dependencies:
   listhen: 0.3.4
   mkdir: 0.0.2
   mri: 1.2.0
+  node-fetch-native: 0.1.8
   ohmyfetch: 0.4.19
   ufo: 0.8.6
   ws: 8.9.0
@@ -4586,8 +4588,8 @@ packages:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
     dev: true
 
-  /node-fetch-native/0.1.7:
-    resolution: {integrity: sha512-hps7dFJM0IEF056JftDSSjWDAwW9v2clwHoUJiHyYgl+ojoqjKyWybljMlpTmlC1O+864qovNlRLyAIjRxu9Ag==}
+  /node-fetch-native/0.1.8:
+    resolution: {integrity: sha512-ZNaury9r0NxaT2oL65GvdGDy+5PlSaHTovT6JV5tOW07k1TQmgC0olZETa4C9KZg0+6zBr99ctTYa3Utqj9P/Q==}
     dev: false
 
   /node-fetch/2.6.7:
@@ -4683,7 +4685,7 @@ packages:
     resolution: {integrity: sha512-OH2xVeRPNsHkx+JFdq1ewe9EwVDfTrv6lsBHpIx8wIWXowP5FyLhhYVaXIVlPsW542rt7gmwK14FwIDWUXEO+Q==}
     dependencies:
       destr: 1.1.1
-      node-fetch-native: 0.1.7
+      node-fetch-native: 0.1.8
       ufo: 0.8.6
       undici: 5.11.0
     dev: false

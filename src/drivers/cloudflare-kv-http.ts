@@ -96,13 +96,25 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const kvFetch = $fetch.create({ baseURL, headers })
 
   const hasItem = async (key: string) => {
-    const { success } = await kvFetch(`/values/${key}`)
-    return success
+    try {
+      const res = await kvFetch(`/metadata/${key}`)
+      return res?.success === true
+    } catch (err) {
+      if (!err.response) { throw err }
+      if (err.response.status === 404) { return false }
+      throw err
+    }
   }
 
   const getItem = async (key: string) => {
-    const { result } = await kvFetch(`/values/${key}`)
-    return result
+    try {
+      // Cloudflare API returns with `content-type: application/octet-stream`
+      return await kvFetch(`/values/${key}`).then(r => r.text())
+    } catch (err) {
+      if (!err.response) { throw err }
+      if (err.response.status === 404) { return null }
+      throw err
+    }
   }
 
   const setItem = async (key: string, value: any) => {

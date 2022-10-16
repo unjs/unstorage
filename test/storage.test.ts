@@ -25,7 +25,29 @@ describe('storage', () => {
     const storage = createStorage().mount('/mnt', memory())
     await storage.watch(onChange)
     await restoreSnapshot(storage, data, 'mnt')
+    expect(onChange).toHaveBeenCalledWith('update', 'mnt:etc:conf')
     expect(onChange).toHaveBeenCalledWith('update', 'mnt:data:foo')
+    expect(onChange).toHaveBeenCalledTimes(2)
+  })
+
+  it('unwatch return', async () => {
+    const onChange = vi.fn()
+    const storage = createStorage().mount('/mnt', memory())
+    const unwatch = await storage.watch(onChange)
+    await storage.setItem('mnt:data:foo', 42)
+    await unwatch()
+    await storage.setItem('mnt:data:foo', 41)
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('unwatch all', async () => {
+    const onChange = vi.fn()
+    const storage = createStorage().mount('/mnt', memory())
+    await storage.watch(onChange)
+    await storage.setItem('mnt:data:foo', 42)
+    await storage.unwatch()
+    await storage.setItem('mnt:data:foo', 41)
+    expect(onChange).toHaveBeenCalledTimes(1)
   })
 
   it('mount overides', async () => {

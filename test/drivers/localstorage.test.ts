@@ -31,6 +31,34 @@ describe('drivers: localstorage', () => {
 
         expect(watcher).toHaveBeenCalledWith('update', 's1:random_file')
       })
+      it('unwatch localstorage', async () => {
+        const watcher = vi.fn()
+        const unwatch = await ctx.storage.watch(watcher)
+
+        // Emulate
+        // jsdom.window.localStorage.setItem('s1:random_file', 'random')
+        const ev = jsdom.window.document.createEvent('CustomEvent')
+        ev.initEvent('storage', true)
+        // @ts-ignore
+        ev.key = 's1:random_file'
+        // @ts-ignore
+        ev.newValue = 'random'
+        const ev2 = jsdom.window.document.createEvent('CustomEvent')
+        ev2.initEvent('storage', true)
+        // @ts-ignore
+        ev2.key = 's1:random_file2'
+        // @ts-ignore
+        ev2.newValue = 'random'
+        
+        jsdom.window.dispatchEvent(ev)
+
+        await unwatch()
+        
+        jsdom.window.dispatchEvent(ev2)
+
+        expect(watcher).toHaveBeenCalledWith('update', 's1:random_file')
+        expect(watcher).toHaveBeenCalledTimes(1)
+      })
     })
   })
 })

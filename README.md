@@ -57,6 +57,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
   - [`storage.mount(mountpoint, driver)`](#storagemountmountpoint-driver)
   - [`storage.unmount(mountpoint, dispose = true)`](#storageunmountmountpoint-dispose--true)
   - [`storage.watch(callback)`](#storagewatchcallback)
+  - [`storage.unwatch()`](#storageunwatch)
 - [Utils](#utils)
   - [`snapshot(storage, base?)`](#snapshotstorage-base)
   - [`restoreSnapshot(storage, data, base?)`](#restoresnapshotstorage-data-base)
@@ -233,8 +234,19 @@ await storage.unmount('/output')
 Starts watching on all mountpoints. If driver does not supports watching, only emits even when `storage.*` methods are called.
 
 ```js
-await storage.watch((event, key) => { })
+const unwatch = await storage.watch((event, key) => { })
+// to stop this watcher
+await unwatch()
 ```
+
+### `storage.unwatch()`
+
+Stop all watchers on all mountpoints.
+
+```js
+await storage.unwatch()
+```
+
 
 ## Utils
 

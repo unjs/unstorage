@@ -1,5 +1,5 @@
 import destr from 'destr'
-import type { Storage, Driver, WatchCallback, StorageValue } from './types'
+import type { Storage, Driver, WatchCallback, Unwatch, StorageValue } from './types'
 import memory from './drivers/memory'
 import { asyncCall, stringify } from './_utils'
 import { normalizeKey, normalizeBaseKey } from './utils'
@@ -8,6 +8,7 @@ interface StorageCTX {
   mounts: Record<string, Driver>
   mountpoints: string[]
   watching: boolean
+  unwatch: Record<string, Unwatch>
   watchListeners: Function[]
 }
 
@@ -20,7 +21,8 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     mounts: { '': opts.driver || memory() },
     mountpoints: [''],
     watching: false,
-    watchListeners: []
+    watchListeners: [],
+    unwatch: {}
   }
 
   const getMount = (key: string) => {
@@ -60,8 +62,17 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     if (ctx.watching) { return }
     ctx.watching = true
     for (const mountpoint in ctx.mounts) {
-      await watch(ctx.mounts[mountpoint], onChange, mountpoint)
+      ctx.unwatch[mountpoint] = await watch(ctx.mounts[mountpoint], onChange, mountpoint)
     }
+  }
+
+  const stopWatch = async () => {
+    if (!ctx.watching) { return }
+    for (const mountpoint in ctx.unwatch) {
+      await ctx.unwatch[mountpoint]()
+    }
+    ctx.unwatch = {}
+    ctx.watching = false
   }
 
   const storage: Storage = {
@@ -171,6 +182,16 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
     async watch (callback) {
       await startWatch()
       ctx.watchListeners.push(callback)
+      return async () => {
+        ctx.watchListeners = ctx.watchListeners.filter(listener => listener !== callback)
+        if (ctx.watchListeners.length === 0) {
+          await stopWatch()
+        }
+      }
+    },
+    async unwatch () {
+      ctx.watchListeners = []
+      await stopWatch()
     },
     // Mount
     mount (base, driver) {
@@ -185,6 +206,9 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       ctx.mounts[base] = driver
       if (ctx.watching) {
         Promise.resolve(watch(driver, onChange, base))
+          .then((unwatcher) => {
+            ctx.unwatch[base] = unwatcher
+          })
           .catch(console.error) // eslint-disable-line no-console
       }
       return storage
@@ -193,6 +217,10 @@ export function createStorage (opts: CreateStorageOptions = {}): Storage {
       base = normalizeBaseKey(base)
       if (!base /* root */ || !ctx.mounts[base]) {
         return
+      }
+      if (ctx.watching && base in ctx.unwatch) {
+        ctx.unwatch[base]()
+        delete ctx.unwatch[base]
       }
       if (_dispose) {
         await dispose(ctx.mounts[base])
@@ -225,6 +253,8 @@ export async function restoreSnapshot (driver: Storage, snapshot: Snapshot<Stora
 function watch (driver: Driver, onChange: WatchCallback, base: string) {
   if (driver.watch) {
     return driver.watch((event, key) => onChange(event, base + key))
+  } else {
+    return () => undefined
   }
 }
 

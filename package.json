@@ -42,16 +42,16 @@
     "anymatch": "^3.1.2",
     "chokidar": "^3.5.3",
     "destr": "^1.1.1",
-    "h3": "^0.7.14",
-    "ioredis": "^5.2.2",
-    "listhen": "^0.2.15",
+    "h3": "^0.7.21",
+    "ioredis": "^5.2.3",
+    "listhen": "^0.3.4",
     "mri": "^1.2.0",
-    "ohmyfetch": "^0.4.18",
+    "ohmyfetch": "^0.4.19",
     "ufo": "^0.8.5",
-    "ws": "^8.8.1"
+    "ws": "^8.9.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^3.14.1",
+    "@cloudflare/workers-types": "^3.16.0",
     "@nuxtjs/eslint-config-typescript": "latest",
     "@types/ioredis": "latest",
     "@types/jsdom": "latest",
@@ -67,14 +67,14 @@
     "jsdom": "latest",
     "mkdist": "latest",
     "monaco-editor": "latest",
-    "msw": "^0.44.2",
+    "msw": "^0.47.4",
     "standard-version": "latest",
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "latest",
     "unbuild": "latest",
     "vite": "latest",
-    "vitest": "^0.21.0",
-    "vue": "^3.2.37"
+    "vitest": "^0.24.0",
+    "vue": "^3.2.40"
   },
-  "packageManager": "pnpm@7.9.0"
+  "packageManager": "pnpm@7.13.3"
 }

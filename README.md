@@ -23,7 +23,7 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
 ✔️ Asynchronous API <br>
 ✔️ Unix-style driver mounting to combine storages<br>
 ✔️ Default in-memory storage <br>
-✔️ Tree-shakable utils and tiny core <br>
+✔️ Tree-shakeable utils and tiny core <br>
 ✔️ Driver native and user provided metadata <br>
 ✔️ Native aware value serialization and deserialization <br>
 ✔️ Restore initial state (hydration) <br>

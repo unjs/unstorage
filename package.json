@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "anymatch": "^3.1.2",
+    "aws-sdk": "^2.1253.0",
     "chokidar": "^3.5.3",
     "destr": "^1.1.1",
     "h3": "^0.8.1",

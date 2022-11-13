@@ -513,6 +513,47 @@ const storage = createStorage({
 - `getKeys`: Maps to [List a Namespace's Keys](https://api.cloudflare.com/#workers-kv-namespace-list-a-namespace-s-keys) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/keys`
 - `clear`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-multiple-key-value-pairs) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/bulk`
 
+### `s3-sdk`
+
+**Note:** This uses the `aws-sdk`.
+
+If you want to use S3 from within a lambda-instance, extend your `serverless.yml` like this:
+
+```yml
+provider:
+  name: aws
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+       - s3:PutObject
+      Resource: "arn:aws:s3:::YOURBUCKETNAME/*"
+    - Effect: "Deny"
+      Action:
+        - s3:DeleteObject
+      Resource: "arn:aws:s3:::YOURBUCKETNAME/*"
+```
+
+**Options:**
+
+```js
+import { createStorage } from 'unstorage'
+import s3SDKDriver from 'unstorage/drivers/s3-sdk'
+
+// Using binding name to be picked from globalThis
+const storage = createStorage({
+  driver: s3SDKDriver({ bucket: 'YOURBUCKETNAME' })
+})
+```
+
+**Supported methods:**
+
+- `getKeys`: lists up to 1000 keys
+- `getMeta`: with lacking support for `atime`. S3-Metadata is wrapped in `s3`
+- `getItem` 
+- `hasItem`
+- `setItem`
+- `removeItem`
+
 ### `cloudflare-kv-binding`
 
 Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv) and access from worker bindings.

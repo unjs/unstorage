@@ -38,6 +38,10 @@ export default defineDriver((opts: S3SDKOptions) => {
         return { atime: undefined, mtime: undefined }
       })
     }
+
+    const r = (key: string) => {
+      return key.replace(/:/g, '/')
+    }
     
     return {
       getKeys() {
@@ -47,21 +51,28 @@ export default defineDriver((opts: S3SDKOptions) => {
       },
       getMeta,
       hasItem (key) {
-        return getMeta(key)
+        return getMeta(r(key))
         .then((meta) => !!meta.mtime)
       },
       getItem (key) {
-        return s3Client.getObject({ Key: key, ...p})
+        return s3Client.getObject({ Key: r(key), ...p})
         .promise()
         .then(d => d.Body.toString())
+        .catch(r => {
+          if (!['NotFound', 'NoSuchKey'].includes(r?.code)) {
+              throw(r)
+          }
+
+          return undefined
+        })
       },
       setItem(key, value) {
-        return s3Client.upload({ Key: key, Body: value, ...p })
+        return s3Client.upload({ Key: r(key), Body: value, ...p })
         .promise()
         .then(() => {})
       },
       removeItem (key) {
-        return s3Client.deleteObject({ Key: key, ...p })
+        return s3Client.deleteObject({ Key: r(key), ...p })
         .promise()
         .then(() => {})
       },

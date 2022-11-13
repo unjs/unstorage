@@ -547,12 +547,12 @@ const storage = createStorage({
 
 **Supported methods:**
 
-- `getKeys`: lists up to 1000 keys
-- `getMeta`: with lacking support for `atime`. S3-Metadata is wrapped in `s3`
-- `getItem` 
-- `hasItem`
-- `setItem`
-- `removeItem`
+- `getKeys()`: lists up to 1000 keys
+- `getMeta(yourKey, true)`: with lacking support for `atime`. S3-Metadata is wrapped in `s3`. Also make sure to set `nativeMetaOnly` to `true`
+- `getItem(yourKey)` 
+- `hasItem(yourKey)`
+- `setItem(yourKey, value)`
+- `removeItem(yourKey)`
 
 ### `cloudflare-kv-binding`
 

@@ -22,43 +22,49 @@ export default defineDriver((opts: S3SDKOptions) => {
     return s3Client.headObject({
       Key: key,
       ...p
-    }).promise().then(d => ({
-      atime: undefined,
-      mtime: d.LastModified,
-      s3: d
-    }))
-  }
-  
-  return {
-    getKeys() {
-      return s3Client.listObjects({ ...p })
-      .promise()
-      .then(d => d.Contents.map(o => o.Key))
-    },
-    getMeta,
-    hasItem (key) {
-      return getMeta(key)
-      .then(() => true)
-      .catch(r => {
-        if (r !== 'NotFound') {
+    })
+    .promise()
+    .then(d => { 
+      return {
+        atime: undefined,
+        mtime: d.LastModified,
+        s3: d
+      }})
+      .catch((r) => {
+        if (!['NotFound', 'NoSuchKey'].includes(r?.code)) {
           throw(r)
         }
-        return false
+        
+        return { atime: undefined, mtime: undefined }
       })
-    },
-    getItem (key) {
-      return s3Client.getObject({ Key: key, ...p})
+    }
+    
+    return {
+      getKeys() {
+        return s3Client.listObjects({ ...p })
         .promise()
-    },
-    setItem(key, value) {
-      return s3Client.upload({ Key: key, Body: value, ...p })
+        .then(d => d.Contents.map(o => o.Key))
+      },
+      getMeta,
+      hasItem (key) {
+        return getMeta(key)
+        .then((meta) => !!meta.mtime)
+      },
+      getItem (key) {
+        return s3Client.getObject({ Key: key, ...p})
+        .promise()
+        .then(d => d.Body.toString())
+      },
+      setItem(key, value) {
+        return s3Client.upload({ Key: key, Body: value, ...p })
         .promise()
         .then(() => {})
-    },
-    removeItem (key) {
-      return s3Client.deleteObject({ Key: key, ...p })
+      },
+      removeItem (key) {
+        return s3Client.deleteObject({ Key: key, ...p })
         .promise()
         .then(() => {})
-    },
-  }
-})
+      },
+    }
+  })
+  

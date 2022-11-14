@@ -31,7 +31,7 @@ specifiers:
   ohmyfetch: ^0.4.21
   types-cloudflare-worker: ^1.2.0
   typescript: ^4.8.4
-  ufo: ^0.8.6
+  ufo: ^1.0.0
   unbuild: ^0.9.4
   vite: ^3.2.3
   vitest: ^0.25.1
@@ -48,7 +48,7 @@ dependencies:
   mkdir: 0.0.2
   mri: 1.2.0
   ohmyfetch: 0.4.21
-  ufo: 0.8.6
+  ufo: 1.0.0
   ws: 8.11.0
 
 devDependencies:
@@ -5227,6 +5227,10 @@ packages:
 
   /ufo/0.8.6:
     resolution: {integrity: sha512-fk6CmUgwKCfX79EzcDQQpSCMxrHstvbLswFChHS0Vump+kFkw7nJBfTZoC1j0bOGoY9I7R3n2DGek5ajbcYnOw==}
+
+  /ufo/1.0.0:
+    resolution: {integrity: sha512-DRty0ZBNlJ2R59y4mEupJRKLbkLQsc4qtxjpQv78AwEDuBkaUogMc2LkeqW3HddFlw6NwnXYfdThEZOiNgkmmQ==}
+    dev: false
 
   /unbox-primitive/1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}

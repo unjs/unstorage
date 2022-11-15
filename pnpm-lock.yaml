@@ -17,7 +17,7 @@ specifiers:
   doctoc: ^2.2.1
   eslint: ^8.27.0
   eslint-config-unjs: ^0.0.2
-  h3: ^0.8.6
+  h3: ^1.0.1
   ioredis: ^5.2.4
   jiti: ^1.16.0
   jsdom: ^20.0.2
@@ -40,7 +40,7 @@ dependencies:
   anymatch: 3.1.2
   chokidar: 3.5.3
   destr: 1.2.1
-  h3: 0.8.6
+  h3: 1.0.1
   ioredis: 5.2.4
   listhen: 1.0.0
   mkdir: 0.0.2
@@ -3085,13 +3085,13 @@ packages:
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
     dev: true
 
-  /h3/0.8.6:
-    resolution: {integrity: sha512-CSWNOKa3QGo67rFU2PhbFTp0uPJtilNji2Z0pMiSRQt3+OkIW0u3E1WMJqIycLqaTgb9JyFqH/S4mcTyyGtvyQ==}
+  /h3/1.0.1:
+    resolution: {integrity: sha512-gDCGpRvjchZW2JBlTqbJ9IOs+mdkXXuwSQkSye+jubHAv/UhdamKqoQvd4RFgyBNjHSId8Y+b10UdTcPlP/V+w==}
     dependencies:
       cookie-es: 0.5.0
       destr: 1.2.1
-      radix3: 0.2.1
-      ufo: 0.8.6
+      radix3: 1.0.0
+      ufo: 1.0.0
     dev: false
 
   /has-bigints/1.0.2:
@@ -4522,8 +4522,8 @@ packages:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
     dev: true
 
-  /radix3/0.2.1:
-    resolution: {integrity: sha512-FnhArTl5Tq7dodiLeSPKrDUyCQuJqEncP8cKdyy399g8F/cz7GH6FmzA3Rkosu2IZMkpswFFwXfb2ERSiL06pg==}
+  /radix3/1.0.0:
+    resolution: {integrity: sha512-6n3AEXth91ASapMVKiEh2wrbFJmI+NBilrWE0AbiGgfm0xet0QXC8+a3K19r1UVYjUjctUgB053c3V/J6V0kCQ==}
     dev: false
 
   /rc9/1.2.2:

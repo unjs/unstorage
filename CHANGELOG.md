@@ -2,37 +2,7 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## v0.5.6...v0.6.0
-
-[compare changes](https://github.com/unjs/unstorage/compare/v0.5.6...v0.6.0)
-
-
-### 🚀 Enhancements
-
-  - Add unwatch functions ([#82](https://github.com/unjs/unstorage/pull/82))
-
-### 🩹 Fixes
-
-  - **server:** Fix typo in 405 `statusMessage` ([#84](https://github.com/unjs/unstorage/pull/84))
-  - **cloudflare-kv-http:** HasItem and getItem ([#81](https://github.com/unjs/unstorage/pull/81))
-
-### 📖 Documentation
-
-  - Fix `storageServer.handle` example ([#83](https://github.com/unjs/unstorage/pull/83))
-
-### 🏡 Chore
-
-  - Update h3 to 0.8.0 and other dependencies to latest ([7ffb38f](https://github.com/unjs/unstorage/commit/7ffb38f))
-  - Fix ci ([b3a249f](https://github.com/unjs/unstorage/commit/b3a249f))
-  - Ignore local test files ([38ae640](https://github.com/unjs/unstorage/commit/38ae640))
-  - Swtich to changelogen ([e6234c4](https://github.com/unjs/unstorage/commit/e6234c4))
-
-### ❤️  Contributors
-
-- Alexander Lichter
-- Pooya Parsa
-- Qin Guan
-- Sacha STAFYNIAK
+## [1.0.0](https://github.com/unjs/unstorage/compare/v0.6.0...v1.0.0) (2022-11-15)
 
 ## [0.5.0](https://github.com/unjs/unstorage/compare/v0.4.1...v0.5.0) (2022-06-13)
 

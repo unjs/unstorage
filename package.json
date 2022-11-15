@@ -68,7 +68,6 @@
     "eslint-config-unjs": "^0.0.2",
     "jiti": "^1.16.0",
     "jsdom": "^20.0.2",
-    "mkdist": "latest",
     "monaco-editor": "^0.34.1",
     "msw": "^0.48.2",
     "types-cloudflare-worker": "^1.2.0",

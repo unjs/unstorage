@@ -1,4 +1,4 @@
-import { $fetch } from 'ohmyfetch'
+import { $fetch } from 'ofetch'
 import { defineDriver } from './utils'
 
 const LOG_TAG = '[unstorage] [cloudflare-http] '

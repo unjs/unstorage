@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { listen } from "listhen";
-import { $fetch } from "ohmyfetch";
+import { $fetch } from "ofetch";
 import { createStorage } from "../src";
 import { createStorageServer } from "../src/server";
 

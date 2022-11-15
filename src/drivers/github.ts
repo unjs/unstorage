@@ -1,5 +1,5 @@
 import { defineDriver } from './utils'
-import { $fetch } from 'ohmyfetch'
+import { $fetch } from 'ofetch'
 import { withTrailingSlash, joinURL } from 'ufo'
 
 export interface GithubOptions {

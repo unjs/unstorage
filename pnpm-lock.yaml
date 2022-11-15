@@ -9,13 +9,13 @@ specifiers:
   '@types/node': ^18.11.9
   '@types/ws': ^8.5.3
   '@vitejs/plugin-vue': ^3.2.0
-  '@vitest/coverage-c8': ^0.25.1
+  '@vitest/coverage-c8': ^0.25.2
   '@vue/compiler-sfc': ^3.2.45
   anymatch: ^3.1.2
   c8: ^7.12.0
   changelogen: ^0.4.0
   chokidar: ^3.5.3
-  destr: ^1.2.0
+  destr: ^1.2.1
   doctoc: ^2.2.1
   eslint: ^8.27.0
   h3: ^0.8.6
@@ -34,14 +34,14 @@ specifiers:
   ufo: ^1.0.0
   unbuild: ^0.9.4
   vite: ^3.2.3
-  vitest: ^0.25.1
+  vitest: ^0.25.2
   vue: ^3.2.45
   ws: ^8.11.0
 
 dependencies:
   anymatch: 3.1.2
   chokidar: 3.5.3
-  destr: 1.2.0
+  destr: 1.2.1
   h3: 0.8.6
   ioredis: 5.2.4
   listhen: 0.3.5
@@ -60,7 +60,7 @@ devDependencies:
   '@types/node': 18.11.9
   '@types/ws': 8.5.3
   '@vitejs/plugin-vue': 3.2.0_vite@3.2.3+vue@3.2.45
-  '@vitest/coverage-c8': 0.25.1_jsdom@20.0.2
+  '@vitest/coverage-c8': 0.25.2_jsdom@20.0.2
   '@vue/compiler-sfc': 3.2.45
   c8: 7.12.0
   changelogen: 0.4.0
@@ -75,7 +75,7 @@ devDependencies:
   typescript: 4.8.4
   unbuild: 0.9.4
   vite: 3.2.3_@types+node@18.11.9
-  vitest: 0.25.1_jsdom@20.0.2
+  vitest: 0.25.2_jsdom@20.0.2
   vue: 3.2.45
 
 packages:
@@ -872,11 +872,11 @@ packages:
       vue: 3.2.45
     dev: true
 
-  /@vitest/coverage-c8/0.25.1_jsdom@20.0.2:
-    resolution: {integrity: sha512-gpl5QNaNeIN0mfRiosCqBFoZcizb5GA458TDnOQXkGDc4kklazxn70u9evGfV62wiiAUfGGebgRhxlBkAa6m6g==}
+  /@vitest/coverage-c8/0.25.2_jsdom@20.0.2:
+    resolution: {integrity: sha512-qKsiUJh3bjbB5Q229CbxEWCqiDBwvIrcZ9OOuQdMEC0pce3/LlTUK3+K3hd7WqAYEbbiqXfC5MVMKHZkV82PgA==}
     dependencies:
       c8: 7.12.0
-      vitest: 0.25.1_jsdom@20.0.2
+      vitest: 0.25.2_jsdom@20.0.2
     transitivePeerDependencies:
       - '@edge-runtime/vm'
       - '@vitest/browser'
@@ -1595,8 +1595,8 @@ packages:
     engines: {node: '>=0.10'}
     dev: false
 
-  /destr/1.2.0:
-    resolution: {integrity: sha512-JG+cG4ZPB1L27sl2C2URg8MIOmIUtTbE5wEx02BpmrTCqg/hXxFKXsYsnODl5PdpqNRaS1KQGUQ56V8jk8XpYQ==}
+  /destr/1.2.1:
+    resolution: {integrity: sha512-ud8w0qMLlci6iFG7CNgeRr8OcbUWMsbfjtWft1eJ5Luqrz/M8Ebqk/KCzne8rKUlIQWWfLv0wD6QHrqOf4GshA==}
 
   /dir-glob/3.0.1:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
@@ -3127,7 +3127,7 @@ packages:
     resolution: {integrity: sha512-CSWNOKa3QGo67rFU2PhbFTp0uPJtilNji2Z0pMiSRQt3+OkIW0u3E1WMJqIycLqaTgb9JyFqH/S4mcTyyGtvyQ==}
     dependencies:
       cookie-es: 0.5.0
-      destr: 1.2.0
+      destr: 1.2.1
       radix3: 0.2.1
       ufo: 0.8.6
     dev: false
@@ -4292,7 +4292,7 @@ packages:
   /ohmyfetch/0.4.21:
     resolution: {integrity: sha512-VG7f/JRvqvBOYvL0tHyEIEG7XHWm7OqIfAs6/HqwWwDfjiJ1g0huIpe5sFEmyb+7hpFa1EGNH2aERWR72tlClw==}
     dependencies:
-      destr: 1.2.0
+      destr: 1.2.1
       node-fetch-native: 0.1.8
       ufo: 0.8.6
       undici: 5.12.0
@@ -4604,7 +4604,7 @@ packages:
     resolution: {integrity: sha512-zbe8+HR2X28eZepAwohuKkebbEsA67h0DO9I7g12QrHa2CQopR9gztOLPIPXXGTvcxeUjAN4wZ+b29t3m/u05g==}
     dependencies:
       defu: 6.1.0
-      destr: 1.2.0
+      destr: 1.2.1
       flat: 5.0.2
     dev: true
 
@@ -5446,8 +5446,8 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /vitest/0.25.1_jsdom@20.0.2:
-    resolution: {integrity: sha512-eH74h6MkuEgsqR4mAQZeMK9O0PROiKY+i+1GMz/fBi5A3L2ml5U7JQs7LfPU7+uWUziZyLHagl+rkyfR8SLhlA==}
+  /vitest/0.25.2_jsdom@20.0.2:
+    resolution: {integrity: sha512-qqkzfzglEFbQY7IGkgSJkdOhoqHjwAao/OrphnHboeYHC5JzsVFoLCaB2lnAy8krhj7sbrFTVRApzpkTOeuDWQ==}
     engines: {node: '>=v14.16.0'}
     hasBin: true
     peerDependencies:

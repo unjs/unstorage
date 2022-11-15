@@ -113,7 +113,7 @@ await storage.hasItem('foo:bar')
 
 ### `storage.getItem(key)`
 
-Gets the value of a key in storage. Resolves to either `string` or `null`.
+Gets the value of a key in storage. Resolves to either `string` or `undefined`.
 
 ```js
 await storage.getItem('foo:bar')

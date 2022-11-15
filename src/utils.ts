@@ -1,50 +1,50 @@
-import type { Storage } from './types'
+import type { Storage } from "./types";
 
 type StorageKeys = Array<keyof Storage>
 
-const storageKeyProps: StorageKeys = [
-  'hasItem',
-  'getItem',
-  'setItem',
-  'removeItem',
-  'getMeta',
-  'setMeta',
-  'removeMeta',
-  'getKeys',
-  'clear',
-  'mount',
-  'unmount'
-]
+const storageKeyProperties: StorageKeys = [
+  "hasItem",
+  "getItem",
+  "setItem",
+  "removeItem",
+  "getMeta",
+  "setMeta",
+  "removeMeta",
+  "getKeys",
+  "clear",
+  "mount",
+  "unmount"
+];
 
 export function prefixStorage (storage: Storage, base: string) {
-  base = normalizeBaseKey(base)
+  base = normalizeBaseKey(base);
   if (!base) {
-    return storage
+    return storage;
   }
-  const nsStorage: Storage = { ...storage }
-  for (const prop of storageKeyProps) {
+  const nsStorage: Storage = { ...storage };
+  for (const property of storageKeyProperties) {
     // @ts-ignore Better types?
-    nsStorage[prop] = (key: string = '', ...args) => storage[prop](base + key, ...args)
+    nsStorage[property] = (key: string = "", ...arguments_) => storage[property](base + key, ...arguments_);
   }
-  nsStorage.getKeys = (key: string = '', ...args) =>
+  nsStorage.getKeys = (key: string = "", ...arguments_) =>
     storage
-      .getKeys(base + key, ...args)
+      .getKeys(base + key, ...arguments_)
       // Remove Prefix
-      .then(keys => keys.map(key => key.substr(base.length)))
+      .then(keys => keys.map(key => key.slice(base.length)));
 
-  return nsStorage
+  return nsStorage;
 }
 
 export function normalizeKey (key?: string) {
-  if (!key) { return '' }
-  return key.replace(/[/\\]/g, ':').replace(/:+/g, ':').replace(/^:|:$/g, '')
+  if (!key) { return ""; }
+  return key.replace(/[/\\]/g, ":").replace(/:+/g, ":").replace(/^:|:$/g, "");
 }
 
 export function joinKeys (...keys: string[]) {
-  return normalizeKey(keys.join(':'))
+  return normalizeKey(keys.join(":"));
 }
 
 export function normalizeBaseKey (base?: string) {
-  base = normalizeKey(base)
-  return base ? (base + ':') : ''
+  base = normalizeKey(base);
+  return base ? (base + ":") : "";
 }

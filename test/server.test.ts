@@ -1,32 +1,32 @@
-import { describe, it, expect } from 'vitest'
-import { listen } from 'listhen'
-import { $fetch } from 'ohmyfetch'
-import { createStorage } from '../src'
-import { createStorageServer } from '../src/server'
+import { describe, it, expect } from "vitest";
+import { listen } from "listhen";
+import { $fetch } from "ohmyfetch";
+import { createStorage } from "../src";
+import { createStorageServer } from "../src/server";
 
-describe('server', () => {
-  it('basic', async () => {
-    const storage = createStorage()
-    const storageServer = createStorageServer(storage)
+describe("server", () => {
+  it("basic", async () => {
+    const storage = createStorage();
+    const storageServer = createStorageServer(storage);
     const { close, url: serverURL } = await listen(storageServer.handle, {
       port: { random: true }
-    })
+    });
 
-    const fetchStorage = (url: string, opts?: any) => $fetch(url, { baseURL: serverURL, ...opts })
+    const fetchStorage = (url: string, options?: any) => $fetch(url, { baseURL: serverURL, ...options });
 
-    expect(await fetchStorage('foo', {})).toMatchObject([])
+    expect(await fetchStorage("foo", {})).toMatchObject([]);
 
-    await storage.setItem('foo/bar', 'bar')
-    await storage.setMeta('foo/bar', { mtime: new Date() })
-    expect(await fetchStorage('foo/bar')).toBe('bar')
+    await storage.setItem("foo/bar", "bar");
+    await storage.setMeta("foo/bar", { mtime: new Date() });
+    expect(await fetchStorage("foo/bar")).toBe("bar");
 
-    expect(await fetchStorage('foo/bar', { method: 'PUT', body: 'updated' })).toBe('OK')
-    expect(await fetchStorage('foo/bar')).toBe('updated')
-    expect(await fetchStorage('/')).toMatchObject(['foo/bar'])
+    expect(await fetchStorage("foo/bar", { method: "PUT", body: "updated" })).toBe("OK");
+    expect(await fetchStorage("foo/bar")).toBe("updated");
+    expect(await fetchStorage("/")).toMatchObject(["foo/bar"]);
 
-    expect(await fetchStorage('foo/bar', { method: 'DELETE' })).toBe('OK')
-    expect(await fetchStorage('foo/bar', {})).toMatchObject([])
+    expect(await fetchStorage("foo/bar", { method: "DELETE" })).toBe("OK");
+    expect(await fetchStorage("foo/bar", {})).toMatchObject([]);
 
-    await close()
-  })
-})
+    await close();
+  });
+});

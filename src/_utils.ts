@@ -1,26 +1,26 @@
 type Awaited<T> = T extends Promise<infer U> ? Awaited<U> : T;
 type Promisified<T> = Promise<Awaited<T>>
 
-export function wrapToPromise<T> (val: T) {
-  if (!val || typeof (val as any).then !== 'function') {
-    return Promise.resolve(val) as Promisified<T>
+export function wrapToPromise<T> (value: T) {
+  if (!value || typeof (value as any).then !== "function") {
+    return Promise.resolve(value) as Promisified<T>;
   }
-  return val as unknown as Promisified<T>
+  return value as unknown as Promisified<T>;
 }
 
-export function asyncCall<T extends (...args: any) => any>(fn: T, ...args: any[]): Promisified<ReturnType<T>> {
+export function asyncCall<T extends (...arguments_: any) => any>(function_: T, ...arguments_: any[]): Promisified<ReturnType<T>> {
   try {
-    return wrapToPromise(fn(...args))
-  } catch (err) {
-    return Promise.reject(err)
+    return wrapToPromise(function_(...arguments_));
+  } catch (error) {
+    return Promise.reject(error);
   }
 }
 
-export function isPrimitive (arg: any) {
-  const type = typeof arg
-  return arg === null || (type !== 'object' && type !== 'function')
+export function isPrimitive (argument: any) {
+  const type = typeof argument;
+  return argument === null || (type !== "object" && type !== "function");
 }
 
-export function stringify (arg: any) {
-  return isPrimitive(arg) ? (arg + '') : JSON.stringify(arg)
+export function stringify (argument: any) {
+  return isPrimitive(argument) ? (argument + "") : JSON.stringify(argument);
 }

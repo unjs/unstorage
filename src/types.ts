@@ -1,5 +1,5 @@
 export type StorageValue = null | string | String | number | Number | boolean | Boolean | object
-export type WatchEvent = 'update' | 'remove'
+export type WatchEvent = "update" | "remove"
 export type WatchCallback = (event: WatchEvent, key: string) => any
 
 type MaybePromise<T> = T | Promise<T>

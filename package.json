@@ -67,7 +67,7 @@
     "eslint": "^8.28.0",
     "eslint-config-unjs": "^0.0.2",
     "jiti": "^1.16.0",
-    "jsdom": "^20.0.2",
+    "jsdom": "^20.0.3",
     "monaco-editor": "^0.34.1",
     "msw": "^0.49.0",
     "types-cloudflare-worker": "^1.2.0",
@@ -77,5 +77,5 @@
     "vitest": "^0.25.2",
     "vue": "^3.2.45"
   },
-  "packageManager": "pnpm@7.16.1"
+  "packageManager": "pnpm@7.17.0"
 }

@@ -1,4 +1,4 @@
-import { RequestListener } from "node:http";
+import type { RequestListener } from "node:http";
 import { createApp, createError, readBody, eventHandler, toNodeListener } from "h3";
 import { Storage } from "./types";
 import { stringify } from "./_utils";

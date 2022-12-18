@@ -23,7 +23,10 @@ export default defineBuildConfig({
           const relativePath = relative(dirname(declaration), target);
 
           await mkdir(dirname(declaration), { recursive: true });
-          await writeFile(declaration, `export * from "${relativePath.slice(0, -5)}";`);
+          await writeFile(declaration, [
+            `export * from "${relativePath.slice(0, -5)}";`,
+            `export { default } from "${relativePath.slice(0, -5)}";`
+          ].join("\n"));
         }
       }
     }

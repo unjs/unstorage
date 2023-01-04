@@ -166,7 +166,7 @@ Remove meta for a specific key by adding a `$` suffix.
 
 ```js
 await storage.removeMeta('foo:bar',)
-// Same as storage.removeMeta('foo:bar$')
+// Same as storage.removeItem('foo:bar$')
 ```
 
 ### `storage.getKeys(base?)`

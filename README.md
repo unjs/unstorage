@@ -567,7 +567,7 @@ To use, you will need to install `@planetscale/database` in your project:
 ```json
 {
   "dependencies": {
-    "@planetscale/database": "^1.5.0",
+    "@planetscale/database": "^1.5.0"
   }
 }
 ```
@@ -586,24 +586,24 @@ create table <storage> (
 You can then configure the driver like this:
 
 ```js
-import { createStorage } from 'unstorage'
-import planetscaleDriver from 'unstorage/drivers/planetscale'
+import { createStorage } from "unstorage";
+import planetscaleDriver from "unstorage/drivers/planetscale";
 
 const storage = createStorage({
   driver: planetscaleDriver({
     // This should certainly not be inlined in your code but loaded via runtime config
     // or environment variables depending on your framework/project.
-    url: 'mysql://xxxxxxxxx:************@xxxxxxxxxx.us-east-3.psdb.cloud/my-database?sslaccept=strict',
+    url: "mysql://xxxxxxxxx:************@xxxxxxxxxx.us-east-3.psdb.cloud/my-database?sslaccept=strict",
     // table: 'storage'
-  })
-})
+  }),
+});
 ```
 
 **Options:**
 
 - **`url`** (required): You can find your URL in the [Planetscale dashboard](https://planetscale.com/docs/tutorials/connect-nodejs-app).
 - `storage`: The name of the table to read from. It defaults to `storage`.
-- `cache`: Whether to enable cached queries: see [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).
+- `boostCache`: Whether to enable cached queries: see [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).
 
 ## Making custom drivers
 

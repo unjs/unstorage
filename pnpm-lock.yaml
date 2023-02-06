@@ -26,6 +26,7 @@ specifiers:
   monaco-editor: ^0.34.1
   mri: ^1.2.0
   msw: ^1.0.0
+  node-fetch-native: ^1.0.1
   ofetch: ^1.0.0
   prettier: ^2.8.3
   types-cloudflare-worker: ^1.2.0
@@ -46,6 +47,7 @@ dependencies:
   listhen: 1.0.2
   mkdir: 0.0.2
   mri: 1.2.0
+  node-fetch-native: 1.0.1
   ofetch: 1.0.0
   ufo: 1.0.1
   ws: 8.12.0

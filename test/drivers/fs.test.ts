@@ -11,7 +11,7 @@ describe("drivers: fs", () => {
     driver: driver({ base: dir }),
     additionalTests(ctx) {
       it("check filesystem", async () => {
-        expect(await readFile(resolve(dir, "s1/a"))).toBe("test_data");
+        expect(await readFile(resolve(dir, "s1/a"), "utf8")).toBe("test_data");
       });
       it("native meta", async () => {
         const meta = await ctx.storage.getMeta("/s1/a");
@@ -22,7 +22,7 @@ describe("drivers: fs", () => {
       it("watch filesystem", async () => {
         const watcher = vi.fn();
         await ctx.storage.watch(watcher);
-        await writeFile(resolve(dir, "s1/random_file"), "random");
+        await writeFile(resolve(dir, "s1/random_file"), "random", "utf8");
         await new Promise((resolve) => setTimeout(resolve, 500));
         expect(watcher).toHaveBeenCalledWith("update", "s1:random_file");
       });

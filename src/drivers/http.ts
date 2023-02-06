@@ -33,7 +33,7 @@ export default defineDriver((opts: HTTPOptions = {}) => {
       };
     },
     async setItem(key, value) {
-      await $fetch(r(key), { method: "PUT", body: stringify(value) });
+      await $fetch(r(key), { method: "PUT", body: value });
     },
     async removeItem(key) {
       await $fetch(r(key), { method: "DELETE" });

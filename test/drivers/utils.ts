@@ -58,6 +58,47 @@ export function testDriver(opts: TestOptions) {
     expect(await ctx.storage.getItem("/data/true.json")).toBe(true);
   });
 
+  it("serialize (lossy object with toJSON())", async () => {
+    class Test1 {
+      toJSON() {
+        return "SERIALIZED";
+      }
+    }
+    await ctx.storage.setItem("/data/serialized1.json", new Test1());
+    expect(await ctx.storage.getItem("/data/serialized1.json")).toBe(
+      "SERIALIZED"
+    );
+    class Test2 {
+      toJSON() {
+        return { serializedObj: "works" };
+      }
+    }
+    await ctx.storage.setItem("/data/serialized2.json", new Test2());
+    expect(await ctx.storage.getItem("/data/serialized2.json")).toMatchObject({
+      serializedObj: "works",
+    });
+  });
+
+  it("serialize (error for non primitives)", async () => {
+    class Test {}
+    expect(
+      ctx.storage.setItem("/data/badvalue.json", new Test())
+    ).rejects.toThrow("[unstorage] Cannot stringify value!");
+  });
+
+  it("raw support", async () => {
+    const value = new Uint8Array([1, 2, 3]);
+    await ctx.storage.setItemRaw("/data/raw.bin", value);
+    const rValue = await ctx.storage.getItemRaw("/data/raw.bin");
+    if (rValue.length !== value.length) {
+      console.log(rValue);
+    }
+    expect(rValue.length).toBe(value.length);
+    expect(Buffer.from(rValue).toString("base64")).toBe(
+      Buffer.from(value).toString("base64")
+    );
+  });
+
   if (opts.additionalTests) {
     opts.additionalTests(ctx);
   }

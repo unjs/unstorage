@@ -18,7 +18,7 @@ const server = setupServer(
     return res(
       ctx.status(200),
       ctx.set("content-type", "application/octet-stream"),
-      ctx.json(store[key])
+      ctx.body(store[key])
     );
   }),
 
@@ -30,9 +30,9 @@ const server = setupServer(
     return res(ctx.status(200), ctx.json({ success: true }));
   }),
 
-  rest.put(`${baseURL}/values/:key`, (req, res, ctx) => {
+  rest.put(`${baseURL}/values/:key`, async (req, res, ctx) => {
     const key = req.params.key as string;
-    store[key] = req.body;
+    store[key] = await req.text();
     return res(ctx.status(204), ctx.json(null));
   }),
 

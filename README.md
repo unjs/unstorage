@@ -6,8 +6,7 @@
 [![Codecov][codecov-src]][codecov-href]
 [![bundle][bundle-src]][bundle-href]
 
-> 🌍 💾 Universal Storage Layer
-
+> 💾 Universal Storage Layer
 
 **Why ❓**
 
@@ -18,83 +17,43 @@ Typically, we choose one or more data storages based on our use-cases like a fil
 Comparing to similar solutions like [localforage](https://localforage.github.io/localForage/), unstorage core is almost 6x smaller (28.9 kB vs 4.7 kB), using modern ESM/Typescript/Async syntax and many more features to be used universally.
 
 <br>
-✔️ Works in all environments (Browser, NodeJS, and Workers) <br>
-✔️ Multiple built-in drivers (Memory, FS, LocalStorage, HTTP, Redis) <br>
-✔️ Asynchronous API <br>
-✔️ Unix-style driver mounting to combine storages<br>
-✔️ Default in-memory storage <br>
-✔️ Tree-shakable utils and tiny core <br>
-✔️ Driver native and user provided metadata <br>
-✔️ Native aware value serialization and deserialization <br>
-✔️ Restore initial state (hydration) <br>
-✔️ State snapshot <br>
-✔️ Driver agnostic watcher <br>
-✔️ HTTP Storage server (cli and programmatic) <br>
-✔️ Namespaced storage <br>
-✔️ Overlay storage (copy-on-write) <br>
+✅ Designed to work in all environments (Browser, NodeJS, and Workers) <br>
+✅ Multiple built-in drivers (Memory, FS, LocalStorage, HTTP, Redis) <br>
+✅ Asynchronous API <br>
+✅ Unix-style driver mounting to combine storages<br>
+✅ Default in-memory storage <br>
+✅ Tree-shakable utils and tiny core <br>
+✅ Driver native and user provided metadata <br>
+✅ Native aware value serialization and deserialization <br>
+✅ Restore initial state (hydration) <br>
+✅ State snapshot <br>
+✅ Driver agnostic watcher <br>
+✅ HTTP Storage server (cli and programmatic) <br>
+✅ Namespaced storage <br>
+✅ Overlay storage (copy-on-write) <br>
+✅ Binary and raw operations support (experimental) <br>
 <br>
-🚧 Virtual `fs` interface <br>
-🚧 Cached storage <br>
-🚧 More drivers: MongoDB, S3 and IndexedDB<br>
-<br>
-
-**📚 Table of Contents**
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [Usage](#usage)
-- [Storage Interface](#storage-interface)
-  - [`storage.hasItem(key)`](#storagehasitemkey)
-  - [`storage.getItem(key)`](#storagegetitemkey)
-  - [`storage.setItem(key, value)`](#storagesetitemkey-value)
-  - [`storage.removeItem(key, removeMeta = true)`](#storageremoveitemkey-removemeta--true)
-  - [`storage.getMeta(key, nativeOnly?)`](#storagegetmetakey-nativeonly)
-  - [`storage.setMeta(key)`](#storagesetmetakey)
-  - [`storage.removeMeta(key)`](#storageremovemetakey)
-  - [`storage.getKeys(base?)`](#storagegetkeysbase)
-  - [`storage.clear(base?)`](#storageclearbase)
-  - [`storage.dispose()`](#storagedispose)
-  - [`storage.mount(mountpoint, driver)`](#storagemountmountpoint-driver)
-  - [`storage.unmount(mountpoint, dispose = true)`](#storageunmountmountpoint-dispose--true)
-  - [`storage.watch(callback)`](#storagewatchcallback)
-  - [`storage.unwatch()`](#storageunwatch)
-- [Utils](#utils)
-  - [`snapshot(storage, base?)`](#snapshotstorage-base)
-  - [`restoreSnapshot(storage, data, base?)`](#restoresnapshotstorage-data-base)
-  - [`prefixStorage(storage, data, base?)`](#prefixstoragestorage-data-base)
-- [Storage Server](#storage-server)
-- [Drivers](#drivers)
-  - [`fs` (node)](#fs-node)
-  - [`localStorage` (browser)](#localstorage-browser)
-  - [`memory` (universal)](#memory-universal)
-  - [`overlay` (universal)](#overlay-universal)
-  - [`http` (universal)](#http-universal)
-  - [`redis`](#redis)
-  - [`cloudflare-kv-http`](#cloudflare-kv-http)
-  - [`cloudflare-kv-binding`](#cloudflare-kv-binding)
-  - [`github`](#github)
-- [Making custom drivers](#making-custom-drivers)
-- [Contribution](#contribution)
-- [License](#license)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Usage
 
 Install `unstorage` npm package:
 
 ```sh
+# yarn
 yarn add unstorage
-# or
-npm i unstorage
+# npm
+npm install unstorage
+# pnpm
+pnpm add unstorage
+
 ```
 
 ```js
-import { createStorage } from 'unstorage'
+import { createStorage } from "unstorage";
 
-const storage = createStorage(/* opts */)
+const storage = createStorage(/* opts */);
 
-await storage.getItem('foo:bar') // or storage.getItem('/foo/bar')
+await storage.getItem("foo:bar"); // or storage.getItem('/foo/bar')
 ```
 
 **Options:**
@@ -108,15 +67,26 @@ await storage.getItem('foo:bar') // or storage.getItem('/foo/bar')
 Checks if storage contains a key. Resolves to either `true` or `false`.
 
 ```js
-await storage.hasItem('foo:bar')
+await storage.hasItem("foo:bar");
 ```
 
 ### `storage.getItem(key)`
 
-Gets the value of a key in storage. Resolves to either `string` or `undefined`.
+Gets the value of a key in storage. Resolves to either a javascript primitive value or `undefined`.
 
 ```js
-await storage.getItem('foo:bar')
+await storage.getItem("foo:bar");
+```
+
+### `storage.getItemRaw(key)`
+
+**Note:** This is an experimental feature. Please check [unjs/unstorage#142](https://github.com/unjs/unstorage/issues/142) for more information.
+
+Gets the value of a key in storage in raw format.
+
+```js
+// Value can be a Buffer, Array or Driver's raw format
+const value = await storage.getItemRaw("foo:bar.bin");
 ```
 
 ### `storage.setItem(key, value)`
@@ -128,7 +98,19 @@ If the value is not a string, it will be stringified.
 If value is `undefined`, it is same as calling `removeItem(key)`.
 
 ```js
-await storage.setItem('foo:bar', 'baz')
+await storage.setItem("foo:bar", "baz");
+```
+
+### `storage.setItemRaw(key, value)`
+
+**Note:** This is an experimental feature. Please check [unjs/unstorage#142](https://github.com/unjs/unstorage/issues/142) for more information.
+
+Add/Update a value to the storage in raw format.
+
+If value is `undefined`, it is same as calling `removeItem(key)`.
+
+```js
+await storage.setItemRaw("data/test.bin", new Uint8Array([1, 2, 3]));
 ```
 
 ### `storage.removeItem(key, removeMeta = true)`
@@ -136,7 +118,7 @@ await storage.setItem('foo:bar', 'baz')
 Remove a value (and it's meta) from storage.
 
 ```js
-await storage.removeItem('foo:bar')
+await storage.removeItem("foo:bar");
 ```
 
 ### `storage.getMeta(key, nativeOnly?)`
@@ -144,11 +126,12 @@ await storage.removeItem('foo:bar')
 Get metadata object for a specific key.
 
 This data is fetched from two sources:
+
 - Driver native meta (like file creation time)
 - Custom meta set by `storage.setMeta` (overrides driver native meta)
 
 ```js
-await storage.getMeta('foo:bar') // For fs driver returns an object like { mtime, atime, size }
+await storage.getMeta("foo:bar"); // For fs driver returns an object like { mtime, atime, size }
 ```
 
 ### `storage.setMeta(key)`
@@ -156,7 +139,7 @@ await storage.getMeta('foo:bar') // For fs driver returns an object like { mtime
 Set custom meta for a specific key by adding a `$` suffix.
 
 ```js
-await storage.setMeta('foo:bar', { flag: 1 })
+await storage.setMeta("foo:bar", { flag: 1 });
 // Same as storage.setItem('foo:bar$', { flag: 1 })
 ```
 
@@ -165,7 +148,7 @@ await storage.setMeta('foo:bar', { flag: 1 })
 Remove meta for a specific key by adding a `$` suffix.
 
 ```js
-await storage.removeMeta('foo:bar',)
+await storage.removeMeta("foo:bar");
 // Same as storage.removeItem('foo:bar$')
 ```
 
@@ -178,7 +161,7 @@ Meta keys (ending with `$`) will be filtered.
 If a base is provided, only keys starting with the base will be returned also only mounts starting with base will be queried. Keys still have a full path.
 
 ```js
-await storage.getKeys()
+await storage.getKeys();
 ```
 
 ### `storage.clear(base?)`
@@ -186,7 +169,7 @@ await storage.getKeys()
 Removes all stored key/values. If a base is provided, only mounts matching base will be cleared.
 
 ```js
-await storage.clear()
+await storage.clear();
 ```
 
 ### `storage.dispose()`
@@ -196,7 +179,7 @@ Disposes all mounted storages to ensure there are no open-handles left. Call it 
 **Note:** Dispose also clears in-memory data.
 
 ```js
-await storage.dispose()
+await storage.dispose();
 ```
 
 ### `storage.mount(mountpoint, driver)`
@@ -206,19 +189,19 @@ By default, everything is stored in memory. We can mount additional storage spac
 When operating with a `key` that starts with mountpoint, instead of default storage, mounted driver will be called.
 
 ```js
-import { createStorage } from 'unstorage'
-import fsDriver from 'unstorage/drivers/fs'
+import { createStorage } from "unstorage";
+import fsDriver from "unstorage/drivers/fs";
 
 // Create a storage container with default memory storage
-const storage = createStorage({})
+const storage = createStorage({});
 
-storage.mount('/output', fsDriver({ base: './output' }))
+storage.mount("/output", fsDriver({ base: "./output" }));
 
 //  Writes to ./output/test file
-await storage.setItem('/output/test', 'works')
+await storage.setItem("/output/test", "works");
 
 // Adds value to in-memory storage
-await storage.setItem('/foo', 'bar')
+await storage.setItem("/foo", "bar");
 ```
 
 ### `storage.unmount(mountpoint, dispose = true)`
@@ -226,7 +209,7 @@ await storage.setItem('/foo', 'bar')
 Unregisters a mountpoint. Has no effect if mountpoint is not found or is root.
 
 ```js
-await storage.unmount('/output')
+await storage.unmount("/output");
 ```
 
 ### `storage.watch(callback)`
@@ -234,9 +217,9 @@ await storage.unmount('/output')
 Starts watching on all mountpoints. If driver does not supports watching, only emits even when `storage.*` methods are called.
 
 ```js
-const unwatch = await storage.watch((event, key) => { })
+const unwatch = await storage.watch((event, key) => {});
 // to stop this watcher
-await unwatch()
+await unwatch();
 ```
 
 ### `storage.unwatch()`
@@ -244,9 +227,8 @@ await unwatch()
 Stop all watchers on all mountpoints.
 
 ```js
-await storage.unwatch()
+await storage.unwatch();
 ```
-
 
 ## Utils
 
@@ -255,9 +237,9 @@ await storage.unwatch()
 Snapshot from all keys in specified base into a plain javascript object (string: string). Base is removed from keys.
 
 ```js
-import { snapshot } from 'unstorage'
+import { snapshot } from "unstorage";
 
-const data = await snapshot(storage, '/etc')
+const data = await snapshot(storage, "/etc");
 ```
 
 ### `restoreSnapshot(storage, data, base?)`
@@ -265,7 +247,7 @@ const data = await snapshot(storage, '/etc')
 Restore snapshot created by `snapshot()`.
 
 ```js
-await restoreSnapshot(storage, { 'foo:bar': 'baz' }, '/etc2')
+await restoreSnapshot(storage, { "foo:bar": "baz" }, "/etc2");
 ```
 
 ### `prefixStorage(storage, data, base?)`
@@ -275,13 +257,13 @@ Create a namespaced instance of main storage.
 All operations are virtually prefixed. Useful to create shorcuts and limit access.
 
 ```js
-import { createStorage, prefixStorage } from 'unstorage'
+import { createStorage, prefixStorage } from "unstorage";
 
-const storage = createStorage()
-const assetsStorage = prefixStorage(storage, 'assets')
+const storage = createStorage();
+const assetsStorage = prefixStorage(storage, "assets");
 
 // Same as storage.setItem('assets:x', 'hello!')
-await assetsStorage.setItem('x', 'hello!')
+await assetsStorage.setItem("x", "hello!");
 ```
 
 ## Storage Server
@@ -295,15 +277,15 @@ Also consider that even with authentication, unstorage should not be exposed to 
 **Programmatic usage:**
 
 ```js
-import { listen } from 'listhen'
-import { createStorage } from 'unstorage'
-import { createStorageServer } from 'unstorage/server'
+import { listen } from "listhen";
+import { createStorage } from "unstorage";
+import { createStorageServer } from "unstorage/server";
 
-const storage = createStorage()
-const storageServer = createStorageServer(storage)
+const storage = createStorage();
+const storageServer = createStorageServer(storage);
 
 // Alternatively we can use `storageServer.handle` as a middleware
-await listen(storageServer.handle)
+await listen(storageServer.handle);
 ```
 
 **Using CLI:**
@@ -328,12 +310,12 @@ Maps data to the real filesystem using directory structure for nested keys. Supp
 This driver implements meta for each key including `mtime` (last modified time), `atime` (last access time), and `size` (file size) using `fs.stat`.
 
 ```js
-import { createStorage } from 'unstorage'
-import fsDriver from 'unstorage/drivers/fs'
+import { createStorage } from "unstorage";
+import fsDriver from "unstorage/drivers/fs";
 
 const storage = createStorage({
-  driver: fsDriver({ base: './tmp' })
-})
+  driver: fsDriver({ base: "./tmp" }),
+});
 ```
 
 **Options:**
@@ -347,12 +329,12 @@ const storage = createStorage({
 Store data in [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
 
 ```js
-import { createStorage } from 'unstorage'
-import localStorageDriver from 'unstorage/drivers/localstorage'
+import { createStorage } from "unstorage";
+import localStorageDriver from "unstorage/drivers/localstorage";
 
 const storage = createStorage({
-  driver: localStorageDriver({ base: 'app:' })
-})
+  driver: localStorageDriver({ base: "app:" }),
+});
 ```
 
 **Options:**
@@ -368,12 +350,12 @@ Keeps data in memory using [Set](https://developer.mozilla.org/en-US/docs/Web/Ja
 By default it is mounted to top level so it is unlikely you need to mount it again.
 
 ```js
-import { createStorage } from 'unstorage'
-import memoryDriver from 'unstorage/drivers/memory'
+import { createStorage } from "unstorage";
+import memoryDriver from "unstorage/drivers/memory";
 
 const storage = createStorage({
-  driver: memoryDriver()
-})
+  driver: memoryDriver(),
+});
 ```
 
 ### `overlay` (universal)
@@ -387,19 +369,16 @@ When removing a key, a special value `__OVERLAY_REMOVED__` will be set on the to
 In the example below, we create an in-memory overlay on top of fs. No changes will be actually written to the disk.
 
 ```js
-import { createStorage } from 'unstorage'
-import overlay from 'unstorage/drivers/overlay'
-import memory from 'unstorage/drivers/memory'
-import fs from 'unstorage/drivers/fs'
+import { createStorage } from "unstorage";
+import overlay from "unstorage/drivers/overlay";
+import memory from "unstorage/drivers/memory";
+import fs from "unstorage/drivers/fs";
 
 const storage = createStorage({
   driver: overlay({
-    layers: [
-      memory(),
-      fs({ base: './data' })
-    ]
-  })
-})
+    layers: [memory(), fs({ base: "./data" })],
+  }),
+});
 ```
 
 ### `http` (universal)
@@ -409,12 +388,12 @@ Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server
 This driver implements meta for each key including `mtime` (last modified time) and `status` from HTTP headers by making a `HEAD` request.
 
 ```js
-import { createStorage } from 'unstorage'
-import httpDriver from 'unstorage/drivers/http'
+import { createStorage } from "unstorage";
+import httpDriver from "unstorage/drivers/http";
 
 const storage = createStorage({
-  driver: httpDriver({ base: 'http://cdn.com' })
-})
+  driver: httpDriver({ base: "http://cdn.com" }),
+});
 ```
 
 **Options:**
@@ -434,14 +413,14 @@ const storage = createStorage({
 Store data in a redis storage using [ioredis](https://github.com/luin/ioredis).
 
 ```js
-import { createStorage } from 'unstorage'
-import redisDriver from 'unstorage/drivers/redis'
+import { createStorage } from "unstorage";
+import redisDriver from "unstorage/drivers/redis";
 
 const storage = createStorage({
   driver: redisDriver({
-     base: 'storage:'
-  })
-})
+    base: "storage:",
+  }),
+});
 ```
 
 **Options:**
@@ -462,36 +441,36 @@ You need to create a KV namespace. See [KV Bindings](https://developers.cloudfla
 **Note:** This driver uses native fetch and works universally! For using directly in a cloudflare worker environemnt, please use `cloudflare-kv-binding` driver for best performance!
 
 ```js
-import { createStorage } from 'unstorage'
-import cloudflareKVHTTPDriver from 'unstorage/drivers/cloudflare-kv-http'
+import { createStorage } from "unstorage";
+import cloudflareKVHTTPDriver from "unstorage/drivers/cloudflare-kv-http";
 
 // Using `apiToken`
 const storage = createStorage({
   driver: cloudflareKVHTTPDriver({
-    accountId: 'my-account-id',
-    namespaceId: 'my-kv-namespace-id',
-    apiToken: 'supersecret-api-token',
+    accountId: "my-account-id",
+    namespaceId: "my-kv-namespace-id",
+    apiToken: "supersecret-api-token",
   }),
-})
+});
 
 // Using `email` and `apiKey`
 const storage = createStorage({
   driver: cloudflareKVHTTPDriver({
-    accountId: 'my-account-id',
-    namespaceId: 'my-kv-namespace-id',
-    email: 'me@example.com',
-    apiKey: 'my-api-key',
+    accountId: "my-account-id",
+    namespaceId: "my-kv-namespace-id",
+    email: "me@example.com",
+    apiKey: "my-api-key",
   }),
-})
+});
 
 // Using `userServiceKey`
 const storage = createStorage({
   driver: cloudflareKVHTTPDriver({
-    accountId: 'my-account-id',
-    namespaceId: 'my-kv-namespace-id',
-    userServiceKey: 'v1.0-my-service-key',
+    accountId: "my-account-id",
+    namespaceId: "my-kv-namespace-id",
+    userServiceKey: "v1.0-my-service-key",
   }),
-})
+});
 ```
 
 **Options:**
@@ -522,23 +501,23 @@ Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-
 You need to create and assign a KV. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
 
 ```js
-import { createStorage } from 'unstorage'
-import cloudflareKVBindingDriver from 'unstorage/drivers/cloudflare-kv-binding'
+import { createStorage } from "unstorage";
+import cloudflareKVBindingDriver from "unstorage/drivers/cloudflare-kv-binding";
 
 // Using binding name to be picked from globalThis
 const storage = createStorage({
-  driver: cloudflareKVBindingDriver({ binding: 'STORAGE' })
-})
+  driver: cloudflareKVBindingDriver({ binding: "STORAGE" }),
+});
 
 // Directly setting binding
 const storage = createStorage({
-  driver: cloudflareKVBindingDriver({ binding: globalThis.STORAGE })
-})
+  driver: cloudflareKVBindingDriver({ binding: globalThis.STORAGE }),
+});
 
 // Using from Durable Objects and Workers using Modules Syntax
 const storage = createStorage({
-  driver: cloudflareKVBindingDriver({ binding: this.env.STORAGE })
-})
+  driver: cloudflareKVBindingDriver({ binding: this.env.STORAGE }),
+});
 
 // Using outside of Cloudflare Workers (like Node.js)
 // Use cloudflare-kv-http!
@@ -555,16 +534,16 @@ Map files from a remote github repository. (readonly)
 This driver fetches all possible keys once and keep it in cache for 10 minutes. Because of github rate limit, it is highly recommanded to provide a token. It only applies to fetching keys.
 
 ```js
-import { createStorage } from 'unstorage'
-import githubDriver from 'unstorage/drivers/github'
+import { createStorage } from "unstorage";
+import githubDriver from "unstorage/drivers/github";
 
 const storage = createStorage({
   driver: githubDriver({
-    repo: 'nuxt/framework',
-    branch: 'main',
-    dir: '/docs/content'
-  })
-})
+    repo: "nuxt/framework",
+    branch: "main",
+    dir: "/docs/content",
+  }),
+});
 ```
 
 **Options:**
@@ -642,49 +621,46 @@ See [src/drivers](./src/drivers) to inspire how to implement them. Methods can
 **Example:**
 
 ```js
-import { createStorage, defineDriver } from 'unstorage'
+import { createStorage, defineDriver } from "unstorage";
 
 const myStorageDriver = defineDriver((_opts) => {
   return {
-    async hasItem (key) {},
-    async getItem (key) {},
+    async hasItem(key) {},
+    async getItem(key) {},
     async setItem(key, value) {},
-    async removeItem (key) {},
+    async removeItem(key) {},
     async getKeys() {},
     async clear() {},
     async dispose() {},
     // async watch(callback) {}
-  }
-})
+  };
+});
 
 const storage = createStorage({
-  driver: myStorageDriver()
-})
+  driver: myStorageDriver(),
+});
 ```
 
 ## Contribution
 
 - Clone repository
-- Install dependencies with `yarn install`
-- Use `yarn dev` to start jest watcher verifying changes
-- Use `yarn test` before pushing to ensure all tests and lint checks passing
+- Install dependencies with `pnpm install`
+- Use `pnpm dev` to start jest watcher verifying changes
+- Use `pnpm test` before pushing to ensure all tests and lint checks passing
 
 ## License
 
 [MIT](./LICENSE)
 
 <!-- Badges -->
+
 [npm-version-src]: https://img.shields.io/npm/v/unstorage?style=flat-square
 [npm-version-href]: https://npmjs.com/package/unstorage
-
 [npm-downloads-src]: https://img.shields.io/npm/dm/unstorage?style=flat-square
 [npm-downloads-href]: https://npmjs.com/package/unstorage
-
 [github-actions-src]: https://img.shields.io/github/workflow/status/unjs/unstorage/ci/main?style=flat-square
 [github-actions-href]: https://github.com/unjs/unstorage/actions?query=workflow%3Aci
-
 [codecov-src]: https://img.shields.io/codecov/c/gh/unjs/unstorage/main?style=flat-square
 [codecov-href]: https://codecov.io/gh/unjs/unstorage
-
 [bundle-src]: https://img.shields.io/bundlephobia/minzip/unstorage?style=flat-square
 [bundle-href]: https://bundlephobia.com/result?p=unstorage

@@ -8,7 +8,7 @@ import type {
   WatchEvent,
 } from "./types";
 import memory from "./drivers/memory";
-import { asyncCall, stringify } from "./_utils";
+import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
 
 interface StorageCTX {
@@ -113,6 +113,16 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         destr(value)
       );
     },
+    getItemRaw(key) {
+      key = normalizeKey(key);
+      const { relativeKey, driver } = getMount(key);
+      if (driver.getItemRaw) {
+        return asyncCall(driver.getItemRaw, relativeKey);
+      }
+      return asyncCall(driver.getItem, relativeKey).then((value) =>
+        deserializeRaw(value)
+      );
+    },
     async setItem(key, value) {
       if (value === undefined) {
         return storage.removeItem(key);
@@ -123,6 +133,23 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         return; // Readonly
       }
       await asyncCall(driver.setItem, relativeKey, stringify(value));
+      if (!driver.watch) {
+        onChange("update", key);
+      }
+    },
+    async setItemRaw(key, value) {
+      if (value === undefined) {
+        return storage.removeItem(key);
+      }
+      key = normalizeKey(key);
+      const { relativeKey, driver } = getMount(key);
+      if (driver.setItemRaw) {
+        await asyncCall(driver.setItemRaw, relativeKey, value);
+      } else if (driver.setItem) {
+        await asyncCall(driver.setItem, relativeKey, serializeRaw(value));
+      } else {
+        return; // Readonly
+      }
       if (!driver.watch) {
         onChange("update", key);
       }

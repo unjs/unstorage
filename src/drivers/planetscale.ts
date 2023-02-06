@@ -21,6 +21,7 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
 
   opts.table = opts.table || "storage";
 
+  // `connect` configures a connection class rather than initiating a connection
   const c = connect({
     url: opts.url,
     fetch,

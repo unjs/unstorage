@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@cloudflare/workers-types': ^4.20230115.0
+  '@planetscale/database': ^1.5.0
   '@types/jsdom': ^21.1.0
   '@types/mri': ^1.1.1
   '@types/node': ^18.11.19
@@ -25,6 +26,7 @@ specifiers:
   monaco-editor: ^0.34.1
   mri: ^1.2.0
   msw: ^1.0.0
+  node-fetch-native: ^1.0.1
   ofetch: ^1.0.0
   prettier: ^2.8.3
   types-cloudflare-worker: ^1.2.0
@@ -45,9 +47,13 @@ dependencies:
   listhen: 1.0.2
   mkdir: 0.0.2
   mri: 1.2.0
+  node-fetch-native: 1.0.1
   ofetch: 1.0.0
   ufo: 1.0.1
   ws: 8.12.0
+
+optionalDependencies:
+  '@planetscale/database': 1.5.0
 
 devDependencies:
   '@cloudflare/workers-types': 4.20230115.0
@@ -633,6 +639,13 @@ packages:
       tiny-glob: 0.2.9
       tslib: 2.5.0
     dev: true
+
+  /@planetscale/database/1.5.0:
+    resolution: {integrity: sha512-Qwh7Or1W5dB5mZ9EQqDkgvkDKhBBmQe58KIVUy0SGocNtr5fP4JAWtvZ6EdLAV6C6hVpzNlCA2xIg9lKTswm1Q==}
+    engines: {node: '>=16'}
+    requiresBuild: true
+    dev: false
+    optional: true
 
   /@rollup/plugin-alias/4.0.3_rollup@3.14.0:
     resolution: {integrity: sha512-ZuDWE1q4PQDhvm/zc5Prun8sBpLJy41DMptYrS6MhAy9s9kL/doN1613BWfEchGVfKxzliJ3BjbOPizXX38DbQ==}

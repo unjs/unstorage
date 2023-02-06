@@ -188,6 +188,8 @@ By default, everything is stored in memory. We can mount additional storage spac
 
 When operating with a `key` that starts with mountpoint, instead of default storage, mounted driver will be called.
 
+In addition to `base`, you can set `readOnly` and `noClear` to disable write and clear operations.
+
 ```js
 import { createStorage } from "unstorage";
 import fsDriver from "unstorage/drivers/fs";

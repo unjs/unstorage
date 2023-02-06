@@ -14,6 +14,8 @@ import anymatch from "anymatch";
 export interface FSStorageOptions {
   base?: string;
   ignore?: string[];
+  readOnly?: boolean;
+  noClear?: boolean;
   watchOptions?: WatchOptions;
 }
 
@@ -59,18 +61,30 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       return { atime, mtime, size };
     },
     setItem(key, value) {
+      if (opts.readOnly) {
+        return;
+      }
       return writeFile(r(key), value, "utf8");
     },
     setItemRaw(key, value) {
+      if (opts.readOnly) {
+        return;
+      }
       return writeFile(r(key), value);
     },
     removeItem(key) {
+      if (opts.readOnly) {
+        return;
+      }
       return unlink(r(key));
     },
     getKeys() {
       return readdirRecursive(r("."), anymatch(opts.ignore || []));
     },
     async clear() {
+      if (opts.readOnly || opts.noClear) {
+        return;
+      }
       await rmRecursive(r("."));
     },
     async dispose() {

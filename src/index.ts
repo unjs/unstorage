@@ -16,6 +16,7 @@ export const builtinDrivers = {
   memory: "unstorage/drivers/memory",
   overlay: "unstorage/drivers/overlay",
   redis: "unstorage/drivers/redis",
+  planetscale: "unstorage/drivers/planetscale",
 };
 
 export type BuiltinDriverName = keyof typeof builtinDrivers;

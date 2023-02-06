@@ -22,6 +22,7 @@ specifiers:
   jiti: ^1.16.2
   jsdom: ^21.1.0
   listhen: ^1.0.2
+  lru-cache: ^7.14.1
   mkdir: ^0.0.2
   monaco-editor: ^0.34.1
   mri: ^1.2.0
@@ -45,6 +46,7 @@ dependencies:
   h3: 1.1.0
   ioredis: 5.3.0
   listhen: 1.0.2
+  lru-cache: 7.14.1
   mkdir: 0.0.2
   mri: 1.2.0
   node-fetch-native: 1.0.1
@@ -3301,6 +3303,11 @@ packages:
     dependencies:
       yallist: 4.0.0
     dev: true
+
+  /lru-cache/7.14.1:
+    resolution: {integrity: sha512-ysxwsnTKdAx96aTRdhDOCQfDgbHnt8SK0KY8SEjO0wHinhWOFTESbjVCMPbU1uGXg/ch4lifqx0wfjOawU2+WA==}
+    engines: {node: '>=12'}
+    dev: false
 
   /magic-string/0.25.9:
     resolution: {integrity: sha512-RmF0AsMzgt25qzqqLc1+MbHmhdx0ojF2Fvs4XnOqz2ZOBXzzkEwc/dJQZCYHAn7v1jbVOjAZfK8msRn4BxO4VQ==}

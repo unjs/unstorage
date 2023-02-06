@@ -33,7 +33,7 @@
     "build": "unbuild",
     "demo": "vite demo",
     "dev": "vitest",
-    "doctoc": "doctoc README.md --notitle --maxlevel 3",
+    "doctoc": "doctoc README.md --notitle --maxlevel 3 && prettier -w README.md",
     "lint": "eslint --ext .ts . && prettier -c src test demo",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",

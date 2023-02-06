@@ -148,7 +148,8 @@ export default defineDriver<KVHTTPOptions>((opts) => {
       if (pageCursor) {
         params.cursor = pageCursor
       } else {
-        delete params.cursor
+        params.cursor = undefined
+
       }
     }
     return keys

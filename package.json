@@ -74,7 +74,7 @@
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "^4.9.5",
     "unbuild": "^0.9.4",
-    "vite": "^3.2.5",
+    "vite": "^4.1.1",
     "vitest": "^0.28.4",
     "vue": "^3.2.47"
   },

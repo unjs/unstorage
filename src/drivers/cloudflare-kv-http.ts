@@ -142,7 +142,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     }
 
     while (params.has('cursor')) {
-      const pageResult = await kvFetch('/keys', { params })
+      const pageResult = await kvFetch('/keys', { params: Object.fromEntries(params.entries()) })
       pageResult.result.forEach(({ name }: { name: string }) => keys.push(name))
       const pageCursor = pageResult.result_info.cursor
       if (pageCursor) {

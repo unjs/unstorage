@@ -17,24 +17,21 @@ Typically, we choose one or more data storages based on our use-cases like a fil
 Comparing to similar solutions like [localforage](https://localforage.github.io/localForage/), unstorage core is almost 6x smaller (28.9 kB vs 4.7 kB), using modern ESM/Typescript/Async syntax and many more features to be used universally.
 
 <br>
-✔️ Works in all environments (Browser, NodeJS, and Workers) <br>
-✔️ Multiple built-in drivers (Memory, FS, LocalStorage, HTTP, Redis) <br>
-✔️ Asynchronous API <br>
-✔️ Unix-style driver mounting to combine storages<br>
-✔️ Default in-memory storage <br>
-✔️ Tree-shakable utils and tiny core <br>
-✔️ Driver native and user provided metadata <br>
-✔️ Native aware value serialization and deserialization <br>
-✔️ Restore initial state (hydration) <br>
-✔️ State snapshot <br>
-✔️ Driver agnostic watcher <br>
-✔️ HTTP Storage server (cli and programmatic) <br>
-✔️ Namespaced storage <br>
-✔️ Overlay storage (copy-on-write) <br>
-<br>
-🚧 Virtual `fs` interface <br>
-🚧 Cached storage <br>
-🚧 More drivers: MongoDB, S3 and IndexedDB<br>
+✅ Designed to work in all environments (Browser, NodeJS, and Workers) <br>
+✅ Multiple built-in drivers (Memory, FS, LocalStorage, HTTP, Redis) <br>
+✅ Asynchronous API <br>
+✅ Unix-style driver mounting to combine storages<br>
+✅ Default in-memory storage <br>
+✅ Tree-shakable utils and tiny core <br>
+✅ Driver native and user provided metadata <br>
+✅ Native aware value serialization and deserialization <br>
+✅ Restore initial state (hydration) <br>
+✅ State snapshot <br>
+✅ Driver agnostic watcher <br>
+✅ HTTP Storage server (cli and programmatic) <br>
+✅ Namespaced storage <br>
+✅ Overlay storage (copy-on-write) <br>
+✅ Binary and raw operations support (experimental) <br>
 <br>
 
 **📚 Table of Contents**

@@ -7,9 +7,9 @@
   "sideEffects": false,
   "exports": {
     "./drivers/*": {
-      "import": "./dist/drivers/*.mjs",
-      "require": "./dist/drivers/*.cjs",
-      "types": "./dist/drivers/*.d.ts"
+      "import": "./drivers/*.mjs",
+      "require": "./drivers/*.cjs",
+      "types": "./drivers/*.d.ts"
     },
     ".": {
       "import": "./dist/index.mjs",

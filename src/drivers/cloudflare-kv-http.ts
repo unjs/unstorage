@@ -128,9 +128,9 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const getKeys = async (base?: string) => {
     const keys: string[] = []
 
-    const params = new URLSearchParams()
+    const params: Record<string, string> = {}
     if (base) {
-      params.set('prefix', base)
+      params.prefix = base
     }
 
     const firstPage = await kvFetch('/keys', { params })
@@ -138,17 +138,17 @@ export default defineDriver<KVHTTPOptions>((opts) => {
 
     const cursor = firstPage.result_info.cursor
     if (cursor) {
-      params.set('cursor', cursor)
+      params.cursor = cursor
     }
 
-    while (params.has('cursor')) {
-      const pageResult = await kvFetch('/keys', { params: Object.fromEntries(params.entries()) })
+    while (params.cursor) {
+      const pageResult = await kvFetch('/keys', { params })
       pageResult.result.forEach(({ name }: { name: string }) => keys.push(name))
       const pageCursor = pageResult.result_info.cursor
       if (pageCursor) {
-        params.set('cursor', pageCursor)
+        params.cursor = pageCursor
       } else {
-        params.delete('cursor')
+        delete params.cursor
       }
     }
     return keys

@@ -35,7 +35,7 @@ export function stringify(value: any): string {
     return String(value);
   }
 
-  if (isPureObject(value)) {
+  if (isPureObject(value) || Array.isArray(value)) {
     return JSON.stringify(value);
   }
 

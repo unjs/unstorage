@@ -1,10 +1,15 @@
 import { describe, it, expect, vi } from "vitest";
-import { createStorage, snapshot, restoreSnapshot, prefixStorage } from "../src";
+import {
+  createStorage,
+  snapshot,
+  restoreSnapshot,
+  prefixStorage,
+} from "../src";
 import memory from "../src/drivers/memory";
 
 const data = {
   "etc:conf": "test",
-  "data:foo": 123
+  "data:foo": 123,
 };
 
 describe("storage", () => {

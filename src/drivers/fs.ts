@@ -1,93 +1,100 @@
-import { existsSync, promises as fsp } from 'fs'
-import { resolve, relative, join } from 'path'
-import { FSWatcher, WatchOptions, watch } from 'chokidar'
-import { defineDriver } from './utils'
-import { readFile, writeFile, readdirRecursive, rmRecursive, unlink } from './utils/node-fs'
-import anymatch from 'anymatch'
+import { existsSync, promises as fsp } from "fs";
+import { resolve, relative, join } from "path";
+import { FSWatcher, WatchOptions, watch } from "chokidar";
+import { defineDriver } from "./utils";
+import {
+  readFile,
+  writeFile,
+  readdirRecursive,
+  rmRecursive,
+  unlink,
+} from "./utils/node-fs";
+import anymatch from "anymatch";
 
 export interface FSStorageOptions {
-  base?: string
-  ignore?: string[]
-  watchOptions?: WatchOptions
+  base?: string;
+  ignore?: string[];
+  watchOptions?: WatchOptions;
 }
 
-const PATH_TRAVERSE_RE = /\.\.\:|\.\.$/
+const PATH_TRAVERSE_RE = /\.\.\:|\.\.$/;
 
 export default defineDriver((opts: FSStorageOptions = {}) => {
   if (!opts.base) {
-    throw new Error('base is required')
+    throw new Error("base is required");
   }
 
   if (!opts.ignore) {
-    opts.ignore = [
-      '**/node_modules/**',
-      '**/.git/**'
-    ]
+    opts.ignore = ["**/node_modules/**", "**/.git/**"];
   }
 
-  opts.base = resolve(opts.base)
+  opts.base = resolve(opts.base);
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {
-      throw new Error('[unstorage] [fs] Invalid key. It should not contain `..` segments: ' + key)
+      throw new Error(
+        "[unstorage] [fs] Invalid key. It should not contain `..` segments: " +
+          key
+      );
     }
-    const resolved = join(opts.base!, key.replace(/:/g, '/'))
-    return resolved
-  }
+    const resolved = join(opts.base!, key.replace(/:/g, "/"));
+    return resolved;
+  };
 
-  let _watcher: FSWatcher
+  let _watcher: FSWatcher;
 
   return {
-    hasItem (key) {
-      return existsSync(r(key))
+    hasItem(key) {
+      return existsSync(r(key));
     },
-    getItem (key) {
-      return readFile(r(key))
+    getItem(key) {
+      return readFile(r(key));
     },
-    async getMeta (key) {
-      const { atime, mtime, size } = await fsp.stat(r(key))
-        .catch(() => ({ atime: undefined, mtime: undefined, size: undefined }))
-      return { atime, mtime, size }
+    async getMeta(key) {
+      const { atime, mtime, size } = await fsp
+        .stat(r(key))
+        .catch(() => ({ atime: undefined, mtime: undefined, size: undefined }));
+      return { atime, mtime, size };
     },
-    setItem (key, value) {
-      return writeFile(r(key), value)
+    setItem(key, value) {
+      return writeFile(r(key), value);
     },
-    removeItem (key) {
-      return unlink(r(key))
+    removeItem(key) {
+      return unlink(r(key));
     },
-    getKeys () {
-      return readdirRecursive(r('.'), anymatch(opts.ignore || []))
+    getKeys() {
+      return readdirRecursive(r("."), anymatch(opts.ignore || []));
     },
-    async clear () {
-      await rmRecursive(r('.'))
+    async clear() {
+      await rmRecursive(r("."));
     },
     async dispose() {
       if (_watcher) {
-        await _watcher.close()
+        await _watcher.close();
       }
-     },
+    },
     watch(callback) {
       if (_watcher) {
-        return
+        return;
       }
       return new Promise((resolve, reject) => {
         _watcher = watch(opts.base!, {
           ignoreInitial: true,
           ignored: opts.ignore,
-          ...opts.watchOptions
+          ...opts.watchOptions,
         })
-          .on('ready', () => {
-            resolve(() => _watcher.close().then(() => _watcher = undefined))
+          .on("ready", () => {
+            resolve(() => _watcher.close().then(() => (_watcher = undefined)));
           })
-          .on('error', reject)
-          .on('all', (eventName, path) => {
-            path = relative(opts.base!, path)
-            if (eventName === 'change' || eventName === 'add') {
-              callback('update', path)
-            } else if (eventName === 'unlink') {
-              callback('remove', path)
+          .on("error", reject)
+          .on("all", (eventName, path) => {
+            path = relative(opts.base!, path);
+            if (eventName === "change" || eventName === "add") {
+              callback("update", path);
+            } else if (eventName === "unlink") {
+              callback("remove", path);
             }
-        })
-      })
-    }
-  }
-})
+          });
+      });
+    },
+  };
+});

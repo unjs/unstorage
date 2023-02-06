@@ -3,35 +3,35 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import * as monaco from 'monaco-editor'
+import { defineComponent } from "vue";
+import * as monaco from "monaco-editor";
 
 export default defineComponent({
   props: {
     value: {
       type: String,
-      required: true
+      required: true,
     },
     language: {
       type: String,
-      default: 'auto'
-    }
+      default: "auto",
+    },
   },
   watch: {
-    value (newValue) {
-      this.editor.setValue(newValue)
+    value(newValue) {
+      this.editor.setValue(newValue);
     },
-    language (newValue) {
-      this.editor.setModelLanguage(this.editor.getModule(), newValue)
-    }
+    language(newValue) {
+      this.editor.setModelLanguage(this.editor.getModule(), newValue);
+    },
   },
-  mounted () {
+  mounted() {
     this.editor = monaco.editor.create(this.$refs.editor, {
       value: this.value,
-      language: this.language
-    })
-  }
-})
+      language: this.language,
+    });
+  },
+});
 </script>
 
 <style scoped>

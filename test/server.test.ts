@@ -9,10 +9,11 @@ describe("server", () => {
     const storage = createStorage();
     const storageServer = createStorageServer(storage);
     const { close, url: serverURL } = await listen(storageServer.handle, {
-      port: { random: true }
+      port: { random: true },
     });
 
-    const fetchStorage = (url: string, options?: any) => $fetch(url, { baseURL: serverURL, ...options });
+    const fetchStorage = (url: string, options?: any) =>
+      $fetch(url, { baseURL: serverURL, ...options });
 
     expect(await fetchStorage("foo", {})).toMatchObject([]);
 
@@ -20,7 +21,9 @@ describe("server", () => {
     await storage.setMeta("foo/bar", { mtime: new Date() });
     expect(await fetchStorage("foo/bar")).toBe("bar");
 
-    expect(await fetchStorage("foo/bar", { method: "PUT", body: "updated" })).toBe("OK");
+    expect(
+      await fetchStorage("foo/bar", { method: "PUT", body: "updated" })
+    ).toBe("OK");
     expect(await fetchStorage("foo/bar")).toBe("updated");
     expect(await fetchStorage("/")).toMatchObject(["foo/bar"]);
 

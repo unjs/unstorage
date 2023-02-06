@@ -1,52 +1,51 @@
 <template>
   <div class="filetree">
-    <file-tree-node
-      :item="tree"
-      @open="path => $emit('open', path)"
-    />
+    <file-tree-node :item="tree" @open="(path) => $emit('open', path)" />
   </div>
 </template>
 
 <script>
-import { defineComponent, inject, ref } from 'vue'
-import FileTreeNode from './FileTreeNode.vue'
+import { defineComponent, inject, ref } from "vue";
+import FileTreeNode from "./FileTreeNode.vue";
 
-function unflattenArray (items, toplevelKey = 'root') {
-  const res = { name: toplevelKey, path: '', children: [] }
+function unflattenArray(items, toplevelKey = "root") {
+  const res = { name: toplevelKey, path: "", children: [] };
   for (const item of items) {
-    const split = item.split(':')
-    let target = res
+    const split = item.split(":");
+    let target = res;
     for (const name of split) {
-      let child = target.children.find(c => c.name === name)
+      let child = target.children.find((c) => c.name === name);
       if (!child) {
         child = {
           name,
-          path: target.path + ':' + name,
-          children: []
-        }
-        target.children.push(child)
-        target.children = target.children.sort((c1, c2) => c1.name.localeCompare(c2.name))
+          path: target.path + ":" + name,
+          children: [],
+        };
+        target.children.push(child);
+        target.children = target.children.sort((c1, c2) =>
+          c1.name.localeCompare(c2.name)
+        );
       }
-      target = child
+      target = child;
     }
-    target.path = item
+    target.path = item;
   }
-  return res
+  return res;
 }
 
 export default defineComponent({
   components: { FileTreeNode },
-  async setup () {
-    const storage = inject('storage')
-    const tree = ref([])
+  async setup() {
+    const storage = inject("storage");
+    const tree = ref([]);
     await storage.getKeys().then((_keys) => {
-      tree.value = unflattenArray(_keys, 'workspace')
-    })
+      tree.value = unflattenArray(_keys, "workspace");
+    });
     return {
-      tree
-    }
-  }
-})
+      tree,
+    };
+  },
+});
 </script>
 
 <style scoped>

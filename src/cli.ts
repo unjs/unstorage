@@ -5,7 +5,7 @@ import { createStorage } from "./storage";
 import { createStorageServer } from "./server";
 import fsDriver from "./drivers/fs";
 
-async function main () {
+async function main() {
   const arguments_ = mri(process.argv.splice(2));
 
   if (arguments_.help) {
@@ -18,14 +18,14 @@ async function main () {
   const rootDir = resolve(arguments_._[0] || ".");
 
   const storage = createStorage({
-    driver: fsDriver({ base: rootDir })
+    driver: fsDriver({ base: rootDir }),
   });
 
   const storageServer = createStorageServer(storage);
 
   await listen(storageServer.handle, {
     name: "Storage server",
-    port: 8080
+    port: 8080,
   });
 }
 

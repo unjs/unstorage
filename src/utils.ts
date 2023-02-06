@@ -1,6 +1,6 @@
 import type { Storage } from "./types";
 
-type StorageKeys = Array<keyof Storage>
+type StorageKeys = Array<keyof Storage>;
 
 const storageKeyProperties: StorageKeys = [
   "hasItem",
@@ -13,38 +13,42 @@ const storageKeyProperties: StorageKeys = [
   "getKeys",
   "clear",
   "mount",
-  "unmount"
+  "unmount",
 ];
 
-export function prefixStorage (storage: Storage, base: string) {
+export function prefixStorage(storage: Storage, base: string) {
   base = normalizeBaseKey(base);
   if (!base) {
     return storage;
   }
   const nsStorage: Storage = { ...storage };
   for (const property of storageKeyProperties) {
-    // @ts-ignore Better types?
-    nsStorage[property] = (key: string = "", ...arguments_) => storage[property](base + key, ...arguments_);
+    // @ts-ignore
+    nsStorage[property] = (key = "", ...args) =>
+      // @ts-ignore
+      storage[property](base + key, ...args);
   }
-  nsStorage.getKeys = (key: string = "", ...arguments_) =>
+  nsStorage.getKeys = (key = "", ...arguments_) =>
     storage
       .getKeys(base + key, ...arguments_)
       // Remove Prefix
-      .then(keys => keys.map(key => key.slice(base.length)));
+      .then((keys) => keys.map((key) => key.slice(base.length)));
 
   return nsStorage;
 }
 
-export function normalizeKey (key?: string) {
-  if (!key) { return ""; }
+export function normalizeKey(key?: string) {
+  if (!key) {
+    return "";
+  }
   return key.replace(/[/\\]/g, ":").replace(/:+/g, ":").replace(/^:|:$/g, "");
 }
 
-export function joinKeys (...keys: string[]) {
+export function joinKeys(...keys: string[]) {
   return normalizeKey(keys.join(":"));
 }
 
-export function normalizeBaseKey (base?: string) {
+export function normalizeBaseKey(base?: string) {
   base = normalizeKey(base);
-  return base ? (base + ":") : "";
+  return base ? base + ":" : "";
 }

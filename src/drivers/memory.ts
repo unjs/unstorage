@@ -1,30 +1,30 @@
-import { defineDriver } from './utils'
-import type { StorageValue } from '../types'
+import { defineDriver } from "./utils";
+import type { StorageValue } from "../types";
 
 export default defineDriver(() => {
-  const data = new Map<string, StorageValue>()
+  const data = new Map<string, StorageValue>();
 
   return {
-    hasItem (key) {
-      return data.has(key)
+    hasItem(key) {
+      return data.has(key);
     },
-    getItem (key) {
-      return data.get(key) || null
+    getItem(key) {
+      return data.get(key) || null;
     },
     setItem(key, value) {
-      data.set(key, value)
+      data.set(key, value);
     },
-    removeItem (key) {
-      data.delete(key)
+    removeItem(key) {
+      data.delete(key);
     },
     getKeys() {
-      return Array.from(data.keys())
+      return Array.from(data.keys());
     },
     clear() {
-      data.clear()
+      data.clear();
     },
     dispose() {
-      data.clear()
-    }
-  }
-})
+      data.clear();
+    },
+  };
+});

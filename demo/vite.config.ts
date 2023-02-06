@@ -9,20 +9,20 @@ import fsdriver from "../src/drivers/fs";
 export default defineConfig({
   resolve: {
     alias: {
-      "node-fetch": "node-fetch/browser"
-    }
+      "node-fetch": "node-fetch/browser",
+    },
   },
   plugins: [
     vue(),
     {
       name: "app",
-      configureServer (server) {
+      configureServer(server) {
         const storage = createStorage();
         const storageServer = createStorageServer(storage);
         // eslint-disable-next-line unicorn/prefer-module
         storage.mount("/src", fsdriver({ base: resolve(__dirname, "..") }));
         server.middlewares.use("/storage", storageServer.handle);
-      }
-    }
-  ]
+      },
+    },
+  ],
 });

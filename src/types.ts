@@ -15,7 +15,11 @@ export interface StorageMeta {
 export interface Driver {
   hasItem: (key: string) => MaybePromise<boolean>;
   getItem: (key: string) => StorageValue;
+  /** @experimental */
+  getItemRaw?: (key: string) => unknown;
   setItem?: (key: string, value: string) => MaybePromise<void>;
+  /** @experimental */
+  setItemRaw?: (key: string, value: any) => MaybePromise<void>;
   removeItem?: (key: string) => MaybePromise<void>;
   getMeta?: (key: string) => MaybePromise<StorageMeta>;
   getKeys: (base?: string) => MaybePromise<string[]>;
@@ -28,7 +32,11 @@ export interface Storage {
   // Item
   hasItem: (key: string) => Promise<boolean>;
   getItem: (key: string) => Promise<StorageValue>;
+  /** @experimental */
+  getItemRaw: (key: string) => Promise<any>;
   setItem: (key: string, value: StorageValue) => Promise<void>;
+  /** @experimental */
+  setItemRaw: (key: string, value: any) => Promise<void>;
   removeItem: (key: string, removeMeta?: boolean) => Promise<void>;
   // Meta
   getMeta: (key: string, nativeMetaOnly?: true) => MaybePromise<StorageMeta>;

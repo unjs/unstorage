@@ -113,10 +113,19 @@ await storage.hasItem("foo:bar");
 
 ### `storage.getItem(key)`
 
-Gets the value of a key in storage. Resolves to either `string` or `undefined`.
+Gets the value of a key in storage. Resolves to either a javascript primitive value or `undefined`.
 
 ```js
 await storage.getItem("foo:bar");
+```
+
+### `storage.getItemRaw(key)` (experimental)
+
+Gets the value of a key in storage in raw format.
+
+```js
+// Value can be a Buffer, Array or Driver's raw format
+const value = await storage.getItemRaw("foo:bar.bin");
 ```
 
 ### `storage.setItem(key, value)`
@@ -129,6 +138,16 @@ If value is `undefined`, it is same as calling `removeItem(key)`.
 
 ```js
 await storage.setItem("foo:bar", "baz");
+```
+
+### `storage.setItemRaw(key, value)` (experimental)
+
+Add/Update a value to the storage in raw format.
+
+If value is `undefined`, it is same as calling `removeItem(key)`.
+
+```js
+await storage.setItemRaw("data/test.bin", new Uint8Array([1, 2, 3]));
 ```
 
 ### `storage.removeItem(key, removeMeta = true)`

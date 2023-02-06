@@ -45,3 +45,33 @@ export function stringify(value: any): string {
 
   throw new Error("[unstorage] Cannot stringify value!");
 }
+
+function checkBufferSupport() {
+  if (typeof Buffer === undefined) {
+    throw new TypeError("[unstorage] Buffer is not supported!");
+  }
+}
+
+export const BASE64_PREFIX = "base64:";
+
+export function serializeRaw(value) {
+  if (typeof value === "string") {
+    return value;
+  }
+  checkBufferSupport();
+  const base64 = Buffer.from(value).toString("base64");
+  return BASE64_PREFIX + base64;
+}
+
+export function deserializeRaw(value) {
+  if (typeof value !== "string") {
+    // Return non-strings as-is
+    return value;
+  }
+  if (!value.startsWith(BASE64_PREFIX)) {
+    // Return unknown strings as-is
+    return value;
+  }
+  checkBufferSupport();
+  return Buffer.from(value.slice(BASE64_PREFIX.length), "base64");
+}

@@ -47,6 +47,9 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       return existsSync(r(key));
     },
     getItem(key) {
+      return readFile(r(key), "utf8");
+    },
+    getItemRaw(key) {
       return readFile(r(key));
     },
     async getMeta(key) {
@@ -56,6 +59,9 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       return { atime, mtime, size };
     },
     setItem(key, value) {
+      return writeFile(r(key), value, "utf8");
+    },
+    setItemRaw(key, value) {
       return writeFile(r(key), value);
     },
     removeItem(key) {

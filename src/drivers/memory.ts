@@ -2,7 +2,7 @@ import { defineDriver } from "./utils";
 import type { StorageValue } from "../types";
 
 export default defineDriver(() => {
-  const data = new Map<string, StorageValue>();
+  const data = new Map<string, any>();
 
   return {
     hasItem(key) {
@@ -11,7 +11,13 @@ export default defineDriver(() => {
     getItem(key) {
       return data.get(key) || null;
     },
+    getItemRaw(key) {
+      return data.get(key) || null;
+    },
     setItem(key, value) {
+      data.set(key, value);
+    },
+    setItemRaw(key, value) {
       data.set(key, value);
     },
     removeItem(key) {

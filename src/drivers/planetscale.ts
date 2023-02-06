@@ -78,7 +78,7 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
         { key }
       );
       return {
-        atime: rows(res)[0]?.created_at,
+        ctime: rows(res)[0]?.created_at,
         mtime: rows(res)[0]?.updated_at,
       };
     },

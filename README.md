@@ -360,7 +360,7 @@ const storage = createStorage({
 });
 ```
 
-### `lru` (universal)
+### `lru-cache` (universal)
 
 Keeps cached data in memory using [LRU Cache](https://www.npmjs.com/package/lru-cache).
 

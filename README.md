@@ -383,6 +383,26 @@ const storage = createStorage({
 });
 ```
 
+### `cache`
+
+This driver can be combined with any other driver to automatically cache reads using the `memory` driver but still perform write operations. (It is almost the reverse of the `overlay` driver.)
+
+```js
+import { createStorage } from "unstorage";
+import cacheDriver from "unstorage/drivers/cache";
+import httpDriver from "unstorage/drivers/http";
+
+const storage = createStorage({
+  driver: cacheDriver({
+    driver: httpDriver({ base: "http://cdn.com" }),
+  }),
+});
+```
+
+**Options:**
+
+- `driver`: A configured driver to cache automatically.
+
 ### `http` (universal)
 
 Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server](#storage-server) methods.

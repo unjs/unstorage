@@ -46,7 +46,6 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
         `SELECT value from ${opts.table} WHERE id=:key;`,
         { key }
       );
-      console.log({ key, res: res.rows[0] });
       return rows(res)[0]?.value ?? null;
     },
     setItem: async (key, value) => {

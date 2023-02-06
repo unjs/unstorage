@@ -54,7 +54,7 @@
     "ws": "^8.12.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^3.19.0",
+    "@cloudflare/workers-types": "^4.20230115.0",
     "@types/jsdom": "^20.0.1",
     "@types/mri": "^1.1.1",
     "@types/node": "^18.11.19",

@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@cloudflare/workers-types': ^3.19.0
+  '@cloudflare/workers-types': ^4.20230115.0
   '@types/jsdom': ^20.0.1
   '@types/mri': ^1.1.1
   '@types/node': ^18.11.19
@@ -50,7 +50,7 @@ dependencies:
   ws: 8.12.0
 
 devDependencies:
-  '@cloudflare/workers-types': 3.19.0
+  '@cloudflare/workers-types': 4.20230115.0
   '@types/jsdom': 20.0.1
   '@types/mri': 1.1.1
   '@types/node': 18.11.19
@@ -286,8 +286,8 @@ packages:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
     dev: true
 
-  /@cloudflare/workers-types/3.19.0:
-    resolution: {integrity: sha512-0FRcsz7Ea3jT+gc5gKPIYciykm1bbAaTpygdzpCwGt0RL+V83zWnYN30NWDW4rIHj/FHtz+MIuBKS61C8l7AzQ==}
+  /@cloudflare/workers-types/4.20230115.0:
+    resolution: {integrity: sha512-GPJEiO8AFN+jUpA+DHJ1qdVmk4s/hq8JYKjOV/+U7avGquQbVnj905+Kg6uAEfrq16muwmRKl+XJGqsvlBlDNg==}
     dev: true
 
   /@esbuild/android-arm/0.15.11:

@@ -6,7 +6,7 @@
 [![Codecov][codecov-src]][codecov-href]
 [![bundle][bundle-src]][bundle-href]
 
-> 🌍 💾 Universal Storage Layer
+> 💾 Universal Storage Layer
 
 **Why ❓**
 
@@ -34,58 +34,18 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
 ✅ Binary and raw operations support (experimental) <br>
 <br>
 
-**📚 Table of Contents**
-
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [Usage](#usage)
-- [Storage Interface](#storage-interface)
-  - [`storage.hasItem(key)`](#storagehasitemkey)
-  - [`storage.getItem(key)`](#storagegetitemkey)
-  - [`storage.getItemRaw(key)`](#storagegetitemrawkey)
-  - [`storage.setItem(key, value)`](#storagesetitemkey-value)
-  - [`storage.setItemRaw(key, value)`](#storagesetitemrawkey-value)
-  - [`storage.removeItem(key, removeMeta = true)`](#storageremoveitemkey-removemeta--true)
-  - [`storage.getMeta(key, nativeOnly?)`](#storagegetmetakey-nativeonly)
-  - [`storage.setMeta(key)`](#storagesetmetakey)
-  - [`storage.removeMeta(key)`](#storageremovemetakey)
-  - [`storage.getKeys(base?)`](#storagegetkeysbase)
-  - [`storage.clear(base?)`](#storageclearbase)
-  - [`storage.dispose()`](#storagedispose)
-  - [`storage.mount(mountpoint, driver)`](#storagemountmountpoint-driver)
-  - [`storage.unmount(mountpoint, dispose = true)`](#storageunmountmountpoint-dispose--true)
-  - [`storage.watch(callback)`](#storagewatchcallback)
-  - [`storage.unwatch()`](#storageunwatch)
-- [Utils](#utils)
-  - [`snapshot(storage, base?)`](#snapshotstorage-base)
-  - [`restoreSnapshot(storage, data, base?)`](#restoresnapshotstorage-data-base)
-  - [`prefixStorage(storage, data, base?)`](#prefixstoragestorage-data-base)
-- [Storage Server](#storage-server)
-- [Drivers](#drivers)
-  - [`fs` (node)](#fs-node)
-  - [`localStorage` (browser)](#localstorage-browser)
-  - [`memory` (universal)](#memory-universal)
-  - [`overlay` (universal)](#overlay-universal)
-  - [`http` (universal)](#http-universal)
-  - [`redis`](#redis)
-  - [`cloudflare-kv-http`](#cloudflare-kv-http)
-  - [`cloudflare-kv-binding`](#cloudflare-kv-binding)
-  - [`github`](#github)
-- [Making custom drivers](#making-custom-drivers)
-- [Contribution](#contribution)
-- [License](#license)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## Usage
 
 Install `unstorage` npm package:
 
 ```sh
+# yarn
 yarn add unstorage
-# or
-npm i unstorage
+# npm
+npm install unstorage
+# pnpm
+pnpm add unstorage
+
 ```
 
 ```js
@@ -635,9 +595,9 @@ const storage = createStorage({
 ## Contribution
 
 - Clone repository
-- Install dependencies with `yarn install`
-- Use `yarn dev` to start jest watcher verifying changes
-- Use `yarn test` before pushing to ensure all tests and lint checks passing
+- Install dependencies with `pnpm install`
+- Use `pnpm dev` to start jest watcher verifying changes
+- Use `pnpm test` before pushing to ensure all tests and lint checks passing
 
 ## License
 

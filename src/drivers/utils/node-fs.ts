@@ -9,13 +9,18 @@ function ignoreExists(err: any) {
   return err.code === "EEXIST" ? null : err;
 }
 
-export async function writeFile(path: string, data: string) {
+type WriteFileData = Parameters<typeof fsPromises.writeFile>[1];
+export async function writeFile(
+  path: string,
+  data: WriteFileData,
+  encoding?: BufferEncoding
+) {
   await ensuredir(dirname(path));
-  return fsPromises.writeFile(path, data, "utf8");
+  return fsPromises.writeFile(path, data, encoding);
 }
 
-export function readFile(path: string) {
-  return fsPromises.readFile(path, "utf8").catch(ignoreNotfound);
+export function readFile(path: string, encoding?: BufferEncoding) {
+  return fsPromises.readFile(path, encoding).catch(ignoreNotfound);
 }
 
 export function stat(path: string) {

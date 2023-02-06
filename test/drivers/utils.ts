@@ -86,6 +86,19 @@ export function testDriver(opts: TestOptions) {
     ).rejects.toThrow("[unstorage] Cannot stringify value!");
   });
 
+  it("raw support", async () => {
+    const value = new Uint8Array([1, 2, 3]);
+    await ctx.storage.setItemRaw("/data/raw.bin", value);
+    const rValue = await ctx.storage.getItemRaw("/data/raw.bin");
+    if (rValue.length !== value.length) {
+      console.log(rValue);
+    }
+    expect(rValue.length).toBe(value.length);
+    expect(Buffer.from(rValue).toString("base64")).toBe(
+      Buffer.from(value).toString("base64")
+    );
+  });
+
   if (opts.additionalTests) {
     opts.additionalTests(ctx);
   }

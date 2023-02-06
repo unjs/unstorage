@@ -12,7 +12,7 @@ export const builtinDrivers = {
   github: "unstorage/drivers/github",
   http: "unstorage/drivers/http",
   localStorage: "unstorage/drivers/localstorage",
-  lruCache: "unstorage/drivers/lru",
+  lruCache: "unstorage/drivers/lru-cache",
   localstorage: "unstorage/drivers/localstorage",
   memory: "unstorage/drivers/memory",
   overlay: "unstorage/drivers/overlay",

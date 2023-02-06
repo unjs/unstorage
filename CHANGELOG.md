@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.1.3
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.1.2...v1.1.3)
+
+
+### 🩹 Fixes
+
+  - Allow stringify array ([#147](https://github.com/unjs/unstorage/pull/147))
+
+### ❤️  Contributors
+
+- Yasser Lahbibi <yasser.lahbibi@apenhet.com>
+
 ## v1.1.2
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.1.1...v1.1.2)

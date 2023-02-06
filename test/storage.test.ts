@@ -109,4 +109,9 @@ describe("utils", () => {
     // Get keys from sub-storage
     expect(await mntStorage.getKeys("foo")).toStrictEqual(["foo:x", "foo:y"]);
   });
+
+  it("stringify", () => {
+    const storage = createStorage();
+    expect(async () => await storage.setItem("foo", [])).not.toThrow();
+  });
 });

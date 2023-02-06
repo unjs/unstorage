@@ -6,6 +6,7 @@ import { fetch } from "ofetch";
 export interface PlanetscaleDriverOptions {
   url?: string;
   table?: string;
+  cache?: boolean;
 }
 
 interface TableSchema {
@@ -26,7 +27,11 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
     url: opts.url,
     fetch,
   });
-  c.execute("SET @@boost_cached_queries = true;");
+
+  // this query will be lazily executed
+  if (opts.cache) {
+    c.execute("SET @@boost_cached_queries = true;");
+  }
 
   return {
     hasItem: async (key) => {

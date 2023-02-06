@@ -53,8 +53,12 @@
     "ufo": "^1.0.1",
     "ws": "^8.12.0"
   },
+  "optionalDependencies": {
+    "@planetscale/database": "^1.5.0"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230115.0",
+    "@planetscale/database": "^1.5.0",
     "@types/jsdom": "^21.1.0",
     "@types/mri": "^1.1.1",
     "@types/node": "^18.11.19",

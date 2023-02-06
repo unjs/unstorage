@@ -577,6 +577,44 @@ const storage = createStorage({
 - `apiURL`: Github API domain. Default is `https://api.github.com`
 - `cdnURL`: Github RAW CDN Url. Default is `https://raw.githubusercontent.com`
 
+### planetscale
+
+Stores data in [Planetscale](https://planetscale.com/)
+
+This driver stores KV information in a Planetscale DB with columns of `id`, `value`, `created_at` and `updated_at`.
+
+To use, run the following query in your planetscale database, where <storage> is the name of the table you want to use:
+
+```sql
+create table <storage> (
+ id varchar(255) not null primary key,
+ value longtext,
+ created_at timestamp default current_timestamp,
+ updated_at timestamp default current_timestamp on update current_timestamp
+);
+```
+
+You can then configure the driver like this:
+
+```js
+import { createStorage } from 'unstorage'
+import planetscaleDriver from 'unstorage/drivers/planetscale'
+
+const storage = createStorage({
+  driver: planetscaleDriver({
+    // This should certainly not be inlined in your code but loaded via runtime config
+    // or environment variables depending on your framework/project.
+    url: 'mysql://xxxxxxxxx:************@xxxxxxxxxx.us-east-3.psdb.cloud/my-database?sslaccept=strict',
+    // table: 'storage'
+  })
+})
+```
+
+**Options:**
+
+- **`url`** (required): You can find your URL in the [Planetscale dashboard](https://planetscale.com/docs/tutorials/connect-nodejs-app).
+- `storage`: The name of the table to read from. It defaults to `storage`.
+
 ## Making custom drivers
 
 It is possible to extend unstorage by creating custom drives.

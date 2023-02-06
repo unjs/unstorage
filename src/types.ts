@@ -32,10 +32,10 @@ export interface Storage {
   // Item
   hasItem: (key: string) => Promise<boolean>;
   getItem: (key: string) => Promise<StorageValue>;
-  /** @experimental */
+  /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   getItemRaw: (key: string) => Promise<any>;
   setItem: (key: string, value: StorageValue) => Promise<void>;
-  /** @experimental */
+  /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   setItemRaw: (key: string, value: any) => Promise<void>;
   removeItem: (key: string, removeMeta?: boolean) => Promise<void>;
   // Meta

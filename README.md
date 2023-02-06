@@ -46,7 +46,9 @@ Comparing to similar solutions like [localforage](https://localforage.github.io/
 - [Storage Interface](#storage-interface)
   - [`storage.hasItem(key)`](#storagehasitemkey)
   - [`storage.getItem(key)`](#storagegetitemkey)
+  - [`storage.getItemRaw(key)`](#storagegetitemrawkey)
   - [`storage.setItem(key, value)`](#storagesetitemkey-value)
+  - [`storage.setItemRaw(key, value)`](#storagesetitemrawkey-value)
   - [`storage.removeItem(key, removeMeta = true)`](#storageremoveitemkey-removemeta--true)
   - [`storage.getMeta(key, nativeOnly?)`](#storagegetmetakey-nativeonly)
   - [`storage.setMeta(key)`](#storagesetmetakey)
@@ -119,7 +121,9 @@ Gets the value of a key in storage. Resolves to either a javascript primitive va
 await storage.getItem("foo:bar");
 ```
 
-### `storage.getItemRaw(key)` (experimental)
+### `storage.getItemRaw(key)`
+
+**Note:** This is an experimental feature. Please check [unjs/unstorage#142](https://github.com/unjs/unstorage/issues/142) for more information.
 
 Gets the value of a key in storage in raw format.
 
@@ -140,7 +144,9 @@ If value is `undefined`, it is same as calling `removeItem(key)`.
 await storage.setItem("foo:bar", "baz");
 ```
 
-### `storage.setItemRaw(key, value)` (experimental)
+### `storage.setItemRaw(key, value)`
+
+**Note:** This is an experimental feature. Please check [unjs/unstorage#142](https://github.com/unjs/unstorage/issues/142) for more information.
 
 Add/Update a value to the storage in raw format.
 

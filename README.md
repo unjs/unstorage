@@ -583,7 +583,17 @@ Stores data in [Planetscale](https://planetscale.com/)
 
 This driver stores KV information in a Planetscale DB with columns of `id`, `value`, `created_at` and `updated_at`.
 
-To use, run the following query in your planetscale database, where <storage> is the name of the table you want to use:
+To use, you will need to install `@planetscale/database` in your project:
+
+```json
+{
+  "dependencies": {
+    "@planetscale/database": "^1.5.0",
+  }
+}
+```
+
+Then you can create a table to store your data by running the following query in your Planetscale database, where <storage> is the name of the table you want to use:
 
 ```sql
 create table <storage> (

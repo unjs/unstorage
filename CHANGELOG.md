@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.1.2
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.1.1...v1.1.2)
+
+
+### 📦 Build
+
+  - Update mkdist ([3839ab3](https://github.com/unjs/unstorage/commit/3839ab3))
+
+### ❤️  Contributors
+
+- Pooya Parsa <pooya@pi0.io>
+
 ## v1.1.1
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.1.0...v1.1.1)

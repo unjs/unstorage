@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.1.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.0.1...v1.1.0)
+
+
+### 🚀 Enhancements
+
+  - Serialize values implementing `toJSON()` ([#139](https://github.com/unjs/unstorage/pull/139))
+  - Experimental raw data support ([#141](https://github.com/unjs/unstorage/pull/141))
+  - **driver:** Add planetscale driver ([#140](https://github.com/unjs/unstorage/pull/140))
+  - **fs:** Support `readOnly` and `noClear` options ([f2dddbd](https://github.com/unjs/unstorage/commit/f2dddbd))
+  - **fs:** Support `birthtime` and `ctime` meta ([#136](https://github.com/unjs/unstorage/pull/136))
+  - `lru-cache` driver ([#146](https://github.com/unjs/unstorage/pull/146))
+
+### 🩹 Fixes
+
+  - **cloudflare:** Pass params to kv request ([#138](https://github.com/unjs/unstorage/pull/138))
+  - **planetscale:** Use `birthtime` for `created_at` value ([#144](https://github.com/unjs/unstorage/pull/144))
+  - Update driver defenition types ([#143](https://github.com/unjs/unstorage/pull/143))
+
+### 💅 Refactors
+
+  - Use type import for node builtin ([#133](https://github.com/unjs/unstorage/pull/133))
+
+### 📖 Documentation
+
+  - Fix readme typo ([#134](https://github.com/unjs/unstorage/pull/134))
+  - Add experimental link for raw support ([98a6466](https://github.com/unjs/unstorage/commit/98a6466))
+
+### 📦 Build
+
+  - Provide backwards-compatible type entries ([#132](https://github.com/unjs/unstorage/pull/132))
+
+### 🏡 Chore
+
+  - Update dependencies ([2cf6697](https://github.com/unjs/unstorage/commit/2cf6697))
+  - Update readme ([229a0eb](https://github.com/unjs/unstorage/commit/229a0eb))
+  - Update readme ([960dd43](https://github.com/unjs/unstorage/commit/960dd43))
+
+### 🎨 Styles
+
+  - Format and lint code ([fd4e006](https://github.com/unjs/unstorage/commit/fd4e006))
+  - Format readme with prettier ([ec7c7c2](https://github.com/unjs/unstorage/commit/ec7c7c2))
+
+### ❤️  Contributors
+
+- Pooya Parsa <pooya@pi0.io>
+- Daniel Roe <daniel@roe.dev>
+- Yu Le <is.yuler@gmail.com>
+
 ### [1.0.1](https://github.com/unjs/unstorage/compare/v1.0.0...v1.0.1) (2022-11-15)
 
 ## [1.0.0](https://github.com/unjs/unstorage/compare/v0.6.0...v1.0.0) (2022-11-15)

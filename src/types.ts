@@ -17,7 +17,7 @@ export interface Driver {
   getItem: (key: string) => MaybePromise<StorageValue>;
   /** @experimental */
   getItemRaw?: (key: string) => MaybePromise<unknown>;
-  setItem?: (key: string, value: StorageValue) => MaybePromise<void>;
+  setItem?: (key: string, value: string) => MaybePromise<void>;
   /** @experimental */
   setItemRaw?: (key: string, value: any) => MaybePromise<void>;
   removeItem?: (key: string) => MaybePromise<void>;

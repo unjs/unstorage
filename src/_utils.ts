@@ -19,11 +19,29 @@ export function asyncCall<T extends (...arguments_: any) => any>(
   }
 }
 
-export function isPrimitive(argument: any) {
-  const type = typeof argument;
-  return argument === null || (type !== "object" && type !== "function");
+function isPrimitive(value: any) {
+  const type = typeof value;
+  return value === null || (type !== "object" && type !== "function");
 }
 
-export function stringify(argument: any) {
-  return isPrimitive(argument) ? argument + "" : JSON.stringify(argument);
+function isPureObject(value: any) {
+  const proto = Object.getPrototypeOf(value);
+  // eslint-disable-next-line no-prototype-builtins
+  return !proto || proto.isPrototypeOf(Object);
+}
+
+export function stringify(value: any): string {
+  if (isPrimitive(value)) {
+    return String(value);
+  }
+
+  if (isPureObject(value)) {
+    return JSON.stringify(value);
+  }
+
+  if (typeof value.toJSON === "function") {
+    return stringify(value.toJSON());
+  }
+
+  throw new Error("[unstorage] Cannot stringify value!");
 }

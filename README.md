@@ -622,6 +622,54 @@ const storage = createStorage({
 - `storage`: The name of the table to read from. It defaults to `storage`.
 - `boostCache`: Whether to enable cached queries: see [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).
 
+### `azure-storage-table`
+
+Store data in a Azure table storage [data-tables](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables).
+
+This driver stores KV information in a Azure table storage. The same partition key is used for all keys and the field `unstorageValue` is used to store the value.
+
+To use it, you will need to install `@azure/data-table` and `@azure/identity` in your project:
+
+```json
+{
+  "dependencies": {
+    "@azure/data-tables": "^13.2.1",
+    "@azure/identity": "^3.1.3"
+  }
+}
+```
+
+Please make sure that the table you want to use exists in your storage account.
+
+```js
+import { createStorage } from "unstorage";
+import azureStorageTableDriver from "unstorage/drivers/azure-storage-table";
+
+const storage = createStorage({
+    driver: azureStorageTableDriver({
+      accountName: "myazurestorageaccount",
+    }),
+});
+```
+
+**Authentication:**
+
+The driver supports the following authentication methods:
+
+- **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate. <br>
+⚠️ Make sure that your Managed Identity or personal account has the `Storage Table Data Contributor` role assigned to it, even if you already are `Contributor` or `Owner` on the storage account.
+- **`AzureNamedKeyCredential`** (only available in Node.js runtime): This will use the `accountName` and `accountKey` to authenticate the request.
+- **`AzureSASCredential`**: This will use the `accountName` and `sasToken` to authenticate the request.
+- **connection string** (only available in Node.js runtime): This will use the `connectionString` to authenticate the request. This is not recommended as it will expose your account key in plain text.
+
+**Options:**
+
+- **`accountName`** (required): The name of your storage account.
+- `tableName`: The name of the table to use. Defaults to `unstorage`.
+- `partitionKey`: The partition key to use. Defaults to `unstorage`.
+- `accountKey`: The account key to use for authentication. This is only required if you are using `AzureNamedKeyCredential`.
+- `sasKey`: The SAS token to use for authentication. This is only required if you are using `AzureSASCredential`.
+
 ## Making custom drivers
 
 It is possible to extend unstorage by creating custom drives.

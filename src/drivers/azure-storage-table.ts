@@ -49,6 +49,11 @@ export default defineDriver((opts: AzureStorageTableOptions = {}) => {
     sasKey = null,
     connectionString = null,
   } = opts;
+  if (!accountName)
+    throw new Error(
+      "Account name is required to use the Azure Storage Table driver."
+    );
+
   let client: TableClient;
   if (accountKey) {
     // AzureNamedKeyCredential is only available in Node.js runtime, not in browsers
@@ -88,8 +93,8 @@ export default defineDriver((opts: AzureStorageTableOptions = {}) => {
     },
     async getItem(key) {
       try {
-        const result = await client.getEntity(partitionKey, key);
-        return result.unstorageValue;
+        const entity = await client.getEntity(partitionKey, key);
+        return entity.unstorageValue;
       } catch {
         return null;
       }
@@ -115,6 +120,13 @@ export default defineDriver((opts: AzureStorageTableOptions = {}) => {
         keys.push(...pageKeys);
       }
       return keys;
+    },
+    async getMeta(key) {
+      const entity = await client.getEntity(partitionKey, key);
+      return {
+        mtime: entity.timestamp,
+        etag: entity.etag,
+      };
     },
     async clear() {
       const iterator = client.listEntities().byPage({ maxPageSize: 1000 });

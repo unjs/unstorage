@@ -12,6 +12,6 @@ describe("drivers: azure-storage-table", () => {
     await client.createTable();
   });
   testDriver({
-    driver: driver({ connectionString: "UseDevelopmentStorage=true" }),
+    driver: driver({ connectionString: "UseDevelopmentStorage=true", accountName: "local" }),
   });
 });

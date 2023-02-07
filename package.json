@@ -36,9 +36,9 @@
     "lint": "eslint --ext .ts . && prettier -c src test demo",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
-    "test": "pnpm lint && run-p -r azurite vitest",
-    "vitest": "vitest run --coverage test/drivers/azure-storage-blob.test.ts",
-    "azurite": "azurite --silent",
+    "test": "pnpm lint && run-p -r azurite-table-storage vitest",
+    "vitest": "vitest run --coverage",
+    "azurite-table-storage": "azurite --silent",
     "unstorage": "pnpm jiti src/cli"
   },
   "dependencies": {

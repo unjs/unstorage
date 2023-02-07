@@ -124,7 +124,7 @@ export default defineDriver((opts: AzureStorageTableOptions = {}) => {
     async getMeta(key) {
       const entity = await client.getEntity(partitionKey, key);
       return {
-        mtime: entity.timestamp,
+        mtime: new Date(entity.timestamp),
         etag: entity.etag,
       };
     },

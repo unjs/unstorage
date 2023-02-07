@@ -36,14 +36,15 @@
     "lint": "eslint --ext .ts . && prettier -c src test demo",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
-    "test": "pnpm lint && run-p -r azurite-table-storage vitest",
-    "vitest": "vitest run --coverage test/drivers/azure-storage-table.test.ts",
-    "azurite-table-storage": "azurite-table --silent",
+    "test": "pnpm lint && run-p -r azurite vitest",
+    "vitest": "vitest run --coverage",
+    "azurite": "azurite --silent",
     "unstorage": "pnpm jiti src/cli"
   },
   "dependencies": {
     "@azure/data-tables": "^13.2.1",
     "@azure/identity": "^3.1.3",
+    "@azure/storage-blob": "^12.12.0",
     "anymatch": "^3.1.3",
     "chokidar": "^3.5.3",
     "destr": "^1.2.2",

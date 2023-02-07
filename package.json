@@ -37,8 +37,8 @@
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
     "test": "pnpm lint && run-p -r azurite-table-storage vitest",
-    "vitest": "vitest run --coverage test/drivers/azure-storage-table.test.ts",
-    "azurite-table-storage": "azurite-table --silent",
+    "vitest": "vitest run --coverage",
+    "azurite-table-storage": "azurite --silent",
     "unstorage": "pnpm jiti src/cli"
   },
   "dependencies": {

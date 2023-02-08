@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.1.4
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.1.3...v1.1.4)
+
+
+### 🩹 Fixes
+
+  - Strip query param from keys ([cc3ebb7](https://github.com/unjs/unstorage/commit/cc3ebb7))
+
+### ❤️  Contributors
+
+- Pooya Parsa <pooya@pi0.io>
+
 ## v1.1.3
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.1.2...v1.1.3)

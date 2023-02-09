@@ -45,9 +45,6 @@ specifiers:
   ws: ^8.12.0
 
 dependencies:
-  '@azure/data-tables': 13.2.1
-  '@azure/identity': 3.1.3
-  '@azure/storage-blob': 12.12.0
   anymatch: 3.1.3
   chokidar: 3.5.3
   destr: 1.2.2
@@ -63,6 +60,9 @@ dependencies:
   ws: 8.12.0
 
 optionalDependencies:
+  '@azure/data-tables': 13.2.1
+  '@azure/identity': 3.1.3
+  '@azure/storage-blob': 12.12.0
   '@planetscale/database': 1.5.0
 
 devDependencies:
@@ -162,6 +162,7 @@ packages:
     transitivePeerDependencies:
       - encoding
     dev: false
+    optional: true
 
   /@azure/core-lro/2.5.1:
     resolution: {integrity: sha512-JHQy/bA3NOz2WuzOi5zEk6n/TJdAropupxUT521JIJvW7EXV2YN2SFYZrf/2RHeD28QAClGdynYadZsbmP+nyQ==}
@@ -201,6 +202,7 @@ packages:
       '@opentelemetry/api': 1.4.0
       tslib: 2.5.0
     dev: false
+    optional: true
 
   /@azure/core-tracing/1.0.1:
     resolution: {integrity: sha512-I5CGMoLtX+pI17ZdiFJZgxMJApsK6jjfm85hpgp3oazCdq5Wxgh4wMr7ge/TTWW1B5WBuvIOI1fMU/FrOAMKrw==}
@@ -222,10 +224,12 @@ packages:
       fast-xml-parser: 4.1.1
       tslib: 2.5.0
     dev: false
+    optional: true
 
   /@azure/data-tables/13.2.1:
     resolution: {integrity: sha512-5pboUpSpxjTgZ499MxkLLR0i+lyUUwN6M5pTLZ2D4mUfKVz+vqiCijvxij0V0OfknMxVpQ+NrZcUdarw6a1Few==}
     engines: {node: '>=14.0.0'}
+    requiresBuild: true
     dependencies:
       '@azure/core-auth': 1.4.0
       '@azure/core-client': 1.7.1
@@ -239,6 +243,7 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: false
+    optional: true
 
   /@azure/identity/2.1.0:
     resolution: {integrity: sha512-BPDz1sK7Ul9t0l9YKLEa8PHqWU4iCfhGJ+ELJl6c8CP3TpJt2urNCbm0ZHsthmxRsYoMPbz2Dvzj30zXZVmAFw==}
@@ -267,6 +272,7 @@ packages:
   /@azure/identity/3.1.3:
     resolution: {integrity: sha512-y0jFjSfHsVPwXSwi3KaSPtOZtJZqhiqAhWUXfFYBUd/+twUBovZRXspBwLrF5rJe0r5NyvmScpQjL+TYDTQVvw==}
     engines: {node: '>=14.0.0'}
+    requiresBuild: true
     dependencies:
       '@azure/abort-controller': 1.1.0
       '@azure/core-auth': 1.4.0
@@ -287,6 +293,7 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: false
+    optional: true
 
   /@azure/keyvault-keys/4.6.0:
     resolution: {integrity: sha512-0112LegxeR03L8J4k+q6HwBVvrpd9y+oInG0FG3NaHXN7YUubVBon/eb5jFI6edGrvNigpxSR0XIsprFXdkzCQ==}
@@ -347,6 +354,7 @@ packages:
     resolution: {integrity: sha512-we9xR8lvu47fF0h+J8KyXoRy9+G/fPzm3QEa2TrdR3jaVS3LKAyE2qyMuUkNdbVkvzl8Zr9f7l+IUSP22HeqXw==}
     engines: {node: '>=0.8.0'}
     dev: false
+    optional: true
 
   /@azure/msal-node/1.15.0:
     resolution: {integrity: sha512-fwC5M0c8pxOAzmScPbpx7j28YVTDebUaizlVF7bR0xvlU0r3VWW5OobCcr9ybqKS6wGyO7u4EhXJS9rjRWAuwA==}
@@ -359,6 +367,7 @@ packages:
   /@azure/storage-blob/12.12.0:
     resolution: {integrity: sha512-o/Mf6lkyYG/eBW4/hXB9864RxVNmAkcKHjsGR6Inlp5hupa3exjSyH2KjO3tLO//YGA+tS+17hM2bxRl9Sn16g==}
     engines: {node: '>=12.0.0'}
+    requiresBuild: true
     dependencies:
       '@azure/abort-controller': 1.1.0
       '@azure/core-http': 2.3.1
@@ -371,6 +380,7 @@ packages:
     transitivePeerDependencies:
       - encoding
     dev: false
+    optional: true
 
   /@babel/code-frame/7.18.6:
     resolution: {integrity: sha512-TDCmlK5eOvH+eH7cdAFlNXeVJqWIQ7gW9tY1GJIpUtFb6CmjVyq2VM3u71bOyR8CRihcCgMUYoDNyLXao3+70Q==}
@@ -1129,6 +1139,7 @@ packages:
     resolution: {integrity: sha512-IgMK9i3sFGNUqPMbjABm0G26g0QCKCUBfglhQ7rQq6WcxbKfEHRcmwsoER4hZcuYqJgkYn2OeuoJIv7Jsftp7g==}
     engines: {node: '>=8.0.0'}
     dev: false
+    optional: true
 
   /@pkgr/utils/2.3.1:
     resolution: {integrity: sha512-wfzX8kc1PMyUILA+1Z/EqoE4UCXGy0iRGMhPwdfae1+f0OXlLqCk+By+aMzgJBzR9AzS4CDizioG6Ss1gvAFJw==}
@@ -1306,6 +1317,7 @@ packages:
       '@types/node': 18.11.19
       form-data: 3.0.1
     dev: false
+    optional: true
 
   /@types/node/18.11.19:
     resolution: {integrity: sha512-YUgMWAQBWLObABqrvx8qKO1enAvBUdjZOAWQ5grBAkp5LQv45jBvYKZ3oFS9iKRCQyFjqw6iuEa1vmFqtxYLZw==}
@@ -1337,6 +1349,7 @@ packages:
     dependencies:
       '@types/node': 18.11.19
     dev: false
+    optional: true
 
   /@types/validator/13.7.12:
     resolution: {integrity: sha512-YVtyAPqpefU+Mm/qqnOANW6IkqKpCSrarcyV269C8MA8Ux0dbkEuQwM/4CjL47kVEM2LgBef/ETfkH+c6+moFA==}
@@ -3206,6 +3219,7 @@ packages:
     dependencies:
       strnum: 1.0.5
     dev: false
+    optional: true
 
   /fastq/1.15.0:
     resolution: {integrity: sha512-wBrocU2LCXXa+lWBt8RoIRD89Fi8OdABODa/kEnyeyjS5aZO5/GNvI5sEINADqP/h8M29UHTHUb53sUu5Ihqdw==}
@@ -3330,6 +3344,7 @@ packages:
       combined-stream: 1.0.8
       mime-types: 2.1.35
     dev: false
+    optional: true
 
   /form-data/4.0.0:
     resolution: {integrity: sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==}
@@ -5116,6 +5131,7 @@ packages:
     resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
     engines: {node: '>= 0.6.0'}
     dev: false
+    optional: true
 
   /proxy-addr/2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
@@ -5772,6 +5788,7 @@ packages:
   /strnum/1.0.5:
     resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}
     dev: false
+    optional: true
 
   /supports-color/5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}

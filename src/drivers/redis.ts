@@ -26,6 +26,9 @@ export default defineDriver<RedisOptions>((_opts) => {
     setItem(key, value) {
       return redis.set(r(key), value).then(() => {});
     },
+    setKeyExpire(key, seconds) {
+      return redis.expire(r(key), seconds).then(() => {});
+    },
     removeItem(key) {
       return redis.del(r(key)).then(() => {});
     },

@@ -19,6 +19,7 @@ export interface Driver {
   getItemRaw?: (key: string) => MaybePromise<unknown>;
   setItem?: (key: string, value: string) => MaybePromise<void>;
   /** @experimental */
+  setKeyExpire?: (key: string, seconds: number) => MaybePromise<void>;
   setItemRaw?: (key: string, value: any) => MaybePromise<void>;
   removeItem?: (key: string) => MaybePromise<void>;
   getMeta?: (key: string) => MaybePromise<StorageMeta>;
@@ -36,6 +37,7 @@ export interface Storage {
   getItemRaw: (key: string) => Promise<any>;
   setItem: (key: string, value: StorageValue) => Promise<void>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
+  setKeyExpire: (key: string, seconds: number) => Promise<void>;
   setItemRaw: (key: string, value: any) => Promise<void>;
   removeItem: (key: string, removeMeta?: boolean) => Promise<void>;
   // Meta

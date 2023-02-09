@@ -137,6 +137,23 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         onChange("update", key);
       }
     },
+    async setKeyExpire(key, seconds) {
+      if (seconds === undefined) {
+        return; // Readonly
+      }
+
+      key = normalizeKey(key);
+      const { relativeKey, driver } = getMount(key);
+      if (!driver.setKeyExpire) {
+        return; // Readonly
+      }
+
+      await asyncCall(driver.setKeyExpire, relativeKey, seconds);
+
+      if (!driver.watch) {
+        onChange("update", key);
+      }
+    },
     async setItemRaw(key, value) {
       if (value === undefined) {
         return storage.removeItem(key);

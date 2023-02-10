@@ -101,6 +101,16 @@ If value is `undefined`, it is same as calling `removeItem(key)`.
 await storage.setItem("foo:bar", "baz");
 ```
 
+### `storage.setKeyExpire(key, seconds)`
+
+Set the expiration time of the key. After the key expires, it will no longer be available. The unit is in seconds.
+
+**Note:** Only for redisDriver.
+
+```js
+await storage.setKeyExpire("foo:bar", 1); // 1s
+```
+
 ### `storage.setItemRaw(key, value)`
 
 **Note:** This is an experimental feature. Please check [unjs/unstorage#142](https://github.com/unjs/unstorage/issues/142) for more information.

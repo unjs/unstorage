@@ -167,7 +167,7 @@ async function streamToBuffer(
   });
 }
 
-// Helepr function used to convert a browser Blob into string. (https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob)
+// Helper function used to convert a browser Blob into string. (https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob)
 async function blobToString(blob: Blob) {
   const fileReader = new FileReader();
   return new Promise((resolve, reject) => {

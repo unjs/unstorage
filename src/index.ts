@@ -4,6 +4,7 @@ export * from "./utils";
 export { defineDriver } from "./drivers/utils";
 
 export const builtinDrivers = {
+  azureStorageTable: "unstorage/drivers/azure-storage-table",
   cloudflareKVHTTP: "unstorage/drivers/cloudflare-kv-http",
   cloudflareKVBinding: "unstorage/drivers/cloudflare-kv-binding",
   "cloudflare-kv-http": "unstorage/drivers/cloudflare-kv-http",

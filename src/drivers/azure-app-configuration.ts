@@ -20,28 +20,43 @@ export interface AzureAppConfigurationOptions {
   endpoint?: string;
   /**
    * Optional name of the Azure App Configuration instance to connect to. If not provided, the endpoint option must be provided. If both are provided, the endpoint option takes precedence.
-   * @default undefined
+   * @default null
    */
   appConfigName?: string;
+  /**
+   * Optional connection string to use when connecting to Azure App Configuration. If not provided, the endpoint option must be provided. If both are provided, the endpoint option takes precedence.
+   * @default null
+   */
+  connectionString?: string;
 }
 
 export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
-  const { prefix = null, label = "" } = opts;
+  const {
+    prefix = null,
+    label = null,
+    endpoint = null,
+    appConfigName = null,
+    connectionString = null,
+  } = opts;
   const labelFilter = label || "\0";
   const keyFilter = prefix ? `${prefix}:*` : "*";
   const p = (key: string) => (prefix ? `${prefix}:${key}` : key); // Prefix a key
   const d = (key: string) => (prefix ? key.replace(prefix, "") : key); // Deprefix a key
 
-  if (!opts.endpoint && !opts.appConfigName)
+  if (!endpoint && !appConfigName && !connectionString)
     throw new Error(
-      "Either the endpoint or appConfigName option must be provided."
+      "Either the endpoint, appConfigName or connectionString option must be provided."
     );
-  const endpoint = opts.endpoint || `https://${opts.appConfigName}.azconfig.io`;
+  const appConfigEndpoint = endpoint || `https://${appConfigName}.azconfig.io`;
   let client: AppConfigurationClient;
   const getClient = () => {
     if (!client) {
-      const credential = new DefaultAzureCredential();
-      client = new AppConfigurationClient(endpoint, credential);
+      if (connectionString) {
+        client = new AppConfigurationClient(connectionString);
+      } else {
+        const credential = new DefaultAzureCredential();
+        client = new AppConfigurationClient(appConfigEndpoint, credential);
+      }
     }
     return client;
   };

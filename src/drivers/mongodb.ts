@@ -8,24 +8,26 @@ export interface MongoDbOptions {
   connectionString?: string;
   /**
    * The name of the database to use.
+   * @default "unstorage"
    */
   databaseName?: string;
   /**
    * The name of the collection to use.
+   * @default "unstorage"
    */
   collectionName?: string;
 }
 
 export default defineDriver((opts: MongoDbOptions = {}) => {
-  const { connectionString, databaseName, collectionName } = opts;
+  const {
+    connectionString,
+    databaseName = "unstorage",
+    collectionName = "unstorage",
+  } = opts;
   if (!connectionString)
     throw new Error(
       "MongoDb driver requires a connection string to be provided."
     );
-  if (!databaseName)
-    throw new Error("MongoDb driver requires a databaseName to be provided.");
-  if (!collectionName)
-    throw new Error("MongoDb driver requires a collectionName to be provided.");
   let client: Collection;
   const getMongoDbClient = () => {
     if (!client) {

@@ -26,7 +26,7 @@ export default defineDriver((opts: MongoDbOptions = {}) => {
   } = opts;
   if (!connectionString)
     throw new Error(
-      "MongoDb driver requires a connection string to be provided."
+      "MongoDB driver requires a connection string to be provided."
     );
   let client: Collection;
   const getMongoDbClient = () => {

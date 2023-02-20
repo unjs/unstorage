@@ -120,11 +120,9 @@ export default defineDriver((opts: AzureStorageTableOptions = {}) => {
         unstorageValue: value,
       };
       await getClient().upsertEntity(entity, "Replace");
-      return;
     },
     async removeItem(key) {
       await getClient().deleteEntity(partitionKey, key);
-      return;
     },
     async getKeys() {
       const iterator = getClient()

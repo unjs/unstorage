@@ -624,7 +624,7 @@ const storage = createStorage({
 
 ### `mongodb`
 
-⚠️ Due to it's dependency on the `mongodb` package. this driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions.
+⚠️ Due to its dependency on the `mongodb` package. this driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions.
 
 Store data in a MongoDB [mongodb](https://www.npmjs.com/package/mongodb).
 

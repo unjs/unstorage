@@ -649,8 +649,8 @@ import { createStorage } from "unstorage";
 import azureKeyVault from "unstorage/drivers/azure-key-vault";
 
 const storage = createStorage({
-    driver: azureKeyVault({
-      vaultName: "testunstoragevault",
+  driver: azureKeyVault({
+    vaultName: "testunstoragevault",
   }),
 });
 ```

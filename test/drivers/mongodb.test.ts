@@ -33,7 +33,6 @@ describe("drivers: mongodb", () => {
         await sleep(100);
         await ctx.storage.setItem("s1:a", "updated_test_data");
         const result = await ctx.storage.getMeta("s1:a");
-        console.log(result);
         expect(result.mtime).not.toBe(result.birthtime);
       });
     },

@@ -61,10 +61,10 @@ export default defineDriver((opts: MongoDbOptions = {}) => {
       await getMongoDbClient().deleteOne({ key });
     },
     async getKeys() {
-      const documents = await getMongoDbClient().find().toArray();
-      const keys = [];
-      documents.map((document) => keys.push(document.key));
-      return keys;
+      return await getMongoDbClient()
+        .find()
+        .map((document) => document.key)
+        .toArray();
     },
     async getMeta(key) {
       const document = await getMongoDbClient().findOne({ key });

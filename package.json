@@ -49,12 +49,10 @@
     "ioredis": "^5.3.1",
     "listhen": "^1.0.2",
     "lru-cache": "^7.16.0",
-    "mkdir": "^0.0.2",
     "mri": "^1.2.0",
     "node-fetch-native": "^1.0.2",
     "ofetch": "^1.0.1",
-    "ufo": "^1.1.0",
-    "ws": "^8.12.1"
+    "ufo": "^1.1.0"
   },
   "optionalDependencies": {
     "@azure/data-tables": "^13.2.1",
@@ -70,7 +68,6 @@
     "@types/jsdom": "^21.1.0",
     "@types/mri": "^1.1.1",
     "@types/node": "^18.13.0",
-    "@types/ws": "^8.5.4",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vitest/coverage-c8": "^0.28.5",
     "@vue/compiler-sfc": "^3.2.47",
@@ -90,5 +87,5 @@
     "vitest": "^0.28.5",
     "vue": "^3.2.47"
   },
-  "packageManager": "pnpm@7.26.3"
+  "packageManager": "pnpm@7.27.0"
 }

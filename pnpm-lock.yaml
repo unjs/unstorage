@@ -8,7 +8,6 @@ specifiers:
   '@types/jsdom': ^21.1.0
   '@types/mri': ^1.1.1
   '@types/node': ^18.13.0
-  '@types/ws': ^8.5.4
   '@vitejs/plugin-vue': ^4.0.0
   '@vitest/coverage-c8': ^0.28.5
   '@vue/compiler-sfc': ^3.2.47
@@ -26,7 +25,6 @@ specifiers:
   jsdom: ^21.1.0
   listhen: ^1.0.2
   lru-cache: ^7.16.0
-  mkdir: ^0.0.2
   monaco-editor: ^0.35.0
   mri: ^1.2.0
   msw: ^1.0.1
@@ -40,7 +38,6 @@ specifiers:
   vite: ^4.1.1
   vitest: ^0.28.5
   vue: ^3.2.47
-  ws: ^8.12.1
 
 dependencies:
   anymatch: 3.1.3
@@ -50,12 +47,10 @@ dependencies:
   ioredis: 5.3.1
   listhen: 1.0.2
   lru-cache: 7.16.0
-  mkdir: 0.0.2
   mri: 1.2.0
   node-fetch-native: 1.0.2
   ofetch: 1.0.1
   ufo: 1.1.0
-  ws: 8.12.1
 
 optionalDependencies:
   '@azure/data-tables': 13.2.1
@@ -67,16 +62,15 @@ devDependencies:
   '@types/jsdom': 21.1.0
   '@types/mri': 1.1.1
   '@types/node': 18.13.0
-  '@types/ws': 8.5.4
   '@vitejs/plugin-vue': 4.0.0_vite@4.1.1+vue@3.2.47
   '@vitest/coverage-c8': 0.28.5_jsdom@21.1.0
   '@vue/compiler-sfc': 3.2.47
-  azurite: 3.21.0
+  azurite: 3.22.0
   c8: 7.13.0
   changelogen: 0.4.1
   eslint: 8.34.0
   eslint-config-unjs: 0.1.0_7kw3g6rralp5ps6mg3uyzz6azm
-  jiti: 1.17.1
+  jiti: 1.17.0
   jsdom: 21.1.0
   monaco-editor: 0.35.0
   msw: 1.0.1_typescript@4.9.5
@@ -185,7 +179,7 @@ packages:
     resolution: {integrity: sha512-0YROtnH4dCq3NZwPsPsaTfeH/7PZLMuhCaeb/HkFcaaERQ0OFR0DOMgpP698yeDTXnKAl3kZdw72tgVtTqD2xQ==}
     engines: {node: '>=14.0.0'}
     dependencies:
-      fast-xml-parser: 4.1.1
+      fast-xml-parser: 4.1.2
       tslib: 2.5.0
     dev: false
     optional: true
@@ -1277,14 +1271,12 @@ packages:
     resolution: {integrity: sha512-Q5vtl1W5ue16D+nIaW8JWebSSraJVlK+EthKn7e7UcD4KWsaSJ8BqGPXNaPghgtcn/fhvrN17Tv8ksUsQpiplw==}
     dev: true
 
-  /@types/validator/13.7.12:
-    resolution: {integrity: sha512-YVtyAPqpefU+Mm/qqnOANW6IkqKpCSrarcyV269C8MA8Ux0dbkEuQwM/4CjL47kVEM2LgBef/ETfkH+c6+moFA==}
+  /@types/triple-beam/1.3.2:
+    resolution: {integrity: sha512-txGIh+0eDFzKGC25zORnswy+br1Ha7hj5cMVwKIU7+s0U2AxxJru/jZSMU6OC9MJWP6+pc/hc6ZjyZShpsyY2g==}
     dev: true
 
-  /@types/ws/8.5.4:
-    resolution: {integrity: sha512-zdQDHKUgcX/zBc4GrwsE/7dVdAD8JR4EuiAXiiUhhfyIJXXb2+PrGshFyeXWQPMmmZ2XxgaqclgpIC7eTXc1mg==}
-    dependencies:
-      '@types/node': 18.13.0
+  /@types/validator/13.7.12:
+    resolution: {integrity: sha512-YVtyAPqpefU+Mm/qqnOANW6IkqKpCSrarcyV269C8MA8Ux0dbkEuQwM/4CjL47kVEM2LgBef/ETfkH+c6+moFA==}
     dev: true
 
   /@typescript-eslint/eslint-plugin/5.50.0_z4w6sgucxc7wjocw543h5gv5dy:
@@ -1769,8 +1761,8 @@ packages:
       - debug
     dev: true
 
-  /azurite/3.21.0:
-    resolution: {integrity: sha512-FswGZJhuYrs82XViNqOG7Z8RcVW1+0mawWk5kU6L6eQH477YInCIHuPlOwHe1SXCGHhSDb+8KH0BJhoFn6ZG7Q==}
+  /azurite/3.22.0:
+    resolution: {integrity: sha512-Kfh6pQLbBC72NN47QU4o/5tsriQVwnmZ4qLyQd7V9zBJqUuUrxLKkzaKc91LLv1ElEXhxaTVynpWDGTZy/RCkQ==}
     engines: {node: '>=10.0.0', vscode: ^1.39.0}
     hasBin: true
     dependencies:
@@ -1787,9 +1779,9 @@ packages:
       multistream: 2.1.1
       mysql2: 2.3.3
       rimraf: 3.0.2
-      sequelize: 6.28.0_5n5p2qdadprnazvanp42s3u2lm
+      sequelize: 6.28.0_2ckbdtsghw5iymsuocba37zyhu
       stoppable: 1.1.0
-      tedious: 15.1.2
+      tedious: 15.1.3
       to-readable-stream: 2.1.0
       tslib: 2.5.0
       uri-templates: 0.2.0
@@ -1936,7 +1928,7 @@ packages:
       defu: 6.1.2
       dotenv: 16.0.3
       giget: 1.0.0
-      jiti: 1.17.1
+      jiti: 1.17.0
       mlly: 1.1.0
       pathe: 1.1.0
       pkg-types: 1.0.1
@@ -2424,8 +2416,8 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /dottie/2.0.2:
-    resolution: {integrity: sha512-fmrwR04lsniq/uSr8yikThDTrM7epXHBAAjH9TbeH3rEA8tdCO7mRzB9hdmdGyJCxF8KERo9CITcm3kGuoyMhg==}
+  /dottie/2.0.3:
+    resolution: {integrity: sha512-4liA0PuRkZWQFQjwBypdxPfZaRWiv5tkhMXY2hzsa2pNf5s7U3m9cwUchfNKe8wZQxdGPQQzO6Rm2uGe0rvohQ==}
     dev: true
 
   /eastasianwidth/0.2.0:
@@ -3128,8 +3120,8 @@ packages:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
     dev: true
 
-  /fast-xml-parser/4.1.1:
-    resolution: {integrity: sha512-4gAP5PvNyrqePBOIIcpaEeE+nKBry1n6qTQiJsE59sLP0OC+YwhU7/XVmLLEMexbiluFQX1yEYm82Pk9B7xEiw==}
+  /fast-xml-parser/4.1.2:
+    resolution: {integrity: sha512-CDYeykkle1LiA/uqQyNwYpFbyF6Axec6YapmpUP+/RHWIoR1zKjocdvNaTsxCxZzQ6v9MLXaSYm9Qq0thv0DHg==}
     hasBin: true
     dependencies:
       strnum: 1.0.5
@@ -3979,8 +3971,8 @@ packages:
       istanbul-lib-report: 3.0.0
     dev: true
 
-  /jiti/1.17.1:
-    resolution: {integrity: sha512-NZIITw8uZQFuzQimqjUxIrIcEdxYDFIe/0xYfIlVXTkiBjjyBEvgasj5bb0/cHtPRD/NziPbT312sFrkI5ALpw==}
+  /jiti/1.17.0:
+    resolution: {integrity: sha512-CByzPgFqYoB9odEeef7GNmQ3S5THIBOtzRYoSCya2Sv27AuQxy2jgoFjQ6VTF53xsq1MXRm+YWNvOoDHUAteOw==}
     hasBin: true
     dev: true
 
@@ -4259,10 +4251,11 @@ packages:
       is-unicode-supported: 0.1.0
     dev: true
 
-  /logform/2.5.0:
-    resolution: {integrity: sha512-fsFiH2yjSCTmzotZ5JmEo0brQyJ7iHrc8pQ5pnHg6e1e5WfkqdNMDvgRWSfz+aCr3Y2YxYzHA4UKj+6QoctKrg==}
+  /logform/2.5.1:
+    resolution: {integrity: sha512-9FyqAm9o9NKKfiAKfZoYo9bGXXuwMkxQiQttkT4YjjVtQVIQtK6LmVtlxmCaFswo6N4AfEkHqZTV0taDtPotNg==}
     dependencies:
       '@colors/colors': 1.5.0
+      '@types/triple-beam': 1.3.2
       fecha: 4.2.3
       ms: 2.1.3
       safe-stable-stringify: 2.4.2
@@ -4416,11 +4409,6 @@ packages:
       yallist: 4.0.0
     dev: true
 
-  /mkdir/0.0.2:
-    resolution: {integrity: sha512-98OnjcWaNEIRUJJe9rFoWlbkQ5n9z8F86wIPCrI961YEViiVybTuJln919WuuSHSnlrqXy0ELKCntoPy8C7lqg==}
-    engines: {node: '>=0.4.0'}
-    dev: false
-
   /mkdirp/1.0.4:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
     engines: {node: '>=10'}
@@ -4443,7 +4431,7 @@ packages:
       esbuild: 0.17.5
       fs-extra: 11.1.0
       globby: 13.1.3
-      jiti: 1.17.1
+      jiti: 1.17.0
       mri: 1.2.0
       pathe: 1.1.0
       typescript: 4.9.5
@@ -5141,8 +5129,8 @@ packages:
       signal-exit: 3.0.7
     dev: true
 
-  /retry-as-promised/7.0.3:
-    resolution: {integrity: sha512-SEvMa4khHvpU/o6zgh7sK24qm6rxVgKnrSyzb5POeDvZx5N9Bf0s5sQsQ4Fl+HjRp0X+w2UzACGfUnXtx6cJ9Q==}
+  /retry-as-promised/7.0.4:
+    resolution: {integrity: sha512-XgmCoxKWkDofwH8WddD0w85ZfqYz+ZHlr5yo+3YUCfycWawU56T5ckWXsScsj5B8tqUcIG67DxXByo3VUgiAdA==}
     dev: true
 
   /reusify/1.0.4:
@@ -5288,7 +5276,7 @@ packages:
     engines: {node: '>= 10.0.0'}
     dev: true
 
-  /sequelize/6.28.0_5n5p2qdadprnazvanp42s3u2lm:
+  /sequelize/6.28.0_2ckbdtsghw5iymsuocba37zyhu:
     resolution: {integrity: sha512-+WHqvUQgTp19GLkt+gyQ+F6qg+FIEO2O5F9C0TOYV/PjZ2a/XwWvVkL1NCkS4VSIjVVvAUutiW6Wv9ofveGaVw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
@@ -5324,17 +5312,17 @@ packages:
       '@types/debug': 4.1.7
       '@types/validator': 13.7.12
       debug: 4.3.4
-      dottie: 2.0.2
+      dottie: 2.0.3
       inflection: 1.13.4
       lodash: 4.17.21
       moment: 2.29.4
       moment-timezone: 0.5.40
       mysql2: 2.3.3
       pg-connection-string: 2.5.0
-      retry-as-promised: 7.0.3
+      retry-as-promised: 7.0.4
       semver: 7.3.8
       sequelize-pool: 7.1.0
-      tedious: 15.1.2
+      tedious: 15.1.3
       toposort-class: 1.0.1
       uuid: 8.3.2
       validator: 13.9.0
@@ -5646,8 +5634,8 @@ packages:
       yallist: 4.0.0
     dev: true
 
-  /tedious/15.1.2:
-    resolution: {integrity: sha512-94slmnggCX8zG6iLNnM3k6PplTguP0p7R2RWOKTXdPmK1VmTpWk4+e0J4koIMXm1jjG7sGlZ1/JlaGVAdF1OOg==}
+  /tedious/15.1.3:
+    resolution: {integrity: sha512-166EpRm5qknwhEisjZqz/mF7k14fXKJYHRg6XiAXVovd/YkyHJ3SG4Ppy89caPaNFfRr7PVYe+s4dAvKaCMFvw==}
     engines: {node: '>=14'}
     dependencies:
       '@azure/identity': 2.1.0
@@ -5902,7 +5890,7 @@ packages:
       esbuild: 0.16.17
       globby: 13.1.3
       hookable: 5.4.2
-      jiti: 1.17.1
+      jiti: 1.17.0
       magic-string: 0.27.0
       mkdirp: 1.0.4
       mkdist: 1.1.1_typescript@4.9.5
@@ -6256,7 +6244,7 @@ packages:
     resolution: {integrity: sha512-YpZzcUzBedhlTAfJg6vJDlyEai/IFMIVcaEZZyl3UXIl4gmqRpU7AE89AHLkbzLUsv0NVmw7ts+iztqKxxPW1Q==}
     engines: {node: '>= 6.4.0'}
     dependencies:
-      logform: 2.5.0
+      logform: 2.5.1
       readable-stream: 3.6.0
       triple-beam: 1.3.0
     dev: true
@@ -6269,7 +6257,7 @@ packages:
       '@dabh/diagnostics': 2.0.3
       async: 3.2.4
       is-stream: 2.0.1
-      logform: 2.5.0
+      logform: 2.5.1
       one-time: 1.0.0
       readable-stream: 3.6.0
       safe-stable-stringify: 2.4.2
@@ -6313,6 +6301,7 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+    dev: true
 
   /xml-name-validator/4.0.0:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}

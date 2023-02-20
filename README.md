@@ -658,8 +658,9 @@ const storage = createStorage({
 
 The driver supports the following authentication methods:
 
-- **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate. <br>
-⚠️ Make sure that your Managed Identity or personal account has the `Storage Table Data Contributor` role assigned to it, even if you already are `Contributor` or `Owner` on the storage account.
+- **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate.
+
+   ⚠️ Make sure that your Managed Identity or personal account has the `Storage Table Data Contributor` role assigned to it, even if you already are `Contributor` or `Owner` on the storage account.
 - **`AzureNamedKeyCredential`** (only available in Node.js runtime): This will use the `accountName` and `accountKey` to authenticate the request.
 - **`AzureSASCredential`**: This will use the `accountName` and `sasToken` to authenticate the request.
 - **connection string** (only available in Node.js runtime): This will use the `connectionString` to authenticate the request. This is not recommended as it will expose your account key in plain text.

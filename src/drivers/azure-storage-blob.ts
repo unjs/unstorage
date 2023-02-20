@@ -106,7 +106,6 @@ export default defineDriver((opts: AzureStorageBlobOptions = {}) => {
     },
     async removeItem(key) {
       await getContainerClient().getBlockBlobClient(key).delete();
-      return;
     },
     async getKeys() {
       const iterator = getContainerClient()

@@ -62,7 +62,6 @@ export default defineDriver((opts: AzureKeyVaultOptions = {}) => {
       const poller = await getKeyVaultClient().beginDeleteSecret(encode(key));
       await poller.pollUntilDone();
       await getKeyVaultClient().purgeDeletedSecret(encode(key));
-      return;
     },
     async getKeys() {
       const secrets = getKeyVaultClient()

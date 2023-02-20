@@ -646,11 +646,11 @@ Usage:
 import { createStorage } from "unstorage";
 import mongodbDriver from "unstorage/drivers/mongodb";
 const storage = createStorage({
-    driver: mongodbDriver({
-      connectionString: "CONNECTION_STRING",
-      databaseName: "test",
-      collectionName: "test",
-    }),
+  driver: mongodbDriver({
+    connectionString: "CONNECTION_STRING",
+    databaseName: "test",
+    collectionName: "test",
+  }),
 });
 ```
 

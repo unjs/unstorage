@@ -1,6 +1,6 @@
 {
   "name": "unstorage",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Universal Storage Layer",
   "repository": "unjs/unstorage",
   "license": "MIT",
@@ -36,7 +36,7 @@
     "lint": "eslint --ext .ts . && prettier -c src test demo",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
-    "test": "vitest run --coverage test/drivers/azure-key-vault.test.ts",
+    "test": "pnpm lint && vitest run --coverage",
     "unstorage": "pnpm jiti src/cli"
   },
   "dependencies": {

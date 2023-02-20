@@ -14,7 +14,7 @@ export interface AzureKeyVaultOptions {
    */
   serviceVersion?: SecretClientOptions["serviceVersion"];
   /**
-   * The number of entries to retrive per request. Impacts getKeys() and clear() performance. Maximum value is 25.
+   * The number of entries to retrieve per request. Impacts getKeys() and clear() performance. Maximum value is 25.
    * @default 25
    */
   pageSize?: number;
@@ -26,12 +26,13 @@ export default defineDriver((opts: AzureKeyVaultOptions = {}) => {
     throw new Error(
       "Azure Key Vault driver requires a vault name to be provided."
     );
+  if (pageSize > 25) throw new Error("pageSize cannot be greater than 25.");
   let keyVaultClient: SecretClient;
   const getKeyVaultClient = () => {
     if (!keyVaultClient) {
       const credential = new DefaultAzureCredential();
       const url = `https://${vaultName}.vault.azure.net`;
-      keyVaultClient = new SecretClient(url, credential);
+      keyVaultClient = new SecretClient(url, credential, { serviceVersion });
     }
     return keyVaultClient;
   };
@@ -88,7 +89,9 @@ export default defineDriver((opts: AzureKeyVaultOptions = {}) => {
         .byPage({ maxPageSize: pageSize });
       for await (const page of secrets) {
         const deletionPromises = page.map(async (secret) => {
-          const poller = await getKeyVaultClient().beginDeleteSecret(secret.name);
+          const poller = await getKeyVaultClient().beginDeleteSecret(
+            secret.name
+          );
           await poller.pollUntilDone();
           await getKeyVaultClient().purgeDeletedSecret(secret.name);
         });
@@ -98,16 +101,19 @@ export default defineDriver((opts: AzureKeyVaultOptions = {}) => {
   };
 });
 
-const base64Map: { [key: string]: string; } = {
+const base64Map: { [key: string]: string } = {
   "=": "e",
   "+": "p",
-  "/": "s"
+  "/": "s",
 };
 
 function encode(value: string): string {
   let encoded = Buffer.from(value).toString("base64");
   for (const key in base64Map) {
-    encoded = encoded.replace(new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "g"), base64Map[key]);
+    encoded = encoded.replace(
+      new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
+      base64Map[key]
+    );
   }
   return encoded;
 }
@@ -115,8 +121,8 @@ function encode(value: string): string {
 function decode(value: string): string {
   let decoded = value;
   const search = new RegExp(Object.values(base64Map).join("|"), "g");
-  decoded = decoded.replace(search, match => {
-    return Object.keys(base64Map).find(key => base64Map[key] === match)!;
+  decoded = decoded.replace(search, (match) => {
+    return Object.keys(base64Map).find((key) => base64Map[key] === match)!;
   });
   return Buffer.from(decoded, "base64").toString();
 }

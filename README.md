@@ -622,6 +622,53 @@ const storage = createStorage({
 - `storage`: The name of the table to read from. It defaults to `storage`.
 - `boostCache`: Whether to enable cached queries: see [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).
 
+### `azure-cosmos`
+
+⚠️ This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions.
+
+Store data in [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/) NoSQL API documents.
+
+This driver stores KV information in a NoSQL API Cosmos DB collection as documents. It uses the `id` field as the key and adds `value` and `modified` fields to the document.
+
+To use it, you will need to install `@azure/cosmos` and `@azure/identity` in your project:
+
+```json
+{
+  "dependencies": {
+    "@azure/cosmos": "^3.17.2",
+    "@azure/identity": "^3.1.3",
+  }
+}
+```
+
+Usage:
+
+```js
+import { createStorage } from "unstorage";
+import azureCosmos from "unstorage/drivers/azure-cosmos";
+const storage = createStorage({
+    driver: azureCosmos({
+      endpoint: "ENDPOINT",
+      accountKey: "ACCOUNT_KEY",
+    }),
+});
+```
+
+**Authentication:**
+
+The driver supports the following authentication methods:
+
+- **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate. <br>
+⚠️ Make sure that your Managed Identity or personal account has at least `Cosmos DB Built-in Data Contributor` role assigned to it. If you already are `Contributor` or `Owner` on the resource it should also be enough, but does not accomplish a model of least privilege.
+- **`accountKey`**: CosmosDB account key. If not provided, the driver will use the DefaultAzureCredential (recommended).
+
+**Options:**
+
+- **`endpoint`** (required): CosmosDB endpoint in the format of `https://<account>.documents.azure.com:443/`.
+- `accountKey`: CosmosDB account key. If not provided, the driver will use the DefaultAzureCredential (recommended).
+- `databaseName`: The name of the database to use. Defaults to `unstorage`.
+- `containerName`: The name of the container to use. Defaults to `unstorage`.
+
 ## Making custom drivers
 
 It is possible to extend unstorage by creating custom drives.

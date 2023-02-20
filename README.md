@@ -648,9 +648,9 @@ import { createStorage } from "unstorage";
 import azureStorageTableDriver from "unstorage/drivers/azure-storage-table";
 
 const storage = createStorage({
-    driver: azureStorageTableDriver({
-      accountName: "myazurestorageaccount",
-    }),
+  driver: azureStorageTableDriver({
+    accountName: "myazurestorageaccount",
+  }),
 });
 ```
 

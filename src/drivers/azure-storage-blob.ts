@@ -142,7 +142,6 @@ export default defineDriver((opts: AzureStorageBlobOptions = {}) => {
           )
         );
       }
-      return;
     },
   };
 });

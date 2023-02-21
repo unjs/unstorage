@@ -1,43 +1,80 @@
 import { defineDriver } from "./utils";
-import Redis, { RedisOptions as _RedisOptions } from "ioredis";
+import Redis, {
+  Cluster,
+  ClusterNode,
+  ClusterOptions,
+  RedisOptions as _RedisOptions,
+} from "ioredis";
 
 export interface RedisOptions extends _RedisOptions {
-  base: string;
-  url: string;
+  /**
+   * Optional prefix to use for all keys. Can be used for namespacing.
+   */
+  base?: string;
+  /**
+   * Url to use for connecting to redis. Takes precedence over `host` option. Has the format `redis://<REDIS_USER>:<REDIS_PASSWORD>@<REDIS_HOST>:<REDIS_PORT>`
+   */
+  url?: string;
+  /**
+   * List of redis nodes to use for cluster mode. Takes precedence over `url` and `host` options.
+   */
+  cluster?: ClusterNode[];
+  /**
+   * Options to use for cluster mode.
+   */
+  clusterOptions?: ClusterOptions;
 }
 
-export default defineDriver<RedisOptions>((_opts) => {
-  const opts = { lazyConnect: true, ..._opts };
-  const redis = opts.url ? new Redis(opts?.url, opts) : new Redis(opts);
+export default defineDriver((opts: RedisOptions = {}) => {
+  if (!opts.url && !opts.host && !opts.cluster)
+    throw new Error(
+      "Redis driver requires either a host, url or cluster option"
+    );
+  const _opts = { lazyConnect: true, ...opts };
+  const { cluster, clusterOptions = {}, url, base, ...redisOptions } = _opts;
 
-  let base = opts?.base || "";
-  if (base && !base.endsWith(":")) {
-    base += ":";
-  }
-  const r = (key: string) => base + key;
+  let redisClient: Redis | Cluster;
+  const getRedisClient = () => {
+    if (!redisClient) {
+      if (cluster) {
+        redisClient = new Redis.Cluster(cluster, clusterOptions);
+      } else if (url) {
+        redisClient = new Redis(url, redisOptions);
+      } else {
+        redisClient = new Redis(redisOptions);
+      }
+    }
+    return redisClient;
+  };
+
+  const p = (key: string) => (base ? `${base}:${key}` : key); // Prefix a key. Uses base for backwards compatibility
+  const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
 
   return {
-    hasItem(key) {
-      return redis.exists(r(key)).then(Boolean);
+    async hasItem(key) {
+      return Boolean(await getRedisClient().exists(p(key)));
     },
-    getItem(key) {
-      return redis.get(r(key));
+    async getItem(key) {
+      const value = await getRedisClient().get(p(key));
+      return value === null ? null : value;
     },
-    setItem(key, value) {
-      return redis.set(r(key), value).then(() => {});
+    async setItem(key, value) {
+      await getRedisClient().set(p(key), value);
     },
-    removeItem(key) {
-      return redis.del(r(key)).then(() => {});
+    async removeItem(key) {
+      await getRedisClient().del(p(key));
     },
-    getKeys() {
-      return redis.keys(r("*"));
+    async getKeys() {
+      const keys: string[] = await getRedisClient().keys(p("*"));
+      console.log(keys);
+      return keys.map((key) => d(key));
     },
     async clear() {
-      const keys = await redis.keys(r("*"));
-      return redis.del(keys.map((key) => r(key))).then(() => {});
+      const keys = await getRedisClient().keys(p("*"));
+      await getRedisClient().del(keys);
     },
     dispose() {
-      return redis.disconnect();
+      return getRedisClient().disconnect();
     },
   };
 });

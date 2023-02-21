@@ -66,7 +66,6 @@ export default defineDriver((opts: RedisOptions = {}) => {
     },
     async getKeys() {
       const keys: string[] = await getRedisClient().keys(p("*"));
-      console.log(keys);
       return keys.map((key) => d(key));
     },
     async clear() {

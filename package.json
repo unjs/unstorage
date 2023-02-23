@@ -68,6 +68,7 @@
     "changelogen": "^0.4.1",
     "eslint": "^8.34.0",
     "eslint-config-unjs": "^0.1.0",
+    "ioredis-mock": "^8.2.6",
     "jiti": "^1.17.0",
     "jsdom": "^21.1.0",
     "monaco-editor": "^0.35.0",

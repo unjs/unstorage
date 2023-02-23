@@ -35,7 +35,7 @@ export default defineDriver<RedisOptions>((_opts) => {
     async clear() {
       const keys = await redis.keys(r("*"));
       if (keys.length === 0) {
-        return
+        return;
       }
       return redis.del(keys).then(() => {});
     },

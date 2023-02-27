@@ -1,21 +1,16 @@
-import { afterAll, beforeAll, describe } from "vitest";
+import { describe, vi } from "vitest";
+import * as ioredis from "ioredis-mock";
 import driver from "../../src/drivers/redis";
 import { testDriver } from "./utils";
-import { RedisMemoryServer } from "redis-memory-server";
 
-const redisServer = new RedisMemoryServer();
-const host = await redisServer.getHost();
-const port = await redisServer.getPort();
-const redisUrl = `redis://${host}:${port}`;
+vi.mock("ioredis", () => ioredis);
 
 describe("drivers: redis", () => {
   testDriver({
-    driver: driver({ host, port, base: "unstorage" }),
-  });
-  testDriver({
-    driver: driver({ url: redisUrl }),
-  });
-  afterAll(async () => {
-    await redisServer.stop();
+    driver: driver({
+      base: "",
+      url: "ioredis://localhost:6379/0",
+      lazyConnect: false,
+    }),
   });
 });

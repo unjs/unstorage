@@ -70,7 +70,12 @@ export default defineDriver((opts: RedisOptions = {}) => {
     },
     async clear() {
       const keys = await getRedisClient().keys(p("*"));
-      await getRedisClient().del(keys);
+      if (keys.length === 0) {
+        return;
+      }
+      return getRedisClient()
+        .del(keys)
+        .then(() => {});
     },
     dispose() {
       return getRedisClient().disconnect();

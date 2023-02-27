@@ -1,0 +1,171 @@
+# Storage Interface
+
+### `storage.hasItem(key)`
+
+Checks if storage contains a key. Resolves to either `true` or `false`.
+
+```js
+await storage.hasItem("foo:bar");
+```
+
+### `storage.getItem(key)`
+
+Gets the value of a key in storage. Resolves to either a javascript primitive value or `undefined`.
+
+```js
+await storage.getItem("foo:bar");
+```
+
+### `storage.getItemRaw(key)`
+
+**Note:** This is an experimental feature. Please check [unjs/unstorage#142](https://github.com/unjs/unstorage/issues/142) for more information.
+
+Gets the value of a key in storage in raw format.
+
+```js
+// Value can be a Buffer, Array or Driver's raw format
+const value = await storage.getItemRaw("foo:bar.bin");
+```
+
+### `storage.setItem(key, value)`
+
+Add/Update a value to the storage.
+
+If the value is not a string, it will be stringified.
+
+If value is `undefined`, it is same as calling `removeItem(key)`.
+
+```js
+await storage.setItem("foo:bar", "baz");
+```
+
+### `storage.setItemRaw(key, value)`
+
+**Note:** This is an experimental feature. Please check [unjs/unstorage#142](https://github.com/unjs/unstorage/issues/142) for more information.
+
+Add/Update a value to the storage in raw format.
+
+If value is `undefined`, it is same as calling `removeItem(key)`.
+
+```js
+await storage.setItemRaw("data/test.bin", new Uint8Array([1, 2, 3]));
+```
+
+### `storage.removeItem(key, removeMeta = true)`
+
+Remove a value (and it's meta) from storage.
+
+```js
+await storage.removeItem("foo:bar");
+```
+
+### `storage.getMeta(key, nativeOnly?)`
+
+Get metadata object for a specific key.
+
+This data is fetched from two sources:
+
+- Driver native meta (like file creation time)
+- Custom meta set by `storage.setMeta` (overrides driver native meta)
+
+```js
+await storage.getMeta("foo:bar"); // For fs driver returns an object like { mtime, atime, size }
+```
+
+### `storage.setMeta(key)`
+
+Set custom meta for a specific key by adding a `$` suffix.
+
+```js
+await storage.setMeta("foo:bar", { flag: 1 });
+// Same as storage.setItem('foo:bar$', { flag: 1 })
+```
+
+### `storage.removeMeta(key)`
+
+Remove meta for a specific key by adding a `$` suffix.
+
+```js
+await storage.removeMeta("foo:bar");
+// Same as storage.removeItem('foo:bar$')
+```
+
+### `storage.getKeys(base?)`
+
+Get all keys. Returns an array of strings.
+
+Meta keys (ending with `$`) will be filtered.
+
+If a base is provided, only keys starting with the base will be returned also only mounts starting with base will be queried. Keys still have a full path.
+
+```js
+await storage.getKeys();
+```
+
+### `storage.clear(base?)`
+
+Removes all stored key/values. If a base is provided, only mounts matching base will be cleared.
+
+```js
+await storage.clear();
+```
+
+### `storage.dispose()`
+
+Disposes all mounted storages to ensure there are no open-handles left. Call it before exiting process.
+
+**Note:** Dispose also clears in-memory data.
+
+```js
+await storage.dispose();
+```
+
+### `storage.mount(mountpoint, driver)`
+
+By default, everything is stored in memory. We can mount additional storage space in a Unix-like fashion.
+
+When operating with a `key` that starts with mountpoint, instead of default storage, mounted driver will be called.
+
+In addition to `base`, you can set `readOnly` and `noClear` to disable write and clear operations.
+
+```js
+import { createStorage } from "unstorage";
+import fsDriver from "unstorage/drivers/fs";
+
+// Create a storage container with default memory storage
+const storage = createStorage({});
+
+storage.mount("/output", fsDriver({ base: "./output" }));
+
+//  Writes to ./output/test file
+await storage.setItem("/output/test", "works");
+
+// Adds value to in-memory storage
+await storage.setItem("/foo", "bar");
+```
+
+### `storage.unmount(mountpoint, dispose = true)`
+
+Unregisters a mountpoint. Has no effect if mountpoint is not found or is root.
+
+```js
+await storage.unmount("/output");
+```
+
+### `storage.watch(callback)`
+
+Starts watching on all mountpoints. If driver does not supports watching, only emits even when `storage.*` methods are called.
+
+```js
+const unwatch = await storage.watch((event, key) => {});
+// to stop this watcher
+await unwatch();
+```
+
+### `storage.unwatch()`
+
+Stop all watchers on all mountpoints.
+
+```js
+await storage.unwatch();
+```

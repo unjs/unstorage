@@ -5,9 +5,9 @@ import { BlobServiceClient } from "@azure/storage-blob";
 import { ChildProcess, exec } from "child_process";
 
 describe("drivers: azure-storage-blob", () => {
-  let azuriteProcess: ChildProcess;
+  // let azuriteProcess: ChildProcess;
   beforeAll(async () => {
-    azuriteProcess = exec("npm run azurite-blob-storage");
+    // azuriteProcess = exec("npm run azurite-blob-storage");
     const client = BlobServiceClient.fromConnectionString(
       "UseDevelopmentStorage=true"
     );
@@ -21,6 +21,6 @@ describe("drivers: azure-storage-blob", () => {
     }),
   });
   afterAll(() => {
-    azuriteProcess.kill(9);
+    // azuriteProcess.kill(9);
   });
 });

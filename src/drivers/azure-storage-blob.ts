@@ -9,75 +9,72 @@ import { DefaultAzureCredential } from "@azure/identity";
 export interface AzureStorageBlobOptions {
   /**
    * The name of the Azure Storage account.
-   * @default null
    */
-  accountName?: string;
+  accountName: string;
+
   /**
    * The name of the storage container. All entities will be stored in the same container.
-   * @default 'unstorage'
+   * @default "unstorage"
    */
   containerName?: string;
+
   /**
    * The account key. If provided, the SAS key will be ignored. Only available in Node.js runtime.
-   * @default null
    */
   accountKey?: string;
+
   /**
    * The SAS key. If provided, the account key will be ignored.
-   * @default null
    */
   sasKey?: string;
+
   /**
    * The connection string. If provided, the account key and SAS key will be ignored. Only available in Node.js runtime.
-   * @default null
    */
   connectionString?: string;
 }
 
-export default defineDriver((opts: AzureStorageBlobOptions = {}) => {
-  const {
-    accountName = null,
-    containerName = "unstorage",
-    accountKey = null,
-    sasKey = null,
-    connectionString = null,
-  } = opts;
-  if (!accountName)
-    throw new Error(
-      "Account name is required to use the Azure Storage Blob driver."
-    );
-
+export default defineDriver((opts: AzureStorageBlobOptions) => {
   let containerClient: ContainerClient;
   const getContainerClient = () => {
-    if (!containerClient) {
-      let serviceClient: BlobServiceClient;
-      if (accountKey) {
-        // StorageSharedKeyCredential is only available in Node.js runtime, not in browsers
-        const credential = new StorageSharedKeyCredential(
-          accountName,
-          accountKey
-        );
-        serviceClient = new BlobServiceClient(
-          `https://${accountName}.blob.core.windows.net`,
-          credential
-        );
-      } else if (sasKey) {
-        serviceClient = new BlobServiceClient(
-          `https://${accountName}.blob.core.windows.net${sasKey}`
-        );
-      } else if (connectionString) {
-        // fromConnectionString is only available in Node.js runtime, not in browsers
-        serviceClient =
-          BlobServiceClient.fromConnectionString(connectionString);
-      } else {
-        const credential = new DefaultAzureCredential();
-        serviceClient = new BlobServiceClient(
-          `https://${accountName}.blob.core.windows.net`,
-          credential
-        );
-      }
-      containerClient = serviceClient.getContainerClient(containerName);
+    if (containerClient) {
+      return containerClient;
     }
+    if (!opts.accountName) {
+      throw new Error(
+        "Account name is required to use the Azure Storage Blob driver."
+      );
+    }
+    let serviceClient: BlobServiceClient;
+    if (opts.accountKey) {
+      // StorageSharedKeyCredential is only available in Node.js runtime, not in browsers
+      const credential = new StorageSharedKeyCredential(
+        opts.accountName,
+        opts.accountKey
+      );
+      serviceClient = new BlobServiceClient(
+        `https://${opts.accountName}.blob.core.windows.net`,
+        credential
+      );
+    } else if (opts.sasKey) {
+      serviceClient = new BlobServiceClient(
+        `https://${opts.accountName}.blob.core.windows.net${opts.sasKey}`
+      );
+    } else if (opts.connectionString) {
+      // fromConnectionString is only available in Node.js runtime, not in browsers
+      serviceClient = BlobServiceClient.fromConnectionString(
+        opts.connectionString
+      );
+    } else {
+      const credential = new DefaultAzureCredential();
+      serviceClient = new BlobServiceClient(
+        `https://${opts.accountName}.blob.core.windows.net`,
+        credential
+      );
+    }
+    containerClient = serviceClient.getContainerClient(
+      opts.containerName || "unstorage"
+    );
     return containerClient;
   };
 

@@ -622,6 +622,49 @@ const storage = createStorage({
 - `storage`: The name of the table to read from. It defaults to `storage`.
 - `boostCache`: Whether to enable cached queries: see [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).
 
+### `mongodb`
+
+Store data in a MongoDB [mongodb](https://www.npmjs.com/package/mongodb) using [Node.js mongodb package](https://www.npmjs.com/package/mongodb)
+
+This driver stores KV information in a MongoDB collection with a separate document for each key value pair.
+
+To use it, you will need to install `mongodb` in your project:
+
+```json
+{
+  "dependencies": {
+    "mongodb": "^5.0.1"
+  }
+}
+```
+
+Usage:
+
+```js
+import { createStorage } from "unstorage";
+import mongodbDriver from "unstorage/drivers/mongodb";
+
+const storage = createStorage({
+  driver: mongodbDriver({
+    connectionString: "CONNECTION_STRING",
+    databaseName: "test",
+    collectionName: "test",
+  }),
+});
+```
+
+**Authentication:**
+
+The driver supports the following authentication methods:
+
+- **`connectionString`**: The MongoDB connection string. This is the only way to authenticate.
+
+**Options:**
+
+- **`connectionString`** (required): The connection string to use to connect to the MongoDB database. It should be in the format `mongodb://<username>:<password>@<host>:<port>/<database>`.
+- `databaseName`: The name of the database to use. Defaults to `unstorage`.
+- `collectionName`: The name of the collection to use. Defaults to `unstorage`.
+
 ## Making custom drivers
 
 It is possible to extend unstorage by creating custom drives.

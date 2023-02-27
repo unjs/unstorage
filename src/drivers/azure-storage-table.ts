@@ -10,34 +10,35 @@ import { DefaultAzureCredential } from "@azure/identity";
 export interface AzureStorageTableOptions {
   /**
    * The name of the Azure Storage account.
-   * @default null
    */
-  accountName?: string;
+  accountName: string;
+
   /**
    * The name of the table. All entities will be stored in the same table.
    * @default 'unstorage'
    */
   tableName?: string;
+
   /**
    * The partition key. All entities will be stored in the same partition.
    * @default 'unstorage'
    */
   partitionKey?: string;
+
   /**
    * The account key. If provided, the SAS key will be ignored. Only available in Node.js runtime.
-   * @default null
    */
   accountKey?: string;
+
   /**
    * The SAS key. If provided, the account key will be ignored.
-   * @default null
    */
   sasKey?: string;
   /**
    * The connection string. If provided, the account key and SAS key will be ignored. Only available in Node.js runtime.
-   * @default null
    */
   connectionString?: string;
+
   /**
    * The number of entries to retrive per request. Impacts getKeys() and clear() performance. Maximum value is 1000.
    * @default 1000
@@ -45,7 +46,7 @@ export interface AzureStorageTableOptions {
   pageSize?: number;
 }
 
-export default defineDriver((opts: AzureStorageTableOptions = {}) => {
+export default defineDriver((opts: AzureStorageTableOptions) => {
   const {
     accountName = null,
     tableName = "unstorage",
@@ -55,43 +56,45 @@ export default defineDriver((opts: AzureStorageTableOptions = {}) => {
     connectionString = null,
     pageSize = 1000,
   } = opts;
-  if (!accountName)
-    throw new Error(
-      "Account name is required to use the Azure Storage Table driver."
-    );
-  if (pageSize > 1000) {
-    throw new Error("pageSize exceeds the maximum allowed value of 1000");
-  }
 
   let client: TableClient;
   const getClient = () => {
-    if (!client) {
-      if (accountKey) {
-        // AzureNamedKeyCredential is only available in Node.js runtime, not in browsers
-        const credential = new AzureNamedKeyCredential(accountName, accountKey);
-        client = new TableClient(
-          `https://${accountName}.table.core.windows.net`,
-          tableName,
-          credential
-        );
-      } else if (sasKey) {
-        const credential = new AzureSASCredential(sasKey);
-        client = new TableClient(
-          `https://${accountName}.table.core.windows.net`,
-          tableName,
-          credential
-        );
-      } else if (connectionString) {
-        // fromConnectionString is only available in Node.js runtime, not in browsers
-        client = TableClient.fromConnectionString(connectionString, tableName);
-      } else {
-        const credential = new DefaultAzureCredential();
-        client = new TableClient(
-          `https://${accountName}.table.core.windows.net`,
-          tableName,
-          credential
-        );
-      }
+    if (client) {
+      return client;
+    }
+    if (!accountName) {
+      throw new Error(
+        "Account name is required to use the Azure Storage Table driver."
+      );
+    }
+    if (pageSize > 1000) {
+      throw new Error("pageSize exceeds the maximum allowed value of 1000");
+    }
+    if (accountKey) {
+      // AzureNamedKeyCredential is only available in Node.js runtime, not in browsers
+      const credential = new AzureNamedKeyCredential(accountName, accountKey);
+      client = new TableClient(
+        `https://${accountName}.table.core.windows.net`,
+        tableName,
+        credential
+      );
+    } else if (sasKey) {
+      const credential = new AzureSASCredential(sasKey);
+      client = new TableClient(
+        `https://${accountName}.table.core.windows.net`,
+        tableName,
+        credential
+      );
+    } else if (connectionString) {
+      // fromConnectionString is only available in Node.js runtime, not in browsers
+      client = TableClient.fromConnectionString(connectionString, tableName);
+    } else {
+      const credential = new DefaultAzureCredential();
+      client = new TableClient(
+        `https://${accountName}.table.core.windows.net`,
+        tableName,
+        credential
+      );
     }
     return client;
   };

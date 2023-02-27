@@ -92,7 +92,8 @@ Database:
 
 Providers:
 
-- [Azure Cosmos](./docs//drivers//azure-cosmos.md)
+- [Azure Key Vault](./docs/drivers/azure-key-vault.md)
+- [Azure Cosmos](./docs//drivers/azure-cosmos.md)
 - [Azure Storage Block](./docs/drivers/azure-storage-blod.md)
 - [Cloudflare KV Binding](./docs/drivers/cloudflare-kv-binding.md)
 - [Cloudflare KV HTTP](./docs/drivers/cloudflare-kv-http.md)

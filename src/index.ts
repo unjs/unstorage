@@ -21,6 +21,7 @@ export const builtinDrivers = {
   overlay: "unstorage/drivers/overlay",
   planetscale: "unstorage/drivers/planetscale",
   redis: "unstorage/drivers/redis",
+  azureKeyVault: "unstorage/drivers/azure-key-vault",
 };
 
 export type BuiltinDriverName = keyof typeof builtinDrivers;

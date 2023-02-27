@@ -43,7 +43,7 @@ export default defineDriver((opts: MongoDbOptions) => {
     },
     async getItem(key) {
       const document = await getMongoCollection().findOne({ key });
-      return document?.value ? document.value : undefined;
+      return document?.value ? document.value : null;
     },
     async setItem(key, value) {
       const currentDateTime = new Date();
@@ -62,9 +62,9 @@ export default defineDriver((opts: MongoDbOptions) => {
     },
     async getKeys() {
       return await getMongoCollection()
-        .find() // TODO: Select only key field
-        .map((document) => document.key)
-        .filter(Boolean)
+        .find()
+        .project({ key: true })
+        .map((d) => d.key)
         .toArray();
     },
     async getMeta(key) {

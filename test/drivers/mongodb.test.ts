@@ -25,8 +25,13 @@ describe("drivers: mongodb", () => {
     additionalTests: (ctx) => {
       it("should throw error if no connection string is provided", async () => {
         expect(() =>
-          driver({ databaseName: "test", collectionName: "test" })
-        ).toThrowError();
+          driver({
+            databaseName: "test",
+            collectionName: "test",
+          } as any).getItem("")
+        ).rejects.toThrowError(
+          "[unstorage] MongoDB driver requires a connection string to be provided."
+        );
       });
       it("should have different dates when an entry was updated", async () => {
         await ctx.storage.setItem("s1:a", "test_data");

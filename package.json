@@ -30,8 +30,6 @@
     "drivers"
   ],
   "scripts": {
-    "azurite-blob-storage": "azurite-blob --silent",
-    "azurite-table-storage": "azurite-table --silent",
     "build": "unbuild",
     "demo": "vite demo",
     "dev": "vitest",

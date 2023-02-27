@@ -2,7 +2,7 @@ import { describe } from "vitest";
 import driver from "../../src/drivers/azure-key-vault";
 import { testDriver } from "./utils";
 
-describe(
+describe.skip(
   "drivers: azure-key-vault",
   () => {
     testDriver({

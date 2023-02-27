@@ -5,14 +5,15 @@ import { DefaultAzureCredential } from "@azure/identity";
 export interface AzureKeyVaultOptions {
   /**
    * The name of the key vault to use.
-   * @default null
    */
-  vaultName?: string;
+  vaultName: string;
+
   /**
    * Version of the Azure Key Vault service to use. Defaults to 7.3.
    * @default '7.3'
    */
   serviceVersion?: SecretClientOptions["serviceVersion"];
+
   /**
    * The number of entries to retrieve per request. Impacts getKeys() and clear() performance. Maximum value is 25.
    * @default 25
@@ -20,20 +21,26 @@ export interface AzureKeyVaultOptions {
   pageSize?: number;
 }
 
-export default defineDriver((opts: AzureKeyVaultOptions = {}) => {
-  const { vaultName = null, serviceVersion = "7.3", pageSize = 25 } = opts;
-  if (!vaultName)
-    throw new Error(
-      "Azure Key Vault driver requires a vault name to be provided."
-    );
-  if (pageSize > 25) throw new Error("pageSize cannot be greater than 25.");
+export default defineDriver((opts: AzureKeyVaultOptions) => {
   let keyVaultClient: SecretClient;
   const getKeyVaultClient = () => {
-    if (!keyVaultClient) {
-      const credential = new DefaultAzureCredential();
-      const url = `https://${vaultName}.vault.azure.net`;
-      keyVaultClient = new SecretClient(url, credential, { serviceVersion });
+    if (keyVaultClient) {
+      return keyVaultClient;
     }
+    const { vaultName = null, serviceVersion = "7.3", pageSize = 25 } = opts;
+    if (!vaultName) {
+      throw new Error(
+        "[unstorage] [key-vault] Azure Key Vault driver requires a vault name to be provided."
+      );
+    }
+    if (pageSize > 25) {
+      throw new Error(
+        "[unstorage] [key-vault] pageSize cannot be greater than 25."
+      );
+    }
+    const credential = new DefaultAzureCredential();
+    const url = `https://${vaultName}.vault.azure.net`;
+    keyVaultClient = new SecretClient(url, credential, { serviceVersion });
     return keyVaultClient;
   };
 
@@ -65,7 +72,7 @@ export default defineDriver((opts: AzureKeyVaultOptions = {}) => {
     async getKeys() {
       const secrets = getKeyVaultClient()
         .listPropertiesOfSecrets()
-        .byPage({ maxPageSize: pageSize });
+        .byPage({ maxPageSize: opts.pageSize || 25 });
       const keys = [];
       for await (const page of secrets) {
         const pageKeys = page.map((secret) => decode(secret.name));
@@ -84,7 +91,7 @@ export default defineDriver((opts: AzureKeyVaultOptions = {}) => {
     async clear() {
       const secrets = getKeyVaultClient()
         .listPropertiesOfSecrets()
-        .byPage({ maxPageSize: pageSize });
+        .byPage({ maxPageSize: opts.pageSize || 25 });
       for await (const page of secrets) {
         const deletionPromises = page.map(async (secret) => {
           const poller = await getKeyVaultClient().beginDeleteSecret(

@@ -33,13 +33,15 @@ export function testDriver(opts: TestOptions) {
   it("setItem", async () => {
     await ctx.storage.setItem("s1:a", "test_data");
     await ctx.storage.setItem("s2:a", "test_data");
+    await ctx.storage.setItem("s3:a?q=1", "test_data");
     expect(await ctx.storage.hasItem("s1:a")).toBe(true);
     expect(await ctx.storage.getItem("s1:a")).toBe("test_data");
+    expect(await ctx.storage.getItem("s3:a?q=2")).toBe("test_data");
   });
 
   it("getKeys", async () => {
     expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
-      ["s1:a", "s2:a"].sort()
+      ["s1:a", "s2:a", "s3:a"].sort()
     );
     expect(await ctx.storage.getKeys("s1").then((k) => k.sort())).toMatchObject(
       ["s1:a"].sort()
@@ -104,12 +106,15 @@ export function testDriver(opts: TestOptions) {
   }
 
   it("removeItem", async () => {
-    await ctx.storage.removeItem("s1:a");
+    await ctx.storage.removeItem("s1:a", false);
     expect(await ctx.storage.hasItem("s1:a")).toBe(false);
     expect(await ctx.storage.getItem("s1:a")).toBe(null);
   });
 
   it("clear", async () => {
+    await ctx.storage.clear();
+    expect(await ctx.storage.getKeys()).toMatchObject([]);
+    // ensure we can clear empty storage as well: #162
     await ctx.storage.clear();
     expect(await ctx.storage.getKeys()).toMatchObject([]);
   });

@@ -114,6 +114,9 @@ export function testDriver(opts: TestOptions) {
   it("clear", async () => {
     await ctx.storage.clear();
     expect(await ctx.storage.getKeys()).toMatchObject([]);
+    // ensure we can clear empty storage as well: #162
+    await ctx.storage.clear();
+    expect(await ctx.storage.getKeys()).toMatchObject([]);
   });
 
   it("dispose", async () => {

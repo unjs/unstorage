@@ -92,6 +92,7 @@ Database:
 
 Providers:
 
+- [Azure App Configuration](./docs/drivers/azure-app-configuration.md)
 - [Azure Key Vault](./docs/drivers/azure-key-vault.md)
 - [Azure Cosmos](./docs//drivers/azure-cosmos.md)
 - [Azure Storage Block](./docs/drivers/azure-storage-blod.md)

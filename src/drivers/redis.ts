@@ -34,7 +34,10 @@ export default defineDriver<RedisOptions>((_opts) => {
     },
     async clear() {
       const keys = await redis.keys(r("*"));
-      return redis.del(keys.map((key) => r(key))).then(() => {});
+      if (keys.length === 0) {
+        return;
+      }
+      return redis.del(keys).then(() => {});
     },
     dispose() {
       return redis.disconnect();

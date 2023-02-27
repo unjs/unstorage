@@ -96,6 +96,7 @@ Providers:
 - [Azure Key Vault](./docs/drivers/azure-key-vault.md)
 - [Azure Cosmos](./docs//drivers/azure-cosmos.md)
 - [Azure Storage Block](./docs/drivers/azure-storage-blod.md)
+- [Azure Storage Table](./docs/drivers//azure-storage-table.md)
 - [Cloudflare KV Binding](./docs/drivers/cloudflare-kv-binding.md)
 - [Cloudflare KV HTTP](./docs/drivers/cloudflare-kv-http.md)
 - [Github](./docs/drivers/github.md)

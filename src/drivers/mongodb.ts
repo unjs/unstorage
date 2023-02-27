@@ -5,12 +5,14 @@ export interface MongoDbOptions {
   /**
    * The MongoDB connection string.
    */
-  connectionString?: string;
+  connectionString: string;
+
   /**
    * The name of the database to use.
    * @default "unstorage"
    */
   databaseName?: string;
+
   /**
    * The name of the collection to use.
    * @default "unstorage"
@@ -18,63 +20,62 @@ export interface MongoDbOptions {
   collectionName?: string;
 }
 
-export default defineDriver((opts: MongoDbOptions = {}) => {
-  const {
-    connectionString,
-    databaseName = "unstorage",
-    collectionName = "unstorage",
-  } = opts;
-  if (!connectionString)
-    throw new Error(
-      "MongoDB driver requires a connection string to be provided."
-    );
-  let client: Collection;
-  const getMongoDbClient = () => {
-    if (!client) {
-      const mongoClient = new MongoClient(connectionString);
-      const db = mongoClient.db(databaseName);
-      client = db.collection(collectionName);
+export default defineDriver((opts: MongoDbOptions) => {
+  let collection: Collection;
+  const getMongoCollection = () => {
+    if (!collection) {
+      if (!opts.connectionString) {
+        throw new Error(
+          "[unstorage] MongoDB driver requires a connection string to be provided."
+        );
+      }
+      const mongoClient = new MongoClient(opts.connectionString);
+      const db = mongoClient.db(opts.databaseName || "unstorage");
+      collection = db.collection(opts.collectionName || "unstorage");
     }
-    return client;
+    return collection;
   };
 
   return {
     async hasItem(key) {
-      const result = await getMongoDbClient().findOne({ key });
+      const result = await getMongoCollection().findOne({ key });
       return !!result;
     },
     async getItem(key) {
-      const document = await getMongoDbClient().findOne({ key });
-      return document?.value ? document.value : null;
+      const document = await getMongoCollection().findOne({ key });
+      return document?.value ? document.value : undefined;
     },
     async setItem(key, value) {
       const currentDateTime = new Date();
-      const [modified, created] = [currentDateTime, currentDateTime];
-      await getMongoDbClient().findOneAndUpdate(
+      await getMongoCollection().findOneAndUpdate(
         { key },
-        { $set: { key, value, modified }, $setOnInsert: { created } },
+        {
+          $set: { key, value, modifiedAt: currentDateTime },
+          $setOnInsert: { createdAt: currentDateTime },
+        },
         { upsert: true, returnDocument: "after" }
       );
       return;
     },
     async removeItem(key) {
-      await getMongoDbClient().deleteOne({ key });
+      await getMongoCollection().deleteOne({ key });
     },
     async getKeys() {
-      return await getMongoDbClient()
-        .find()
+      return await getMongoCollection()
+        .find() // TODO: Select only key field
         .map((document) => document.key)
+        .filter(Boolean)
         .toArray();
     },
     async getMeta(key) {
-      const document = await getMongoDbClient().findOne({ key });
+      const document = await getMongoCollection().findOne({ key });
       return {
-        mtime: document.modified,
-        birthtime: document.created,
+        mtime: document.modifiedAt,
+        birthtime: document.createdAt,
       };
     },
     async clear() {
-      await getMongoDbClient().deleteMany({});
+      await getMongoCollection().deleteMany({});
     },
   };
 });

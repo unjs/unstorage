@@ -624,9 +624,7 @@ const storage = createStorage({
 
 ### `mongodb`
 
-⚠️ Due to its dependency on the `mongodb` package. this driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions.
-
-Store data in a MongoDB [mongodb](https://www.npmjs.com/package/mongodb).
+Store data in a MongoDB [mongodb](https://www.npmjs.com/package/mongodb) using [Node.js mongodb package](https://www.npmjs.com/package/mongodb)
 
 This driver stores KV information in a MongoDB collection with a separate document for each key value pair.
 
@@ -635,7 +633,7 @@ To use it, you will need to install `mongodb` in your project:
 ```json
 {
   "dependencies": {
-    "mongodb": "^5.0.1",
+    "mongodb": "^5.0.1"
   }
 }
 ```
@@ -645,6 +643,7 @@ Usage:
 ```js
 import { createStorage } from "unstorage";
 import mongodbDriver from "unstorage/drivers/mongodb";
+
 const storage = createStorage({
   driver: mongodbDriver({
     connectionString: "CONNECTION_STRING",

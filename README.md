@@ -622,9 +622,50 @@ const storage = createStorage({
 - `storage`: The name of the table to read from. It defaults to `storage`.
 - `boostCache`: Whether to enable cached queries: see [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).
 
-### `azure-storage-blob`
+### `mongodb`
 
-⚠️ This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
+Store data in a MongoDB [mongodb](https://www.npmjs.com/package/mongodb) using [Node.js mongodb package](https://www.npmjs.com/package/mongodb)
+
+This driver stores KV information in a MongoDB collection with a separate document for each key value pair.
+
+To use it, you will need to install `mongodb` in your project:
+
+```json
+{
+  "dependencies": {
+    "mongodb": "^5.0.1"
+  }
+}
+```
+
+Usage:
+
+```js
+import { createStorage } from "unstorage";
+import mongodbDriver from "unstorage/drivers/mongodb";
+
+const storage = createStorage({
+  driver: mongodbDriver({
+    connectionString: "CONNECTION_STRING",
+    databaseName: "test",
+    collectionName: "test",
+  }),
+});
+```
+
+**Authentication:**
+
+The driver supports the following authentication methods:
+
+- **`connectionString`**: The MongoDB connection string. This is the only way to authenticate.
+
+**Options:**
+
+- **`connectionString`** (required): The connection string to use to connect to the MongoDB database. It should be in the format `mongodb://<username>:<password>@<host>:<port>/<database>`.
+- `databaseName`: The name of the database to use. Defaults to `unstorage`.
+- `collectionName`: The name of the collection to use. Defaults to `unstorage`.
+
+## `azure-storage-blob`
 
 Store data in a Azure blob storage [storage-blob](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob).
 
@@ -646,11 +687,10 @@ Please make sure that the container you want to use exists in your storage accou
 ```js
 import { createStorage } from "unstorage";
 import azureStorageBlobDriver from "unstorage/drivers/azure-storage-blob";
-
 const storage = createStorage({
-    driver: azureStorageBlobDriver({
-      accountName: "myazurestorageaccount",
-    }),
+  driver: azureStorageBlobDriver({
+    accountName: "myazurestorageaccount",
+  }),
 });
 ```
 
@@ -659,7 +699,7 @@ const storage = createStorage({
 The driver supports the following authentication methods:
 
 - **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate. <br>
-⚠️ Make sure that your Managed Identity or personal account has the `Storage Blob Data Contributor` role assigned to it, even if you already are `Contributor` or `Owner` on the storage account.
+  ⚠️ Make sure that your Managed Identity or personal account has the `Storage Blob Data Contributor` role assigned to it, even if you already are `Contributor` or `Owner` on the storage account.
 - **`AzureNamedKeyCredential`** (only available in Node.js runtime): This will use the `accountName` and `accountKey` to authenticate the request.
 - **`AzureSASCredential`**: This will use the `accountName` and `sasToken` to authenticate the request.
 - **connection string** (only available in Node.js runtime): This will use the `connectionString` to authenticate the request. This is not recommended as it will expose your account key in plain text.

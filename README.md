@@ -746,8 +746,6 @@ const storage = createStorage({
 
 **Authentication:**
 
-The driver supports the following authentication methods:
-
 - **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate. <br>
   ⚠️ Make sure that your Managed Identity or personal account has at least `Cosmos DB Built-in Data Contributor` role assigned to it. If you already are `Contributor` or `Owner` on the resource it should also be enough, but does not accomplish a model of least privilege.
 - **`accountKey`**: CosmosDB account key. If not provided, the driver will use the DefaultAzureCredential (recommended).

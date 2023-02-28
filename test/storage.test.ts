@@ -15,8 +15,22 @@ const data = {
 describe("storage", () => {
   it("mount/unmount", async () => {
     const storage = createStorage().mount("/mnt", memory());
+    storage.mount("/mnt/sub", memory());
+    storage.mount("/mnt2", memory());
     await restoreSnapshot(storage, data, "mnt");
     expect(await snapshot(storage, "/mnt")).toMatchObject(data);
+
+    expect(storage.getMount("/mnt:").base).toBe("mnt:");
+    expect(storage.getMount("/mnt:foo").base).toBe("mnt:");
+    expect(storage.getMount("/mnt/sub/").base).toBe("mnt:sub:");
+    expect(storage.getMount("/mnt:sub:foo").base).toBe("mnt:sub:");
+    expect(storage.getMounts("/mnt").map((m) => m.base)).toMatchInlineSnapshot(`
+      [
+        "mnt:sub:",
+        "mnt2:",
+        "mnt:",
+      ]
+    `);
   });
 
   it("snapshot", async () => {

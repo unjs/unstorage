@@ -36,12 +36,14 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
     for (const base of context.mountpoints) {
       if (key.startsWith(base)) {
         return {
+          base,
           relativeKey: key.slice(base.length),
           driver: context.mounts[base],
         };
       }
     }
     return {
+      base: "",
       relativeKey: key,
       driver: context.mounts[""],
     };
@@ -298,6 +300,22 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
       }
       context.mountpoints = context.mountpoints.filter((key) => key !== base);
       delete context.mounts[base];
+    },
+    getMount(key = "") {
+      key = normalizeKey(key) + ":";
+      const m = getMount(key);
+      return {
+        driver: m.driver,
+        base: m.base,
+      };
+    },
+    getMounts(base = "", opts = {}) {
+      base = normalizeKey(base);
+      const mounts = getMounts(base, opts.parents);
+      return mounts.map((m) => ({
+        driver: m.driver,
+        base: m.mountpoint,
+      }));
     },
   };
 

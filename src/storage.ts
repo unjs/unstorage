@@ -166,9 +166,9 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
       if (!driver.removeItem) {
         return; // Readonly
       }
-      await asyncCall(driver.removeItem, relativeKey);
+      await asyncCall(driver.removeItem, relativeKey, opts);
       if (opts?.removeMata) {
-        await asyncCall(driver.removeItem, relativeKey + "$");
+        await asyncCall(driver.removeItem, relativeKey + "$", opts);
       }
       if (!driver.watch) {
         onChange("remove", key);

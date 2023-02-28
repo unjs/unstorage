@@ -1,8 +1,7 @@
 export default defineAppConfig({
   docus: {
-    title: "unjs/unstorage",
+    title: "💾 Unstorage",
     description: "Universal Storage Layer.",
-    // image: '',
     header: {
       logo: false,
     },

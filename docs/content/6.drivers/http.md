@@ -1,8 +1,4 @@
----
-navigation.title: HTTP
----
-
-# HTTP Driver
+# HTTP
 
 Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server](/http-server) methods.
 

@@ -1,7 +1,3 @@
----
-navigation.title: Overlay (special)
----
-
 # Overlay
 
 This is a special driver that creates a multi-layer overlay driver.

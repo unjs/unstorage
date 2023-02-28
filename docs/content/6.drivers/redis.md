@@ -55,6 +55,6 @@ See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-h
 
 `lazyConnect` option is enabled by default so that connection happens on first redis operation.
 
-**Operation options:**
+**Transaction options:**
 
 - `ttl`: Supported for `setItem(key, value, { ttl: number /* seconds */ })`

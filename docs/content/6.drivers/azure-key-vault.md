@@ -30,7 +30,7 @@ The driver supports the following authentication methods:
 
 - **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate.
 
-   ⚠️ Make sure that your Managed Identity or personal account has either the `Key Vault Secrets Officer` RBAC role assigned or is a member of an access policy that grants `Get`, `List`, `Set`, `Delete` and `Purge` secret permissions.
+  ⚠️ Make sure that your Managed Identity or personal account has either the `Key Vault Secrets Officer` RBAC role assigned or is a member of an access policy that grants `Get`, `List`, `Set`, `Delete` and `Purge` secret permissions.
 
 **Options:**
 

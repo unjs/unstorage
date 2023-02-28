@@ -20,10 +20,7 @@ import fs from "unstorage/drivers/fs";
 
 const storage = createStorage({
   driver: overlay({
-    layers: [
-      memory(),
-      fs({ base: "./data" })
-    ],
+    layers: [memory(), fs({ base: "./data" })],
   }),
 });
 ```

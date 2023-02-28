@@ -16,6 +16,7 @@ const storage = createStorage({
 ```
 
 **Options:**
+
 - `base`: Add `${base}:` to all keys to avoid collision
 - `localStorage`: Optionally provide `localStorage` object
 - `window`: Optionally provide `window` object

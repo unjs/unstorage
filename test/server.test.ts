@@ -15,7 +15,7 @@ describe("server", () => {
     const fetchStorage = (url: string, options?: any) =>
       $fetch(url, { baseURL: serverURL, ...options });
 
-    expect(await fetchStorage("foo", {})).toMatchObject([]);
+    expect(await fetchStorage("foo/", {})).toMatchObject([]);
 
     await storage.setItem("foo/bar", "bar");
     await storage.setMeta("foo/bar", { mtime: new Date() });
@@ -28,7 +28,7 @@ describe("server", () => {
     expect(await fetchStorage("/")).toMatchObject(["foo/bar"]);
 
     expect(await fetchStorage("foo/bar", { method: "DELETE" })).toBe("OK");
-    expect(await fetchStorage("foo/bar", {})).toMatchObject([]);
+    expect(await fetchStorage("foo/bar/", {})).toMatchObject([]);
 
     await close();
   });

@@ -1,5 +1,4 @@
 import { defineDriver } from "./utils";
-import { stringify } from "./utils";
 import { $fetch } from "ofetch";
 import { joinURL } from "ufo";
 
@@ -8,7 +7,9 @@ export interface HTTPOptions {
 }
 
 export default defineDriver((opts: HTTPOptions = {}) => {
-  const r = (key: string) => joinURL(opts.base!, key.replace(/:/g, "/"));
+  const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
+  const rBase = (key: string = "") =>
+    joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
 
   return {
     hasItem(key) {
@@ -18,6 +19,14 @@ export default defineDriver((opts: HTTPOptions = {}) => {
     },
     async getItem(key) {
       const value = await $fetch(r(key));
+      return value;
+    },
+    async getItemRaw(key) {
+      const value = await $fetch(r(key), {
+        headers: {
+          accept: "application/octet-stream",
+        },
+      });
       return value;
     },
     async getMeta(key) {
@@ -35,15 +44,24 @@ export default defineDriver((opts: HTTPOptions = {}) => {
     async setItem(key, value) {
       await $fetch(r(key), { method: "PUT", body: value });
     },
+    async setItemRaw(key, value) {
+      await $fetch(r(key), {
+        method: "PUT",
+        body: value,
+        headers: {
+          "content-type": "application/octet-stream",
+        },
+      });
+    },
     async removeItem(key) {
       await $fetch(r(key), { method: "DELETE" });
     },
-    async getKeys() {
-      const value = await $fetch(r(""));
+    async getKeys(base) {
+      const value = await $fetch(rBase(base));
       return Array.isArray(value) ? value : [];
     },
-    clear() {
-      // Not supported
+    async clear(base) {
+      await $fetch(rBase(base), { method: "DELETE" });
     },
   };
 });

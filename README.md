@@ -6,15 +6,17 @@
 [![Codecov][codecov-src]][codecov-href]
 [![bundle][bundle-src]][bundle-href]
 
-> 💾 Universal Storage Layer
+💾 Universal Storage Layer
+
+Read the [documentation](https://unstorage.unjs.io).
 
 **Why ❓**
 
-Typically, we choose one or more data storages based on our use-cases like a filesystem, a database like Redis, Mongo, or LocalStorage for browsers but it will soon start to be lots of trouble for supporting and combining more than one or switching between them. For javascript library authors, this usually means they have to decide how many platforms they support and implement storage for each.
+We choose one or more data storage based on our use-cases: a filesystem, a database or LocalStorage for browsers.
 
-💡 Unstorage solution is a unified and powerful Key-Value (KV) interface that allows combining drivers that are either built-in or can be implemented via a super simple interface and adding conventional features like mounting, watching, and working with metadata.
+It soon starts to be create troubles for supporting and combining more than one or switching between them. For JavaScript library authors, this usually means they have to decide how many platforms they support and implement storage for each.
 
-Comparing to similar solutions like [localforage](https://localforage.github.io/localForage/), unstorage core is almost 6x smaller (28.9 kB vs 4.7 kB), using modern ESM/Typescript/Async syntax and many more features to be used universally.
+Comparing to similar solutions like [localforage](https://localforage.github.io/localForage/), unstorage core is almost 6x smaller (`28.9kB` vs `4.7kB`). It uses modern ESM/Typescript/Async syntax and more features to be used universally.
 
 <br>
 ✅ Designed to work in all environments (Browser, NodeJS, and Workers) <br>
@@ -62,11 +64,11 @@ await storage.getItem("foo:bar"); // or storage.getItem('/foo/bar')
 
 ## Storage Interface
 
-Check out [storage interface](./docs/storage.md) for storage interface usage.
+Check out [storage interface](https://unstorage.unjs.io/usage) for storage interface usage.
 
 ## Storage Utilities
 
-Check out [storage utils](./docs/utils.md) for available extra storage utilities.
+Check out [storage utils](https://unstorage.unjs.io/utils) for available extra storage utilities.
 
 ## Storage Drivers
 
@@ -74,33 +76,33 @@ Unstorage has several built-in storage drivers you can instantiate and mount.
 
 Local:
 
-- [Filesystem](./docs/drivers/node-fs.md)
-- [Memory](./docs/drivers/memory.md)
-- [LRU Cache](./docs/drivers/lru-cache.md)
-- [Localstorage](./docs/drivers/localstorage.md)
+- [Filesystem](https://unstorage.unjs.io/driver/fs)
+- [Memory](https://unstorage.unjs.io/driver/memory)
+- [LRU Cache](https://unstorage.unjs.io/driver/lru-cache)
+- [Localstorage](https://unstorage.unjs.io/driver/localstorage)
 
 Special:
 
-- [HTTP](./docs/drivers/http.md)
-- [Overlay](./docs/drivers/overlay.md)
-- [Custom Driver](./docs/drivers/custom.md)
+- [HTTP](https://unstorage.unjs.io/driver/http)
+- [Overlay](https://unstorage.unjs.io/driver/overlay)
+- [Custom Driver](https://unstorage.unjs.io/custom-driver)
 
 Database:
 
-- [MongoDB](./docs/drivers/mongodb.md)
-- [Redis](./docs/drivers/redis.md)
+- [MongoDB](https://unstorage.unjs.io/driver/mongodb)
+- [Redis](https://unstorage.unjs.io/driver/redis)
 
 Providers:
 
-- [Azure App Configuration](./docs/drivers/azure-app-configuration.md)
-- [Azure Key Vault](./docs/drivers/azure-key-vault.md)
-- [Azure Cosmos](./docs//drivers/azure-cosmos.md)
-- [Azure Storage Block](./docs/drivers/azure-storage-blod.md)
-- [Azure Storage Table](./docs/drivers//azure-storage-table.md)
-- [Cloudflare KV Binding](./docs/drivers/cloudflare-kv-binding.md)
-- [Cloudflare KV HTTP](./docs/drivers/cloudflare-kv-http.md)
-- [Github](./docs/drivers/github.md)
-- [Planetscale](./docs/drivers/planetscale.md)
+- [Azure App Configuration](https://unstorage.unjs.io/drivers/azure-app-configuration)
+- [Azure Key Vault](https://unstorage.unjs.io/drivers/azure-key-vault)
+- [Azure Cosmos](https://unstorage.unjs.io/drivers/azure-cosmos)
+- [Azure Storage Block](https://unstorage.unjs.io/drivers/azure-storage-blod)
+- [Azure Storage Table](https://unstorage.unjs.io/drivers//azure-storage-table)
+- [Cloudflare KV Binding](https://unstorage.unjs.io/drivers/cloudflare-kv-binding)
+- [Cloudflare KV HTTP](https://unstorage.unjs.io/drivers/cloudflare-kv-http)
+- [Github](https://unstorage.unjs.io/drivers/github)
+- [Planetscale](https://unstorage.unjs.io/drivers/planetscale)
 
 ## Contribution
 

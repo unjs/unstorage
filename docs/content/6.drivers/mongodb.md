@@ -1,4 +1,4 @@
-### MongoDB
+# MongoDB
 
 Store data in [MongoDB](https://www.npmjs.com/package/mongodb) using [Node.js mongodb package](https://www.npmjs.com/package/mongodb)
 

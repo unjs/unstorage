@@ -1,4 +1,4 @@
-### PlanetScale
+# PlanetScale
 
 Stores data in [PlanetScale](https://planetscale.com/)
 

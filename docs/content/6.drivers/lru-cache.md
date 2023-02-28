@@ -2,7 +2,7 @@
 navigation.title: LRU Cache
 ---
 
-### LRU Cache
+# LRU Cache
 
 Keeps cached data in memory using [LRU Cache](https://www.npmjs.com/package/lru-cache).
 

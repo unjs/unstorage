@@ -2,7 +2,7 @@
 navigation.title: GitHub
 ---
 
-### GitHub
+# GitHub
 
 Map files from a remote github repository (readonly).
 

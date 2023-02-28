@@ -49,7 +49,12 @@ const storage = createStorage({
 - `url`: Url to use for connecting to redis. Takes precedence over `host` option. Has the format `redis://<REDIS_USER>:<REDIS_PASSWORD>@<REDIS_HOST>:<REDIS_PORT>`
 - `cluster`: List of redis nodes to use for cluster mode. Takes precedence over `url` and `host` options.
 - `clusterOptions`: Options to use for cluster mode.
+- `ttl`: Default TTL for all items in **seconds**.
 
 See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 
 `lazyConnect` option is enabled by default so that connection happens on first redis operation.
+
+**Operation options:**
+
+- `ttl`: Supported for `setItem(key, value, { ttl: number /* seconds */ })`

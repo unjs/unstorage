@@ -54,7 +54,7 @@ export interface Storage {
   unmount: (base: string, dispose?: boolean) => Promise<void>;
   getMount: (key?: string) => { base: string; driver: Driver };
   getMounts: (
-    base: string,
+    base?: string,
     options?: { parents?: boolean }
   ) => { base: string; driver: Driver }[];
 }

@@ -53,6 +53,15 @@ describe("storage", () => {
         "",
       ]
     `);
+
+    expect(storage.getMounts().map((m) => m.base)).toMatchInlineSnapshot(`
+      [
+        "cache:sub:",
+        "cache:",
+        "mnt:",
+        "",
+      ]
+    `);
   });
 
   it("snapshot", async () => {

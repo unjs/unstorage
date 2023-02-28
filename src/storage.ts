@@ -159,7 +159,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
     async removeItem(key, opts = {}) {
       // TODO: Remove in next major version
       if (typeof opts === "boolean") {
-        opts = { meta: opts };
+        opts = { removeMata: opts };
       }
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);

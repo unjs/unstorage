@@ -103,19 +103,19 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
 
   const storage: Storage = {
     // Item
-    hasItem(key, opts) {
+    hasItem(key, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem(key, opts) {
+    getItem(key, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
         destr(value)
       );
     },
-    getItemRaw(key, opts) {
+    getItemRaw(key, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       if (driver.getItemRaw) {
@@ -125,7 +125,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         deserializeRaw(value)
       );
     },
-    async setItem(key, value, opts) {
+    async setItem(key, value, opts = {}) {
       if (value === undefined) {
         return storage.removeItem(key);
       }
@@ -139,7 +139,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         onChange("update", key);
       }
     },
-    async setItemRaw(key, value, opts) {
+    async setItemRaw(key, value, opts = {}) {
       if (value === undefined) {
         return storage.removeItem(key, opts);
       }
@@ -156,7 +156,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         onChange("update", key);
       }
     },
-    async removeItem(key, opts) {
+    async removeItem(key, opts = {}) {
       // TODO: Remove in next major version
       if (typeof opts === "boolean") {
         opts = { meta: opts };
@@ -167,7 +167,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         return; // Readonly
       }
       await asyncCall(driver.removeItem, relativeKey, opts);
-      if (opts?.removeMata) {
+      if (opts.removeMata) {
         await asyncCall(driver.removeItem, relativeKey + "$", opts);
       }
       if (!driver.watch) {
@@ -175,7 +175,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
       }
     },
     // Meta
-    async getMeta(key, opts) {
+    async getMeta(key, opts = {}) {
       // TODO: Remove in next major version
       if (typeof opts === "boolean") {
         opts = { nativeOnly: opts };
@@ -186,7 +186,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
       if (driver.getMeta) {
         Object.assign(meta, await asyncCall(driver.getMeta, relativeKey, opts));
       }
-      if (!opts?.nativeOnly) {
+      if (!opts.nativeOnly) {
         const value = await asyncCall(
           driver.getItem,
           relativeKey + "$",
@@ -205,14 +205,14 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
       }
       return meta;
     },
-    setMeta(key: string, value: any, opts) {
+    setMeta(key: string, value: any, opts = {}) {
       return this.setItem(key + "$", value, opts);
     },
-    removeMeta(key: string, opts) {
+    removeMeta(key: string, opts = {}) {
       return this.removeItem(key + "$", opts);
     },
     // Keys
-    async getKeys(base, opts) {
+    async getKeys(base, opts = {}) {
       base = normalizeBaseKey(base);
       const mounts = getMounts(base, true);
       let maskedMounts = [];
@@ -240,7 +240,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         : allKeys.filter((key) => !key.endsWith("$"));
     },
     // Utils
-    async clear(base, opts) {
+    async clear(base, opts = {}) {
       base = normalizeBaseKey(base);
       await Promise.all(
         getMounts(base, false).map(async (m) => {

@@ -2,6 +2,54 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.2.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.1.5...v1.2.0)
+
+
+### 🚀 Enhancements
+
+  - `mongodb` driver ([#155](https://github.com/unjs/unstorage/pull/155))
+  - `azure-storage-blob` driver ([#154](https://github.com/unjs/unstorage/pull/154))
+  - `azure-cosmos` driver ([#158](https://github.com/unjs/unstorage/pull/158))
+  - `azure-key-vault` driver ([#159](https://github.com/unjs/unstorage/pull/159))
+  - `azure-app-configuration` driver ([#156](https://github.com/unjs/unstorage/pull/156))
+  - `azure-storage-table` ([#148](https://github.com/unjs/unstorage/pull/148))
+  - `getMount` and `getMounts` utils ([#167](https://github.com/unjs/unstorage/pull/167))
+  - Allow passing transaction options to drivers ([#168](https://github.com/unjs/unstorage/pull/168))
+  - **redis:** Support native `ttl` ([#169](https://github.com/unjs/unstorage/pull/169))
+  - `http` and server improvements ([#170](https://github.com/unjs/unstorage/pull/170))
+
+### 🩹 Fixes
+
+  - **redis:** Fix clear method ([#163](https://github.com/unjs/unstorage/pull/163))
+
+### 💅 Refactors
+
+  - **redis:** Driver improvements ([#160](https://github.com/unjs/unstorage/pull/160))
+
+### 📖 Documentation
+
+  - Start splitting docs ([6bca2a8](https://github.com/unjs/unstorage/commit/6bca2a8))
+  - Add docs website ([#166](https://github.com/unjs/unstorage/pull/166))
+
+### 🏡 Chore
+
+  - Remove unused dependencies ([#153](https://github.com/unjs/unstorage/pull/153))
+  - Add vercel.json ([10d2610](https://github.com/unjs/unstorage/commit/10d2610))
+
+### ✅ Tests
+
+  - Add unit test for redis driver ([#164](https://github.com/unjs/unstorage/pull/164))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Sébastien Chopin <seb@nuxtjs.com>
+- Jan-Henrik Damaschke <jdamaschke@outlook.de>
+- Jamwong-ecosa <jamwong@ecosa.com.hk>
+- Daniel Roe <daniel@roe.dev>
+
 ## v1.1.5
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.1.4...v1.1.5)

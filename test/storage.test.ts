@@ -15,20 +15,42 @@ const data = {
 describe("storage", () => {
   it("mount/unmount", async () => {
     const storage = createStorage().mount("/mnt", memory());
-    storage.mount("/mnt/sub", memory());
-    storage.mount("/mnt2", memory());
     await restoreSnapshot(storage, data, "mnt");
     expect(await snapshot(storage, "/mnt")).toMatchObject(data);
+  });
 
-    expect(storage.getMount("/mnt:").base).toBe("mnt:");
-    expect(storage.getMount("/mnt:foo").base).toBe("mnt:");
-    expect(storage.getMount("/mnt/sub/").base).toBe("mnt:sub:");
-    expect(storage.getMount("/mnt:sub:foo").base).toBe("mnt:sub:");
-    expect(storage.getMounts("/mnt").map((m) => m.base)).toMatchInlineSnapshot(`
+  it("getMount and getMounts", () => {
+    const storage = createStorage();
+
+    storage.mount("/mnt", memory());
+
+    storage.mount("cache", memory());
+    storage.mount("cache:sub", memory());
+    expect(storage.getMount("/cache:").base).toBe("cache:");
+    expect(storage.getMount("/cache:foo").base).toBe("cache:");
+    expect(storage.getMount("/cache:sub").base).toBe("cache:sub:");
+    expect(storage.getMount("/cache:sub:foo").base).toBe("cache:sub:");
+
+    expect(storage.getMounts("/cache").map((m) => m.base))
+      .toMatchInlineSnapshot(`
+        [
+          "cache:sub:",
+          "cache:",
+        ]
+      `);
+    expect(storage.getMounts("/cache:sub").map((m) => m.base))
+      .toMatchInlineSnapshot(`
+        [
+          "cache:sub:",
+        ]
+      `);
+    expect(
+      storage.getMounts("/cache:sub", { parents: true }).map((m) => m.base)
+    ).toMatchInlineSnapshot(`
       [
-        "mnt:sub:",
-        "mnt2:",
-        "mnt:",
+        "cache:sub:",
+        "cache:",
+        "",
       ]
     `);
   });

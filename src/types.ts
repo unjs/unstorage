@@ -56,5 +56,5 @@ export interface Storage {
   getMounts: (
     base: string,
     options?: { parents?: boolean }
-  ) => Array<{ driver: Driver; base: string }>;
+  ) => { base: string; driver: Driver }[];
 }

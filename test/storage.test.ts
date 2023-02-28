@@ -19,6 +19,51 @@ describe("storage", () => {
     expect(await snapshot(storage, "/mnt")).toMatchObject(data);
   });
 
+  it("getMount and getMounts", () => {
+    const storage = createStorage();
+
+    storage.mount("/mnt", memory());
+
+    storage.mount("cache", memory());
+    storage.mount("cache:sub", memory());
+    expect(storage.getMount("/cache:").base).toBe("cache:");
+    expect(storage.getMount("/cache:foo").base).toBe("cache:");
+    expect(storage.getMount("/cache:sub").base).toBe("cache:sub:");
+    expect(storage.getMount("/cache:sub:foo").base).toBe("cache:sub:");
+
+    expect(storage.getMounts("/cache").map((m) => m.base))
+      .toMatchInlineSnapshot(`
+        [
+          "cache:sub:",
+          "cache:",
+        ]
+      `);
+    expect(storage.getMounts("/cache:sub").map((m) => m.base))
+      .toMatchInlineSnapshot(`
+        [
+          "cache:sub:",
+        ]
+      `);
+    expect(
+      storage.getMounts("/cache:sub", { parents: true }).map((m) => m.base)
+    ).toMatchInlineSnapshot(`
+      [
+        "cache:sub:",
+        "cache:",
+        "",
+      ]
+    `);
+
+    expect(storage.getMounts().map((m) => m.base)).toMatchInlineSnapshot(`
+      [
+        "cache:sub:",
+        "cache:",
+        "mnt:",
+        "",
+      ]
+    `);
+  });
+
   it("snapshot", async () => {
     const storage = createStorage();
     await restoreSnapshot(storage, data);

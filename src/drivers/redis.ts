@@ -26,6 +26,11 @@ export interface RedisOptions extends _RedisOptions {
    * Options to use for cluster mode.
    */
   clusterOptions?: ClusterOptions;
+
+  /**
+   * Default TTL for all items in seconds.
+   */
+  ttl?: number;
 }
 
 export default defineDriver((opts: RedisOptions = {}) => {
@@ -60,8 +65,13 @@ export default defineDriver((opts: RedisOptions = {}) => {
       const value = await getRedisClient().get(p(key));
       return value === null ? null : value;
     },
-    async setItem(key, value) {
-      await getRedisClient().set(p(key), value);
+    async setItem(key, value, tOptions) {
+      let ttl = tOptions?.ttl ?? opts.ttl;
+      if (ttl) {
+        await getRedisClient().set(p(key), value, "EX", tOptions.ttl);
+      } else {
+        await getRedisClient().set(p(key), value);
+      }
     },
     async removeItem(key) {
       await getRedisClient().del(p(key));

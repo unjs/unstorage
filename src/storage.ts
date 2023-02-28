@@ -103,29 +103,29 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
 
   const storage: Storage = {
     // Item
-    hasItem(key) {
+    hasItem(key, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
-      return asyncCall(driver.hasItem, relativeKey);
+      return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem(key) {
+    getItem(key, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
-      return asyncCall(driver.getItem, relativeKey).then((value) =>
+      return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
         destr(value)
       );
     },
-    getItemRaw(key) {
+    getItemRaw(key, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       if (driver.getItemRaw) {
-        return asyncCall(driver.getItemRaw, relativeKey);
+        return asyncCall(driver.getItemRaw, relativeKey, opts);
       }
-      return asyncCall(driver.getItem, relativeKey).then((value) =>
+      return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
         deserializeRaw(value)
       );
     },
-    async setItem(key, value) {
+    async setItem(key, value, opts = {}) {
       if (value === undefined) {
         return storage.removeItem(key);
       }
@@ -134,21 +134,21 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
       if (!driver.setItem) {
         return; // Readonly
       }
-      await asyncCall(driver.setItem, relativeKey, stringify(value));
+      await asyncCall(driver.setItem, relativeKey, stringify(value), opts);
       if (!driver.watch) {
         onChange("update", key);
       }
     },
-    async setItemRaw(key, value) {
+    async setItemRaw(key, value, opts = {}) {
       if (value === undefined) {
-        return storage.removeItem(key);
+        return storage.removeItem(key, opts);
       }
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       if (driver.setItemRaw) {
-        await asyncCall(driver.setItemRaw, relativeKey, value);
+        await asyncCall(driver.setItemRaw, relativeKey, value, opts);
       } else if (driver.setItem) {
-        await asyncCall(driver.setItem, relativeKey, serializeRaw(value));
+        await asyncCall(driver.setItem, relativeKey, serializeRaw(value), opts);
       } else {
         return; // Readonly
       }
@@ -156,32 +156,42 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         onChange("update", key);
       }
     },
-    async removeItem(key, removeMeta = true) {
+    async removeItem(key, opts = {}) {
+      // TODO: Remove in next major version
+      if (typeof opts === "boolean") {
+        opts = { removeMata: opts };
+      }
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       if (!driver.removeItem) {
         return; // Readonly
       }
-      await asyncCall(driver.removeItem, relativeKey);
-      if (removeMeta) {
-        await asyncCall(driver.removeItem, relativeKey + "$");
+      await asyncCall(driver.removeItem, relativeKey, opts);
+      if (opts.removeMata) {
+        await asyncCall(driver.removeItem, relativeKey + "$", opts);
       }
       if (!driver.watch) {
         onChange("remove", key);
       }
     },
     // Meta
-    async getMeta(key, nativeMetaOnly) {
+    async getMeta(key, opts = {}) {
+      // TODO: Remove in next major version
+      if (typeof opts === "boolean") {
+        opts = { nativeOnly: opts };
+      }
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       const meta = Object.create(null);
       if (driver.getMeta) {
-        Object.assign(meta, await asyncCall(driver.getMeta, relativeKey));
+        Object.assign(meta, await asyncCall(driver.getMeta, relativeKey, opts));
       }
-      if (!nativeMetaOnly) {
-        const value = await asyncCall(driver.getItem, relativeKey + "$").then(
-          (value_) => destr(value_)
-        );
+      if (!opts.nativeOnly) {
+        const value = await asyncCall(
+          driver.getItem,
+          relativeKey + "$",
+          opts
+        ).then((value_) => destr(value_));
         if (value && typeof value === "object") {
           // TODO: Support date by destr?
           if (typeof value.atime === "string") {
@@ -195,14 +205,14 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
       }
       return meta;
     },
-    setMeta(key: string, value: any) {
-      return this.setItem(key + "$", value);
+    setMeta(key: string, value: any, opts = {}) {
+      return this.setItem(key + "$", value, opts);
     },
-    removeMeta(key: string) {
-      return this.removeItem(key + "$");
+    removeMeta(key: string, opts = {}) {
+      return this.removeItem(key + "$", opts);
     },
     // Keys
-    async getKeys(base) {
+    async getKeys(base, opts = {}) {
       base = normalizeBaseKey(base);
       const mounts = getMounts(base, true);
       let maskedMounts = [];
@@ -210,7 +220,8 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
       for (const mount of mounts) {
         const rawKeys = await asyncCall(
           mount.driver.getKeys,
-          mount.relativeBase
+          mount.relativeBase,
+          opts
         );
         const keys = rawKeys
           .map((key) => mount.mountpoint + normalizeKey(key))
@@ -229,16 +240,16 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         : allKeys.filter((key) => !key.endsWith("$"));
     },
     // Utils
-    async clear(base) {
+    async clear(base, opts = {}) {
       base = normalizeBaseKey(base);
       await Promise.all(
         getMounts(base, false).map(async (m) => {
           if (m.driver.clear) {
-            return asyncCall(m.driver.clear);
+            return asyncCall(m.driver.clear, m.relativeBase, opts);
           }
           // Fallback to remove all keys if clear not implemented
           if (m.driver.removeItem) {
-            const keys = await m.driver.getKeys();
+            const keys = await m.driver.getKeys(m.relativeBase, opts);
             return Promise.all(keys.map((key) => m.driver.removeItem!(key)));
           }
           // Readonly

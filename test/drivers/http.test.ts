@@ -1,33 +1,22 @@
-import { describe, it, expect } from "vitest";
+import { describe, beforeAll, afterAll } from "vitest";
 import driver from "../../src/drivers/http";
 import { createStorage } from "../../src";
 import { createStorageServer } from "../../src/server";
 import { listen } from "listhen";
+import { testDriver } from "./utils";
 
-describe("drivers: http", () => {
-  it("basic", async () => {
-    const storage = createStorage();
-    const server = createStorageServer(storage);
+describe("drivers: http", async () => {
+  const remoteStorage = createStorage();
+  const server = createStorageServer(remoteStorage);
+  const listener = await listen(server.handle, {
+    port: { random: true },
+  });
 
-    const { url, close } = await listen(server.handle, {
-      port: { random: true },
-    });
-    storage.mount("/http", driver({ base: url }));
+  afterAll(async () => {
+    await listener.close();
+  });
 
-    expect(await storage.hasItem("/http/foo")).toBe(false);
-
-    await storage.setItem("/http/foo", "bar");
-    expect(await storage.getItem("http:foo")).toBe("bar");
-    expect(await storage.hasItem("/http/foo")).toBe(true);
-
-    const date = new Date();
-    await storage.setMeta("/http/foo", { mtime: date });
-
-    expect(await storage.getMeta("/http/foo")).toMatchObject({
-      mtime: date,
-      status: 200,
-    });
-
-    await close();
+  testDriver({
+    driver: driver({ base: listener!.url }),
   });
 });

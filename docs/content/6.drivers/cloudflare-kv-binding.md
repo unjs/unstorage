@@ -1,4 +1,4 @@
-# CloudFlare KV (bindings)
+# CloudFlare KV (binding)
 
 Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv) and access from worker bindings.
 

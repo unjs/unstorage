@@ -4,7 +4,7 @@ navigation.title: HTTP
 
 # HTTP Driver
 
-Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server](#storage-server) methods.
+Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server](/http-server) methods.
 
 This driver implements meta for each key including `mtime` (last modified time) and `status` from HTTP headers by making a `HEAD` request.
 

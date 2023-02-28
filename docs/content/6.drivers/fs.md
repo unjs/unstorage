@@ -1,8 +1,8 @@
 ---
-navigation.title: Node.js FS
+navigation.title: Node.js Filesystem
 ---
 
-# FS Driver
+# Node.js Filesystem
 
 Maps data to the real filesystem using directory structure for nested keys. Supports watching using [chokidar](https://github.com/paulmillr/chokidar).
 

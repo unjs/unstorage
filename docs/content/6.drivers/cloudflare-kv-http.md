@@ -1,4 +1,4 @@
-# Cloudflare KV (API)
+# Cloudflare KV (http)
 
 Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/learning/how-kv-works/) using the [Cloudflare API v4](https://api.cloudflare.com/).
 

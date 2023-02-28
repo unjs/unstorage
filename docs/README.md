@@ -1,39 +1,19 @@
-# Unstorage Docs
+# Documentation
 
-Starter template from [Docus](https://docus.dev).
+Docs are powered by [Docus](https://docus.dev).
 
-## Setup
+## Local Development
 
 Install dependencies:
 
 ```bash
-yarn install
+pnpm install
 ```
 
-## Development
+Start development server with:
 
 ```bash
-yarn dev
+npm run dev
 ```
 
-## Static Generation
-
-Use the `generate` command to build your application.
-
-The HTML files will be generated in the .output/public directory and ready to be deployed to any static compatible hosting.
-
-```bash
-yarn generate
-```
-
-## Preview build
-
-You might want to preview the result of your build locally, to do so, run the following command:
-
-```bash
-yarn preview
-```
-
----
-
-For a detailed explanation of how things work, check out [Docus](https://docus.dev).
+Start editing [conent](./content) directory!

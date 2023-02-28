@@ -12,40 +12,81 @@ export interface StorageMeta {
   [key: string]: StorageValue | Date | undefined;
 }
 
+type TransactionOptions = Record<string, any>;
+
 export interface Driver {
-  hasItem: (key: string) => MaybePromise<boolean>;
-  getItem: (key: string) => MaybePromise<StorageValue>;
+  hasItem: (key: string, opts?: TransactionOptions) => MaybePromise<boolean>;
+  getItem: (
+    key: string,
+    opts?: TransactionOptions
+  ) => MaybePromise<StorageValue>;
   /** @experimental */
-  getItemRaw?: (key: string) => MaybePromise<unknown>;
-  setItem?: (key: string, value: string) => MaybePromise<void>;
+  getItemRaw?: (
+    key: string,
+    opts?: TransactionOptions
+  ) => MaybePromise<unknown>;
+  setItem?: (
+    key: string,
+    value: string,
+    opts?: TransactionOptions
+  ) => MaybePromise<void>;
   /** @experimental */
-  setItemRaw?: (key: string, value: any) => MaybePromise<void>;
-  removeItem?: (key: string) => MaybePromise<void>;
-  getMeta?: (key: string) => MaybePromise<StorageMeta>;
-  getKeys: (base?: string) => MaybePromise<string[]>;
-  clear?: () => MaybePromise<void>;
+  setItemRaw?: (
+    key: string,
+    value: any,
+    opts?: TransactionOptions
+  ) => MaybePromise<void>;
+  removeItem?: (key: string, opts?: TransactionOptions) => MaybePromise<void>;
+  getMeta?: (
+    key: string,
+    opts?: TransactionOptions
+  ) => MaybePromise<StorageMeta>;
+  getKeys: (base?: string, opts?: TransactionOptions) => MaybePromise<string[]>;
+  clear?: (base?: string, opts?: TransactionOptions) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }
 
 export interface Storage {
   // Item
-  hasItem: (key: string) => Promise<boolean>;
-  getItem: (key: string) => Promise<StorageValue>;
+  hasItem: (key: string, opts?: TransactionOptions) => Promise<boolean>;
+  getItem: (key: string, opts?: TransactionOptions) => Promise<StorageValue>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
-  getItemRaw: (key: string) => Promise<any>;
-  setItem: (key: string, value: StorageValue) => Promise<void>;
+  getItemRaw: (key: string, opts?: TransactionOptions) => Promise<any>;
+  setItem: (
+    key: string,
+    value: StorageValue,
+    opts?: TransactionOptions
+  ) => Promise<void>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
-  setItemRaw: (key: string, value: any) => Promise<void>;
-  removeItem: (key: string, removeMeta?: boolean) => Promise<void>;
+  setItemRaw: (
+    key: string,
+    value: any,
+    opts?: TransactionOptions
+  ) => Promise<void>;
+  removeItem: (
+    key: string,
+    opts?:
+      | (TransactionOptions & { removeMata?: boolean })
+      | boolean /* legacy: removeMata */
+  ) => Promise<void>;
   // Meta
-  getMeta: (key: string, nativeMetaOnly?: true) => MaybePromise<StorageMeta>;
-  setMeta: (key: string, value: StorageMeta) => Promise<void>;
-  removeMeta: (key: string) => Promise<void>;
+  getMeta: (
+    key: string,
+    opts?:
+      | (TransactionOptions & { nativeOnly?: boolean })
+      | boolean /* legacy: nativeOnly */
+  ) => MaybePromise<StorageMeta>;
+  setMeta: (
+    key: string,
+    value: StorageMeta,
+    opts?: TransactionOptions
+  ) => Promise<void>;
+  removeMeta: (key: string, opts?: TransactionOptions) => Promise<void>;
   // Keys
-  getKeys: (base?: string) => Promise<string[]>;
+  getKeys: (base?: string, opts?: TransactionOptions) => Promise<string[]>;
   // Utils
-  clear: (base?: string) => Promise<void>;
+  clear: (base?: string, opts?: TransactionOptions) => Promise<void>;
   dispose: () => Promise<void>;
   watch: (callback: WatchCallback) => Promise<Unwatch>;
   unwatch: () => Promise<void>;

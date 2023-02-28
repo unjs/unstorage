@@ -1,6 +1,4 @@
-# `azure-storage-table`
-
-itpropro marked this conversation as resolved.
+# Azure Table Storage
 
 ⚠️ This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
 
@@ -10,13 +8,8 @@ This driver stores KV information in a Azure table storage. The same partition k
 
 To use it, you will need to install `@azure/data-table` and `@azure/identity` in your project:
 
-```json
-{
-  "dependencies": {
-    "@azure/data-tables": "^13.2.1",
-    "@azure/identity": "^3.1.3"
-  }
-}
+```bash
+npm i @azure/data-table @azure/identity
 ```
 
 Please make sure that the table you want to use exists in your storage account.
@@ -24,6 +17,7 @@ Please make sure that the table you want to use exists in your storage account.
 ```js
 import { createStorage } from "unstorage";
 import azureStorageTableDriver from "unstorage/drivers/azure-storage-table";
+
 const storage = createStorage({
   driver: azureStorageTableDriver({
     accountName: "myazurestorageaccount",

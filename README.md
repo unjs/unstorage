@@ -6,33 +6,23 @@
 [![Codecov][codecov-src]][codecov-href]
 [![bundle][bundle-src]][bundle-href]
 
-> 💾 Universal Storage Layer
+💾 Unstorage provides an async Key-Value storage API with conventional features like multi driver mounting, watching and working with metadata, dozens of built-in drivers and a [tiny core](https://bundlephobia.com/package/unstorage).
 
-**Why ❓**
+👉 [documentation](https://unstorage.unjs.io)
 
-Typically, we choose one or more data storages based on our use-cases like a filesystem, a database like Redis, Mongo, or LocalStorage for browsers but it will soon start to be lots of trouble for supporting and combining more than one or switching between them. For javascript library authors, this usually means they have to decide how many platforms they support and implement storage for each.
+## Features
 
-💡 Unstorage solution is a unified and powerful Key-Value (KV) interface that allows combining drivers that are either built-in or can be implemented via a super simple interface and adding conventional features like mounting, watching, and working with metadata.
-
-Comparing to similar solutions like [localforage](https://localforage.github.io/localForage/), unstorage core is almost 6x smaller (28.9 kB vs 4.7 kB), using modern ESM/Typescript/Async syntax and many more features to be used universally.
-
-<br>
-✅ Designed to work in all environments (Browser, NodeJS, and Workers) <br>
-✅ Multiple built-in drivers (Memory, FS, LocalStorage, HTTP, Redis) <br>
-✅ Asynchronous API <br>
-✅ Unix-style driver mounting to combine storages<br>
-✅ Default in-memory storage <br>
-✅ Tree-shakable utils and tiny core <br>
-✅ Driver native and user provided metadata <br>
-✅ Native aware value serialization and deserialization <br>
-✅ Restore initial state (hydration) <br>
-✅ State snapshot <br>
-✅ Driver agnostic watcher <br>
-✅ HTTP Storage server (cli and programmatic) <br>
-✅ Namespaced storage <br>
-✅ Overlay storage (copy-on-write) <br>
-✅ Binary and raw operations support (experimental) <br>
-<br>
+- Designed for all environments: Browser, NodeJS, and Workers
+- Lots of Built-in drivers
+- Asynchronous API
+- Unix-style driver mounting to combine storages
+- Default [in-memory](/drivers/memory) storage
+- Tree-shakable utils and tiny core
+- Auto JSON value serialization and deserialization
+- Banary and raw value support
+- State [snapshots](/utils#snapshots) and hydration
+- Storage watcher
+- HTTP Storage with [built-in server](/server)
 
 ## Usage
 
@@ -41,11 +31,12 @@ Install `unstorage` npm package:
 ```sh
 # yarn
 yarn add unstorage
+
 # npm
 npm install unstorage
+
 # pnpm
 pnpm add unstorage
-
 ```
 
 ```js
@@ -56,51 +47,7 @@ const storage = createStorage(/* opts */);
 await storage.getItem("foo:bar"); // or storage.getItem('/foo/bar')
 ```
 
-**Options:**
-
-- `driver`: Default driver (using memory if not provided)
-
-## Storage Interface
-
-Check out [storage interface](./docs/storage.md) for storage interface usage.
-
-## Storage Utilities
-
-Check out [storage utils](./docs/utils.md) for available extra storage utilities.
-
-## Storage Drivers
-
-Unstorage has several built-in storage drivers you can instantiate and mount.
-
-Local:
-
-- [Filesystem](./docs/drivers/node-fs.md)
-- [Memory](./docs/drivers/memory.md)
-- [LRU Cache](./docs/drivers/lru-cache.md)
-- [Localstorage](./docs/drivers/localstorage.md)
-
-Special:
-
-- [HTTP](./docs/drivers/http.md)
-- [Overlay](./docs/drivers/overlay.md)
-- [Custom Driver](./docs/drivers/custom.md)
-
-Database:
-
-- [MongoDB](./docs/drivers/mongodb.md)
-- [Redis](./docs/drivers/redis.md)
-
-Providers:
-
-- [Azure App Configuration](./docs/drivers/azure-app-configuration.md)
-- [Azure Key Vault](./docs/drivers/azure-key-vault.md)
-- [Azure Cosmos](./docs//drivers/azure-cosmos.md)
-- [Azure Storage Block](./docs/drivers/azure-storage-blod.md)
-- [Azure Storage Table](./docs/drivers//azure-storage-table.md)
-- [Cloudflare KV Binding](./docs/drivers/cloudflare-kv-binding.md)
-- [Cloudflare KV HTTP](./docs/drivers/cloudflare-kv-http.md)
-- [Github](./docs/drivers/github.md)
-- [Planetscale](./docs/drivers/planetscale.md)
+👉 Check out the [the documentation](https://unstorage.unjs.io) for usage information.
 
 ## Contribution
 

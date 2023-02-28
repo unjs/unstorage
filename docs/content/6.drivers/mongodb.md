@@ -1,17 +1,13 @@
-### `mongodb`
+# MongoDB
 
-Store data in a MongoDB [mongodb](https://www.npmjs.com/package/mongodb) using [Node.js mongodb package](https://www.npmjs.com/package/mongodb)
+Store data in [MongoDB](https://www.npmjs.com/package/mongodb) using [Node.js mongodb package](https://www.npmjs.com/package/mongodb)
 
 This driver stores KV information in a MongoDB collection with a separate document for each key value pair.
 
 To use it, you will need to install `mongodb` in your project:
 
-```json
-{
-  "dependencies": {
-    "mongodb": "^5.0.1"
-  }
-}
+```bash
+npm i mongodb
 ```
 
 Usage:

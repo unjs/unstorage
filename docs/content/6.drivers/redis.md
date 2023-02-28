@@ -1,8 +1,8 @@
-# `redis`
+# Redis
 
-Store data in a redis storage using [ioredis](https://github.com/luin/ioredis).
+Store data in a [Redis](https://redis.com/) storage using [ioredis](https://github.com/luin/ioredis).
 
-Usage with single redis instance:
+Usage with single Redis instance:
 
 ```js
 import { createStorage } from "unstorage";
@@ -19,7 +19,7 @@ const storage = createStorage({
 });
 ```
 
-Usage with redis cluster (e.g. AWS ElastiCache or Azure Redis Cache):
+Usage with Redis cluster (e.g. AWS ElastiCache or Azure Redis Cache):
 
 ⚠️ If you connect to a cluster, you have to use `hastags` as prefix to avoid the redis error `CROSSSLOT Keys in request don't hash to the same slot`. This means, the prefix has to be surrounded by curly braces, which forces the keys into the same hash slot.
 

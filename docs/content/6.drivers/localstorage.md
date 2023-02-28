@@ -1,4 +1,8 @@
-### `localStorage`
+---
+navigation.title: Local Storage
+---
+
+# Local Storage
 
 Store data in [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
 

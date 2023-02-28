@@ -1,4 +1,4 @@
-# `azure-cosmos`
+# Azure Cosmos DB
 
 Store data in [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/) NoSQL API documents.
 
@@ -6,13 +6,8 @@ This driver stores KV information in a NoSQL API Cosmos DB collection as documen
 
 To use it, you will need to install `@azure/cosmos` and `@azure/identity` in your project:
 
-```json
-{
-  "dependencies": {
-    "@azure/cosmos": "^3.17.2",
-    "@azure/identity": "^3.1.3"
-  }
-}
+```bash
+npm i @azure/cosmos @azure/identity
 ```
 
 Usage:
@@ -20,6 +15,7 @@ Usage:
 ```js
 import { createStorage } from "unstorage";
 import azureCosmos from "unstorage/drivers/azure-cosmos";
+
 const storage = createStorage({
   driver: azureCosmos({
     endpoint: "ENDPOINT",

@@ -1,4 +1,4 @@
-# `azure-storage-blob`
+# Azure Blob Storage
 
 Store data in a Azure blob storage [storage-blob](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob).
 
@@ -6,13 +6,8 @@ This driver stores KV information in a Azure blob storage blob. The same contain
 
 To use it, you will need to install `@azure/storage-blob` and `@azure/identity` in your project:
 
-```json
-{
-  "dependencies": {
-    "@azure/storage-blob": "^12.12.0",
-    "@azure/identity": "^3.1.3"
-  }
-}
+```bash
+npm i @azure/storage-blob @azure/identity
 ```
 
 Please make sure that the container you want to use exists in your storage account.
@@ -20,6 +15,7 @@ Please make sure that the container you want to use exists in your storage accou
 ```js
 import { createStorage } from "unstorage";
 import azureStorageBlobDriver from "unstorage/drivers/azure-storage-blob";
+
 const storage = createStorage({
   driver: azureStorageBlobDriver({
     accountName: "myazurestorageaccount",

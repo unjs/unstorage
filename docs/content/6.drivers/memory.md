@@ -1,4 +1,4 @@
-### `memory`
+# Memory
 
 Keeps data in memory using [Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set).
 

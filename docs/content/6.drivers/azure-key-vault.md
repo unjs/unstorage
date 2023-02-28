@@ -1,4 +1,4 @@
-# `azure-key-vault`
+# Azure Key Vault
 
 Store data in a Azure Key Vault [secrets](https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets).
 
@@ -7,13 +7,8 @@ Please be aware that key vault secrets don't have the fastest access time and ar
 
 To use it, you will need to install `@azure/keyvault-secrets` and `@azure/identity` in your project:
 
-```json
-{
-  "dependencies": {
-    "@azure/keyvault-secrets": "^4.6.0",
-    "@azure/identity": "^3.1.3"
-  }
-}
+```bash
+npm i @azure/keyvault-secrets @azure/identity
 ```
 
 Usage:
@@ -21,6 +16,7 @@ Usage:
 ```js
 import { createStorage } from "unstorage";
 import azureKeyVault from "unstorage/drivers/azure-key-vault";
+
 const storage = createStorage({
   driver: azureKeyVault({
     vaultName: "testunstoragevault",
@@ -34,7 +30,7 @@ The driver supports the following authentication methods:
 
 - **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate.
 
-   ⚠️ Make sure that your Managed Identity or personal account has either the `Key Vault Secrets Officer` RBAC role assigned or is a member of an access policy that grants `Get`, `List`, `Set`, `Delete` and `Purge` secret permissions.
+  ⚠️ Make sure that your Managed Identity or personal account has either the `Key Vault Secrets Officer` RBAC role assigned or is a member of an access policy that grants `Get`, `List`, `Set`, `Delete` and `Purge` secret permissions.
 
 **Options:**
 

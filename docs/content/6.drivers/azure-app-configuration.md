@@ -1,4 +1,4 @@
-# `azure-app-configuration`
+# Azure App Configuration
 
 Store data in the key value store of [Azure App Configuration](https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview).
 
@@ -6,13 +6,8 @@ This driver uses the configuration store as a key value store. It uses the `key`
 
 To use it, you will need to install `@azure/app-configuration` and `@azure/identity` in your project:
 
-```json
-{
-  "dependencies": {
-    "@azure/app-configuration": "^1.3.1",
-    "@azure/identity": "^3.1.3",
-  }
-}
+```bash
+npm i @azure/app-configuration @azure/identity
 ```
 
 Usage:
@@ -20,12 +15,13 @@ Usage:
 ```js
 import { createStorage } from "unstorage";
 import azureAppConfiguration from "unstorage/drivers/azure-app-configuration";
+
 const storage = createStorage({
-    driver: azureAppConfiguration({
-      appConfigName: "unstoragetest",
-      label: "dev",
-      prefix: "app01",
-    }),
+  driver: azureAppConfiguration({
+    appConfigName: "unstoragetest",
+    label: "dev",
+    prefix: "app01",
+  }),
 });
 ```
 
@@ -34,7 +30,7 @@ const storage = createStorage({
 The driver supports the following authentication methods:
 
 - **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate. <br>
-⚠️ Make sure that your Managed Identity or personal account has the `App Configuration Data Owner` role assigned to it, even if you already are `Contributor` or `Owner` on the app configuration resource.
+  ⚠️ Make sure that your Managed Identity or personal account has the `App Configuration Data Owner` role assigned to it, even if you already are `Contributor` or `Owner` on the app configuration resource.
 - **`connectionString`**: The app configuration connection string. Not recommended for use in production.
 
 **Options:**

@@ -2,9 +2,9 @@
 
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
-[![Github Actions][github-actions-src]][github-actions-href]
 [![Codecov][codecov-src]][codecov-href]
 [![bundle][bundle-src]][bundle-href]
+<!--[![Github Actions][github-actions-src]][github-actions-href]-->
 
 💾 Unstorage provides an async Key-Value storage API with conventional features like multi driver mounting, watching and working with metadata, dozens of built-in drivers and a [tiny core](https://bundlephobia.com/package/unstorage).
 
@@ -62,13 +62,13 @@ await storage.getItem("foo:bar"); // or storage.getItem('/foo/bar')
 
 <!-- Badges -->
 
-[npm-version-src]: https://img.shields.io/npm/v/unstorage?style=flat-square
+[npm-version-src]: https://img.shields.io/npm/v/unstorage?style=flat&colorA=18181B&colorB=F0DB4F
 [npm-version-href]: https://npmjs.com/package/unstorage
-[npm-downloads-src]: https://img.shields.io/npm/dm/unstorage?style=flat-square
+[npm-downloads-src]: https://img.shields.io/npm/dm/unstorage?style=flat&colorA=18181B&colorB=F0DB4F
 [npm-downloads-href]: https://npmjs.com/package/unstorage
-[github-actions-src]: https://img.shields.io/github/workflow/status/unjs/unstorage/ci/main?style=flat-square
+[github-actions-src]: https://img.shields.io/github/workflow/status/unjs/unstorage/ci/main?style=flat&colorA=18181B&colorB=F0DB4F
 [github-actions-href]: https://github.com/unjs/unstorage/actions?query=workflow%3Aci
-[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/unstorage/main?style=flat-square
+[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/unstorage/main?style=flat&colorA=18181B&colorB=F0DB4F
 [codecov-href]: https://codecov.io/gh/unjs/unstorage
-[bundle-src]: https://img.shields.io/bundlephobia/minzip/unstorage?style=flat-square
+[bundle-src]: https://img.shields.io/bundlephobia/minzip/unstorage?style=flat&colorA=18181B&colorB=F0DB4F
 [bundle-href]: https://bundlephobia.com/result?p=unstorage

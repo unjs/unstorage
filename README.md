@@ -1,4 +1,4 @@
-# unstorage
+# 💾 Unstorage
 
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
@@ -6,9 +6,9 @@
 [![bundle][bundle-src]][bundle-href]
 <!--[![Github Actions][github-actions-src]][github-actions-href]-->
 
-💾 Unstorage provides an async Key-Value storage API with conventional features like multi driver mounting, watching and working with metadata, dozens of built-in drivers and a [tiny core](https://bundlephobia.com/package/unstorage).
+Unstorage provides an async Key-Value storage API with conventional features like multi driver mounting, watching and working with metadata, dozens of built-in drivers and a [tiny core](https://bundlephobia.com/package/unstorage).
 
-👉 [documentation](https://unstorage.unjs.io)
+👉 [Documentation](https://unstorage.unjs.io)
 
 ## Features
 

@@ -4,6 +4,7 @@
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![Codecov][codecov-src]][codecov-href]
 [![bundle][bundle-src]][bundle-href]
+[![License][license-src]][license-href]
 <!--[![Github Actions][github-actions-src]][github-actions-href]-->
 
 Unstorage provides an async Key-Value storage API with conventional features like multi driver mounting, watching and working with metadata, dozens of built-in drivers and a [tiny core](https://bundlephobia.com/package/unstorage).
@@ -72,3 +73,5 @@ await storage.getItem("foo:bar"); // or storage.getItem('/foo/bar')
 [codecov-href]: https://codecov.io/gh/unjs/unstorage
 [bundle-src]: https://img.shields.io/bundlephobia/minzip/unstorage?style=flat&colorA=18181B&colorB=F0DB4F
 [bundle-href]: https://bundlephobia.com/result?p=unstorage
+[license-src]: https://img.shields.io/github/license/unjs/unstorage.svg?style=flat&colorA=18181B&colorB=F0DB4F
+[license-href]: https://github.com/unjs/unstorage/blob/main/LICENSE

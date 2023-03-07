@@ -39,11 +39,6 @@ export default defineDriver((opts: RedisOptions = {}) => {
     if (redisClient) {
       return redisClient;
     }
-    if (!opts.url && !opts.cluster) {
-      throw new Error(
-        "Redis driver requires either a host, url or cluster option"
-      );
-    }
     if (opts.cluster) {
       redisClient = new Redis.Cluster(opts.cluster, opts.clusterOptions);
     } else if (opts.url) {

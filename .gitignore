@@ -6,6 +6,5 @@ coverage
 dist
 tmp
 /drivers
-/server*
 /test.*
 __*

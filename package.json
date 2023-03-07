@@ -27,7 +27,8 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "drivers"
+    "drivers",
+    "server.d.ts"
   ],
   "scripts": {
     "build": "unbuild",

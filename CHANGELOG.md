@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.3.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.2.0...v1.3.0)
+
+
+### 🚀 Enhancements
+
+  - **server:** Support authorize ([#175](https://github.com/unjs/unstorage/pull/175))
+  - **server:** Support `resolvePath` ([4717851](https://github.com/unjs/unstorage/commit/4717851))
+
+### 🩹 Fixes
+
+  - **redis:** Remove strict options validation ([9294121](https://github.com/unjs/unstorage/commit/9294121))
+  - **redis:** Respect both global and operation options for `ttl` ([a491333](https://github.com/unjs/unstorage/commit/a491333))
+  - **pkg:** Move `types` field to the first ([f2b08f6](https://github.com/unjs/unstorage/commit/f2b08f6))
+  - **pkg:** Export compat types for `/server` subpath ([3cc2c48](https://github.com/unjs/unstorage/commit/3cc2c48))
+
+### 📖 Documentation
+
+  - Update snapshots page ([4619326](https://github.com/unjs/unstorage/commit/4619326))
+  - Improvements on http server ([a4b8fb8](https://github.com/unjs/unstorage/commit/a4b8fb8))
+
+### 🏡 Chore
+
+  - **docs:** Lintfix ([45c0b38](https://github.com/unjs/unstorage/commit/45c0b38))
+  - Update badge styles ([ecf0d74](https://github.com/unjs/unstorage/commit/ecf0d74))
+  - **readme:** Small improvements ([790d762](https://github.com/unjs/unstorage/commit/790d762))
+  - **readme:** Add license badge ([9f1d3aa](https://github.com/unjs/unstorage/commit/9f1d3aa))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v1.2.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.1.5...v1.2.0)

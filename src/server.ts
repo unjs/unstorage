@@ -32,6 +32,7 @@ const MethodToTypeMap = {
 
 export interface StorageServerOptions {
   authorize?: (request: StorageServerRequest) => void | Promise<void>;
+  resolvePath?: (event: H3Event) => string;
 }
 
 export function createH3StorageHandler(
@@ -41,10 +42,9 @@ export function createH3StorageHandler(
 ): EventHandler {
   return eventHandler(async (event) => {
     const method = getMethod(event);
-    const isBaseKey = event.path.endsWith(":") || event.path.endsWith("/");
-    const key = isBaseKey
-      ? normalizeBaseKey(event.path)
-      : normalizeKey(event.path);
+    const _path = opts.resolvePath?.(event) ?? event.path;
+    const isBaseKey = _path.endsWith(":") || _path.endsWith("/");
+    const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
 
     // Authorize Request
     try {

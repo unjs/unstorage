@@ -7,19 +7,19 @@
   "sideEffects": false,
   "exports": {
     "./drivers/*": {
+      "types": "./drivers/*.d.ts",
       "import": "./drivers/*.mjs",
-      "require": "./drivers/*.cjs",
-      "types": "./drivers/*.d.ts"
+      "require": "./drivers/*.cjs"
     },
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     },
     "./server": {
+      "types": "./dist/server.d.ts",
       "import": "./dist/server.mjs",
-      "require": "./dist/server.cjs",
-      "types": "./dist/server.d.ts"
+      "require": "./dist/server.cjs"
     }
   },
   "main": "./dist/index.cjs",

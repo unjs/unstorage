@@ -2,6 +2,7 @@ import type { RequestListener } from "node:http";
 import {
   createApp,
   createError,
+  isError,
   readBody,
   eventHandler,
   toNodeListener,
@@ -10,22 +11,58 @@ import {
   setResponseHeader,
   readRawBody,
   EventHandler,
+  H3Event,
 } from "h3";
 import { Storage } from "./types";
 import { stringify } from "./_utils";
-import { normalizeKey } from "./utils";
+import { normalizeKey, normalizeBaseKey } from "./utils";
 
-export interface StorageServerOptions {}
+export type StorageServerRequest = {
+  event: H3Event;
+  key: string;
+  type: "read" | "write";
+};
+
+const MethodToTypeMap = {
+  GET: "read",
+  HEAD: "read",
+  PUT: "write",
+  DELETE: "write",
+} as const;
+
+export interface StorageServerOptions {
+  authorize?: (request: StorageServerRequest) => void | Promise<void>;
+}
 
 export function createH3StorageHandler(
   storage: Storage,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _options: StorageServerOptions = {}
+  opts: StorageServerOptions = {}
 ): EventHandler {
   return eventHandler(async (event) => {
     const method = getMethod(event);
     const isBaseKey = event.path.endsWith(":") || event.path.endsWith("/");
-    const key = normalizeKey(event.path);
+    const key = isBaseKey
+      ? normalizeBaseKey(event.path)
+      : normalizeKey(event.path);
+
+    // Authorize Request
+    try {
+      await opts.authorize?.({
+        type: MethodToTypeMap[method],
+        event,
+        key,
+      });
+    } catch (error) {
+      const _httpError = isError(error)
+        ? error
+        : createError({
+            statusMessage: error.message,
+            statusCode: 401,
+            ...error,
+          });
+      throw _httpError;
+    }
 
     // GET => getItem
     if (method === "GET") {

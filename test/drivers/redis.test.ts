@@ -13,7 +13,7 @@ describe("drivers: redis", () => {
       lazyConnect: false,
     }),
     additionalTests() {
-      it("should work", async () => {
+      it("verify stored keys", async () => {
         const client = new ioredis.default("ioredis://localhost:6379/0");
         const keys = await client.keys("*");
         expect(keys).toMatchInlineSnapshot(`
@@ -28,6 +28,7 @@ describe("drivers: redis", () => {
             "test:data:raw.bin",
           ]
         `);
+        await client.disconnect();
       });
     },
   });

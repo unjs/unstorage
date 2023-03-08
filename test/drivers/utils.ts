@@ -13,12 +13,11 @@ export interface TestOptions {
 
 export function testDriver(opts: TestOptions) {
   const ctx: TestContext = {
-    storage: createStorage(),
+    storage: createStorage({ driver: opts.driver }),
     driver: opts.driver,
   };
 
   it("init", async () => {
-    ctx.storage = createStorage({ driver: opts.driver });
     await restoreSnapshot(ctx.storage, { initial: "works" });
     expect(await ctx.storage.getItem("initial")).toBe("works");
     await ctx.storage.clear();
@@ -92,15 +91,16 @@ export function testDriver(opts: TestOptions) {
     const value = new Uint8Array([1, 2, 3]);
     await ctx.storage.setItemRaw("/data/raw.bin", value);
     const rValue = await ctx.storage.getItemRaw("/data/raw.bin");
-    if (rValue.length !== value.length) {
+    if (rValue?.length !== value.length) {
       console.log(rValue);
     }
-    expect(rValue.length).toBe(value.length);
+    expect(rValue?.length).toBe(value.length);
     expect(Buffer.from(rValue).toString("base64")).toBe(
       Buffer.from(value).toString("base64")
     );
   });
 
+  // TODO: Refactor to move after cleanup
   if (opts.additionalTests) {
     opts.additionalTests(ctx);
   }

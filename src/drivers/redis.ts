@@ -49,8 +49,9 @@ export default defineDriver((opts: RedisOptions = {}) => {
     return redisClient;
   };
 
-  const p = (key: string) => (opts.base ? `${opts.base}:${key}` : key); // Prefix a key. Uses base for backwards compatibility
-  const d = (key: string) => (opts.base ? key.replace(opts.base, "") : key); // Deprefix a key
+  const base = (opts.base || "").replace(/:$/, "");
+  const p = (key: string) => (base ? `${base}:${key}` : key); // Prefix a key. Uses base for backwards compatibility
+  const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
 
   return {
     name: "redis",

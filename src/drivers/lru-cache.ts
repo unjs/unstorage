@@ -7,7 +7,7 @@ export interface LRUDriverOptions extends LRUOptions {}
 export default defineDriver((opts: LRUDriverOptions) => {
   const cache = new LRU({
     ...opts,
-    maxSize: 500,
+    max: 500,
   });
 
   return {

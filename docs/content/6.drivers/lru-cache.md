@@ -6,7 +6,7 @@ navigation.title: LRU Cache
 
 Keeps cached data in memory using [LRU Cache](https://www.npmjs.com/package/lru-cache).
 
-See [`lru-cache`](https://www.npmjs.com/package/lru-cache) for supported options. By default `{ maxSize: 500 }` is used.
+See [`lru-cache`](https://www.npmjs.com/package/lru-cache) for supported options. By default `{ max: 500 }` is used.
 
 ```js
 import { createStorage } from "unstorage";

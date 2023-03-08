@@ -1,13 +1,33 @@
 import { defineDriver } from "./utils";
-import LRU, { SharedOptions as _LRUOptions } from "lru-cache";
+import LRU from "lru-cache";
 
-type LRUOptions = _LRUOptions<string, any>;
-export interface LRUDriverOptions extends LRUOptions {}
+type LRUCacheOptions = LRU.SharedOptions<string, any> &
+  // LRU.SafetyBounds
+  LRU.LimitedByCount &
+  LRU.LimitedBySize<string, any> &
+  LRU.LimitedByTTL & {
+    /**
+     * The maximum allowed size for any single item in the cache.
+     *
+     * If a larger item is passed to set or returned by a
+     * fetchMethod, then it will not be stored in the cache.
+     */
+    maxEntrySize?: number; // LRU.LRUSize
+    sizeCalculation?: LRU.SizeCalculator<string, any>;
+  };
 
-export default defineDriver((opts: LRUDriverOptions) => {
+export interface LRUDriverOptions extends Partial<LRUCacheOptions> {}
+
+export default defineDriver((opts: LRUDriverOptions = {}) => {
   const cache = new LRU({
+    max: 1000,
+    sizeCalculation:
+      opts.maxSize || opts.maxEntrySize
+        ? (value, key) => {
+            return key.length + byteLength(value);
+          }
+        : undefined,
     ...opts,
-    max: 500,
   });
 
   return {
@@ -40,3 +60,17 @@ export default defineDriver((opts: LRUDriverOptions) => {
     },
   };
 });
+
+function byteLength(value: any) {
+  if (typeof Buffer !== undefined) {
+    try {
+      return Buffer.byteLength(value);
+    } catch {}
+  }
+  try {
+    return typeof value === "string"
+      ? value.length
+      : JSON.stringify(value).length;
+  } catch {}
+  return 0;
+}

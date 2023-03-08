@@ -45,6 +45,8 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   let _watcher: FSWatcher;
 
   return {
+    name: "fs",
+    options: opts,
     hasItem(key) {
       return existsSync(r(key));
     },

@@ -1,10 +1,11 @@
 import { defineDriver } from "./utils";
-import type { StorageValue } from "../types";
 
 export default defineDriver(() => {
   const data = new Map<string, any>();
 
   return {
+    name: "memory",
+    options: {},
     hasItem(key) {
       return data.has(key);
     },

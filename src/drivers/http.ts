@@ -12,6 +12,8 @@ export default defineDriver((opts: HTTPOptions = {}) => {
     joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
 
   return {
+    name: "http",
+    options: opts,
     hasItem(key) {
       return $fetch(r(key), { method: "HEAD" })
         .then(() => true)

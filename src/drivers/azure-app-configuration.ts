@@ -62,6 +62,8 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
   };
 
   return {
+    name: "azure-app-configuration",
+    options: opts,
     async hasItem(key) {
       try {
         await getClient().getConfigurationSetting({

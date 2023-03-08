@@ -15,6 +15,8 @@ export default defineDriver((opts: KVOptions = {}) => {
   }
 
   return {
+    name: "cloudflare-kv-binding",
+    options: opts,
     async hasItem(key) {
       return (await binding.get(key)) !== null;
     },

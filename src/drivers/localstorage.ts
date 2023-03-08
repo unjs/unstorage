@@ -22,6 +22,8 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
   let _storageListener: (ev: StorageEvent) => void;
 
   return {
+    name: "localstorage",
+    options: opts,
     hasItem(key) {
       return Object.prototype.hasOwnProperty.call(opts.localStorage!, r(key));
     },

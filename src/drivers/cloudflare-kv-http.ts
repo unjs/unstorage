@@ -193,6 +193,8 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   };
 
   return {
+    name: "cloudflare-kv-http",
+    options: opts,
     hasItem,
     getItem,
     setItem,

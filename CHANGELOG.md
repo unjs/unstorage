@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.4.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.3.0...v1.4.0)
+
+
+### 🚀 Enhancements
+
+  - **lru-cache:** Support size calculation ([#177](https://github.com/unjs/unstorage/pull/177))
+  - Expose `name` and `options` from driver instances ([#178](https://github.com/unjs/unstorage/pull/178))
+  - **http:** Support custom headers ([4fe7da7](https://github.com/unjs/unstorage/commit/4fe7da7))
+
+### 🩹 Fixes
+
+  - **lru-cache:** Use `max` instead of `maxSize` ([012fc62](https://github.com/unjs/unstorage/commit/012fc62))
+  - **redis:** Remove trailing `:` from `base` ([82647e0](https://github.com/unjs/unstorage/commit/82647e0))
+
+### 📖 Documentation
+
+  - Fix 404 links in readme ([4a63a54](https://github.com/unjs/unstorage/commit/4a63a54))
+
+### 🏡 Chore
+
+  - Link to the docs ([0ec20f9](https://github.com/unjs/unstorage/commit/0ec20f9))
+
+### ✅ Tests
+
+  - Add test for `lru-cache` ([a9965a8](https://github.com/unjs/unstorage/commit/a9965a8))
+  - Update redis test ([6ca1f06](https://github.com/unjs/unstorage/commit/6ca1f06))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v1.3.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.2.0...v1.3.0)

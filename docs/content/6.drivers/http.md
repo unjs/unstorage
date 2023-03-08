@@ -15,7 +15,8 @@ const storage = createStorage({
 
 **Options:**
 
-- `base`: Base URL for urls
+- `base`: Base URL for urls (**required**)
+- `headers`: Custom headers to send on all requests
 
 **Supported HTTP Methods:**
 
@@ -24,3 +25,7 @@ const storage = createStorage({
 - `setItem`: Maps to http `PUT`. Sends serialized value using body
 - `removeItem`: Maps to `DELETE`
 - `clear`: Not supported
+
+**Transaction Options:**
+
+- `headers`: Custom headers to be sent on each operation (`getItem`, `setItem`, etc)

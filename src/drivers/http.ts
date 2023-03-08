@@ -1,38 +1,50 @@
 import { defineDriver } from "./utils";
-import { $fetch } from "ofetch";
+import { $fetch as _fetch } from "ofetch";
 import { joinURL } from "ufo";
 
 export interface HTTPOptions {
-  base?: string;
+  base: string;
+  headers?: Record<string, string>;
 }
 
-export default defineDriver((opts: HTTPOptions = {}) => {
+export default defineDriver((opts: HTTPOptions) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
+
   const rBase = (key: string = "") =>
     joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
 
   return {
     name: "http",
     options: opts,
-    hasItem(key) {
-      return $fetch(r(key), { method: "HEAD" })
+    hasItem(key, topts) {
+      return _fetch(r(key), {
+        method: "HEAD",
+        headers: { ...opts.headers, ...topts.headers },
+      })
         .then(() => true)
         .catch(() => false);
     },
-    async getItem(key) {
-      const value = await $fetch(r(key));
+    async getItem(key, tops = {}) {
+      const value = await _fetch(r(key), {
+        headers: { ...opts.headers, ...tops.headers },
+      });
       return value;
     },
-    async getItemRaw(key) {
-      const value = await $fetch(r(key), {
+    async getItemRaw(key, topts) {
+      const value = await _fetch(r(key), {
         headers: {
           accept: "application/octet-stream",
+          ...opts.headers,
+          ...topts.headers,
         },
       });
       return value;
     },
-    async getMeta(key) {
-      const res = await $fetch.raw(r(key), { method: "HEAD" });
+    async getMeta(key, topts) {
+      const res = await _fetch.raw(r(key), {
+        method: "HEAD",
+        headers: { ...opts.headers, ...topts.headers },
+      });
       let mtime = undefined;
       const _lastModified = res.headers.get("last-modified");
       if (_lastModified) {
@@ -43,27 +55,41 @@ export default defineDriver((opts: HTTPOptions = {}) => {
         mtime,
       };
     },
-    async setItem(key, value) {
-      await $fetch(r(key), { method: "PUT", body: value });
+    async setItem(key, value, topts) {
+      await _fetch(r(key), {
+        method: "PUT",
+        body: value,
+        headers: { ...opts.headers, ...topts.headers },
+      });
     },
-    async setItemRaw(key, value) {
-      await $fetch(r(key), {
+    async setItemRaw(key, value, topts) {
+      await _fetch(r(key), {
         method: "PUT",
         body: value,
         headers: {
           "content-type": "application/octet-stream",
+          ...opts.headers,
+          ...topts.headers,
         },
       });
     },
-    async removeItem(key) {
-      await $fetch(r(key), { method: "DELETE" });
+    async removeItem(key, topts) {
+      await _fetch(r(key), {
+        method: "DELETE",
+        headers: { ...opts.headers, ...topts.headers },
+      });
     },
-    async getKeys(base) {
-      const value = await $fetch(rBase(base));
+    async getKeys(base, topts) {
+      const value = await _fetch(rBase(base), {
+        headers: { ...opts.headers, ...topts.headers },
+      });
       return Array.isArray(value) ? value : [];
     },
-    async clear(base) {
-      await $fetch(rBase(base), { method: "DELETE" });
+    async clear(base, topts) {
+      await _fetch(rBase(base), {
+        method: "DELETE",
+        headers: { ...opts.headers, ...topts.headers },
+      });
     },
   };
 });

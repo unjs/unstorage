@@ -17,13 +17,13 @@ Unstorage provides an async Key-Value storage API with conventional features lik
 - Lots of Built-in drivers
 - Asynchronous API
 - Unix-style driver mounting to combine storages
-- Default [in-memory](/drivers/memory) storage
+- Default [in-memory](./src/drivers/memory.ts) storage
 - Tree-shakable utils and tiny core
 - Auto JSON value serialization and deserialization
 - Banary and raw value support
-- State [snapshots](/utils#snapshots) and hydration
+- State [snapshots](https://unstorage.unjs.io/utils#snapshots) and hydration
 - Storage watcher
-- HTTP Storage with [built-in server](/server)
+- HTTP Storage with [built-in server](./src/server.ts)
 
 ## Usage
 

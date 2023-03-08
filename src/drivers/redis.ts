@@ -53,6 +53,8 @@ export default defineDriver((opts: RedisOptions = {}) => {
   const d = (key: string) => (opts.base ? key.replace(opts.base, "") : key); // Deprefix a key
 
   return {
+    name: "redis",
+    options: opts,
     async hasItem(key) {
       return Boolean(await getRedisClient().exists(p(key)));
     },

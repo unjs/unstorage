@@ -31,6 +31,8 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
   });
 
   return {
+    name: "lru-cache",
+    options: opts,
     hasItem(key) {
       return cache.has(key);
     },

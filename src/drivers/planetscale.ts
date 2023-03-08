@@ -46,6 +46,8 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
   };
 
   return {
+    name: "planetscale",
+    options: opts,
     hasItem: async (key) => {
       const res = await getConnection().execute(
         `SELECT COUNT(id) from ${opts.table} WHERE id=:key;`,

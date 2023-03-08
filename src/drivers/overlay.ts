@@ -10,6 +10,8 @@ const OVERLAY_REMOVED = "__OVERLAY_REMOVED__";
 
 export default defineDriver((options: OverlayStorageOptions) => {
   return {
+    name: "overlay",
+    options: options,
     async hasItem(key) {
       for (const layer of options.layers) {
         if (await layer.hasItem(key)) {

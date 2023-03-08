@@ -71,6 +71,8 @@ export default defineDriver((_opts: GithubOptions) => {
   };
 
   return {
+    name: "github",
+    options: opts,
     async getKeys() {
       await syncFiles();
       return Object.keys(files);

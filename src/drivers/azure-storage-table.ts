@@ -100,6 +100,8 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
   };
 
   return {
+    name: "azure-strorage-table",
+    options: opts,
     async hasItem(key) {
       try {
         await getClient().getEntity(partitionKey, key);

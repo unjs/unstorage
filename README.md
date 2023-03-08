@@ -5,6 +5,7 @@
 [![Codecov][codecov-src]][codecov-href]
 [![bundle][bundle-src]][bundle-href]
 [![License][license-src]][license-href]
+
 <!--[![Github Actions][github-actions-src]][github-actions-href]-->
 
 Unstorage provides an async Key-Value storage API with conventional features like multi driver mounting, watching and working with metadata, dozens of built-in drivers and a [tiny core](https://bundlephobia.com/package/unstorage).
@@ -17,13 +18,13 @@ Unstorage provides an async Key-Value storage API with conventional features lik
 - Lots of Built-in drivers
 - Asynchronous API
 - Unix-style driver mounting to combine storages
-- Default [in-memory](./src/drivers/memory.ts) storage
+- Default [in-memory](https://unstorage.unjs.io/drivers/memory) storage
 - Tree-shakable utils and tiny core
 - Auto JSON value serialization and deserialization
 - Banary and raw value support
 - State [snapshots](https://unstorage.unjs.io/utils#snapshots) and hydration
 - Storage watcher
-- HTTP Storage with [built-in server](./src/server.ts)
+- HTTP Storage with [built-in server](https://unstorage.unjs.io/http-server)
 
 ## Usage
 

@@ -84,7 +84,7 @@
     "msw": "^1.1.0",
     "prettier": "^2.8.4",
     "types-cloudflare-worker": "^1.2.0",
-    "typescript": "^4.9.5",
+    "typescript": "^5.0.2",
     "unbuild": "^1.1.2",
     "vite": "^4.2.0",
     "vitest": "^0.29.3",

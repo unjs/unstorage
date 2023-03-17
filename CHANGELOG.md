@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.4.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.4.0...v1.4.1)
+
+
+### 🩹 Fixes
+
+  - **pkg:** Use optional peer dependencies ([#183](https://github.com/unjs/unstorage/pull/183))
+
+### 📖 Documentation
+
+  - Upgrade docus ([cf48620](https://github.com/unjs/unstorage/commit/cf48620))
+
+### 🏡 Chore
+
+  - Update lockfile ([42fae46](https://github.com/unjs/unstorage/commit/42fae46))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v1.4.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.3.0...v1.4.0)

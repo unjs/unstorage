@@ -30,7 +30,7 @@ specifiers:
   jiti: ^1.18.2
   jsdom: ^21.1.1
   listhen: ^1.0.4
-  lru-cache: ^7.18.3
+  lru-cache: ^8.0.4
   monaco-editor: ^0.36.1
   mongodb: ^5.1.0
   mongodb-memory-server: ^8.12.1
@@ -54,7 +54,7 @@ dependencies:
   h3: 1.6.2
   ioredis: 5.3.1
   listhen: 1.0.4
-  lru-cache: 7.18.3
+  lru-cache: 8.0.4
   mri: 1.2.0
   node-fetch-native: 1.0.2
   ofetch: 1.0.1
@@ -5206,6 +5206,12 @@ packages:
   /lru-cache/7.18.3:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
+    dev: true
+
+  /lru-cache/8.0.4:
+    resolution: {integrity: sha512-E9FF6+Oc/uFLqZCuZwRKUzgFt5Raih6LfxknOSAVTjNkrCZkBf7DQCwJxZQgd9l4eHjIJDGR+E+1QKD1RhThPw==}
+    engines: {node: '>=16.14'}
+    dev: false
 
   /magic-string/0.25.9:
     resolution: {integrity: sha512-RmF0AsMzgt25qzqqLc1+MbHmhdx0ojF2Fvs4XnOqz2ZOBXzzkEwc/dJQZCYHAn7v1jbVOjAZfK8msRn4BxO4VQ==}

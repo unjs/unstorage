@@ -16,7 +16,6 @@ export const builtinDrivers = {
   http: "unstorage/drivers/http",
   localStorage: "unstorage/drivers/localstorage",
   lruCache: "unstorage/drivers/lru-cache",
-  localstorage: "unstorage/drivers/localstorage",
   memory: "unstorage/drivers/memory",
   mongodb: "unstorage/drivers/mongodb",
   overlay: "unstorage/drivers/overlay",

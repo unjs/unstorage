@@ -22,6 +22,7 @@ export const builtinDrivers = {
   planetscale: "unstorage/drivers/planetscale",
   redis: "unstorage/drivers/redis",
   azureKeyVault: "unstorage/drivers/azure-key-vault",
+  sessionStorage: "unstorage/drivers/session-storage",
 };
 
 export type BuiltinDriverName = keyof typeof builtinDrivers;

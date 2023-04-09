@@ -12,15 +12,15 @@ export interface GithubOptions {
    * The branch to fetch. (e.g. `dev`)
    * @default "main"
    */
-  branch: string;
+  branch?: string;
   /**
-   * @default ""
+   * @default "main"
    */
-  dir: string;
+  dir?: string;
   /**
    * @default 600
    */
-  ttl: number;
+  ttl?: number;
   /**
    * Github API token (recommended)
    */

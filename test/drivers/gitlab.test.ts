@@ -18,11 +18,7 @@ const config = {
 };
 
 const data = {
-  "README.md": `# repo-vitest-nuxt-cms
-
-Repository used for vitest tests`,
-  "data.json": { foo: "bar" },
-  "folder:foo.md": "bar",
+  "README.md": `The readme content.`
 };
 
 describe("drivers: gitlab", () => {

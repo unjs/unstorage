@@ -50,10 +50,10 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
     options: opts,
     hasItem: async (key) => {
       const res = await getConnection().execute(
-        `SELECT COUNT(id) from ${opts.table} WHERE id=:key;`,
+        `SELECT COUNT(id) as value from ${opts.table} WHERE id=:key;`,
         { key }
       );
-      return res.size >= 0;
+      return count(res)[0]?.value > 0;
     },
     getItem: async (key) => {
       const res = await getConnection().execute(
@@ -96,6 +96,10 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
     },
   };
 });
+
+function count(res: ExecutedQuery) {
+  return (res.rows as { value: number }[]) || [];
+}
 
 function rows(res: ExecutedQuery) {
   return (res.rows as TableSchema[]) || [];

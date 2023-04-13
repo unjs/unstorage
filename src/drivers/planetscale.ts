@@ -98,5 +98,5 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
 });
 
 function rows<T = TableSchema[]>(res: ExecutedQuery) {
-  return (res.rows as TableSchema[]) || [];
+  return (res.rows as T) || [];
 }

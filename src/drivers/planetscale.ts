@@ -53,7 +53,7 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
         `SELECT EXISTS (SELECT 1 FROM ${opts.table} WHERE id = :key) as value;`,
         { key }
       );
-      return rows<{ value: string }[]>(res)[0]?.value == '1';
+      return rows<{ value: string }[]>(res)[0]?.value == "1";
     },
     getItem: async (key) => {
       const res = await getConnection().execute(

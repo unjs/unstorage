@@ -7,9 +7,8 @@ export interface KVOptions {
 // https://developers.cloudflare.com/workers/runtime-apis/kv
 
 export default defineDriver((opts: KVOptions = {}) => {
-  const binding = getBinding(opts.binding);
-
   async function getKeys(base?: string) {
+    const binding = getBinding(opts.binding);
     const kvList = await binding.list(base ? { prefix: base } : undefined);
     return kvList.keys.map((key) => key.name);
   }
@@ -18,20 +17,25 @@ export default defineDriver((opts: KVOptions = {}) => {
     name: "cloudflare-kv-binding",
     options: opts,
     async hasItem(key) {
+      const binding = getBinding(opts.binding);
       return (await binding.get(key)) !== null;
     },
     getItem(key) {
+      const binding = getBinding(opts.binding);
       return binding.get(key);
     },
     setItem(key, value) {
+      const binding = getBinding(opts.binding);
       return binding.put(key, value);
     },
     removeItem(key) {
+      const binding = getBinding(opts.binding);
       return binding.delete(key);
     },
     // TODO: use this.getKeys once core is fixed
     getKeys,
     async clear() {
+      const binding = getBinding(opts.binding);
       const keys = await getKeys();
       await Promise.all(keys.map((key) => binding.delete(key)));
     },
@@ -43,7 +47,8 @@ function getBinding(binding: KVNamespace | string = "STORAGE") {
 
   if (typeof binding === "string") {
     bindingName = binding;
-    binding = (globalThis as any)[bindingName] as KVNamespace;
+    binding = (globalThis[bindingName] ||
+      globalThis.__env__?.[bindingName]) as KVNamespace;
   }
 
   if (!binding) {

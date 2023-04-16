@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.5.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.4.1...v1.5.0)
+
+
+### 🚀 Enhancements
+
+  - **drivers:** Added session storage driver ([#179](https://github.com/unjs/unstorage/pull/179))
+  - **lru-cache:** Upgrade to lru-cache v9 ([5b8fc62](https://github.com/unjs/unstorage/commit/5b8fc62))
+
+### 🩹 Fixes
+
+  - Removed duplicate line ([#190](https://github.com/unjs/unstorage/pull/190))
+  - **planetscale:** Fix `hasItem` ([#200](https://github.com/unjs/unstorage/pull/200))
+  - **github:** Optional properties ([#196](https://github.com/unjs/unstorage/pull/196))
+  - **cloudflare:** Allow lazy access to env bindings ([#202](https://github.com/unjs/unstorage/pull/202))
+
+### 📖 Documentation
+
+  - Fix typo ([#201](https://github.com/unjs/unstorage/pull/201))
+
+### 🏡 Chore
+
+  - **release:** V1.4.1 ([38b3dbe](https://github.com/unjs/unstorage/commit/38b3dbe))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Dave Stewart <info@davestewart.co.uk>
+- Winton Welsh ([@winton](http://github.com/winton))
+- Steady Gaze 
+- Corentin THOMASSET <corentin.thomasset74@gmail.com>
+- Tejas Magade ([@thetejasmagade](http://github.com/thetejasmagade))
+
 ## v1.4.1
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.4.0...v1.4.1)

@@ -1,6 +1,6 @@
 {
   "name": "unstorage",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Universal Storage Layer",
   "repository": "unjs/unstorage",
   "license": "MIT",

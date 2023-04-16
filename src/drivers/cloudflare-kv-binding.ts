@@ -47,7 +47,10 @@ function getBinding(binding: KVNamespace | string = "STORAGE") {
 
   if (typeof binding === "string") {
     bindingName = binding;
-    binding = (globalThis as any)[bindingName] as KVNamespace;
+    binding = (
+      globalThis[bindingName] ||
+      globalThis.__env__?.[bindingName]
+    ) as KVNamespace;
   }
 
   if (!binding) {

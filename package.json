@@ -48,7 +48,7 @@
     "h3": "^1.6.4",
     "ioredis": "^5.3.2",
     "listhen": "^1.0.4",
-    "lru-cache": "^7.18.3",
+    "lru-cache": "^9.0.3",
     "mri": "^1.2.0",
     "node-fetch-native": "^1.1.0",
     "ofetch": "^1.0.1",

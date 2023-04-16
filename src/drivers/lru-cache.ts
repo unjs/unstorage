@@ -1,29 +1,19 @@
 import { defineDriver } from "./utils";
-import LRU from "lru-cache";
+import { LRUCache } from "lru-cache";
 
-type LRUCacheOptions = LRU.SharedOptions<string, any> &
-  // LRU.SafetyBounds
-  LRU.LimitedByCount &
-  LRU.LimitedBySize<string, any> &
-  LRU.LimitedByTTL & {
-    /**
-     * The maximum allowed size for any single item in the cache.
-     *
-     * If a larger item is passed to set or returned by a
-     * fetchMethod, then it will not be stored in the cache.
-     */
-    maxEntrySize?: number; // LRU.LRUSize
-    sizeCalculation?: LRU.SizeCalculator<string, any>;
-  };
+type LRUCacheOptions = LRUCache.OptionsBase<string, any, any> &
+  Partial<LRUCache.OptionsMaxLimit<string, any, any>> &
+  Partial<LRUCache.OptionsSizeLimit<string, any, any>> &
+  Partial<LRUCache.OptionsTTLLimit<string, any, any>>;
 
-export interface LRUDriverOptions extends Partial<LRUCacheOptions> {}
+export interface LRUDriverOptions extends LRUCacheOptions {}
 
 export default defineDriver((opts: LRUDriverOptions = {}) => {
-  const cache = new LRU({
+  const cache = new LRUCache({
     max: 1000,
     sizeCalculation:
       opts.maxSize || opts.maxEntrySize
-        ? (value, key) => {
+        ? (value, key: string) => {
             return key.length + byteLength(value);
           }
         : undefined,

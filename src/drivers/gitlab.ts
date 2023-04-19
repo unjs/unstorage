@@ -16,7 +16,7 @@ export interface GitlabOptions {
   /**
    * @default ""
    */
-  dir?: string;
+  base?: string;
   /**
    * @default 600
    */
@@ -37,8 +37,8 @@ export interface GitlabOptions {
 const defaultOptions: GitlabOptions = {
   repo: null,
   branch: "main",
+  base: "",
   ttl: 600,
-  dir: "",
   apiURL: "https://gitlab.com",
 };
 
@@ -93,12 +93,13 @@ export default defineDriver((_opts: GitlabOptions) => {
           item.body = await $fetch(
             `/api/v4/projects/${encodeURIComponent(
               opts.repo!
-            )}/repository/files/${encodeURIComponent(path)}/raw?ref=${
-              opts.branch
-            }`,
+            )}/repository/files/${encodeURIComponent(path)}/raw`,
             {
               baseURL: opts.apiURL,
               headers: opts.headers,
+              query: {
+                ref: opts.branch,
+              },
             }
           );
         } catch (err) {
@@ -122,12 +123,15 @@ async function fetchFiles(opts: GitlabOptions) {
   const files = {};
   try {
     const trees = await $fetch(
-      `/api/v4/projects/${encodeURIComponent(
-        opts.repo!
-      )}/repository/tree?recursive=1`,
+      `/api/v4/projects/${encodeURIComponent(opts.repo!)}/repository/tree`,
       {
         baseURL: opts.apiURL,
         headers: opts.headers,
+        query: {
+          recursive: true,
+          ref: opts.branch,
+          path: opts.base,
+        },
       }
     );
 

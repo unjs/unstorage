@@ -1,5 +1,5 @@
 import { $fetch } from "ofetch";
-import { withTrailingSlash } from "ufo";
+import { withTrailingSlash, withoutLeadingSlash } from "ufo";
 import { defineDriver } from "./utils";
 
 export interface GitlabOptions {
@@ -89,7 +89,12 @@ export default defineDriver((_opts: GitlabOptions) => {
 
       if (!item.body) {
         try {
-          const path = key.replace(/:/g, "/");
+          const path = (
+            opts.base
+              ? withoutLeadingSlash(withTrailingSlash(opts.base)) + key
+              : key
+          ).replace(/:/g, "/");
+
           item.body = await $fetch(
             `/api/v4/projects/${encodeURIComponent(
               opts.repo!
@@ -119,7 +124,7 @@ export default defineDriver((_opts: GitlabOptions) => {
 });
 
 async function fetchFiles(opts: GitlabOptions) {
-  const prefix = withTrailingSlash(opts.dir).replace(/^\//, "");
+  const prefix = withTrailingSlash(opts.base).replace(/^\//, "");
   const files = {};
   try {
     const trees = await $fetch(

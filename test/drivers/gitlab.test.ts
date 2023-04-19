@@ -47,7 +47,7 @@ describe("drivers: gitlab", () => {
       })
     );
     const keys = await storage.getKeys();
-    expect(keys).toMatchObject(["mnt:content:dir:file2.md"]);
+    expect(keys).toMatchObject(["mnt:file2.md"]);
   });
 
   it("get keys of branch test", async () => {
@@ -66,6 +66,18 @@ describe("drivers: gitlab", () => {
     const storage = createStorage().mount("/mnt", driver(config));
     const item = await storage.getItem("mnt:content:dir:file2.md");
     expect(item).toMatch(`# File 2`);
+  });
+
+  it("get /content/file1.md with base /content", async () => {
+    const storage = createStorage().mount(
+      "/mnt",
+      driver({
+        ...config,
+        base: "content",
+      })
+    );
+    const item = await storage.getItem("mnt:file1.md");
+    expect(item).toMatch(`# File 1`);
   });
 
   it("get /content/file1.md on branch test", async () => {

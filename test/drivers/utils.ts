@@ -25,7 +25,7 @@ export function testDriver(opts: TestOptions) {
 
   it("initial state", async () => {
     expect(await ctx.storage.hasItem("s1:a")).toBe(false);
-    expect(await ctx.storage.getItem("s2:a")).toBe(null);
+    expect(await ctx.storage.getItem("s2:a")).toBe(undefined);
     expect(await ctx.storage.getKeys()).toMatchObject([]);
   });
 
@@ -108,7 +108,7 @@ export function testDriver(opts: TestOptions) {
   it("removeItem", async () => {
     await ctx.storage.removeItem("s1:a", false);
     expect(await ctx.storage.hasItem("s1:a")).toBe(false);
-    expect(await ctx.storage.getItem("s1:a")).toBe(null);
+    expect(await ctx.storage.getItem("s1:a")).toBe(undefined);
   });
 
   it("clear", async () => {

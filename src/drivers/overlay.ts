@@ -29,13 +29,13 @@ export default defineDriver((options: OverlayStorageOptions) => {
       for (const layer of options.layers) {
         const value = await layer.getItem(key);
         if (value === OVERLAY_REMOVED) {
-          return null;
+          return undefined;
         }
-        if (value !== null) {
+        if (value !== undefined) {
           return value;
         }
       }
-      return null;
+      return undefined;
     },
     // TODO: Support native meta
     // async getMeta (key) {},

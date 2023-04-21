@@ -45,7 +45,7 @@ export default defineDriver((opts: MongoDbOptions) => {
     },
     async getItem(key) {
       const document = await getMongoCollection().findOne({ key });
-      return document?.value ? document.value : null;
+      return document?.value;
     },
     async setItem(key, value) {
       const currentDateTime = new Date();

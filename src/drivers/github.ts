@@ -98,7 +98,7 @@ export default defineDriver<GithubOptions>((_opts) => {
       const item = files[key];
 
       if (!item) {
-        return null;
+        return undefined;
       }
 
       if (!item.body) {

@@ -62,7 +62,7 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
         `SELECT value from ${opts.table} WHERE id=:key;`,
         { key }
       );
-      return rows(res)[0]?.value ?? null;
+      return rows(res)[0]?.value;
     },
     setItem: async (key, value) => {
       await getConnection().execute(

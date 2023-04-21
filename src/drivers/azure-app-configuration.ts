@@ -87,7 +87,7 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
         });
         return setting.value;
       } catch {
-        return null;
+        return undefined;
       }
     },
     async setItem(key, value) {

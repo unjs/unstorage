@@ -58,7 +58,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
         const secret = await getKeyVaultClient().getSecret(encode(key));
         return secret.value;
       } catch {
-        return null;
+        return undefined;
       }
     },
     async setItem(key, value) {

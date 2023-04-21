@@ -133,8 +133,8 @@ export default defineDriver<KVHTTPOptions>((opts) => {
       if (!err?.response) {
         throw err;
       }
-      if (err?.response?.status === 404) {
-        return null;
+      if (err.response.status === 404) {
+        return undefined;
       }
       throw err;
     }

@@ -27,7 +27,7 @@ export default defineDriver((opts: KVOptions = {}) => {
     async hasItem(key) {
       key = r(key);
       const binding = getBinding(opts.binding);
-      return (await binding.get(key)) !== null;
+      return (await binding.get(key)) !== undefined;
     },
     getItem(key) {
       key = r(key);

@@ -96,7 +96,7 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
           ? (await streamToBuffer(blob.readableStreamBody)).toString()
           : null;
       } catch {
-        return null;
+        return undefined;
       }
     },
     async setItem(key, value) {

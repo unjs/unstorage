@@ -29,10 +29,10 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
       return cache.has(key);
     },
     getItem(key) {
-      return cache.get(key) || null;
+      return cache.get(key);
     },
     getItemRaw(key) {
-      return cache.get(key) || null;
+      return cache.get(key);
     },
     setItem(key, value) {
       cache.set(key, value);

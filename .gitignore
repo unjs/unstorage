@@ -8,4 +8,5 @@ tmp
 /drivers
 /test.*
 __*
+.idea
 .vercel

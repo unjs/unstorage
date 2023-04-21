@@ -118,7 +118,7 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
         const entity = await getClient().getEntity(partitionKey, key);
         return entity.unstorageValue;
       } catch {
-        return null;
+        return undefined;
       }
     },
     async setItem(key, value) {

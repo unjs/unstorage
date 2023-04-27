@@ -126,33 +126,42 @@ export default defineDriver((_opts: GitlabOptions) => {
 async function fetchFiles(opts: GitlabOptions) {
   const prefix = withTrailingSlash(opts.base).replace(/^\//, "");
   const files = {};
-  try {
-    const trees = await $fetch(
-      `/api/v4/projects/${encodeURIComponent(opts.repo!)}/repository/tree`,
-      {
-        baseURL: opts.apiURL,
-        headers: await opts.getHeaders(),
-        query: {
-          recursive: true,
-          ref: opts.branch,
-          path: opts.base,
-        },
-      }
-    );
+  let page: string | null = "1";
 
-    for (const node of trees) {
-      if (node.type !== "blob" || !node.path.startsWith(prefix)) {
-        continue;
+  try {
+    do {
+      const trees = await $fetch(
+        `/api/v4/projects/${encodeURIComponent(opts.repo!)}/repository/tree`,
+        {
+          baseURL: opts.apiURL,
+          headers: await opts.getHeaders(),
+          query: {
+            recursive: true,
+            ref: opts.branch,
+            path: opts.base,
+            page,
+            per_page: 100,
+          },
+          onResponse({ response }) {
+            page = response.headers.get("x-next-page");
+          },
+        }
+      );
+
+      for (const node of trees) {
+        if (node.type !== "blob" || !node.path.startsWith(prefix)) {
+          continue;
+        }
+        const key = node.path.substring(prefix.length).replace(/\//g, ":");
+        files[key] = {
+          meta: {
+            id: node.id,
+            name: node.name,
+            mode: node.mode,
+          },
+        };
       }
-      const key = node.path.substring(prefix.length).replace(/\//g, ":");
-      files[key] = {
-        meta: {
-          id: node.id,
-          name: node.name,
-          mode: node.mode,
-        },
-      };
-    }
+    } while (page);
   } catch (err) {
     throw new Error("[unstorage] [gitlab] Failed to fetch git tree", {
       cause: err,

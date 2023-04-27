@@ -32,7 +32,7 @@ The driver supports the following authentication methods:
 
 - `apiURL`: Gitlab API domain. Default is `https://gitlab.com`
 - `repo`: Gitlab repository. Format is `username/repo` or `org/repo` **(required)**.
-- `headers`: **(recommended)** See above.
+- `getHeaders`: **(recommended)** See above. A function that return headers. Here you can add the authorization token.
 - `branch`: Target branch or tag. Default is `main`.
 - `base`: Path of a directory to use as driver root.
 - `ttl`: Filenames cache revalidate time. Default is `600` seconds (10 minutes).

@@ -27,7 +27,7 @@ export interface GitlabOptions {
    * {'PRIVATE-TOKEN'?: string } // Direct authentication with private token. Ex: `glpat-Hxq...`
    * { Authorization?: string } // Authentication through apps OAuth pkce. Ex: `Bearer jwt...`
    */
-  headers?: HeadersInit;
+  getHeaders?(): HeadersInit;
   /**
    * @default "https://gitlab.com"
    */
@@ -103,6 +103,7 @@ export default defineDriver((_opts: GitlabOptions) => {
             )}/repository/files/${encodeURIComponent(path)}/raw`,
             {
               baseURL: opts.apiURL,
+              headers: await opts.getHeaders(),
               query,
             }
           );
@@ -130,7 +131,7 @@ async function fetchFiles(opts: GitlabOptions) {
       `/api/v4/projects/${encodeURIComponent(opts.repo!)}/repository/tree`,
       {
         baseURL: opts.apiURL,
-        headers: opts.headers,
+        headers: await opts.getHeaders(),
         query: {
           recursive: true,
           ref: opts.branch,

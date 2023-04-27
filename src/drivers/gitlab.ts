@@ -36,7 +36,7 @@ export interface GitlabOptions {
 
 const defaultOptions: GitlabOptions = {
   repo: null,
-  branch: "main",
+  branch: "",
   base: "",
   ttl: 600,
   apiURL: "https://gitlab.com",
@@ -95,16 +95,15 @@ export default defineDriver((_opts: GitlabOptions) => {
               : key
           ).replace(/:/g, "/");
 
+          const query = opts.branch ? { ref: opts.branch } : undefined;
+
           item.body = await $fetch(
             `/api/v4/projects/${encodeURIComponent(
               opts.repo!
             )}/repository/files/${encodeURIComponent(path)}/raw`,
             {
               baseURL: opts.apiURL,
-              headers: opts.headers,
-              query: {
-                ref: opts.branch,
-              },
+              query,
             }
           );
         } catch (err) {

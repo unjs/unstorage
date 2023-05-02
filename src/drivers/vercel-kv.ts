@@ -2,18 +2,15 @@ import { createClient } from "@vercel/kv";
 import type { VercelKV } from "@vercel/kv";
 import type { RedisConfigNodejs } from "@upstash/redis";
 
-import { defineDriver } from "./utils";
+import { defineDriver, normalizeKey, joinKeys } from "./utils";
 
 export interface RedisOptions extends RedisConfigNodejs {
   base?: string;
 }
 
 export default defineDriver<RedisOptions>((opts) => {
-  let base = opts?.base || "";
-  if (base && !base.endsWith(":")) {
-    base += ":";
-  }
-  const r = (key: string) => base + key;
+  const base = normalizeKey(opts?.base);
+  const r = base ? (...keys: string[]) => joinKeys(base, ...keys) : joinKeys;
 
   let _connection: VercelKV;
   const getConnection = () => {
@@ -41,11 +38,11 @@ export default defineDriver<RedisOptions>((opts) => {
         .del(r(key))
         .then(() => {});
     },
-    getKeys() {
-      return getConnection().keys(r("*"));
+    getKeys(base) {
+      return getConnection().keys(r(base, "*"));
     },
-    async clear() {
-      const keys = await getConnection().keys(r("*"));
+    async clear(base) {
+      const keys = await getConnection().keys(r(base, "*"));
       if (keys.length === 0) {
         return;
       }

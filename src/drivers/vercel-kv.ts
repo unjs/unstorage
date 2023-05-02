@@ -10,7 +10,7 @@ export interface RedisOptions extends RedisConfigNodejs {
 
 export default defineDriver<RedisOptions>((opts) => {
   const base = normalizeKey(opts?.base);
-  const r = base ? (...keys: string[]) => joinKeys(base, ...keys) : joinKeys;
+  const r = (...keys: string[]) => joinKeys(base, ...keys);
 
   let _connection: VercelKV;
   const getConnection = () => {

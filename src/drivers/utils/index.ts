@@ -15,6 +15,6 @@ export function normalizeKey(key: string | undefined): string {
   return key.replace(/[/\\]/g, ":").replace(/^:|:$/g, "");
 }
 
-export function joinKeys (...keys: string[]) {
-  return normalizeKey(keys.join(":"))
+export function joinKeys(...keys: string[]) {
+  return normalizeKey(keys.join(":"));
 }

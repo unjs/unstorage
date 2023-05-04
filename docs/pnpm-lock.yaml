@@ -2,7 +2,7 @@ lockfileVersion: '6.0'
 
 devDependencies:
   '@nuxt-themes/docus':
-    specifier: ^1.11.1
+    specifier: ^1.11.0
     version: 1.11.1(nuxt@3.4.3)(postcss@8.4.23)(rollup@3.21.4)(vue@3.2.47)
   '@nuxtjs/plausible':
     specifier: ^0.2.0

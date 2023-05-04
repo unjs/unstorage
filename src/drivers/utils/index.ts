@@ -16,5 +16,5 @@ export function normalizeKey(key: string | undefined): string {
 }
 
 export function joinKeys(...keys: string[]) {
-  return normalizeKey(keys.filter(Boolean).join(":"));
+  return keys.map(normalizeKey).filter(Boolean).join(":");
 }

@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { defineDriver, joinKeys } from "./utils";
 import Redis, {
   Cluster,
   ClusterNode,
@@ -50,7 +50,7 @@ export default defineDriver((opts: RedisOptions = {}) => {
   };
 
   const base = (opts.base || "").replace(/:$/, "");
-  const p = (key: string) => (base ? `${base}:${key}` : key); // Prefix a key. Uses base for backwards compatibility
+  const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
 
   return {
@@ -74,12 +74,12 @@ export default defineDriver((opts: RedisOptions = {}) => {
     async removeItem(key) {
       await getRedisClient().del(p(key));
     },
-    async getKeys() {
-      const keys: string[] = await getRedisClient().keys(p("*"));
+    async getKeys(base) {
+      const keys: string[] = await getRedisClient().keys(p(base, "*"));
       return keys.map((key) => d(key));
     },
-    async clear() {
-      const keys = await getRedisClient().keys(p("*"));
+    async clear(base) {
+      const keys = await getRedisClient().keys(p(base, "*"));
       if (keys.length === 0) {
         return;
       }

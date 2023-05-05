@@ -32,8 +32,8 @@ export default defineDriver<VercelKVOptions>((opts) => {
       }
       if (!opts.token) {
         const envName = envPrefix + "REST_API_TOKEN";
-        if (envPrefix && process.env[envPrefix + "REST_API_TOKEN"]) {
-          opts.token = process.env[envPrefix + "REST_API_TOKEN"];
+        if (envPrefix && process.env[envName]) {
+          opts.token = process.env[envName];
         } else {
           throw new Error(
             `[unstorage] [vercel-kv] missing required 'token' option or '${envName}' env.`

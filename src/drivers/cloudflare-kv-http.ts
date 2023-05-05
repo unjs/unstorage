@@ -1,8 +1,6 @@
 import { $fetch } from "ofetch";
 import { createError, createRequiredError, defineDriver } from "./utils";
 
-const LOG_TAG = "[unstorage] [cloudflare-http] ";
-
 interface KVAuthAPIToken {
   /**
    * API Token generated from the [User Profile 'API Tokens' page](https://dash.cloudflare.com/profile/api-tokens)

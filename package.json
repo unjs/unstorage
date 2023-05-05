@@ -67,6 +67,8 @@
     "@types/jsdom": "^21.1.1",
     "@types/mri": "^1.1.1",
     "@types/node": "^18.16.3",
+    "@upstash/redis": "^1.20.5",
+    "@vercel/kv": "^0.1.1",
     "@vitejs/plugin-vue": "^4.2.1",
     "@vitest/coverage-c8": "^0.31.0",
     "@vue/compiler-sfc": "^3.2.47",
@@ -97,7 +99,9 @@
     "@azure/identity": "^3.1.4",
     "@azure/keyvault-secrets": "^4.7.0",
     "@azure/storage-blob": "^12.14.0",
-    "@planetscale/database": "^1.7.0"
+    "@planetscale/database": "^1.7.0",
+    "@upstash/redis": "^1.20.5",
+    "@vercel/kv": "^0.1.1"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {
@@ -119,6 +123,12 @@
       "optional": true
     },
     "@planetscale/database": {
+      "optional": true
+    },
+    "@upstash/redis": {
+      "optional": true
+    },
+    "@vercel/kv": {
       "optional": true
     }
   },

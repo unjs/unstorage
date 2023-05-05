@@ -23,6 +23,7 @@ export const builtinDrivers = {
   redis: "unstorage/drivers/redis",
   azureKeyVault: "unstorage/drivers/azure-key-vault",
   sessionStorage: "unstorage/drivers/session-storage",
+  vercelKV: "unstorage/drivers/vercel-kv",
 };
 
 export type BuiltinDriverName = keyof typeof builtinDrivers;

@@ -16,21 +16,28 @@ export default defineDriver<VercelKVOptions>((opts) => {
   let _client: VercelKV;
   const getClient = () => {
     if (!_client) {
-      const envPrefix = typeof process !== "undefined" && opts.env !== false ? `${opts.env || "KV"}_` : "";
+      const envPrefix =
+        typeof process !== "undefined" && opts.env !== false
+          ? `${opts.env || "KV"}_`
+          : "";
       if (!opts.url) {
         const envName = envPrefix + "REST_API_URL";
         if (envPrefix && process.env[envName]) {
           opts.url = process.env[envName];
         } else {
-          throw new Error(`[unstorage] [vercel-kv] missing required 'url' option or '${envName}' env.`);
+          throw new Error(
+            `[unstorage] [vercel-kv] missing required 'url' option or '${envName}' env.`
+          );
         }
       }
       if (!opts.token) {
         const envName = envPrefix + "REST_API_TOKEN";
-        if (envPrefix && process.env[envPrefix + 'REST_API_TOKEN']) {
-          opts.token = process.env[envPrefix + 'REST_API_TOKEN'];
+        if (envPrefix && process.env[envPrefix + "REST_API_TOKEN"]) {
+          opts.token = process.env[envPrefix + "REST_API_TOKEN"];
         } else {
-          throw new Error(`[unstorage] [vercel-kv] missing required 'token' option or '${envName}' env.`);
+          throw new Error(
+            `[unstorage] [vercel-kv] missing required 'token' option or '${envName}' env.`
+          );
         }
       }
       _client = createClient(opts);

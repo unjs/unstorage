@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.6.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.5.0...v1.6.0)
+
+
+### 🚀 Enhancements
+
+  - Add `vercel-kv` driver ([#213](https://github.com/unjs/unstorage/pull/213))
+
+### 🩹 Fixes
+
+  - **redis:** Support `getKeys` and `clear` with base ([#216](https://github.com/unjs/unstorage/pull/216))
+  - **azure-cosmos:** Always cast `mtime` to `Date` ([129a935](https://github.com/unjs/unstorage/commit/129a935))
+
+### 💅 Refactors
+
+  - Use shared util for driver errors ([5ecca54](https://github.com/unjs/unstorage/commit/5ecca54))
+
+### 📖 Documentation
+
+  - **vercel-kv:** Add beta notice ([7a75f5f](https://github.com/unjs/unstorage/commit/7a75f5f))
+
+### 🏡 Chore
+
+  - **release:** V1.5.0 ([4a51abe](https://github.com/unjs/unstorage/commit/4a51abe))
+  - Add `codecov.yml` ([d6e0da3](https://github.com/unjs/unstorage/commit/d6e0da3))
+  - Fix docs ([333fd44](https://github.com/unjs/unstorage/commit/333fd44))
+
+### ✅ Tests
+
+  - Add basic test for `vercel-kv` ([b47acd1](https://github.com/unjs/unstorage/commit/b47acd1))
+  - Fix `vercel-kv` test ([329496c](https://github.com/unjs/unstorage/commit/329496c))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Daniel Roe <daniel@roe.dev>
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v1.5.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.4.1...v1.5.0)

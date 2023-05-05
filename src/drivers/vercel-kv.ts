@@ -4,8 +4,9 @@ import type { RedisConfigNodejs } from "@upstash/redis";
 
 import { defineDriver, normalizeKey, joinKeys } from "./utils";
 
-export interface VercelKVOptions extends RedisConfigNodejs {
+export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
   base?: string;
+  env?: false | string;
 }
 
 export default defineDriver<VercelKVOptions>((opts) => {
@@ -14,7 +15,22 @@ export default defineDriver<VercelKVOptions>((opts) => {
 
   let _client: VercelKV;
   const getClient = () => {
-    if (!_client  ) {
+    if (!_client) {
+      const envPrefix = typeof process !== "undefined" && opts.env !== false ? `${opts.env || "KV"}_` : "";
+      if (!opts.url) {
+        if (envPrefix && process.env[envPrefix + 'REST_API_URL']) {
+          opts.url = process.env[envPrefix + 'REST_API_URL'];
+        } else {
+          throw new Error('[unstorage] [vercel-kv] missing required `url` option or `KV_REST_API_URL` env.');
+        }
+      }
+      if (!opts.token) {
+        if (envPrefix && process.env[envPrefix + 'REST_API_TOKEN']) {
+          opts.token = process.env[envPrefix + 'REST_API_TOKEN'];
+        } else {
+          throw new Error('[unstorage] [vercel-kv] missing required `token` option or `KV_REST_API_TOKEN` env.');
+        }
+      }
       _client = createClient(opts);
     }
     return _client;

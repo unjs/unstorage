@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { defineDriver, createRequiredError } from "./utils";
 import { AppConfigurationClient } from "@azure/app-configuration";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -34,6 +34,8 @@ export interface AzureAppConfigurationOptions {
   connectionString?: string;
 }
 
+const DRIVER_NAME = "azure-app-configuration";
+
 export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
   const labelFilter = opts.label || "\0";
   const keyFilter = opts.prefix ? `${opts.prefix}:*` : "*";
@@ -46,9 +48,11 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
       return client;
     }
     if (!opts.endpoint && !opts.appConfigName && !opts.connectionString) {
-      throw new Error(
-        "[unstorage] [azure-app-configuration] Either the `endpoint`, `appConfigName` or `connectionString` option must be provided."
-      );
+      throw createRequiredError(DRIVER_NAME, [
+        "endpoint",
+        "appConfigName",
+        "connectionString",
+      ]);
     }
     const appConfigEndpoint =
       opts.endpoint || `https://${opts.appConfigName}.azconfig.io`;
@@ -62,7 +66,7 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
   };
 
   return {
-    name: "azure-app-configuration",
+    name: DRIVER_NAME,
     options: opts,
     async hasItem(key) {
       try {

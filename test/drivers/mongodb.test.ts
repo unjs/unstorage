@@ -30,7 +30,7 @@ describe("drivers: mongodb", () => {
             collectionName: "test",
           } as any).getItem("")
         ).rejects.toThrowError(
-          "[unstorage] MongoDB driver requires a connection string to be provided."
+          "[unstorage] [mongodb] Missing required option `connectionString`."
         );
       });
       it("should have different dates when an entry was updated", async () => {

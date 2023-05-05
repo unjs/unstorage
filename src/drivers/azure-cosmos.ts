@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { createRequiredError, defineDriver } from "./utils";
 import { Container, CosmosClient } from "@azure/cosmos";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -26,6 +26,8 @@ export interface AzureCosmosOptions {
   containerName?: string;
 }
 
+const DRIVER_NAME = "azure-cosmos";
+
 export interface AzureCosmosItem {
   /**
    * The unstorage key as id of the item.
@@ -50,9 +52,7 @@ export default defineDriver((opts: AzureCosmosOptions) => {
       return client;
     }
     if (!opts.endpoint) {
-      throw new Error(
-        "Azure CosmosDB driver requires an endpoint to be provided."
-      );
+      throw createRequiredError(DRIVER_NAME, "endpoint");
     }
     if (opts.accountKey) {
       const cosmosClient = new CosmosClient({
@@ -84,7 +84,7 @@ export default defineDriver((opts: AzureCosmosOptions) => {
   };
 
   return {
-    name: "azure-cosmos",
+    name: DRIVER_NAME,
     options: opts,
     async hasItem(key) {
       const item = await (await getCosmosClient())

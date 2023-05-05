@@ -2,7 +2,7 @@ import { createClient } from "@vercel/kv";
 import type { VercelKV } from "@vercel/kv";
 import type { RedisConfigNodejs } from "@upstash/redis";
 
-import { defineDriver, normalizeKey, joinKeys } from "./utils";
+import { defineDriver, normalizeKey, joinKeys, createError } from "./utils";
 
 export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
   base?: string;
@@ -25,8 +25,9 @@ export default defineDriver<VercelKVOptions>((opts) => {
         if (envPrefix && process.env[envName]) {
           opts.url = process.env[envName];
         } else {
-          throw new Error(
-            `[unstorage] [vercel-kv] missing required 'url' option or '${envName}' env.`
+          throw createError(
+            "vercel-kv",
+            `missing required \`url\` option or '${envName}' env.`
           );
         }
       }
@@ -35,8 +36,9 @@ export default defineDriver<VercelKVOptions>((opts) => {
         if (envPrefix && process.env[envName]) {
           opts.token = process.env[envName];
         } else {
-          throw new Error(
-            `[unstorage] [vercel-kv] missing required 'token' option or '${envName}' env.`
+          throw createError(
+            "vercel-kv",
+            `missing required \`token\` option or '${envName}' env.`
           );
         }
       }

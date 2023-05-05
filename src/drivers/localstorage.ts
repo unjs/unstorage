@@ -1,10 +1,12 @@
-import { defineDriver } from "./utils";
+import { createRequiredError, defineDriver } from "./utils";
 
 export interface LocalStorageOptions {
   base?: string;
   window?: typeof window;
   localStorage?: typeof window.localStorage;
 }
+
+const DRIVER_NAME = "localstorage";
 
 export default defineDriver((opts: LocalStorageOptions = {}) => {
   if (!opts.window) {
@@ -14,7 +16,7 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
     opts.localStorage = opts.window?.localStorage;
   }
   if (!opts.localStorage) {
-    throw new Error("localStorage not available");
+    throw createRequiredError(DRIVER_NAME, "localStorage");
   }
 
   const r = (key: string) => (opts.base ? opts.base + ":" : "") + key;
@@ -22,7 +24,7 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
   let _storageListener: (ev: StorageEvent) => void;
 
   return {
-    name: "localstorage",
+    name: DRIVER_NAME,
     options: opts,
     hasItem(key) {
       return Object.prototype.hasOwnProperty.call(opts.localStorage!, r(key));

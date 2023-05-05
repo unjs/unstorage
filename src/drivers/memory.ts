@@ -1,10 +1,12 @@
 import { defineDriver } from "./utils";
 
+const DRIVER_NAME = "memory";
+
 export default defineDriver(() => {
   const data = new Map<string, any>();
 
   return {
-    name: "memory",
+    name: DRIVER_NAME,
     options: {},
     hasItem(key) {
       return data.has(key);

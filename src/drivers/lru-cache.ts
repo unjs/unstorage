@@ -8,6 +8,8 @@ type LRUCacheOptions = LRUCache.OptionsBase<string, any, any> &
 
 export interface LRUDriverOptions extends LRUCacheOptions {}
 
+const DRIVER_NAME = "lru-cache";
+
 export default defineDriver((opts: LRUDriverOptions = {}) => {
   const cache = new LRUCache({
     max: 1000,
@@ -21,7 +23,7 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
   });
 
   return {
-    name: "lru-cache",
+    name: DRIVER_NAME,
     options: opts,
     hasItem(key) {
       return cache.has(key);

@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { createError, createRequiredError, defineDriver } from "./utils";
 import { SecretClient, SecretClientOptions } from "@azure/keyvault-secrets";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -21,6 +21,8 @@ export interface AzureKeyVaultOptions {
   pageSize?: number;
 }
 
+const DRIVER_NAME = "azure-key-vault";
+
 export default defineDriver((opts: AzureKeyVaultOptions) => {
   let keyVaultClient: SecretClient;
   const getKeyVaultClient = () => {
@@ -29,14 +31,10 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
     }
     const { vaultName = null, serviceVersion = "7.3", pageSize = 25 } = opts;
     if (!vaultName) {
-      throw new Error(
-        "[unstorage] [key-vault] Azure Key Vault driver requires a vault name to be provided."
-      );
+      throw createRequiredError(DRIVER_NAME, "vaultName");
     }
     if (pageSize > 25) {
-      throw new Error(
-        "[unstorage] [key-vault] pageSize cannot be greater than 25."
-      );
+      throw createError(DRIVER_NAME, "`pageSize` cannot be greater than `25`");
     }
     const credential = new DefaultAzureCredential();
     const url = `https://${vaultName}.vault.azure.net`;
@@ -45,7 +43,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
   };
 
   return {
-    name: "azure-key-vault",
+    name: DRIVER_NAME,
     options: opts,
     async hasItem(key) {
       try {

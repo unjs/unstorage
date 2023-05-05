@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { createError, createRequiredError, defineDriver } from "./utils";
 import {
   TableClient,
   AzureNamedKeyCredential,
@@ -46,6 +46,8 @@ export interface AzureStorageTableOptions {
   pageSize?: number;
 }
 
+const DRIVER_NAME = "azure-storage-table";
+
 export default defineDriver((opts: AzureStorageTableOptions) => {
   const {
     accountName = null,
@@ -63,12 +65,13 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
       return client;
     }
     if (!accountName) {
-      throw new Error(
-        "Account name is required to use the Azure Storage Table driver."
-      );
+      throw createRequiredError(DRIVER_NAME, "accountName");
     }
     if (pageSize > 1000) {
-      throw new Error("pageSize exceeds the maximum allowed value of 1000");
+      throw createError(
+        DRIVER_NAME,
+        "`pageSize` exceeds the maximum allowed value of `1000`"
+      );
     }
     if (accountKey) {
       // AzureNamedKeyCredential is only available in Node.js runtime, not in browsers
@@ -100,7 +103,7 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
   };
 
   return {
-    name: "azure-strorage-table",
+    name: DRIVER_NAME,
     options: opts,
     async hasItem(key) {
       try {

@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { createError, defineDriver } from "./utils";
 import {
   BlobServiceClient,
   ContainerClient,
@@ -34,6 +34,8 @@ export interface AzureStorageBlobOptions {
   connectionString?: string;
 }
 
+const DRIVER_NAME = "azure-storage-blob";
+
 export default defineDriver((opts: AzureStorageBlobOptions) => {
   let containerClient: ContainerClient;
   const getContainerClient = () => {
@@ -41,9 +43,7 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
       return containerClient;
     }
     if (!opts.accountName) {
-      throw new Error(
-        "Account name is required to use the Azure Storage Blob driver."
-      );
+      throw createError(DRIVER_NAME, "accountName");
     }
     let serviceClient: BlobServiceClient;
     if (opts.accountKey) {
@@ -79,7 +79,7 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
   };
 
   return {
-    name: "azure-storage-blob",
+    name: DRIVER_NAME,
     options: opts,
     async hasItem(key) {
       return await getContainerClient().getBlockBlobClient(key).exists();

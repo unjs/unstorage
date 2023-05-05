@@ -1,10 +1,12 @@
-import { defineDriver } from "./utils";
+import { createError, createRequiredError, defineDriver } from "./utils";
 
 export interface SessionStorageOptions {
   base?: string;
   window?: typeof window;
   sessionStorage?: typeof window.sessionStorage;
 }
+
+const DRIVER_NAME = "session-storage";
 
 export default defineDriver((opts: SessionStorageOptions = {}) => {
   if (!opts.window) {
@@ -14,7 +16,7 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
     opts.sessionStorage = opts.window?.sessionStorage;
   }
   if (!opts.sessionStorage) {
-    throw new Error("sessionStorage not available");
+    throw createRequiredError(DRIVER_NAME, "sessionStorage");
   }
 
   const r = (key: string) => (opts.base ? opts.base + ":" : "") + key;
@@ -22,7 +24,7 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
   let _storageListener: (ev: StorageEvent) => void;
 
   return {
-    name: "session-storage",
+    name: DRIVER_NAME,
     options: opts,
     hasItem(key) {
       return Object.prototype.hasOwnProperty.call(opts.sessionStorage, r(key));

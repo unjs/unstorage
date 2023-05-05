@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { createError, createRequiredError, defineDriver } from "./utils";
 import type { ExecutedQuery, Connection } from "@planetscale/database";
 import { connect } from "@planetscale/database";
 import { fetch } from "node-fetch-native";
@@ -16,15 +16,17 @@ interface TableSchema {
   updated_at: Date;
 }
 
-export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
-  if (!opts.url)
-    throw new Error("Database URL is required to use the Planetscale driver.");
+const DRIVER_NAME = "planetscale";
 
+export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
   opts.table = opts.table || "storage";
 
   let _connection: Connection;
   const getConnection = () => {
     if (!_connection) {
+      if (!opts.url) {
+        throw createRequiredError(DRIVER_NAME, "url");
+      }
       // `connect` configures a connection class rather than initiating a connection
       _connection = connect({
         url: opts.url,
@@ -46,7 +48,7 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
   };
 
   return {
-    name: "planetscale",
+    name: DRIVER_NAME,
     options: opts,
     hasItem: async (key) => {
       const res = await getConnection().execute(

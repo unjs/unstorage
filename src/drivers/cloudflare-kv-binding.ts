@@ -1,10 +1,12 @@
 /// <reference types="@cloudflare/workers-types" />
-import { defineDriver } from "./utils";
+import { createError, defineDriver } from "./utils";
 export interface KVOptions {
   binding?: string | KVNamespace;
 }
 
 // https://developers.cloudflare.com/workers/runtime-apis/kv
+
+const DRIVER_NAME = "cloudflare-kv-binding";
 
 export default defineDriver((opts: KVOptions = {}) => {
   async function getKeys(base?: string) {
@@ -14,7 +16,7 @@ export default defineDriver((opts: KVOptions = {}) => {
   }
 
   return {
-    name: "cloudflare-kv-binding",
+    name: DRIVER_NAME,
     options: opts,
     async hasItem(key) {
       const binding = getBinding(opts.binding);
@@ -52,15 +54,17 @@ function getBinding(binding: KVNamespace | string = "STORAGE") {
   }
 
   if (!binding) {
-    throw new Error(
-      `Invalid Cloudflare KV binding '${bindingName}': ${binding}`
+    throw createError(
+      DRIVER_NAME,
+      `Invalid binding \`${bindingName}\`: \`${binding}\``
     );
   }
 
   for (const key of ["get", "put", "delete"]) {
     if (!(key in binding)) {
-      throw new Error(
-        `Invalid Cloudflare KV binding '${bindingName}': '${key}' key is missing`
+      throw createError(
+        DRIVER_NAME,
+        `Invalid binding \`${bindingName}\`: \`${key}\` key is missing`
       );
     }
   }

@@ -7,6 +7,8 @@ export interface HTTPOptions {
   headers?: Record<string, string>;
 }
 
+const DRIVER_NAME = "http";
+
 export default defineDriver((opts: HTTPOptions) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
 
@@ -14,7 +16,7 @@ export default defineDriver((opts: HTTPOptions) => {
     joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
 
   return {
-    name: "http",
+    name: DRIVER_NAME,
     options: opts,
     hasItem(key, topts) {
       return _fetch(r(key), {

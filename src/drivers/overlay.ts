@@ -8,9 +8,11 @@ export interface OverlayStorageOptions {
 
 const OVERLAY_REMOVED = "__OVERLAY_REMOVED__";
 
+const DRIVER_NAME = "overlay";
+
 export default defineDriver((options: OverlayStorageOptions) => {
   return {
-    name: "overlay",
+    name: DRIVER_NAME,
     options: options,
     async hasItem(key) {
       for (const layer of options.layers) {

@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { createError, createRequiredError, defineDriver } from "./utils";
 import { $fetch } from "ofetch";
 import { withTrailingSlash, joinURL } from "ufo";
 
@@ -44,6 +44,8 @@ const defaultOptions: GithubOptions = {
   cdnURL: "https://raw.githubusercontent.com",
 };
 
+const DRIVER_NAME = "github";
+
 export default defineDriver((_opts: GithubOptions) => {
   const opts = { ...defaultOptions, ..._opts };
   const rawUrl = joinURL(opts.cdnURL, opts.repo, opts.branch, opts.dir);
@@ -52,11 +54,11 @@ export default defineDriver((_opts: GithubOptions) => {
   let lastCheck = 0;
   let syncPromise: Promise<any>;
 
-  if (!opts.repo) {
-    throw new Error('[unstorage] [github] Missing required option "repo"');
-  }
-
   const syncFiles = async () => {
+    if (!opts.repo) {
+      throw createRequiredError(DRIVER_NAME, "repo");
+    }
+
     if (lastCheck + opts.ttl * 1000 > Date.now()) {
       return;
     }
@@ -71,7 +73,7 @@ export default defineDriver((_opts: GithubOptions) => {
   };
 
   return {
-    name: "github",
+    name: DRIVER_NAME,
     options: opts,
     async getKeys() {
       await syncFiles();
@@ -98,10 +100,12 @@ export default defineDriver((_opts: GithubOptions) => {
               Authorization: opts.token ? `token ${opts.token}` : undefined,
             },
           });
-        } catch (err) {
-          throw new Error(`[unstorage] [github] Failed to fetch "${key}"`, {
-            cause: err,
-          });
+        } catch (error) {
+          throw createError(
+            "github",
+            `Failed to fetch \`${JSON.stringify(key)}\``,
+            { cause: error }
+          );
         }
       }
       return item.body;
@@ -141,10 +145,9 @@ async function fetchFiles(opts: GithubOptions) {
         },
       };
     }
-  } catch (err) {
-    throw new Error(`[unstorage] [github] Failed to fetch git tree`, {
-      cause: err,
+  } catch (error) {
+    throw createError(DRIVER_NAME, "Failed to fetch git tree", {
+      cause: error,
     });
   }
-  return files;
 }

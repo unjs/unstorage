@@ -1,5 +1,5 @@
 import { $fetch } from "ofetch";
-import { defineDriver } from "./utils";
+import { createError, createRequiredError, defineDriver } from "./utils";
 
 const LOG_TAG = "[unstorage] [cloudflare-http] ";
 
@@ -72,12 +72,14 @@ type CloudflareAuthorizationHeaders =
       Authorization: `Bearer ${string}`;
     };
 
+const DRIVER_NAME = "cloudflare-kv-http";
+
 export default defineDriver<KVHTTPOptions>((opts) => {
   if (!opts.accountId) {
-    throw new Error(LOG_TAG + "`accountId` is required.");
+    throw createRequiredError(DRIVER_NAME, "accountId");
   }
   if (!opts.namespaceId) {
-    throw new Error(LOG_TAG + "`namespaceId` is required.");
+    throw createRequiredError(DRIVER_NAME, "namespaceId");
   }
 
   let headers: CloudflareAuthorizationHeaders;
@@ -89,9 +91,9 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   } else if (opts.email && opts.apiKey) {
     headers = { "X-Auth-Email": opts.email, "X-Auth-Key": opts.apiKey };
   } else {
-    throw new Error(
-      LOG_TAG +
-        "One of the `apiToken`, `userServiceKey`, or a combination of `email` and `apiKey` is required."
+    throw createError(
+      DRIVER_NAME,
+      "One of the `apiToken`, `userServiceKey`, or a combination of `email` and `apiKey` is required."
     );
   }
 
@@ -193,7 +195,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   };
 
   return {
-    name: "cloudflare-kv-http",
+    name: DRIVER_NAME,
     options: opts,
     hasItem,
     getItem,

@@ -33,6 +33,8 @@ export interface RedisOptions extends _RedisOptions {
   ttl?: number;
 }
 
+const DRIVER_NAME = "redis";
+
 export default defineDriver((opts: RedisOptions = {}) => {
   let redisClient: Redis | Cluster;
   const getRedisClient = () => {
@@ -54,7 +56,7 @@ export default defineDriver((opts: RedisOptions = {}) => {
   const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
 
   return {
-    name: "redis",
+    name: DRIVER_NAME,
     options: opts,
     async hasItem(key) {
       return Boolean(await getRedisClient().exists(p(key)));

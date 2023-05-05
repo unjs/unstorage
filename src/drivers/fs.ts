@@ -1,7 +1,7 @@
 import { existsSync, promises as fsp, Stats } from "fs";
 import { resolve, relative, join } from "path";
 import { FSWatcher, WatchOptions, watch } from "chokidar";
-import { defineDriver } from "./utils";
+import { createError, createRequiredError, defineDriver } from "./utils";
 import {
   readFile,
   writeFile,
@@ -21,9 +21,11 @@ export interface FSStorageOptions {
 
 const PATH_TRAVERSE_RE = /\.\.\:|\.\.$/;
 
+const DRIVER_NAME = "fs";
+
 export default defineDriver((opts: FSStorageOptions = {}) => {
   if (!opts.base) {
-    throw new Error("base is required");
+    throw createRequiredError(DRIVER_NAME, "base");
   }
 
   if (!opts.ignore) {
@@ -33,9 +35,9 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   opts.base = resolve(opts.base);
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {
-      throw new Error(
-        "[unstorage] [fs] Invalid key. It should not contain `..` segments: " +
-          key
+      throw createError(
+        DRIVER_NAME,
+        `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`
       );
     }
     const resolved = join(opts.base!, key.replace(/:/g, "/"));
@@ -45,7 +47,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   let _watcher: FSWatcher;
 
   return {
-    name: "fs",
+    name: DRIVER_NAME,
     options: opts,
     hasItem(key) {
       return existsSync(r(key));

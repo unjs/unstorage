@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { createRequiredError, defineDriver } from "./utils";
 import { Collection, MongoClient } from "mongodb";
 
 export interface MongoDbOptions {
@@ -20,14 +20,14 @@ export interface MongoDbOptions {
   collectionName?: string;
 }
 
+const DRIVER_NAME = "mongodb";
+
 export default defineDriver((opts: MongoDbOptions) => {
   let collection: Collection;
   const getMongoCollection = () => {
     if (!collection) {
       if (!opts.connectionString) {
-        throw new Error(
-          "[unstorage] MongoDB driver requires a connection string to be provided."
-        );
+        throw createRequiredError(DRIVER_NAME, "connectionString");
       }
       const mongoClient = new MongoClient(opts.connectionString);
       const db = mongoClient.db(opts.databaseName || "unstorage");
@@ -37,7 +37,7 @@ export default defineDriver((opts: MongoDbOptions) => {
   };
 
   return {
-    name: "mongodb",
+    name: DRIVER_NAME,
     options: opts,
     async hasItem(key) {
       const result = await getMongoCollection().findOne({ key });

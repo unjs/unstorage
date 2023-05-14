@@ -6,6 +6,14 @@ navigation.title: IDB Keyval
 
 Store data in [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) using [idb-keyval](https://github.com/jakearchibald/idb-keyval).
 
+To use it, you will need to install `idb-keyval` in your project:
+
+```bash
+npm i idb-keyval
+```
+
+Usage:
+
 ```js
 import { createStorage } from "unstorage";
 import idbKeyvalDriver from "unstorage/drivers/idb-keyval";

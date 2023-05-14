@@ -22,10 +22,10 @@ export default defineDriver((opts: IDBKeyvalOptions = {}) => {
         name: DRIVER_NAME,
         options: opts,
         hasItem(key) {
-            return get(r(key), customStore).then((item) => item !== undefined)
+            return get(r(key), customStore).then((item) => (item ?? null) !== null)
         },
         getItem(key) {
-            return get(r(key), customStore)
+            return get(r(key), customStore).then((item) => item ?? null)
         },
         setItem(key, value) {
             return set(r(key), value, customStore)

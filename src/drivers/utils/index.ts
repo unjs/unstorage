@@ -19,6 +19,14 @@ export function joinKeys(...keys: string[]) {
   return keys.map(normalizeKey).filter(Boolean).join(":");
 }
 
+export async function flattenAsyncIterable<T>(iterator: AsyncIterable<T>) {
+  const items: T[] = [];
+  for await (const item of iterator) {
+    items.push(item);
+  }
+  return items;
+}
+
 export function createError(
   driver: string,
   message: string,

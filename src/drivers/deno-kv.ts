@@ -1,5 +1,6 @@
-import { defineDriver, createError, flattenAsyncIterable } from "./utils";
-import { DenoGlobal, DenoKv } from "./_deno-types";
+import { defineDriver, createError } from "./utils";
+import type { DenoKv, DenoGlobal } from "./utils/deno-kv";
+import { flattenAsyncIterable } from "./utils/deno-kv";
 
 export interface DenoKvOptions {
   path?: string;

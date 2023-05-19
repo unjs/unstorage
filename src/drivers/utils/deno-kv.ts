@@ -31,7 +31,7 @@ interface DenoAtomicOperation {
   commit(): Promise<KvCommitResult | KvCommitError>;
 }
 interface KvU64 {
-  constructor(value: bigint);
+  new (value: bigint);
   readonly value: bigint;
 }
 type KvConsistencyLevel = "strong" | "eventual";
@@ -81,3 +81,11 @@ interface KvListOptions {
 export type DenoGlobal = {
   openKv(path?: string): Promise<DenoKv>;
 };
+
+export async function flattenAsyncIterable<T>(iterator: AsyncIterable<T>) {
+  const items: T[] = [];
+  for await (const item of iterator) {
+    items.push(item);
+  }
+  return items;
+}

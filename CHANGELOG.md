@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.6.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.6.0...v1.6.1)
+
+
+### 🩹 Fixes
+
+  - **prefixStorage:** Prefix `getItemRaw` and `setItemRaw` ([#232](https://github.com/unjs/unstorage/pull/232))
+  - **github:** FetchFiles should return files ([#229](https://github.com/unjs/unstorage/pull/229))
+
+### 💅 Refactors
+
+  - Remove unused variable ([97d3e3e](https://github.com/unjs/unstorage/commit/97d3e3e))
+
+### 🏡 Chore
+
+  - Update eslint ([4591831](https://github.com/unjs/unstorage/commit/4591831))
+
+### ✅ Tests
+
+  - Skip cloudflare-kv-http on node >= 18 ([33bc9c0](https://github.com/unjs/unstorage/commit/33bc9c0))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Andrei Dyldin <and@cesbo.com>
+- 魔王少年 <q267009886.work@gmail.com>
+
 ## v1.6.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.5.0...v1.6.0)

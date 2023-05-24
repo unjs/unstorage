@@ -5,7 +5,9 @@ type StorageKeys = Array<keyof Storage>;
 const storageKeyProperties: StorageKeys = [
   "hasItem",
   "getItem",
+  "getItemRaw",
   "setItem",
+  "setItemRaw",
   "removeItem",
   "getMeta",
   "setMeta",

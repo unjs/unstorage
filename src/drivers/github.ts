@@ -145,6 +145,8 @@ async function fetchFiles(opts: GithubOptions) {
         },
       };
     }
+
+    return files;
   } catch (error) {
     throw createError(DRIVER_NAME, "Failed to fetch git tree", {
       cause: error,

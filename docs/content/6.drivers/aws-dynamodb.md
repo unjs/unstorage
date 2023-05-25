@@ -10,7 +10,25 @@ To use it, you will need to install `@aws-sdk/client-dynamodb` and `@aws-sdk/lib
 npm i @aws-sdk/client-dynamodb @aws-sdk/lib-dynamodb
 ```
 
-Usage:
+Minimal usage:
+
+```js
+import { createStorage } from "unstorage";
+import dynamoDbCacheDriver from "unstorage/drivers/aws-dynamodb";
+
+const storage = createStorage({
+  driver: dynamoDbCacheDriver({
+    table: "my-persistent-storage", // required
+    region: "us-east-1", // optional, retrieved via environment variables
+    credentials: { // optional, retrieved by AWS SDK via environment variables
+      accessKeyId: "xxxxxxxxxx", // DO NOT HARD-CODE SECRETS
+      secretAccessKey: "xxxxxxxxxxxxxxxxxxxx", // DO NOT HARD-CODE SECRETS
+    },
+  }),
+});
+```
+
+Persistent configuration usage:
 
 ```js
 import { createStorage } from "unstorage";
@@ -19,17 +37,29 @@ import dynamoDbCacheDriver from "unstorage/drivers/aws-dynamodb";
 const storage = createStorage({
   driver: dynamoDbCacheDriver({
     table: "my-table-name", // required
-    region: "us-east-1",
-    credentials: {
-      accessKeyId: "xxxxxxxxxx",
-      secretAccessKey: "xxxxxxxxxxxxxxxxxxxx",
+    attributes: {
+      key: "key", // optional, configure attributes name
+      value: "value", // optional, configure attributes name
     },
+  }),
+});
+```
+
+Temporary configurations:
+
+```js
+import { createStorage } from "unstorage";
+import dynamoDbCacheDriver from "unstorage/drivers/aws-dynamodb";
+
+const storage = createStorage({
+  driver: dynamoDbCacheDriver({
+    table: "my-table-name", // required
     attributes: {
       key: "key",
       value: "value",
-      ttl: "ttl",
+      ttl: "ttl", // optional, configure attributes name
     },
-    expireIn: 300, // seconds
+    expireIn: 300, // optional, values in seconds or 0 to disable
   }),
 });
 ```

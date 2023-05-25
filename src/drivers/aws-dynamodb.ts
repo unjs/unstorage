@@ -50,7 +50,7 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
   opts.expireIn =
     opts.expireIn === undefined ? 0 : parseInt(`${opts.expireIn}`);
   if (Number.isNaN(opts.expireIn) || opts.expireIn < 0) {
-    throw createError(DRIVER_NAME, "expireIn");
+    throw createError(DRIVER_NAME, "Invalid option `expireIn`.");
   }
 
   let client;
@@ -64,6 +64,10 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
       );
     }
     return client;
+  }
+
+  function getTimestamp(): number {
+    return Math.round(Date.now() / 1000);
   }
 
   function createObject(key: string, value: any = undefined, ttl: number = 0) {
@@ -88,13 +92,13 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
     );
 
     if (!item) {
-      return undefined;
+      return null;
     }
 
     if (opts.expireIn > 0) {
-      const timestamp = Math.round(Date.now() / 1000);
+      const timestamp = getTimestamp();
       if (timestamp > parseInt(item.ttl || 0)) {
-        return undefined;
+        return null;
       }
     }
 
@@ -128,7 +132,7 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
     );
 
     if (opts.expireIn > 0) {
-      const timestamp = Math.round(Date.now() / 1000);
+      const timestamp = getTimestamp();
       items = items.filter((item) => parseInt(item.ttl || 0) >= timestamp);
     }
 

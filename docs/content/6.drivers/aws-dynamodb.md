@@ -20,7 +20,8 @@ const storage = createStorage({
   driver: dynamoDbCacheDriver({
     table: "my-persistent-storage", // required
     region: "us-east-1", // optional, retrieved via environment variables
-    credentials: { // optional, retrieved by AWS SDK via environment variables
+    credentials: {
+      // optional, retrieved by AWS SDK via environment variables
       accessKeyId: "xxxxxxxxxx", // DO NOT HARD-CODE SECRETS
       secretAccessKey: "xxxxxxxxxxxxxxxxxxxx", // DO NOT HARD-CODE SECRETS
     },

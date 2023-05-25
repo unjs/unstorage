@@ -1,7 +1,7 @@
-import { describe, beforeAll, afterAll } from "vitest";
+import { describe, beforeAll, afterAll, expect, it } from "vitest";
 import driver, { DynamoDBStorageOptions } from "../../src/drivers/aws-dynamodb";
 import { testDriver } from "./utils";
-import { fromIni } from "@aws-sdk/credential-providers";
+import { fromIni, fromEnv } from "@aws-sdk/credential-providers";
 import {
   DynamoDBClient,
   CreateTableCommand,
@@ -9,16 +9,30 @@ import {
   DeleteTableCommand,
   waitUntilTableExists,
   waitUntilTableNotExists,
+  GetItemCommand,
 } from "@aws-sdk/client-dynamodb";
 
 const TABLE_OPERATIONS_TIMEOUT_SECONDS = 30; // table need at lest 30s from creation to become available
 
 describe("drivers: aws-dynamodb", () => {
+  // Load AWS credentials
+
   const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION;
-  const credentials = fromIni({
-    profile:
-      process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE || "default",
+  const profile = process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE;
+  const credentials = profile
+    ? fromIni({
+        profile: profile,
+      })
+    : fromEnv();
+
+  // Init client for test purpose
+
+  const client = new DynamoDBClient({
+    region,
+    credentials,
   });
+
+  // Setup test driver options
 
   const options: DynamoDBStorageOptions = {
     table: "tmp-unstorage-tests",
@@ -29,12 +43,10 @@ describe("drivers: aws-dynamodb", () => {
       value: "value",
       ttl: "ttl",
     },
+    expireIn: 300,
   };
 
-  const client = new DynamoDBClient({
-    region: process.env.AWS_REGION,
-    credentials,
-  });
+  // Test hooks
 
   beforeAll(async () => {
     await client.send(
@@ -85,7 +97,37 @@ describe("drivers: aws-dynamodb", () => {
     );
   }, (TABLE_OPERATIONS_TIMEOUT_SECONDS + 2) * 1000);
 
+  // Common tests
+
   testDriver({
     driver: driver(options),
+    additionalTests: (ctx) => {
+      // Additional tests
+
+      it("should set TTL attribute on item", async () => {
+        const timestamp = Math.round(Date.now() / 1000);
+
+        await ctx.storage.setItem("test-with-ttl", "ok");
+
+        const key = {};
+        key[options.attributes?.key as string] = {
+          S: "test-with-ttl",
+        };
+
+        const { Item: item } = await client.send(
+          new GetItemCommand({
+            TableName: options.table,
+            Key: key,
+          })
+        );
+
+        expect(item).not.toBeUndefined();
+        expect(item?.[options.attributes?.value as string].S).toBe("ok");
+        expect(item?.[options.attributes?.ttl as string].N).not.toBeUndefined();
+        expect(
+          parseInt(item?.[options.attributes?.ttl as string].N as string)
+        ).toBeGreaterThanOrEqual(timestamp + (options.expireIn || 0));
+      });
+    },
   });
 });

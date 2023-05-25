@@ -18,25 +18,32 @@ import dynamoDbCacheDriver from "unstorage/drivers/aws-dynamodb";
 
 const storage = createStorage({
   driver: dynamoDbCacheDriver({
-    table: 'my-table-name', // required
-    region: 'us-east-1',
+    table: "my-table-name", // required
+    region: "us-east-1",
     credentials: {
-      accessKeyId: 'xxxxxxxxxx',
-      secretAccessKey: 'xxxxxxxxxxxxxxxxxxxx',
+      accessKeyId: "xxxxxxxxxx",
+      secretAccessKey: "xxxxxxxxxxxxxxxxxxxx",
     },
     attributes: {
-      key: 'key',
-      value: 'value',
-    };
+      key: "key",
+      value: "value",
+      ttl: "ttl",
+    },
+    expireIn: 300, // seconds
   }),
 });
 ```
+
+When `expireIn` is set to a number greater than 0 the driver will add seconds to the current timestamp and set the TTL attribute.
+Otherwise removing the `expireIn` option or setting it to 0 will disable this functionality.
+
+Since the DynamoDB items deletion is asynchronous the driver will check the validity of the TTL attribute before returning them from `getItem` and `getKeys` operations. This in order to ensure that no expired items will be returned.
 
 **Authentication:**
 
 The driver supports the default [AWS SDK credentials](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html).
 
-The IAM role or user that use the driver need the following permissions:
+The IAM role or IAM user that use the driver need the following permissions:
 
 ```json
 {
@@ -61,4 +68,5 @@ The IAM role or user that use the driver need the following permissions:
 - `table`: The name of the DynamoDB table.
 - `region`: The AWS region to use.
 - `credentials`: The AWS SDK credentials object.
-- `attributes`: The key/value attributes mapping to table item attributes.
+- `attributes`: The key, value and TTL attributes mapping to table item attributes.
+- `expireIn`: The number of seconds to add to the current timestamp to set the TTL attribute. Set to 0 to disable it.

@@ -5,6 +5,7 @@ import { fromIni } from "@aws-sdk/credential-providers";
 import {
   DynamoDBClient,
   CreateTableCommand,
+  UpdateTimeToLiveCommand,
   DeleteTableCommand,
   waitUntilTableExists,
   waitUntilTableNotExists,
@@ -26,6 +27,7 @@ describe("drivers: aws-dynamodb", () => {
     attributes: {
       key: "key",
       value: "value",
+      ttl: "ttl",
     },
   };
 
@@ -57,6 +59,16 @@ describe("drivers: aws-dynamodb", () => {
     await waitUntilTableExists(
       { client, maxWaitTime: TABLE_OPERATIONS_TIMEOUT_SECONDS },
       { TableName: options.table }
+    );
+
+    await client.send(
+      new UpdateTimeToLiveCommand({
+        TableName: options.table,
+        TimeToLiveSpecification: {
+          AttributeName: options.attributes?.ttl,
+          Enabled: true,
+        },
+      })
     );
   }, (TABLE_OPERATIONS_TIMEOUT_SECONDS + 2) * 1000);
 

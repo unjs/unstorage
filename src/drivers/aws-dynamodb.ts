@@ -1,4 +1,4 @@
-import { createRequiredError, defineDriver } from "./utils";
+import { createError, createRequiredError, defineDriver } from "./utils";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
@@ -15,7 +15,9 @@ export interface DynamoDBStorageOptions {
   attributes?: {
     key?: string;
     value?: string;
+    ttl?: string;
   };
+  expireIn?: number;
 }
 
 const DRIVER_NAME = "aws-dynamodb";
@@ -29,6 +31,7 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
     opts.attributes = {
       key: "key",
       value: "value",
+      ttl: "ttl",
     };
   } else {
     if (!opts.attributes.key) {
@@ -38,6 +41,16 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
     if (!opts.attributes.value) {
       opts.attributes.value = "value";
     }
+
+    if (!opts.attributes.ttl) {
+      opts.attributes.value = "ttl";
+    }
+  }
+
+  opts.expireIn =
+    opts.expireIn === undefined ? 0 : parseInt(`${opts.expireIn}`);
+  if (Number.isNaN(opts.expireIn) || opts.expireIn < 0) {
+    throw createError(DRIVER_NAME, "expireIn");
   }
 
   let client;
@@ -53,11 +66,15 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
     return client;
   }
 
-  function createObject(key: string, value: any = null) {
+  function createObject(key: string, value: any = undefined, ttl: number = 0) {
     const obj = {};
     obj[opts.attributes.key] = key;
     if (value) {
       obj[opts.attributes.value] = value;
+    }
+    if (ttl > 0) {
+      const timestamp = Math.round(Date.now() / 1000);
+      obj[opts.attributes.ttl] = timestamp + ttl;
     }
     return obj;
   }
@@ -69,9 +86,18 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
         Key: createObject(key),
       })
     );
+
     if (!item) {
-      return null;
+      return undefined;
     }
+
+    if (opts.expireIn > 0) {
+      const timestamp = Math.round(Date.now() / 1000);
+      if (timestamp > parseInt(item.ttl || 0)) {
+        return undefined;
+      }
+    }
+
     return item[opts.attributes.value];
   }
 
@@ -79,7 +105,7 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
     await getClient().send(
       new PutCommand({
         TableName: opts.table,
-        Item: createObject(key, value),
+        Item: createObject(key, value, opts.expireIn),
       })
     );
   }
@@ -94,14 +120,19 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
   }
 
   async function listKeys(startKey = undefined) {
-    const { Items: items, LastEvaluatedKey: lastKey } = await getClient().send(
+    let { Items: items, LastEvaluatedKey: lastKey } = await getClient().send(
       new ScanCommand({
         TableName: opts.table,
         ExclusiveStartKey: startKey,
       })
     );
 
-    let keys = items.map((item) => item[opts.attributes.key] || null);
+    if (opts.expireIn > 0) {
+      const timestamp = Math.round(Date.now() / 1000);
+      items = items.filter((item) => parseInt(item.ttl || 0) >= timestamp);
+    }
+
+    let keys = items.map((item) => item[opts.attributes.key]);
     if (lastKey) {
       keys = keys.concat(await listKeys(lastKey));
     }

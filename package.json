@@ -55,6 +55,9 @@
     "ufo": "^1.1.2"
   },
   "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.338.0",
+    "@aws-sdk/credential-providers": "^3.338.0",
+    "@aws-sdk/lib-dynamodb": "^3.338.0",
     "@azure/app-configuration": "^1.4.1",
     "@azure/cosmos": "^3.17.3",
     "@azure/data-tables": "^13.2.2",
@@ -93,6 +96,8 @@
     "vue": "^3.3.4"
   },
   "peerDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.338.0",
+    "@aws-sdk/lib-dynamodb": "^3.338.0",
     "@azure/app-configuration": "^1.4.1",
     "@azure/cosmos": "^3.17.3",
     "@azure/data-tables": "^13.2.2",

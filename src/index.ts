@@ -4,6 +4,7 @@ export * from "./utils";
 export { defineDriver } from "./drivers/utils";
 
 export const builtinDrivers = {
+  awsDynamoDB: "unstorage/drivers/aws-dynamodb",
   azureStorageTable: "unstorage/drivers/azure-storage-table",
   azureCosmos: "unstorage/drivers/azure-cosmos",
   azureStorageBlob: "unstorage/drivers/azure-storage-blob",

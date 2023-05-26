@@ -4,51 +4,64 @@ import { testDriver } from "./utils";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 
+const mockOptions: KVHTTPOptions = {
+  apiToken: "api-token",
+  accountId: "123456789",
+  namespaceId: "123456789",
+};
+
 const baseURL =
-  "https://api.cloudflare.com/client/v4/accounts/:accountId/storage/kv/namespaces/:namespaceId";
+  `https://api.cloudflare.com/client/v4/accounts/${mockOptions.accountId}/storage/kv/namespaces/${mockOptions.namespaceId}` as const;
 
 const store: Record<string, any> = {};
+const optionStore: Record<string, any> = {};
 
 const server = setupServer(
-  rest.get(`${baseURL}/values/:key`, (req, res, ctx) => {
-    const key = req.params.key as string;
+  rest.get(`${baseURL}/values/:key`, ({ params }) => {
+    const key = params.key as string;
+    return new Response(JSON.stringify(store[key] ?? null), {
+      headers: { "content-type": "application/octet-stream" },
+    });
+  }),
+
+  rest.get(`${baseURL}/metadata/:key`, ({ params }) => {
+    const key = params.key as string;
     if (!(key in store)) {
-      return res(ctx.status(404), ctx.json(null));
+      return new Response(JSON.stringify({ success: false }), { status: 404 });
     }
-    return res(
-      ctx.status(200),
-      ctx.set("content-type", "application/octet-stream"),
-      ctx.body(store[key])
-    );
+    return new Response(JSON.stringify({ success: true }));
   }),
 
-  rest.get(`${baseURL}/metadata/:key`, (req, res, ctx) => {
-    const key = req.params.key as string;
-    if (!(key in store)) {
-      return res(ctx.status(404), ctx.json({ success: false }));
+  rest.put(`${baseURL}/values/:key`, async ({ params, request }) => {
+    const key = params.key as string;
+    store[key] = await request.text();
+    return new Response(null, { status: 204 });
+  }),
+
+  rest.put(`${baseURL}/bulk`, async ({ request }) => {
+    const items = (await request.json()) as Record<string, any>[];
+    if (!items) return new Response(null, { status: 404 });
+    for (const item of items) {
+      const { key, value, ...options } = item;
+      store[key] = value;
+      optionStore[key] = options;
     }
-    return res(ctx.status(200), ctx.json({ success: true }));
+    return new Response(null, { status: 204 });
   }),
 
-  rest.put(`${baseURL}/values/:key`, async (req, res, ctx) => {
-    const key = req.params.key as string;
-    store[key] = await req.text();
-    return res(ctx.status(204), ctx.json(null));
-  }),
-
-  rest.delete(`${baseURL}/values/:key`, (req, res, ctx) => {
-    const key = req.params.key as string;
+  rest.delete(`${baseURL}/values/:key`, ({ params }) => {
+    const key = params.key as string;
     delete store[key];
-    return res(ctx.status(204));
+    return new Response(null, { status: 204 });
   }),
 
-  rest.get(`${baseURL}/keys`, (req, res, ctx) => {
-    const prefix = req.url.searchParams.get("prefix") || "";
-    let keys = Object.keys(store);
-    if (req.url.searchParams.has("prefix")) {
-      keys = keys.filter((key) => key.startsWith(prefix));
-    }
-    const result = keys.map((key) => ({ name: key }));
+  rest.get(`${baseURL}/keys`, ({ params }) => {
+    const prefix = params.prefix as string;
+    const keys = Object.keys(store);
+    const filteredKeys = prefix
+      ? keys.filter((key) => key.startsWith(prefix))
+      : keys;
+    const result = filteredKeys.map((key) => ({ name: key }));
 
     const data = {
       result,
@@ -60,25 +73,16 @@ const server = setupServer(
         cursor: "",
       },
     };
-
-    return res(ctx.status(200), ctx.json(data));
+    return new Response(JSON.stringify(data));
   }),
 
-  rest.delete(`${baseURL}/bulk`, (_req, res, ctx) => {
+  rest.delete(`${baseURL}/bulk`, () => {
     Object.keys(store).forEach((key) => delete store[key]);
-    return res(ctx.status(204));
+    return new Response(null, { status: 204 });
   })
 );
 
-const mockOptions: KVHTTPOptions = {
-  apiToken: "api-token",
-  accountId: "account-id",
-  namespaceId: "namespace-id",
-};
-
-// TODO: Fix msw compatibility with Node 18
-const isNode18 = parseInt(process.version.substring(1).split(".")[0]) >= 18;
-describe.skipIf(isNode18)("drivers: cloudflare-kv-http", () => {
+describe("drivers: cloudflare-kv-http", () => {
   beforeAll(() => {
     // Establish requests interception layer before all tests.
     server.listen();

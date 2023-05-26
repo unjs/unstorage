@@ -97,12 +97,16 @@ export default defineDriver<KVHTTPOptions>((opts) => {
 
   const apiURL = opts.apiURL || "https://api.cloudflare.com";
   const baseURL = `${apiURL}/client/v4/accounts/${opts.accountId}/storage/kv/namespaces/${opts.namespaceId}`;
-  const kvFetch = $fetch.create({ baseURL, headers });
+  // const kvFetch = $fetch.create({ baseURL, headers });
+  const kvFetch = (url: string, options?: any) => {
+    return fetch(`${baseURL}${url}`, { headers, ...options });
+  };
 
   const hasItem = async (key: string) => {
     try {
-      const res = await kvFetch(`/metadata/${key}`);
-      return res?.success === true;
+      const response = await kvFetch(`/metadata/${key}`);
+      const data = (await response.json()) as any;
+      return data?.success === true;
     } catch (err) {
       if (!err.response) {
         throw err;
@@ -117,7 +121,10 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const getItem = async (key: string) => {
     try {
       // Cloudflare API returns with `content-type: application/octet-stream`
-      return await kvFetch(`/values/${key}`).then((r) => r.text());
+      const response = await kvFetch(`/values/${key}`);
+      if (response.status === 404) return null;
+      const data = (await response.json()) as any;
+      return data;
     } catch (err) {
       if (!err.response) {
         throw err;
@@ -129,12 +136,34 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     }
   };
 
-  const setItem = async (key: string, value: any) => {
-    return await kvFetch(`/values/${key}`, { method: "PUT", body: value });
+  const setItem = async (
+    key: string,
+    value: any,
+    options: Record<string, any>
+  ) => {
+    try {
+      await kvFetch(`/bulk`, {
+        method: "PUT",
+        body: JSON.stringify([{ key, value, ...options }]),
+      });
+      return;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const setItems = async (
+    items: { key: string; value: any; options: Record<string, any> }[]
+  ) => {
+    return await kvFetch(`/bulk`, {
+      method: "PUT",
+      body: JSON.stringify(items),
+    });
   };
 
   const removeItem = async (key: string) => {
-    return await kvFetch(`/values/${key}`, { method: "DELETE" });
+    await kvFetch(`/values/${key}`, { method: "DELETE" });
+    return;
   };
 
   const getKeys = async (base?: string) => {
@@ -146,19 +175,21 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     }
 
     const firstPage = await kvFetch("/keys", { params });
-    firstPage.result.forEach(({ name }: { name: string }) => keys.push(name));
+    const data = (await firstPage.json()) as any;
+    data.result.forEach(({ name }: { name: string }) => keys.push(name));
 
-    const cursor = firstPage.result_info.cursor;
+    const cursor = data.result_info.cursor;
     if (cursor) {
       params.cursor = cursor;
     }
 
     while (params.cursor) {
       const pageResult = await kvFetch("/keys", { params });
-      pageResult.result.forEach(({ name }: { name: string }) =>
+      const dataPageResult = (await pageResult.json()) as any;
+      dataPageResult.result.forEach(({ name }: { name: string }) =>
         keys.push(name)
       );
-      const pageCursor = pageResult.result_info.cursor;
+      const pageCursor = dataPageResult.result_info.cursor;
       if (pageCursor) {
         params.cursor = pageCursor;
       } else {
@@ -198,6 +229,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     hasItem,
     getItem,
     setItem,
+    setItems,
     removeItem,
     getKeys,
     clear,

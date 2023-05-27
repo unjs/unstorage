@@ -4,6 +4,8 @@ export type WatchCallback = (event: WatchEvent, key: string) => any;
 
 type MaybePromise<T> = T | Promise<T>;
 
+type MaybeDefined<T> = T extends any ? T : any;
+
 export type Unwatch = () => MaybePromise<void>;
 
 export interface StorageMeta {
@@ -49,21 +51,29 @@ export interface Driver {
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }
 
-export interface Storage {
+export interface Storage<T extends StorageValue = StorageValue> {
   // Item
   hasItem: (key: string, opts?: TransactionOptions) => Promise<boolean>;
-  getItem: (key: string, opts?: TransactionOptions) => Promise<StorageValue>;
-  /** @experimental See https://github.com/unjs/unstorage/issues/142 */
-  getItemRaw: (key: string, opts?: TransactionOptions) => Promise<any>;
-  setItem: (
+  // TODO: When miss get, return null or undefined.
+  // https://github.com/unjs/unstorage/issues/205
+  getItem: <U extends T>(
     key: string,
-    value: StorageValue,
+    opts?: TransactionOptions
+  ) => Promise<U | null | undefined>;
+  /** @experimental See https://github.com/unjs/unstorage/issues/142 */
+  getItemRaw: <T = any>(
+    key: string,
+    opts?: TransactionOptions
+  ) => Promise<MaybeDefined<T> | null | undefined>;
+  setItem: <U extends T>(
+    key: string,
+    value: U,
     opts?: TransactionOptions
   ) => Promise<void>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
-  setItemRaw: (
+  setItemRaw: <T = any>(
     key: string,
-    value: any,
+    value: MaybeDefined<T>,
     opts?: TransactionOptions
   ) => Promise<void>;
   removeItem: (

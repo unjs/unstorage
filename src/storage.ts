@@ -23,7 +23,9 @@ export interface CreateStorageOptions {
   driver?: Driver;
 }
 
-export function createStorage(options: CreateStorageOptions = {}): Storage {
+export function createStorage<T extends StorageValue>(
+  options: CreateStorageOptions = {}
+): Storage<T> {
   const context: StorageCTX = {
     mounts: { "": options.driver || memory() },
     mountpoints: [""],
@@ -364,7 +366,7 @@ export async function restoreSnapshot(
 function watch(driver: Driver, onChange: WatchCallback, base: string) {
   return driver.watch
     ? driver.watch((event, key) => onChange(event, base + key))
-    : () => {};
+    : () => { };
 }
 
 async function dispose(driver: Driver) {

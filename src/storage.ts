@@ -366,7 +366,7 @@ export async function restoreSnapshot(
 function watch(driver: Driver, onChange: WatchCallback, base: string) {
   return driver.watch
     ? driver.watch((event, key) => onChange(event, base + key))
-    : () => { };
+    : () => {};
 }
 
 async function dispose(driver: Driver) {

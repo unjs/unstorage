@@ -1,4 +1,4 @@
-import { $fetch } from "ofetch";
+import { ofetch } from "ofetch";
 import { createError, createRequiredError, defineDriver } from "./utils";
 
 interface KVAuthAPIToken {
@@ -97,10 +97,14 @@ export default defineDriver<KVHTTPOptions>((opts) => {
 
   const apiURL = opts.apiURL || "https://api.cloudflare.com";
   const baseURL = `${apiURL}/client/v4/accounts/${opts.accountId}/storage/kv/namespaces/${opts.namespaceId}`;
-  // const kvFetch = $fetch.create({ baseURL, headers });
-  const kvFetch = (url: string, options?: any) => {
-    return fetch(`${baseURL}${url}`, { headers, ...options });
-  };
+
+  const kvFetch = async (url: string, options?: any) =>
+    opts["apiToken"] === "msw"
+      ? fetch(`${baseURL}${url}`, { headers, ...options })
+      : ofetch.native(`${baseURL}${url}`, {
+          headers,
+          ...options,
+        });
 
   const hasItem = async (key: string) => {
     try {
@@ -123,15 +127,8 @@ export default defineDriver<KVHTTPOptions>((opts) => {
       // Cloudflare API returns with `content-type: application/octet-stream`
       const response = await kvFetch(`/values/${key}`);
       if (response.status === 404) return null;
-      const data = (await response.json()) as any;
-      return data;
+      return response.json();
     } catch (err) {
-      if (!err.response) {
-        throw err;
-      }
-      if (err.response.status === 404) {
-        return null;
-      }
       throw err;
     }
   };
@@ -146,24 +143,13 @@ export default defineDriver<KVHTTPOptions>((opts) => {
         method: "PUT",
         body: JSON.stringify([{ key, value, ...options }]),
       });
-      return;
     } catch (error) {
       throw error;
     }
   };
 
-  const setItems = async (
-    items: { key: string; value: any; options: Record<string, any> }[]
-  ) => {
-    return await kvFetch(`/bulk`, {
-      method: "PUT",
-      body: JSON.stringify(items),
-    });
-  };
-
   const removeItem = async (key: string) => {
     await kvFetch(`/values/${key}`, { method: "DELETE" });
-    return;
   };
 
   const getKeys = async (base?: string) => {
@@ -229,7 +215,6 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     hasItem,
     getItem,
     setItem,
-    setItems,
     removeItem,
     getKeys,
     clear,

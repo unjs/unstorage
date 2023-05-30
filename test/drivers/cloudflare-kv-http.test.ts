@@ -1,11 +1,12 @@
 import { afterAll, beforeAll, describe } from "vitest";
 import driver, { KVHTTPOptions } from "../../src/drivers/cloudflare-kv-http";
 import { testDriver } from "./utils";
-import { rest } from "msw";
+import { rest, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
+import { ofetch } from "ofetch";
 
 const mockOptions: KVHTTPOptions = {
-  apiToken: "api-token",
+  apiToken: "msw",
   accountId: "123456789",
   namespaceId: "123456789",
 };
@@ -16,20 +17,19 @@ const baseURL =
 const store: Record<string, any> = {};
 const optionStore: Record<string, any> = {};
 
+//Latest MSW docs : https://github.com/mswjs/msw/blob/feat/standard-api/MIGRATING.md
 const server = setupServer(
   rest.get(`${baseURL}/values/:key`, ({ params }) => {
     const key = params.key as string;
-    return new Response(JSON.stringify(store[key] ?? null), {
-      headers: { "content-type": "application/octet-stream" },
-    });
+    return HttpResponse.json(store[key] ?? null);
   }),
 
   rest.get(`${baseURL}/metadata/:key`, ({ params }) => {
     const key = params.key as string;
-    if (!(key in store)) {
-      return new Response(JSON.stringify({ success: false }), { status: 404 });
+    if (!store[key]) {
+      return HttpResponse.json({ success: false }, { status: 404 });
     }
-    return new Response(JSON.stringify({ success: true }));
+    return HttpResponse.json({ success: true });
   }),
 
   rest.put(`${baseURL}/values/:key`, async ({ params, request }) => {
@@ -73,7 +73,7 @@ const server = setupServer(
         cursor: "",
       },
     };
-    return new Response(JSON.stringify(data));
+    return HttpResponse.json(data);
   }),
 
   rest.delete(`${baseURL}/bulk`, () => {

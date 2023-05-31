@@ -133,9 +133,9 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         return driver.getItems
           ? asyncCall(
               driver.getItems,
-              items.map(({ key, ...rest }) => ({
+              items.map(({ key, opts }) => ({
                 key: normalizeKey(key),
-                ...rest,
+                opts,
               }))
             )
           : Promise.all(
@@ -176,15 +176,15 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
           return m.driver.setItems
             ? asyncCall(
                 m.driver.setItems,
-                items.map(({ key, value, ...rest }) => ({
+                items.map(({ key, value, opts }) => ({
                   key: normalizeKey(key),
                   value,
-                  ...rest,
+                  opts,
                 }))
               )
             : Promise.all(
-                items.map(({ key, value, ...rest }) =>
-                  m.driver.setItem(normalizeKey(key), value, rest)
+                items.map(({ key, value, opts }) =>
+                  m.driver.setItem(normalizeKey(key), value, opts)
                 )
               );
         })

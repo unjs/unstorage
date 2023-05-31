@@ -100,6 +100,57 @@ export function testDriver(opts: TestOptions) {
     );
   });
 
+  // Bulk tests
+  it("setItems", async () => {
+    await ctx.storage.setItems([
+      { key: "t:1", value: "test_data_t1" },
+      { key: "t:2", value: "test_data_t2" },
+      { key: "t:3", value: "test_data_t3" },
+    ]);
+    expect(await ctx.storage.getItem("t:1")).toBe("test_data_t1");
+    expect(await ctx.storage.getItem("t:2")).toBe("test_data_t2");
+    expect(await ctx.storage.getItem("t:3")).toBe("test_data_t3");
+  });
+
+  it("getItems string array syntax", async () => {
+    await ctx.storage.setItem("u1:a", "test_data_u1:a");
+    await ctx.storage.setItem("u2:a", "test_data_u2:a");
+    await ctx.storage.setItem("u3:a?q=1", "test_data_u3:a?q=1");
+
+    expect(await ctx.storage.getItems(["u1:a", "u2:a", "u3:a"])).toMatchObject([
+      "test_data_u1:a",
+      "test_data_u2:a",
+      "test_data_u3:a?q=1",
+    ]);
+  });
+
+  it("getItems object array syntax", async () => {
+    await ctx.storage.setItem("v1:a", "test_data_v1:a");
+    await ctx.storage.setItem("v2:a", "test_data_v2:a");
+    await ctx.storage.setItem("v3:a?q=1", "test_data_v3:a?q=1");
+
+    expect(
+      await ctx.storage.getItems([
+        { key: "v1:a" },
+        { key: "v2:a" },
+        { key: "v3:a?q=1" },
+      ])
+    ).toMatchObject([
+      {
+        key: "v1:a",
+        value: "test_data_v1:a",
+      },
+      {
+        key: "v2:a",
+        value: "test_data_v2:a",
+      },
+      {
+        key: "v3:a", // key should lose the querystring
+        value: "test_data_v3:a?q=1",
+      },
+    ]);
+  });
+
   // TODO: Refactor to move after cleanup
   if (opts.additionalTests) {
     opts.additionalTests(ctx);

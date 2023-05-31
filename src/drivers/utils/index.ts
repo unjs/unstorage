@@ -1,4 +1,4 @@
-import type { Driver } from "../../types";
+import type { Driver, TransactionOptions } from "../../types";
 
 type DriverFactory<T> = (opts?: T) => Driver;
 
@@ -38,4 +38,14 @@ export function createRequiredError(driver: string, name: string | string[]) {
     );
   }
   return createError(driver, `Missing required option \`${name}\`.`);
+}
+
+export function isItemsStringArray(items: any[]): items is string[] {
+  return typeof items[0] === "string";
+}
+
+export function isItemsObjectArray(
+  items: any[]
+): items is { key: string; opts?: TransactionOptions }[] {
+  return typeof items[0] === "object";
 }

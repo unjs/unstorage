@@ -26,6 +26,15 @@ describe("drivers: redis", () => {
             "test:data:serialized1.json",
             "test:data:serialized2.json",
             "test:data:raw.bin",
+            "test:t:1",
+            "test:t:2",
+            "test:t:3",
+            "test:u1:a",
+            "test:u2:a",
+            "test:u3:a",
+            "test:v1:a",
+            "test:v2:a",
+            "test:v3:a",
           ]
         `);
         await client.disconnect();

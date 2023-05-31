@@ -10,6 +10,7 @@ import type {
 import memory from "./drivers/memory";
 import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
+import { isItemsObjectArray, isItemsStringArray } from "./drivers/utils";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -115,6 +116,36 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         destr(value)
       );
     },
+    getItems(items) {
+      if (isItemsStringArray(items)) {
+        const key = items[0];
+        const { driver } = getMount(key); // We just need one mountpoint
+        return driver.getItems
+          ? asyncCall(
+              driver.getItems,
+              items.map((key) => normalizeKey(key))
+            )
+          : Promise.all(items.map((key) => driver.getItem(normalizeKey(key))));
+      }
+      if (isItemsObjectArray(items)) {
+        const { key } = items[0];
+        const { driver } = getMount(key); // We just need one mountpoint
+        return driver.getItems
+          ? asyncCall(
+              driver.getItems,
+              items.map(({ key, ...rest }) => ({
+                key: normalizeKey(key),
+                ...rest,
+              }))
+            )
+          : Promise.all(
+              items.map(async ({ key, opts }) => ({
+                key: normalizeKey(key),
+                value: await driver.getItem(normalizeKey(key), opts),
+              }))
+            );
+      }
+    },
     getItemRaw(key, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
@@ -138,6 +169,26 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
       if (!driver.watch) {
         onChange("update", key);
       }
+    },
+    async setItems(items) {
+      await Promise.all(
+        getMounts("", false).map((m) => {
+          return m.driver.setItems
+            ? asyncCall(
+                m.driver.setItems,
+                items.map(({ key, value, ...rest }) => ({
+                  key: normalizeKey(key),
+                  value,
+                  ...rest,
+                }))
+              )
+            : Promise.all(
+                items.map(({ key, value, ...rest }) =>
+                  m.driver.setItem(normalizeKey(key), value, rest)
+                )
+              );
+        })
+      );
     },
     async setItemRaw(key, value, opts = {}) {
       if (value === undefined) {

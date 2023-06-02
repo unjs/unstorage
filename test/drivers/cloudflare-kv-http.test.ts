@@ -3,7 +3,6 @@ import driver, { KVHTTPOptions } from "../../src/drivers/cloudflare-kv-http";
 import { testDriver } from "./utils";
 import { rest, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
-import { ofetch } from "ofetch";
 
 const mockOptions: KVHTTPOptions = {
   apiToken: "msw",
@@ -17,25 +16,36 @@ const baseURL =
 const store: Record<string, any> = {};
 const optionStore: Record<string, any> = {};
 
+const successData = {
+  errors: [],
+  messages: [],
+  result: {},
+  success: true,
+};
+
+const success = () => HttpResponse.json(successData);
+
 //Latest MSW docs : https://github.com/mswjs/msw/blob/feat/standard-api/MIGRATING.md
+// Mocking cloudflare API : https://developers.cloudflare.com/api/operations/workers-kv-namespace-read-the-metadata-for-a-key
 const server = setupServer(
   rest.get(`${baseURL}/values/:key`, ({ params }) => {
     const key = params.key as string;
-    return HttpResponse.json(store[key] ?? null);
+    return store[key]
+      ? HttpResponse.json(store[key])
+      : HttpResponse.json({ success: false, result: null }, { status: 404 });
   }),
 
   rest.get(`${baseURL}/metadata/:key`, ({ params }) => {
     const key = params.key as string;
-    if (!store[key]) {
-      return HttpResponse.json({ success: false }, { status: 404 });
-    }
-    return HttpResponse.json({ success: true });
+    return store[key]
+      ? HttpResponse.json({ success: true, result: store[key] })
+      : HttpResponse.json({ success: false, result: null }, { status: 404 });
   }),
 
   rest.put(`${baseURL}/values/:key`, async ({ params, request }) => {
     const key = params.key as string;
     store[key] = await request.text();
-    return new Response(null, { status: 204 });
+    return success();
   }),
 
   rest.put(`${baseURL}/bulk`, async ({ request }) => {
@@ -46,13 +56,13 @@ const server = setupServer(
       store[key] = value;
       optionStore[key] = options;
     }
-    return new Response(null, { status: 204 });
+    return success();
   }),
 
   rest.delete(`${baseURL}/values/:key`, ({ params }) => {
     const key = params.key as string;
     delete store[key];
-    return new Response(null, { status: 204 });
+    return success();
   }),
 
   rest.get(`${baseURL}/keys`, ({ params }) => {
@@ -64,10 +74,8 @@ const server = setupServer(
     const result = filteredKeys.map((key) => ({ name: key }));
 
     const data = {
+      ...successData,
       result,
-      success: true,
-      errors: [],
-      messages: [],
       result_info: {
         count: keys.length,
         cursor: "",
@@ -78,7 +86,7 @@ const server = setupServer(
 
   rest.delete(`${baseURL}/bulk`, () => {
     Object.keys(store).forEach((key) => delete store[key]);
-    return new Response(null, { status: 204 });
+    return success();
   })
 );
 

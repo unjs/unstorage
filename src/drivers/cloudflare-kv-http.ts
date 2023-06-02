@@ -99,7 +99,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const baseURL = `${apiURL}/client/v4/accounts/${opts.accountId}/storage/kv/namespaces/${opts.namespaceId}`;
 
   const kvFetch = async (url: string, options?: any) =>
-    opts["apiToken"] === "msw"
+    opts["apiToken"] === "msw" //Using raw fetch is necessary for msw to work.
       ? fetch(`${baseURL}${url}`, { headers, ...options })
       : ofetch.native(`${baseURL}${url}`, {
           headers,
@@ -107,30 +107,17 @@ export default defineDriver<KVHTTPOptions>((opts) => {
         });
 
   const hasItem = async (key: string) => {
-    try {
-      const response = await kvFetch(`/metadata/${key}`);
-      const data = (await response.json()) as any;
-      return data?.success === true;
-    } catch (err) {
-      if (!err.response) {
-        throw err;
-      }
-      if (err.response.status === 404) {
-        return false;
-      }
-      throw err;
-    }
+    const response = await kvFetch(`/metadata/${key}`);
+    if (response.status === 404) return false;
+    const data = (await response.json()) as any;
+    return data?.success === true;
   };
 
   const getItem = async (key: string) => {
-    try {
-      // Cloudflare API returns with `content-type: application/octet-stream`
-      const response = await kvFetch(`/values/${key}`);
-      if (response.status === 404) return null;
-      return response.json();
-    } catch (err) {
-      throw err;
-    }
+    // Cloudflare API returns with `content-type: application/json`: https://developers.cloudflare.com/api/operations/workers-kv-namespace-read-key-value-pair
+    const response = await kvFetch(`/values/${key}`);
+    if (response.status === 404) return null;
+    return response.json();
   };
 
   const setItem = async (
@@ -138,14 +125,10 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     value: any,
     options: Record<string, any>
   ) => {
-    try {
-      await kvFetch(`/bulk`, {
-        method: "PUT",
-        body: JSON.stringify([{ key, value, ...options }]),
-      });
-    } catch (error) {
-      throw error;
-    }
+    await kvFetch(`/bulk`, {
+      method: "PUT",
+      body: JSON.stringify([{ key, value, ...options }]),
+    });
   };
 
   const removeItem = async (key: string) => {

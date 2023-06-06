@@ -46,6 +46,12 @@ export default defineDriver((opts: RedisOptions = {}) => {
     } else {
       redisClient = new Redis(opts);
     }
+    redisClient.on('error',(e,x)=>{
+      console.error("An error occurred on redis client - disconnecting from client ",e)
+      if(e.code==='ECONNREFUSED'){
+        redisClient.disconnect();
+      }
+    })
     return redisClient;
   };
 

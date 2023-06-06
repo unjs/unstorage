@@ -46,6 +46,10 @@ export default defineDriver((opts: RedisOptions = {}) => {
     } else {
       redisClient = new Redis(opts);
     }
+    redisClient.on('error',(e)=>{
+      console.error("An error occurred on redis client - disconnecting from client ",e)
+      redisClient.disconnect();
+    })
     return redisClient;
   };
 

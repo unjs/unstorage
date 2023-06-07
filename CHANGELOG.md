@@ -42,10 +42,10 @@ All notable changes to this project will be documented in this file. See [standa
 ### ❤️  Contributors
 
 - Pooya Parsa ([@pi0](http://github.com/pi0))
-- Marco 
+- Marco
 - João Pedro Antunes Silva <github@joaopedroas.com>
 - Abdurrahman Shofy Adianto <azophy@gmail.com>
-- Timbological 
+- Timbological
 - Daniel Roe <daniel@roe.dev>
 - Estéban ([@Barbapapazes](http://github.com/Barbapapazes))
 - Heb ([@Hebilicious](http://github.com/Hebilicious))
@@ -115,7 +115,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 - Pooya Parsa ([@pi0](http://github.com/pi0))
 - 魔王少年 ([@maou-shonen](http://github.com/maou-shonen))
-- Neelansh Mathur 
+- Neelansh Mathur
 - Sébastien Chopin ([@Atinux](http://github.com/Atinux))
 
 ## v1.6.1
@@ -215,7 +215,7 @@ All notable changes to this project will be documented in this file. See [standa
 - Pooya Parsa ([@pi0](http://github.com/pi0))
 - Dave Stewart <info@davestewart.co.uk>
 - Winton Welsh ([@winton](http://github.com/winton))
-- Steady Gaze 
+- Steady Gaze
 - Corentin THOMASSET <corentin.thomasset74@gmail.com>
 - Tejas Magade ([@thetejasmagade](http://github.com/thetejasmagade))
 

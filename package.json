@@ -73,7 +73,7 @@
     "@vitest/coverage-c8": "^0.31.1",
     "@vue/compiler-sfc": "^3.3.4",
     "azurite": "^3.23.0",
-    "c8": "^7.13.0",
+    "c8": "^8.0.0",
     "changelogen": "^0.5.3",
     "eslint": "^8.41.0",
     "eslint-config-unjs": "^0.2.0",

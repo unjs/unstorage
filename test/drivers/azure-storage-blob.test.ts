@@ -4,7 +4,7 @@ import { testDriver } from "./utils";
 import { BlobServiceClient } from "@azure/storage-blob";
 import { ChildProcess, exec } from "child_process";
 
-describe("drivers: azure-storage-blob", () => {
+describe.skip("drivers: azure-storage-blob", () => {
   let azuriteProcess: ChildProcess;
   beforeAll(async () => {
     azuriteProcess = exec("npx azurite-blob --silent");

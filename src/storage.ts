@@ -251,8 +251,10 @@ export function createStorage<T extends StorageValue>(
           }
           // Fallback to remove all keys if clear not implemented
           if (m.driver.removeItem) {
-            const keys = await m.driver.getKeys(m.relativeBase, opts);
-            return Promise.all(keys.map((key) => m.driver.removeItem!(key)));
+            const keys = await m.driver.getKeys(m.relativeBase || "", opts);
+            return Promise.all(
+              keys.map((key) => m.driver.removeItem!(key, opts))
+            );
           }
           // Readonly
         })

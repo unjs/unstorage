@@ -54,17 +54,15 @@ export interface Driver {
 export interface Storage<T extends StorageValue = StorageValue> {
   // Item
   hasItem: (key: string, opts?: TransactionOptions) => Promise<boolean>;
-  // TODO: When miss get, return null or undefined.
-  // https://github.com/unjs/unstorage/issues/205
   getItem: <U extends T>(
     key: string,
     opts?: TransactionOptions
-  ) => Promise<U | null | undefined>;
+  ) => Promise<U | null>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   getItemRaw: <T = any>(
     key: string,
     opts?: TransactionOptions
-  ) => Promise<MaybeDefined<T> | null | undefined>;
+  ) => Promise<MaybeDefined<T> | null>;
   setItem: <U extends T>(
     key: string,
     value: U,

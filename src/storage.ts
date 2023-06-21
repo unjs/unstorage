@@ -193,7 +193,7 @@ export function createStorage<T extends StorageValue>(
           driver.getItem,
           relativeKey + "$",
           opts
-        ).then((value_) => destr(value_));
+        ).then((value_) => destr<any>(value_));
         if (value && typeof value === "object") {
           // TODO: Support date by destr?
           if (typeof value.atime === "string") {

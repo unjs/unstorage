@@ -38,7 +38,8 @@
     "lint:fix": "eslint --ext .ts . --fix && prettier -w src test demo docs/content",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
-    "test": "pnpm lint && vitest run --coverage",
+    "test": "pnpm lint && pnpm test:types && vitest run --coverage",
+    "test:types": "tsc --noEmit --skipLibCheck",
     "unstorage": "pnpm jiti src/cli"
   },
   "dependencies": {

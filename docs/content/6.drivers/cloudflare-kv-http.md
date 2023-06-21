@@ -4,7 +4,7 @@ Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/learning
 
 You need to create a KV namespace. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
 
-**Note:** This driver uses native fetch and works universally! For using directly in a cloudflare worker environemnt, please use `cloudflare-kv-binding` driver for best performance!
+**Note:** This driver uses native fetch and works universally! For using directly in a cloudflare worker environment, please use `cloudflare-kv-binding` driver for best performance!
 
 ```js
 import { createStorage } from "unstorage";

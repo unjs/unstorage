@@ -23,7 +23,9 @@ export interface CreateStorageOptions {
   driver?: Driver;
 }
 
-export function createStorage(options: CreateStorageOptions = {}): Storage {
+export function createStorage<T extends StorageValue>(
+  options: CreateStorageOptions = {}
+): Storage<T> {
   const context: StorageCTX = {
     mounts: { "": options.driver || memory() },
     mountpoints: [""],
@@ -191,7 +193,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
           driver.getItem,
           relativeKey + "$",
           opts
-        ).then((value_) => destr(value_));
+        ).then((value_) => destr<any>(value_));
         if (value && typeof value === "object") {
           // TODO: Support date by destr?
           if (typeof value.atime === "string") {

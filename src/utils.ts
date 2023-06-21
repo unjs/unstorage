@@ -1,4 +1,4 @@
-import type { Storage } from "./types";
+import type { Storage, StorageValue } from "./types";
 
 type StorageKeys = Array<keyof Storage>;
 
@@ -18,7 +18,10 @@ const storageKeyProperties: StorageKeys = [
   "unmount",
 ];
 
-export function prefixStorage(storage: Storage, base: string) {
+export function prefixStorage<T extends StorageValue>(
+  storage: Storage<T>,
+  base: string
+): Storage<T> {
   base = normalizeBaseKey(base);
   if (!base) {
     return storage;

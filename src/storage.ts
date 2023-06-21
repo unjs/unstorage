@@ -51,7 +51,7 @@ export function createStorage<T extends StorageValue>(
     };
   };
 
-  const getMounts = (base: string, includeParent: boolean) => {
+  const getMounts = (base: string, includeParent?: boolean) => {
     return context.mountpoints
       .filter(
         (mountpoint) =>
@@ -217,7 +217,7 @@ export function createStorage<T extends StorageValue>(
     async getKeys(base, opts = {}) {
       base = normalizeBaseKey(base);
       const mounts = getMounts(base, true);
-      let maskedMounts = [];
+      let maskedMounts: string[] = [];
       const allKeys = [];
       for (const mount of mounts) {
         const rawKeys = await asyncCall(
@@ -251,8 +251,10 @@ export function createStorage<T extends StorageValue>(
           }
           // Fallback to remove all keys if clear not implemented
           if (m.driver.removeItem) {
-            const keys = await m.driver.getKeys(m.relativeBase, opts);
-            return Promise.all(keys.map((key) => m.driver.removeItem!(key)));
+            const keys = await m.driver.getKeys(m.relativeBase || "", opts);
+            return Promise.all(
+              keys.map((key) => m.driver.removeItem!(key, opts))
+            );
           }
           // Readonly
         })

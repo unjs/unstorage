@@ -21,7 +21,13 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
 
   const r = (key: string) => (opts.base ? opts.base + ":" : "") + key;
 
-  let _storageListener: (ev: StorageEvent) => void;
+  let _storageListener: undefined | ((ev: StorageEvent) => void);
+  const _unwatch = () => {
+    if (_storageListener) {
+      opts.window!.removeEventListener("storage", _storageListener);
+    }
+    _storageListener = undefined;
+  };
 
   return {
     name: DRIVER_NAME,
@@ -30,22 +36,22 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
       return Object.prototype.hasOwnProperty.call(opts.sessionStorage, r(key));
     },
     getItem(key) {
-      return opts.sessionStorage.getItem(r(key));
+      return opts.sessionStorage!.getItem(r(key));
     },
     setItem(key, value) {
-      return opts.sessionStorage.setItem(r(key), value);
+      return opts.sessionStorage!.setItem(r(key), value);
     },
     removeItem(key) {
-      return opts.sessionStorage.removeItem(r(key));
+      return opts.sessionStorage!.removeItem(r(key));
     },
     getKeys() {
-      return Object.keys(opts.sessionStorage);
+      return Object.keys(opts.sessionStorage!);
     },
     clear() {
       if (!opts.base) {
         opts.sessionStorage!.clear();
       } else {
-        for (const key of Object.keys(opts.sessionStorage)) {
+        for (const key of Object.keys(opts.sessionStorage!)) {
           opts.sessionStorage?.removeItem(key);
         }
       }
@@ -55,19 +61,16 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
     },
     watch(callback) {
       if (!opts.window) {
-        return;
+        return _unwatch;
       }
       _storageListener = ({ key, newValue }: StorageEvent) => {
         if (key) {
           callback(newValue ? "update" : "remove", key);
         }
       };
-      opts.window.addEventListener("storage", _storageListener);
+      opts.window!.addEventListener("storage", _storageListener);
 
-      return () => {
-        opts.window.removeEventListener("storage", _storageListener);
-        _storageListener = undefined;
-      };
+      return _unwatch;
     },
   };
 });

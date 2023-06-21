@@ -103,11 +103,11 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     try {
       const res = await kvFetch(`/metadata/${key}`);
       return res?.success === true;
-    } catch (err) {
-      if (!err.response) {
+    } catch (err: any) {
+      if (!err?.response) {
         throw err;
       }
-      if (err.response.status === 404) {
+      if (err?.response?.status === 404) {
         return false;
       }
       throw err;
@@ -118,11 +118,11 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     try {
       // Cloudflare API returns with `content-type: application/octet-stream`
       return await kvFetch(`/values/${key}`).then((r) => r.text());
-    } catch (err) {
-      if (!err.response) {
+    } catch (err: any) {
+      if (!err?.response) {
         throw err;
       }
-      if (err.response.status === 404) {
+      if (err?.response?.status === 404) {
         return null;
       }
       throw err;
@@ -140,7 +140,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const getKeys = async (base?: string) => {
     const keys: string[] = [];
 
-    const params: Record<string, string> = {};
+    const params: Record<string, string | undefined> = {};
     if (base) {
       params.prefix = base;
     }
@@ -171,7 +171,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const clear = async () => {
     const keys: string[] = await getKeys();
     // Split into chunks of 10000, as the API only allows for 10,000 keys at a time
-    const chunks = keys.reduce(
+    const chunks = keys.reduce<string[][]>(
       (acc, key, i) => {
         if (i % 10000 === 0) {
           acc.push([]);

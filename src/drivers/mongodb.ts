@@ -71,10 +71,12 @@ export default defineDriver((opts: MongoDbOptions) => {
     },
     async getMeta(key) {
       const document = await getMongoCollection().findOne({ key });
-      return {
-        mtime: document.modifiedAt,
-        birthtime: document.createdAt,
-      };
+      return document
+        ? {
+            mtime: document.modifiedAt,
+            birthtime: document.createdAt,
+          }
+        : {};
     },
     async clear() {
       await getMongoCollection().deleteMany({});

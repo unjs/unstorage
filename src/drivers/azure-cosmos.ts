@@ -123,7 +123,9 @@ export default defineDriver((opts: AzureCosmosOptions) => {
         .item(key)
         .read<AzureCosmosItem>();
       return {
-        mtime: new Date(item.resource.modified),
+        mtime: item.resource?.modified
+          ? new Date(item.resource.modified)
+          : undefined,
       };
     },
     async clear() {

@@ -51,7 +51,7 @@ export function createStorage<T extends StorageValue>(
     };
   };
 
-  const getMounts = (base: string, includeParent: boolean) => {
+  const getMounts = (base: string, includeParent?: boolean) => {
     return context.mountpoints
       .filter(
         (mountpoint) =>
@@ -217,7 +217,7 @@ export function createStorage<T extends StorageValue>(
     async getKeys(base, opts = {}) {
       base = normalizeBaseKey(base);
       const mounts = getMounts(base, true);
-      let maskedMounts = [];
+      let maskedMounts: string[] = [];
       const allKeys = [];
       for (const mount of mounts) {
         const rawKeys = await asyncCall(

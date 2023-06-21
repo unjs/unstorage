@@ -19,34 +19,31 @@ type TransactionOptions = Record<string, any>;
 export interface Driver {
   name?: string;
   options?: any;
-  hasItem: (key: string, opts?: TransactionOptions) => MaybePromise<boolean>;
+  hasItem: (key: string, opts: TransactionOptions) => MaybePromise<boolean>;
   getItem: (
     key: string,
     opts?: TransactionOptions
   ) => MaybePromise<StorageValue>;
   /** @experimental */
-  getItemRaw?: (
-    key: string,
-    opts?: TransactionOptions
-  ) => MaybePromise<unknown>;
+  getItemRaw?: (key: string, opts: TransactionOptions) => MaybePromise<unknown>;
   setItem?: (
     key: string,
     value: string,
-    opts?: TransactionOptions
+    opts: TransactionOptions
   ) => MaybePromise<void>;
   /** @experimental */
   setItemRaw?: (
     key: string,
     value: any,
-    opts?: TransactionOptions
+    opts: TransactionOptions
   ) => MaybePromise<void>;
-  removeItem?: (key: string, opts?: TransactionOptions) => MaybePromise<void>;
+  removeItem?: (key: string, opts: TransactionOptions) => MaybePromise<void>;
   getMeta?: (
     key: string,
-    opts?: TransactionOptions
-  ) => MaybePromise<StorageMeta>;
-  getKeys: (base?: string, opts?: TransactionOptions) => MaybePromise<string[]>;
-  clear?: (base?: string, opts?: TransactionOptions) => MaybePromise<void>;
+    opts: TransactionOptions
+  ) => MaybePromise<StorageMeta | null>;
+  getKeys: (base: string, opts: TransactionOptions) => MaybePromise<string[]>;
+  clear?: (base: string, opts: TransactionOptions) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }

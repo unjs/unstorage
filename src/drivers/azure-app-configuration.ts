@@ -85,7 +85,7 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
           key: p(key),
           label: opts.label,
         });
-        return d(setting.value);
+        return setting.value;
       } catch {
         return null;
       }

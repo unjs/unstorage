@@ -1,8 +1,8 @@
 import type { Driver } from "../../types";
 
-type DriverFactory<T> = (opts?: T) => Driver;
+type DriverFactory<T> = (opts: T) => Driver;
 
-export function defineDriver<T = any>(
+export function defineDriver<T = any | void>(
   factory: DriverFactory<T>
 ): DriverFactory<T> {
   return factory;

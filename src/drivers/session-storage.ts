@@ -22,6 +22,12 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
   const r = (key: string) => (opts.base ? opts.base + ":" : "") + key;
 
   let _storageListener: undefined | ((ev: StorageEvent) => void);
+  const _unwatch = () => {
+    if (_storageListener) {
+      opts.window!.removeEventListener("storage", _storageListener);
+    }
+    _storageListener = undefined;
+  };
 
   return {
     name: DRIVER_NAME,
@@ -55,7 +61,7 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
     },
     watch(callback) {
       if (!opts.window) {
-        return () => {};
+        return _unwatch;
       }
       _storageListener = ({ key, newValue }: StorageEvent) => {
         if (key) {
@@ -64,12 +70,7 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
       };
       opts.window!.addEventListener("storage", _storageListener);
 
-      return () => {
-        if (_storageListener) {
-          opts.window!.removeEventListener("storage", _storageListener);
-        }
-        _storageListener = undefined;
-      };
+      return _unwatch;
     },
   };
 });

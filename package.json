@@ -80,6 +80,7 @@
     "ioredis-mock": "^8.7.0",
     "jiti": "^1.18.2",
     "jsdom": "^22.0.0",
+    "miniflare": "^3.0.1",
     "monaco-editor": "^0.38.0",
     "mongodb": "^5.5.0",
     "mongodb-memory-server": "^8.12.2",

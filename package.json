@@ -67,7 +67,7 @@
     "@types/ioredis-mock": "^8.2.2",
     "@types/jsdom": "^21.1.1",
     "@types/mri": "^1.1.1",
-    "@types/node": "^20.3.1",
+    "@types/node": "^20.3.2",
     "@upstash/redis": "^1.21.0",
     "@vercel/kv": "^0.2.2",
     "@vitejs/plugin-vue": "^4.2.3",
@@ -132,5 +132,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@8.6.3"
+  "packageManager": "pnpm@8.6.5"
 }

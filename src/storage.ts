@@ -23,7 +23,9 @@ export interface CreateStorageOptions {
   driver?: Driver;
 }
 
-export function createStorage(options: CreateStorageOptions = {}): Storage {
+export function createStorage<T extends StorageValue>(
+  options: CreateStorageOptions = {}
+): Storage<T> {
   const context: StorageCTX = {
     mounts: { "": options.driver || memory() },
     mountpoints: [""],
@@ -49,7 +51,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
     };
   };
 
-  const getMounts = (base: string, includeParent: boolean) => {
+  const getMounts = (base: string, includeParent?: boolean) => {
     return context.mountpoints
       .filter(
         (mountpoint) =>
@@ -191,7 +193,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
           driver.getItem,
           relativeKey + "$",
           opts
-        ).then((value_) => destr(value_));
+        ).then((value_) => destr<any>(value_));
         if (value && typeof value === "object") {
           // TODO: Support date by destr?
           if (typeof value.atime === "string") {
@@ -215,7 +217,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
     async getKeys(base, opts = {}) {
       base = normalizeBaseKey(base);
       const mounts = getMounts(base, true);
-      let maskedMounts = [];
+      let maskedMounts: string[] = [];
       const allKeys = [];
       for (const mount of mounts) {
         const rawKeys = await asyncCall(
@@ -249,8 +251,10 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
           }
           // Fallback to remove all keys if clear not implemented
           if (m.driver.removeItem) {
-            const keys = await m.driver.getKeys(m.relativeBase, opts);
-            return Promise.all(keys.map((key) => m.driver.removeItem!(key)));
+            const keys = await m.driver.getKeys(m.relativeBase || "", opts);
+            return Promise.all(
+              keys.map((key) => m.driver.removeItem!(key, opts))
+            );
           }
           // Readonly
         })

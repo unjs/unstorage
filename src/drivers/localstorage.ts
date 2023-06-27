@@ -21,7 +21,13 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
 
   const r = (key: string) => (opts.base ? opts.base + ":" : "") + key;
 
-  let _storageListener: (ev: StorageEvent) => void;
+  let _storageListener: undefined | ((ev: StorageEvent) => void);
+  const _unwatch = () => {
+    if (_storageListener) {
+      opts.window?.removeEventListener("storage", _storageListener);
+    }
+    _storageListener = undefined;
+  };
 
   return {
     name: DRIVER_NAME,
@@ -55,7 +61,7 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
     },
     watch(callback) {
       if (!opts.window) {
-        return;
+        return _unwatch;
       }
       _storageListener = (ev: StorageEvent) => {
         if (ev.key) {
@@ -63,10 +69,7 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
         }
       };
       opts.window.addEventListener("storage", _storageListener);
-      return () => {
-        opts.window.removeEventListener("storage", _storageListener);
-        _storageListener = undefined;
-      };
+      return _unwatch;
     },
   };
 });

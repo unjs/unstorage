@@ -11,6 +11,6 @@
   "devDependencies": {
     "@nuxt-themes/docus": "^2.0.0-beta.12",
     "@nuxtjs/plausible": "^0.2.1",
-    "nuxt": "^3.5.3"
+    "nuxt": "^3.6.1"
   }
 }

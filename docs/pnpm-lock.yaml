@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  nitropack: npm:nitropack-edge@latest
+
 devDependencies:
   '@nuxt-themes/docus':
     specifier: ^2.0.0-beta.12
@@ -4728,8 +4731,8 @@ packages:
     hasBin: true
     dev: true
 
-  /nitropack@2.5.1:
-    resolution: {integrity: sha512-RKq++lLrs7m/hlkEkYezL119Lu7LzseaDh/6UzmXqYD8/fx896Bou4CJpe775iHiHDzASiCmVKtlkBJxSiRi5w==}
+  /nitropack-edge@2.5.2-28131518.dfd8bbd:
+    resolution: {integrity: sha512-+7eNMlFXP/SdhcpFUowW5fwrzFBWasRAKN37pf5Xp9+lAh59wbLQ5t4oAcEjfCppp1eSryPF3Bs4C8CqIlH0bg==}
     engines: {node: ^14.16.0 || ^16.11.0 || >=17.0.0}
     hasBin: true
     dependencies:
@@ -5005,7 +5008,7 @@ packages:
       local-pkg: 0.4.3
       magic-string: 0.30.0
       mlly: 1.4.0
-      nitropack: 2.5.1
+      nitropack: /nitropack-edge@2.5.2-28131518.dfd8bbd
       nuxi: 3.6.1
       nypm: 0.2.2
       ofetch: 1.1.1

@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   modules: ["@nuxtjs/plausible"],
   nitro: {
     future: {
-      nativeSWR: true
-    }
-  }
+      nativeSWR: true,
+    },
+  },
 });

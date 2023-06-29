@@ -1,4 +1,5 @@
 import { defineDriver, joinKeys } from "./utils";
+import { millisecondsToSeconds } from "../utils";
 import Redis, {
   Cluster,
   ClusterNode,
@@ -72,9 +73,14 @@ export default defineDriver((opts: RedisOptions = {}) => {
       return value !== null ? value : undefined;
     },
     async setItem(key, value, tOptions) {
-      let ttl = tOptions?.ttl ?? opts.ttl;
+      const ttl = tOptions?.ttl ?? opts.ttl;
       if (ttl) {
-        await getRedisClient().set(p(key), value, "EX", ttl);
+        await getRedisClient().set(
+          p(key),
+          value,
+          "EX",
+          millisecondsToSeconds(ttl)
+        );
       } else {
         await getRedisClient().set(p(key), value);
       }

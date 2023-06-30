@@ -32,3 +32,16 @@ const storage = createStorage({
 **Options:**
 
 - `binding`: KV binding or name of namespace. Default is `STORAGE`.
+
+## Using Cloudlflare KV Options
+
+You can pass options to cloudflare such as metadata and expiration as the 3rd argument of the `setItem` function.
+Refer to the [cloudflare KV docs](https://developers.cloudflare.com/workers/runtime-apis/kv/#writing-key-value-pairs) for the list of supported options.
+
+```ts
+await storage.setItem("key", "value", {
+  expiration: 1578435000,
+  expirationTtl: 300,
+  metadata: { someMetadataKey: "someMetadataValue" },
+});
+```

@@ -26,9 +26,9 @@ export default defineDriver((opts: KVOptions = {}) => {
       const binding = getBinding(opts.binding);
       return binding.get(key);
     },
-    setItem(key, value) {
+    setItem(key, value, options) {
       const binding = getBinding(opts.binding);
-      return binding.put(key, value);
+      return binding.put(key, value, options);
     },
     removeItem(key) {
       const binding = getBinding(opts.binding);

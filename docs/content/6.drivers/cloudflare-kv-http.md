@@ -57,3 +57,17 @@ const storage = createStorage({
 - `removeItem`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-key-value-pair) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
 - `getKeys`: Maps to [List a Namespace's Keys](https://api.cloudflare.com/#workers-kv-namespace-list-a-namespace-s-keys) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/keys`
 - `clear`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-multiple-key-value-pairs) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/bulk`
+
+## Using Cloudlflare KV Options
+
+You can pass cloudflare options such as metadata and expiration as the 3rd argument of the `setItem` function.
+Refer to the [cloudflare KV API docs](https://developers.cloudflare.com/api/operations/workers-kv-namespace-write-multiple-key-value-pairs) for the list of supported options.
+
+```ts
+await storage.setItem("key", "value", {
+  expiration: 1578435000,
+  expiration_ttl: 300,
+  base64: false,
+  metadata: { someMetadataKey: "someMetadataValue" },
+});
+```

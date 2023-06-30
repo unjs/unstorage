@@ -103,11 +103,17 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const apiURL = opts.apiURL || "https://api.cloudflare.com";
   const baseURL = `${apiURL}/client/v4/accounts/${opts.accountId}/storage/kv/namespaces/${opts.namespaceId}`;
 
-  const kvFetch = async (url: string, fetchOptions?: FetchOptions) =>
+  let kvFetch = async (url: string, fetchOptions?: FetchOptions) =>
     $fetch.native(`${baseURL}${url}`, {
       headers,
       ...(fetchOptions as any),
     });
+
+  //@ts-expect-error fetch needs to be used directly for msw to work
+  if (opts.apiToken === "msw") {
+    kvFetch = async (url: string, fetchOptions?: FetchOptions) =>
+      fetch(`${baseURL}${url}`, { headers, ...(fetchOptions as any) });
+  }
 
   const hasItem = async (key: string) => {
     const response = await kvFetch(`/metadata/${key}`);

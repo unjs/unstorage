@@ -18,8 +18,8 @@ const server = setupServer(
     }
     return res(
       ctx.status(200),
-      ctx.set("content-type", "application/octet-stream"),
-      ctx.body(store[key])
+      ctx.set("content-type", "application/json"),
+      ctx.json(store[key])
     );
   }),
 
@@ -31,9 +31,13 @@ const server = setupServer(
     return res(ctx.status(200), ctx.json({ success: true }));
   }),
 
-  rest.put(`${baseURL}/values/:key`, async (req, res, ctx) => {
-    const key = req.params.key as string;
-    store[key] = await req.text();
+  rest.put(`${baseURL}/bulk`, async (req, res, ctx) => {
+    const items = (await req.json()) as Record<string, any>[];
+    if (!items) return res(ctx.status(404), ctx.json(null));
+    for (const item of items) {
+      const { key, value } = item;
+      store[key] = value;
+    }
     return res(ctx.status(204), ctx.json(null));
   }),
 

@@ -15,7 +15,7 @@ export interface IDBKeyvalOptions {
   base?: string;
 }
 
-const DRIVER_NAME = "idb-keyval";
+const DRIVER_NAME = "indexeddb";
 
 export default defineDriver((opts: IDBKeyvalOptions = {}) => {
   let customStore: UseStore | undefined;

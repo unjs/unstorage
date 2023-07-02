@@ -15,6 +15,10 @@ export function normalizeKey(key: string | undefined): string {
   return key.replace(/[/\\]/g, ":").replace(/^:|:$/g, "");
 }
 
+export function millisecondsToSeconds(value: number) {
+  return value / 1000;
+}
+
 export function joinKeys(...keys: string[]) {
   return keys.map(normalizeKey).filter(Boolean).join(":");
 }

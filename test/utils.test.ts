@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { millisecondsToSeconds } from "../src";
+import { millisecondsToSeconds } from "../src/drivers/utils";
 
 describe("utils tests", () => {
   it("converts 2000 milliseconds to 2 seconds", () => {

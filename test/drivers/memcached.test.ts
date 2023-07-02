@@ -1,23 +1,25 @@
-import { describe, it, expect, vi, vitest, beforeEach, afterEach } from 'vitest'
-import driver from '../../src/drivers/memcached'
-import { createStorage } from '../../src'
-import { testDriver } from './utils'
+import { describe, it, expect } from "vitest";
+import memcachedDriver from "../../src/drivers/memcached";
+import { createStorage } from "../../src";
+import { testDriver } from "./utils";
 
-describe('Memcached storage', () => {
-    const storage = driver({
-        serverLocation: 'localhost:11211',
-        connectionOptions: {}
-    });
+describe("Memcached storage", () => {
+  const driver = memcachedDriver({
+    serverLocation: "localhost:11211",
+    connectionOptions: {},
+  });
+  const storage = createStorage({ driver });
 
-    it('driver: basic',async () => {
-        // @ts-ignore
-        await storage.setItem('basic', 'foo', 0);
-        let got = await storage.getItem('basic');
-        const has = await storage.hasItem('basic');
-        expect(got).toBe('foo');
-        expect(has).toBeTruthy();
-        await storage.removeItem('basic');
-        got = await storage.getItem('basic');
-        expect(got).toBeUndefined();
-    });
+  testDriver({ driver, skip: ["getKeys"] });
+
+  it("can set, get, has and clear keys", async () => {
+    await storage.setItem("first", "foo");
+    await storage.setItem("second", "bar");
+    expect(await storage.getItem("first")).toBe("foo");
+    expect(await storage.getItem("second")).toBe("bar");
+    await storage.removeItem("first");
+    expect(await storage.getItem("first")).toBeNull();
+    await storage.clear();
+    expect(await storage.hasItem("second")).toBe(false);
+  });
 });

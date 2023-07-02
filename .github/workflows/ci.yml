@@ -11,6 +11,11 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    services:
+      memcached:
+        image: memcached:latest
+        ports:
+          - 11211:11211
     steps:
       - uses: actions/checkout@v3
       - run: corepack enable

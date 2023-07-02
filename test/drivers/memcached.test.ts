@@ -5,8 +5,7 @@ import { testDriver } from "./utils";
 
 describe("Memcached storage", () => {
   const driver = memcachedDriver({
-    serverLocation: "localhost:11211",
-    connectionOptions: {},
+    location: "localhost:11211",
   });
   const storage = createStorage({ driver });
 

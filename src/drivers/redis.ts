@@ -1,5 +1,4 @@
-import { defineDriver } from "./utils";
-import { millisecondsToSeconds } from "../utils";
+import { defineDriver, millisecondsToSeconds } from "./utils";
 import Redis, {
   Cluster,
   ClusterNode,

@@ -56,7 +56,3 @@ export function normalizeBaseKey(base?: string) {
   base = normalizeKey(base);
   return base ? base + ":" : "";
 }
-
-export function millisecondsToSeconds(value: number) {
-  return value / 1000;
-}

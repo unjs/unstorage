@@ -1,15 +1,15 @@
 import { defineDriver } from "./utils";
 import Memcached from "memcached";
 
-export interface MemcachedOpts {
-  serverLocation: Memcached.Location;
-  connectionOptions: Memcached.options;
+export interface MemcachedOptions {
+  location: Memcached.Location;
+  options: Memcached.options;
 }
 
-export default defineDriver<MemcachedOpts>((_opts: MemcachedOpts) => {
+export default defineDriver<MemcachedOptions>((_opts: MemcachedOptions) => {
   const memcached = new Memcached(
-    _opts.serverLocation || "localhost:11211",
-    _opts.connectionOptions || {}
+    _opts.location || "localhost:11211",
+    _opts.options || {}
   );
   return {
     async getKeys() {

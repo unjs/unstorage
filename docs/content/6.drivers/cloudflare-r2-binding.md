@@ -26,3 +26,4 @@ const storage = createStorage({
 **Options:**
 
 - `binding`: Bucket binding or name.
+- `base`: Prefix all keys with base.

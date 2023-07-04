@@ -2,11 +2,11 @@ import { Dirent, existsSync, promises as fsPromises } from "fs";
 import { resolve, dirname } from "path";
 
 function ignoreNotfound(err: any) {
-  return err.code === "ENOENT" || err.code === "EISDIR" ? null : err;
+  return err.code === "ENOENT" || err.code === "EISDIR" ? undefined : err;
 }
 
 function ignoreExists(err: any) {
-  return err.code === "EEXIST" ? null : err;
+  return err.code === "EEXIST" ? undefined : err;
 }
 
 type WriteFileData = Parameters<typeof fsPromises.writeFile>[1];

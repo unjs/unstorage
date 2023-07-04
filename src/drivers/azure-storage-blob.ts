@@ -90,13 +90,15 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
           .getBlockBlobClient(key)
           .download();
         if (isBrowser) {
-          return blob.blobBody ? await blobToString(await blob.blobBody) : null;
+          return blob.blobBody
+            ? await blobToString(await blob.blobBody)
+            : undefined;
         }
         return blob.readableStreamBody
           ? (await streamToBuffer(blob.readableStreamBody)).toString()
-          : null;
+          : undefined;
       } catch {
-        return null;
+        return undefined;
       }
     },
     async setItem(key, value) {

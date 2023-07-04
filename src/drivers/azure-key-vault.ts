@@ -29,7 +29,11 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
     if (keyVaultClient) {
       return keyVaultClient;
     }
-    const { vaultName = null, serviceVersion = "7.3", pageSize = 25 } = opts;
+    const {
+      vaultName = undefined,
+      serviceVersion = "7.3",
+      pageSize = 25,
+    } = opts;
     if (!vaultName) {
       throw createRequiredError(DRIVER_NAME, "vaultName");
     }
@@ -58,7 +62,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
         const secret = await getKeyVaultClient().getSecret(encode(key));
         return secret.value;
       } catch {
-        return null;
+        return undefined;
       }
     },
     async setItem(key, value) {

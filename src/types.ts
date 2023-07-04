@@ -41,7 +41,7 @@ export interface Driver {
   getMeta?: (
     key: string,
     opts: TransactionOptions
-  ) => MaybePromise<StorageMeta | null>;
+  ) => MaybePromise<StorageMeta | undefined>;
   getKeys: (base: string, opts: TransactionOptions) => MaybePromise<string[]>;
   clear?: (base: string, opts: TransactionOptions) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
@@ -54,12 +54,12 @@ export interface Storage<T extends StorageValue = StorageValue> {
   getItem: <U extends T>(
     key: string,
     opts?: TransactionOptions
-  ) => Promise<U | null>;
+  ) => Promise<U | undefined>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   getItemRaw: <T = any>(
     key: string,
     opts?: TransactionOptions
-  ) => Promise<MaybeDefined<T> | null>;
+  ) => Promise<MaybeDefined<T> | undefined>;
   setItem: <U extends T>(
     key: string,
     value: U,

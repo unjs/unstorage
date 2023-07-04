@@ -1,13 +1,9 @@
 # CloudFlare R2 (binding)
 
-::alert{type="warning"}
-This is an experimental driver
-::
-
 Store data in [Cloudflare R2](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/) buckets and access from worker bindings.
 
 ::alert
-This driver only works in a cloudflare worker environment and cannot be used in other runtime environments such as Node.js (r2-http driver is coming soon)
+This is an experimental driver! This driver only works in a cloudflare worker environment and cannot be used in other runtime environments such as Node.js (r2-http driver is coming soon)
 ::
 
 You need to create and assign a R2 bucket. See [R2 Bindings](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/#create-a-binding) for more information.

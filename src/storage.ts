@@ -111,7 +111,7 @@ export function createStorage<T extends StorageValue>(
       key: string;
       relativeKey: string;
       value?: StorageValue;
-      opts?: any;
+      options?: TransactionOptions;
     }[];
   };
 
@@ -138,7 +138,7 @@ export function createStorage<T extends StorageValue>(
       const isStringItem = typeof item === "string";
       const key = normalizeKey(isStringItem ? item : item.key);
       const value = isStringItem ? undefined : item.value;
-      const opts =
+      const options =
         isStringItem || !item.options
           ? commonOpts
           : { ...commonOpts, ...item.options };
@@ -147,7 +147,7 @@ export function createStorage<T extends StorageValue>(
         key,
         value,
         relativeKey: mount.relativeKey,
-        opts,
+        options,
       });
     }
 
@@ -177,7 +177,7 @@ export function createStorage<T extends StorageValue>(
             batch.driver.getItems,
             batch.items.map((item) => ({
               key: item.relativeKey,
-              options: item.opts,
+              options: item.options,
             })),
             commonOptions
           ).then((r) =>
@@ -192,7 +192,7 @@ export function createStorage<T extends StorageValue>(
             return asyncCall(
               batch.driver.getItem,
               item.relativeKey,
-              item.opts
+              item.options
             ).then((value) => ({
               key: item.key,
               value: destr(value),
@@ -233,7 +233,7 @@ export function createStorage<T extends StorageValue>(
             batch.items.map((item) => ({
               key: item.relativeKey,
               value: stringify(item.value),
-              options: item.opts,
+              options: item.options,
             })),
             commonOptions
           );
@@ -247,7 +247,7 @@ export function createStorage<T extends StorageValue>(
               batch.driver.setItem!,
               item.relativeKey,
               stringify(item.value),
-              item.opts
+              item.options
             );
           })
         );

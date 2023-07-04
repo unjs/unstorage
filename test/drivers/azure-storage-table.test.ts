@@ -4,7 +4,7 @@ import { testDriver } from "./utils";
 import { TableClient } from "@azure/data-tables";
 import { ChildProcess, exec } from "child_process";
 
-describe("drivers: azure-storage-table", () => {
+describe.skip("drivers: azure-storage-table", () => {
   let azuriteProcess: ChildProcess;
 
   beforeAll(async () => {

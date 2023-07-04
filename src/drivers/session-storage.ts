@@ -36,7 +36,7 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
       return Object.prototype.hasOwnProperty.call(opts.sessionStorage, r(key));
     },
     getItem(key) {
-      return opts.sessionStorage!.getItem(r(key)) || undefined;
+      return opts.sessionStorage!.getItem(r(key)) ?? undefined;
     },
     setItem(key, value) {
       return opts.sessionStorage!.setItem(r(key), value);

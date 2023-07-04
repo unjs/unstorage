@@ -23,7 +23,7 @@ export interface Driver {
   getItem: (
     key: string,
     opts?: TransactionOptions
-  ) => MaybePromise<StorageValue>;
+  ) => MaybePromise<StorageValue | undefined>;
   /** @experimental */
   getItems?: (
     items: { key: string; options?: TransactionOptions }[],

@@ -36,7 +36,7 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
       return Object.prototype.hasOwnProperty.call(opts.localStorage!, r(key));
     },
     getItem(key) {
-      return opts.localStorage!.getItem(r(key)) || undefined;
+      return opts.localStorage!.getItem(r(key)) ?? undefined;
     },
     setItem(key, value) {
       return opts.localStorage!.setItem(r(key), value);

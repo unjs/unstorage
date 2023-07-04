@@ -22,7 +22,7 @@ const mockBinding: KVNamespace = {
   },
   list(opts) {
     return mockStorage
-      .getKeys(opts?.prefix || undefined)
+      .getKeys(opts?.prefix ?? undefined)
       .then((keys) => ({ keys: keys.map((name) => ({ name })) })) as any;
   },
 };

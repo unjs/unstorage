@@ -10,7 +10,7 @@ import type {
 } from "./types";
 import memory from "./drivers/memory";
 import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
-import { normalizeKey, normalizeBaseKey } from "./utils";
+import { normalizeKey, normalizeBaseKey, joinKeys } from "./utils";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -106,6 +106,7 @@ export function createStorage<T extends StorageValue>(
 
   type BatchItem = {
     driver: Driver;
+    base: string;
     items: {
       key: string;
       relativeKey: string;
@@ -125,6 +126,7 @@ export function createStorage<T extends StorageValue>(
       if (!batch) {
         batch = {
           driver: mount.driver,
+          base: mount.base,
           items: [],
         };
         batches.set(mount.base, batch);
@@ -171,13 +173,30 @@ export function createStorage<T extends StorageValue>(
     getItems(items, commonOptions) {
       return runBatch(items, commonOptions, (batch) => {
         if (batch.driver.getItems) {
-          return asyncCall(batch.driver.getItems, batch.items);
+          return asyncCall(
+            batch.driver.getItems,
+            batch.items.map((item) => ({
+              key: item.relativeKey,
+              options: item.opts,
+            })),
+            commonOptions
+          ).then((r) =>
+            r.map((item) => ({
+              key: joinKeys(batch.base, item.key),
+              value: destr(item.value),
+            }))
+          );
         }
         return Promise.all(
           batch.items.map((item) => {
-            return asyncCall(batch.driver.getItem, item.relativeKey).then(
-              (value) => ({ key: item.key, value: destr(value) })
-            );
+            return asyncCall(
+              batch.driver.getItem,
+              item.relativeKey,
+              item.opts
+            ).then((value) => ({
+              key: item.key,
+              value: destr(value),
+            }));
           })
         );
       });
@@ -207,21 +226,22 @@ export function createStorage<T extends StorageValue>(
       }
     },
     async setItems(items, commonOptions) {
-      await runBatch(items, commonOptions, (batch) => {
+      await runBatch(items, commonOptions, async (batch) => {
         if (batch.driver.setItems) {
-          return asyncCall(
+          await asyncCall(
             batch.driver.setItems,
             batch.items.map((item) => ({
               key: item.relativeKey,
               value: stringify(item.value),
+              options: item.opts,
             })),
             commonOptions
           );
         }
         if (!batch.driver.setItem) {
-          return Promise.resolve();
+          return;
         }
-        return Promise.all(
+        await Promise.all(
           batch.items.map((item) => {
             return asyncCall(
               batch.driver.setItem!,

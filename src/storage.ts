@@ -105,7 +105,7 @@ export function createStorage<T extends StorageValue>(
   };
 
   type BatchItem = {
-    mount: ReturnType<typeof getMount>;
+    driver: Driver;
     items: {
       key: string;
       relativeKey: string;
@@ -123,7 +123,10 @@ export function createStorage<T extends StorageValue>(
     const getBatch = (mount: ReturnType<typeof getMount>) => {
       let batch = batches.get(mount.base);
       if (!batch) {
-        batch = { mount, items: [] };
+        batch = {
+          driver: mount.driver,
+          items: [],
+        };
         batches.set(mount.base, batch);
       }
       return batch;
@@ -167,12 +170,12 @@ export function createStorage<T extends StorageValue>(
     },
     getItems(items, commonOptions) {
       return runBatch(items, commonOptions, (batch) => {
-        if (batch.mount.driver.getItems) {
-          return asyncCall(batch.mount.driver.getItems, batch.items);
+        if (batch.driver.getItems) {
+          return asyncCall(batch.driver.getItems, batch.items);
         }
         return Promise.all(
           batch.items.map((item) => {
-            return asyncCall(batch.mount.driver.getItem, item.relativeKey).then(
+            return asyncCall(batch.driver.getItem, item.relativeKey).then(
               (value) => ({ key: item.key, value: destr(value) })
             );
           })
@@ -205,9 +208,9 @@ export function createStorage<T extends StorageValue>(
     },
     async setItems(items, commonOptions) {
       await runBatch(items, commonOptions, (batch) => {
-        if (batch.mount.driver.setItems) {
+        if (batch.driver.setItems) {
           return asyncCall(
-            batch.mount.driver.setItems,
+            batch.driver.setItems,
             batch.items.map((item) => ({
               key: item.relativeKey,
               value: stringify(item.value),
@@ -215,13 +218,13 @@ export function createStorage<T extends StorageValue>(
             commonOptions
           );
         }
-        if (!batch.mount.driver.setItem) {
+        if (!batch.driver.setItem) {
           return Promise.resolve();
         }
         return Promise.all(
           batch.items.map((item) => {
             return asyncCall(
-              batch.mount.driver.setItem!,
+              batch.driver.setItem!,
               item.relativeKey,
               stringify(item.value),
               item.opts

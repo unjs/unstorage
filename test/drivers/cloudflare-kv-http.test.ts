@@ -1,8 +1,9 @@
-import { afterAll, beforeAll, describe } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import driver, { KVHTTPOptions } from "../../src/drivers/cloudflare-kv-http";
 import { testDriver } from "./utils";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
+import { snapshot } from "../../src";
 
 const baseURL =
   "https://api.cloudflare.com/client/v4/accounts/:accountId/storage/kv/namespaces/:namespaceId";
@@ -71,6 +72,7 @@ const server = setupServer(
 );
 
 const mockOptions: KVHTTPOptions = {
+  base: "base",
   apiToken: "api-token",
   accountId: "account-id",
   namespaceId: "namespace-id",
@@ -91,5 +93,27 @@ describe.skipIf(isNode18)("drivers: cloudflare-kv-http", () => {
 
   testDriver({
     driver: driver(mockOptions),
+    async additionalTests(ctx) {
+      test("snapshot", async () => {
+        expect(store).toMatchInlineSnapshot(`
+          {
+            "base:data:raw.bin": "base64:AQID",
+            "base:data:serialized1.json": "SERIALIZED",
+            "base:data:serialized2.json": "{\\"serializedObj\\":\\"works\\"}",
+            "base:data:test.json": "{\\"json\\":\\"works\\"}",
+            "base:data:true.json": "true",
+            "base:s1:a": "test_data",
+            "base:s2:a": "test_data",
+            "base:s3:a": "test_data",
+            "base:t:1": "test_data_t1",
+            "base:t:2": "test_data_t2",
+            "base:t:3": "test_data_t3",
+            "base:v1:a": "test_data_v1:a",
+            "base:v2:a": "test_data_v2:a",
+            "base:v3:a": "test_data_v3:a?q=1",
+          }
+        `);
+      });
+    },
   });
 });

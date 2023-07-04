@@ -14,7 +14,7 @@ export interface StorageMeta {
   [key: string]: StorageValue | Date | undefined;
 }
 
-type TransactionOptions = Record<string, any>;
+export type TransactionOptions = Record<string, any>;
 
 export interface Driver {
   name?: string;
@@ -25,11 +25,12 @@ export interface Driver {
     opts?: TransactionOptions
   ) => MaybePromise<StorageValue>;
   /** @experimental */
-  getItemRaw?: (key: string, opts: TransactionOptions) => MaybePromise<unknown>;
   getItems?: (
     items: { key: string; options?: TransactionOptions }[],
     commonOptions?: TransactionOptions
   ) => MaybePromise<{ key: string; value: StorageValue }[]>;
+  /** @experimental */
+  getItemRaw?: (key: string, opts: TransactionOptions) => MaybePromise<unknown>;
   setItem?: (
     key: string,
     value: string,
@@ -64,16 +65,16 @@ export interface Storage<T extends StorageValue = StorageValue> {
     key: string,
     opts?: TransactionOptions
   ) => Promise<U | null>;
-  /** @experimental See https://github.com/unjs/unstorage/issues/142 */
-  getItemRaw: <T = any>(
-    key: string,
-    opts?: TransactionOptions
-  ) => Promise<MaybeDefined<T> | null>;
   /** @experimental */
   getItems: (
     items: (string | { key: string; options?: TransactionOptions })[],
     commonOptions?: TransactionOptions
   ) => MaybePromise<{ key: string; value: StorageValue }[]>;
+  /** @experimental See https://github.com/unjs/unstorage/issues/142 */
+  getItemRaw: <T = any>(
+    key: string,
+    opts?: TransactionOptions
+  ) => Promise<MaybeDefined<T> | null>;
   setItem: <U extends T>(
     key: string,
     value: U,

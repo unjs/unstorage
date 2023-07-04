@@ -83,8 +83,8 @@ function getBinding(binding: R2Bucket | string) {
 
   if (typeof binding === "string") {
     bindingName = binding;
-    binding = (globalThis[bindingName] ||
-      globalThis.__env__?.[bindingName]) as R2Bucket;
+    binding = ((globalThis as any)[bindingName] ||
+      (globalThis as any).__env__?.[bindingName]) as R2Bucket;
   }
 
   if (!binding) {

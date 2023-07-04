@@ -133,9 +133,10 @@ export function createStorage<T extends StorageValue>(
       const isStringItem = typeof item === "string";
       const key = normalizeKey(isStringItem ? item : item.key);
       const value = isStringItem ? undefined : item.value;
-      const opts = isStringItem
-        ? commonOpts
-        : { ...commonOpts, ...item.options };
+      const opts =
+        isStringItem || !item.options
+          ? commonOpts
+          : { ...commonOpts, ...item.options };
       const mount = getMount(key);
       getBatch(mount).items.push({
         key,

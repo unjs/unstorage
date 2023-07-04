@@ -48,6 +48,7 @@ const storage = createStorage({
 - `apiKey`: API key generated on the "My Account" page of the Cloudflare console. May be used along with `email` to authenticate in place of `apiToken`.
 - `userServiceKey`: A special Cloudflare API key good for a restricted set of endpoints. Always begins with "v1.0-", may vary in length. May be used to authenticate in place of `apiToken` or `apiKey` and `email`.
 - `apiURL`: Custom API URL. Default is `https://api.cloudflare.com`.
+- `base`: Adds prefix to all stored keys
 
 **Supported methods:**
 

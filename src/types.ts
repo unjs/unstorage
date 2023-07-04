@@ -14,29 +14,26 @@ export interface StorageMeta {
   [key: string]: StorageValue | Date | undefined;
 }
 
-export type TransactionOptions = Record<string, any>;
+type TransactionOptions = Record<string, any>;
 
 export interface Driver {
   name?: string;
   options?: any;
-  hasItem: (key: string, options?: TransactionOptions) => MaybePromise<boolean>;
+  hasItem: (key: string, opts: TransactionOptions) => MaybePromise<boolean>;
   getItem: (
     key: string,
-    options?: TransactionOptions
+    opts?: TransactionOptions
   ) => MaybePromise<StorageValue>;
   /** @experimental */
+  getItemRaw?: (key: string, opts: TransactionOptions) => MaybePromise<unknown>;
   getItems?: (
     items: { key: string; options?: TransactionOptions }[],
     commonOptions?: TransactionOptions
   ) => MaybePromise<{ key: string; value: StorageValue }[]>;
-  getItemRaw?: (
-    key: string,
-    options?: TransactionOptions
-  ) => MaybePromise<unknown>;
   setItem?: (
     key: string,
     value: string,
-    options?: TransactionOptions
+    opts: TransactionOptions
   ) => MaybePromise<void>;
   /** @experimental */
   setItems?: (
@@ -47,40 +44,40 @@ export interface Driver {
   setItemRaw?: (
     key: string,
     value: any,
-    options?: TransactionOptions
+    opts: TransactionOptions
   ) => MaybePromise<void>;
-  removeItem?: (
-    key: string,
-    options?: TransactionOptions
-  ) => MaybePromise<void>;
+  removeItem?: (key: string, opts: TransactionOptions) => MaybePromise<void>;
   getMeta?: (
     key: string,
-    options?: TransactionOptions
-  ) => MaybePromise<StorageMeta>;
-  getKeys: (
-    base?: string,
-    options?: TransactionOptions
-  ) => MaybePromise<string[]>;
-  clear?: (base?: string, options?: TransactionOptions) => MaybePromise<void>;
+    opts: TransactionOptions
+  ) => MaybePromise<StorageMeta | null>;
+  getKeys: (base: string, opts: TransactionOptions) => MaybePromise<string[]>;
+  clear?: (base: string, opts: TransactionOptions) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }
 
 export interface Storage<T extends StorageValue = StorageValue> {
   // Item
-  hasItem: (key: string, options?: TransactionOptions) => Promise<boolean>;
-  getItem: (key: string, options?: TransactionOptions) => Promise<StorageValue>;
+  hasItem: (key: string, opts?: TransactionOptions) => Promise<boolean>;
+  getItem: <U extends T>(
+    key: string,
+    opts?: TransactionOptions
+  ) => Promise<U | null>;
+  /** @experimental See https://github.com/unjs/unstorage/issues/142 */
+  getItemRaw: <T = any>(
+    key: string,
+    opts?: TransactionOptions
+  ) => Promise<MaybeDefined<T> | null>;
   /** @experimental */
   getItems: (
     items: (string | { key: string; options?: TransactionOptions })[],
     commonOptions?: TransactionOptions
   ) => MaybePromise<{ key: string; value: StorageValue }[]>;
-  /** @experimental See https://github.com/unjs/unstorage/issues/142 */
-  getItemRaw: (key: string, options?: TransactionOptions) => Promise<any>;
-  setItem: (
+  setItem: <U extends T>(
     key: string,
-    value: StorageValue,
-    options?: TransactionOptions
+    value: U,
+    opts?: TransactionOptions
   ) => Promise<void>;
   /** @experimental */
   setItems: (
@@ -90,32 +87,32 @@ export interface Storage<T extends StorageValue = StorageValue> {
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   setItemRaw: <T = any>(
     key: string,
-    value: any,
-    options?: TransactionOptions
+    value: MaybeDefined<T>,
+    opts?: TransactionOptions
   ) => Promise<void>;
   removeItem: (
     key: string,
-    options?:
+    opts?:
       | (TransactionOptions & { removeMata?: boolean })
       | boolean /* legacy: removeMata */
   ) => Promise<void>;
   // Meta
   getMeta: (
     key: string,
-    options?:
+    opts?:
       | (TransactionOptions & { nativeOnly?: boolean })
       | boolean /* legacy: nativeOnly */
   ) => MaybePromise<StorageMeta>;
   setMeta: (
     key: string,
     value: StorageMeta,
-    options?: TransactionOptions
+    opts?: TransactionOptions
   ) => Promise<void>;
-  removeMeta: (key: string, options?: TransactionOptions) => Promise<void>;
+  removeMeta: (key: string, opts?: TransactionOptions) => Promise<void>;
   // Keys
-  getKeys: (base?: string, options?: TransactionOptions) => Promise<string[]>;
+  getKeys: (base?: string, opts?: TransactionOptions) => Promise<string[]>;
   // Utils
-  clear: (base?: string, options?: TransactionOptions) => Promise<void>;
+  clear: (base?: string, opts?: TransactionOptions) => Promise<void>;
   dispose: () => Promise<void>;
   watch: (callback: WatchCallback) => Promise<Unwatch>;
   unwatch: () => Promise<void>;

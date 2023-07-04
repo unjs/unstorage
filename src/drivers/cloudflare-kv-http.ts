@@ -212,7 +212,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     removeItem,
     getKeys: (base?: string) =>
       getKeys(base).then((keys) =>
-        keys.map((key) => (opts.base ? key.replace(opts.base, "") : key))
+        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key))
       ),
     clear,
   };

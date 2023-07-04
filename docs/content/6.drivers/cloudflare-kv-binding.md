@@ -32,3 +32,4 @@ const storage = createStorage({
 **Options:**
 
 - `binding`: KV binding or name of namespace. Default is `STORAGE`.
+- `base`: Adds prefix to all stored keys

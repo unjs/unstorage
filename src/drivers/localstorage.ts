@@ -1,9 +1,4 @@
-import {
-  createRequiredError,
-  defineDriver,
-  isItemsObjectArray,
-  isItemsStringArray,
-} from "./utils";
+import { createRequiredError, defineDriver } from "./utils";
 
 export interface LocalStorageOptions {
   base?: string;
@@ -36,21 +31,6 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
     },
     getItem(key) {
       return opts.localStorage!.getItem(r(key));
-    },
-    getItems(items) {
-      if (isItemsStringArray(items)) {
-        return Promise.all(
-          items.map((key) => opts.localStorage!.getItem(r(key)))
-        );
-      }
-      if (isItemsObjectArray(items)) {
-        return Promise.all(
-          items.map(({ key }) => ({
-            key,
-            value: opts.localStorage!.getItem(r(key)),
-          }))
-        );
-      }
     },
     setItem(key, value) {
       return opts.localStorage!.setItem(r(key), value);

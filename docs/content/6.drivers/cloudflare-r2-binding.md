@@ -1,5 +1,9 @@
 # CloudFlare R2 (binding)
 
+::alert{type="warning"}
+This is an experimental driver
+::
+
 Store data in [Cloudflare R2](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/) buckets and access from worker bindings.
 
 ::alert

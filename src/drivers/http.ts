@@ -61,7 +61,7 @@ export default defineDriver((opts: HTTPOptions) => {
       await _fetch(r(key), {
         method: "PUT",
         body: value,
-        headers: { ...opts.headers, ...topts.headers },
+        headers: { ...opts.headers, ...topts?.headers },
       });
     },
     async setItemRaw(key, value, topts) {

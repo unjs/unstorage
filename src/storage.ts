@@ -6,10 +6,11 @@ import type {
   Unwatch,
   StorageValue,
   WatchEvent,
+  TransactionOptions,
 } from "./types";
 import memory from "./drivers/memory";
 import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
-import { normalizeKey, normalizeBaseKey } from "./utils";
+import { normalizeKey, normalizeBaseKey, joinKeys } from "./utils";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -103,6 +104,61 @@ export function createStorage<T extends StorageValue>(
     context.watching = false;
   };
 
+  type BatchItem = {
+    driver: Driver;
+    base: string;
+    items: {
+      key: string;
+      relativeKey: string;
+      value?: StorageValue;
+      options?: TransactionOptions;
+    }[];
+  };
+
+  const runBatch = (
+    items: (
+      | string
+      | { key: string; value?: StorageValue; options?: TransactionOptions }
+    )[],
+    commonOptions: undefined | TransactionOptions,
+    cb: (batch: BatchItem) => Promise<any>
+  ) => {
+    const batches = new Map<string /* mount base */, BatchItem>();
+    const getBatch = (mount: ReturnType<typeof getMount>) => {
+      let batch = batches.get(mount.base);
+      if (!batch) {
+        batch = {
+          driver: mount.driver,
+          base: mount.base,
+          items: [],
+        };
+        batches.set(mount.base, batch);
+      }
+      return batch;
+    };
+
+    for (const item of items) {
+      const isStringItem = typeof item === "string";
+      const key = normalizeKey(isStringItem ? item : item.key);
+      const value = isStringItem ? undefined : item.value;
+      const options =
+        isStringItem || !item.options
+          ? commonOptions
+          : { ...commonOptions, ...item.options };
+      const mount = getMount(key);
+      getBatch(mount).items.push({
+        key,
+        value,
+        relativeKey: mount.relativeKey,
+        options,
+      });
+    }
+
+    return Promise.all([...batches.values()].map((batch) => cb(batch))).then(
+      (r) => r.flat()
+    );
+  };
+
   const storage: Storage = {
     // Item
     hasItem(key, opts = {}) {
@@ -116,6 +172,37 @@ export function createStorage<T extends StorageValue>(
       return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
         destr(value)
       );
+    },
+    getItems(items, commonOptions) {
+      return runBatch(items, commonOptions, (batch) => {
+        if (batch.driver.getItems) {
+          return asyncCall(
+            batch.driver.getItems,
+            batch.items.map((item) => ({
+              key: item.relativeKey,
+              options: item.options,
+            })),
+            commonOptions
+          ).then((r) =>
+            r.map((item) => ({
+              key: joinKeys(batch.base, item.key),
+              value: destr(item.value),
+            }))
+          );
+        }
+        return Promise.all(
+          batch.items.map((item) => {
+            return asyncCall(
+              batch.driver.getItem,
+              item.relativeKey,
+              item.options
+            ).then((value) => ({
+              key: item.key,
+              value: destr(value),
+            }));
+          })
+        );
+      });
     },
     getItemRaw(key, opts = {}) {
       key = normalizeKey(key);
@@ -140,6 +227,34 @@ export function createStorage<T extends StorageValue>(
       if (!driver.watch) {
         onChange("update", key);
       }
+    },
+    async setItems(items, commonOptions) {
+      await runBatch(items, commonOptions, async (batch) => {
+        if (batch.driver.setItems) {
+          await asyncCall(
+            batch.driver.setItems,
+            batch.items.map((item) => ({
+              key: item.relativeKey,
+              value: stringify(item.value),
+              options: item.options,
+            })),
+            commonOptions
+          );
+        }
+        if (!batch.driver.setItem) {
+          return;
+        }
+        await Promise.all(
+          batch.items.map((item) => {
+            return asyncCall(
+              batch.driver.setItem!,
+              item.relativeKey,
+              stringify(item.value),
+              item.options
+            );
+          })
+        );
+      });
     },
     async setItemRaw(key, value, opts = {}) {
       if (value === undefined) {

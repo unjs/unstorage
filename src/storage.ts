@@ -116,8 +116,11 @@ export function createStorage<T extends StorageValue>(
   };
 
   const runBatch = (
-    items: (string | { key: string; value?: StorageValue; options?: any })[],
-    commonOpts: undefined | TransactionOptions,
+    items: (
+      | string
+      | { key: string; value?: StorageValue; options?: TransactionOptions }
+    )[],
+    commonOptions: undefined | TransactionOptions,
     cb: (batch: BatchItem) => Promise<any>
   ) => {
     const batches = new Map<string /* mount base */, BatchItem>();
@@ -140,8 +143,8 @@ export function createStorage<T extends StorageValue>(
       const value = isStringItem ? undefined : item.value;
       const options =
         isStringItem || !item.options
-          ? commonOpts
-          : { ...commonOpts, ...item.options };
+          ? commonOptions
+          : { ...commonOptions, ...item.options };
       const mount = getMount(key);
       getBatch(mount).items.push({
         key,

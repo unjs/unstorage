@@ -6,11 +6,11 @@ import type {
   Unwatch,
   StorageValue,
   WatchEvent,
+  TransactionOptions,
 } from "./types";
 import memory from "./drivers/memory";
 import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
-import { isItemsObjectArray, isItemsStringArray } from "./drivers/utils";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -102,6 +102,52 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
     context.watching = false;
   };
 
+  type BatchItem = {
+    mount: ReturnType<typeof getMount>;
+    items: {
+      key: string;
+      relativeKey: string;
+      value?: StorageValue;
+      opts?: any;
+    }[];
+  };
+
+  const runBatch = (
+    items: (string | { key: string; value?: StorageValue; options?: any })[],
+    commonOpts: undefined | TransactionOptions,
+    cb: (batch: BatchItem) => Promise<any>
+  ) => {
+    const batches = new Map<string /* mount base */, BatchItem>();
+    const getBatch = (mount: ReturnType<typeof getMount>) => {
+      let batch = batches.get(mount.base);
+      if (!batch) {
+        batch = { mount, items: [] };
+        batches.set(mount.base, batch);
+      }
+      return batch;
+    };
+
+    for (const item of items) {
+      const isStringItem = typeof item === "string";
+      const key = normalizeKey(isStringItem ? item : item.key);
+      const value = isStringItem ? undefined : item.value;
+      const opts = isStringItem
+        ? commonOpts
+        : { ...commonOpts, ...item.options };
+      const mount = getMount(key);
+      getBatch(mount).items.push({
+        key,
+        value,
+        relativeKey: mount.relativeKey,
+        opts,
+      });
+    }
+
+    return Promise.all([...batches.values()].map((batch) => cb(batch))).then(
+      (r) => r.flat()
+    );
+  };
+
   const storage: Storage = {
     // Item
     hasItem(key, opts = {}) {
@@ -116,35 +162,19 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         destr(value)
       );
     },
-    getItems(items) {
-      if (isItemsStringArray(items)) {
-        const key = items[0];
-        const { driver } = getMount(key); // We just need one mountpoint
-        return driver.getItems
-          ? asyncCall(
-              driver.getItems,
-              items.map((key) => normalizeKey(key))
-            )
-          : Promise.all(items.map((key) => driver.getItem(normalizeKey(key))));
-      }
-      if (isItemsObjectArray(items)) {
-        const { key } = items[0];
-        const { driver } = getMount(key); // We just need one mountpoint
-        return driver.getItems
-          ? asyncCall(
-              driver.getItems,
-              items.map(({ key, opts }) => ({
-                key: normalizeKey(key),
-                opts,
-              }))
-            )
-          : Promise.all(
-              items.map(async ({ key, opts }) => ({
-                key: normalizeKey(key),
-                value: await driver.getItem(normalizeKey(key), opts),
-              }))
+    getItems(items, commonOptions) {
+      return runBatch(items, commonOptions, (batch) => {
+        if (batch.mount.driver.getItems) {
+          return asyncCall(batch.mount.driver.getItems, batch.items);
+        }
+        return Promise.all(
+          batch.items.map((item) => {
+            return asyncCall(batch.mount.driver.getItem, item.relativeKey).then(
+              (value) => ({ key: item.key, value: destr(value) })
             );
-      }
+          })
+        );
+      });
     },
     getItemRaw(key, opts = {}) {
       key = normalizeKey(key);
@@ -170,25 +200,32 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         onChange("update", key);
       }
     },
-    async setItems(items) {
-      await Promise.all(
-        getMounts("", false).map((m) => {
-          return m.driver.setItems
-            ? asyncCall(
-                m.driver.setItems,
-                items.map(({ key, value, opts }) => ({
-                  key: normalizeKey(key),
-                  value,
-                  opts,
-                }))
-              )
-            : Promise.all(
-                items.map(({ key, value, opts }) =>
-                  m.driver.setItem(normalizeKey(key), value, opts)
-                )
-              );
-        })
-      );
+    async setItems(items, commonOptions) {
+      await runBatch(items, commonOptions, (batch) => {
+        if (batch.mount.driver.setItems) {
+          return asyncCall(
+            batch.mount.driver.setItems,
+            batch.items.map((item) => ({
+              key: item.relativeKey,
+              value: stringify(item.value),
+            })),
+            commonOptions
+          );
+        }
+        if (!batch.mount.driver.setItem) {
+          return Promise.resolve();
+        }
+        return Promise.all(
+          batch.items.map((item) => {
+            return asyncCall(
+              batch.mount.driver.setItem!,
+              item.relativeKey,
+              stringify(item.value),
+              item.opts
+            );
+          })
+        );
+      });
     },
     async setItemRaw(key, value, opts = {}) {
       if (value === undefined) {

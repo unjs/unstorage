@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.7.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.6.1...v1.7.0)
+
+
+### 🚀 Enhancements
+
+  - Generic type support ([#237](https://github.com/unjs/unstorage/pull/237))
+
+### 💅 Refactors
+
+  - Fix issues with typescript strict ([#250](https://github.com/unjs/unstorage/pull/250))
+
+### 📖 Documentation
+
+  - Add social share image ([97b8a87](https://github.com/unjs/unstorage/commit/97b8a87))
+  - Fix typo ([#239](https://github.com/unjs/unstorage/pull/239))
+
+### 🏡 Chore
+
+  - Update deps ([bcf9385](https://github.com/unjs/unstorage/commit/bcf9385))
+  - Update dependencies ([ba82bf0](https://github.com/unjs/unstorage/commit/ba82bf0))
+  - Add type check to ci ([57e6901](https://github.com/unjs/unstorage/commit/57e6901))
+
+### 🤖 CI
+
+  - Skip flaky azure tests ([24cfbd7](https://github.com/unjs/unstorage/commit/24cfbd7))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- 魔王少年 ([@maou-shonen](http://github.com/maou-shonen))
+- Neelansh Mathur 
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v1.6.1
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.6.0...v1.6.1)

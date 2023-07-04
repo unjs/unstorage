@@ -42,7 +42,7 @@ export default defineDriver<VercelKVOptions>((opts) => {
           );
         }
       }
-      _client = createClient(opts);
+      _client = createClient(opts as RedisConfigNodejs);
     }
     return _client;
   };

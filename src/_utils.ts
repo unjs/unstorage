@@ -54,7 +54,7 @@ function checkBufferSupport() {
 
 export const BASE64_PREFIX = "base64:";
 
-export function serializeRaw(value) {
+export function serializeRaw(value: any) {
   if (typeof value === "string") {
     return value;
   }
@@ -63,7 +63,7 @@ export function serializeRaw(value) {
   return BASE64_PREFIX + base64;
 }
 
-export function deserializeRaw(value) {
+export function deserializeRaw(value: any) {
   if (typeof value !== "string") {
     // Return non-strings as-is
     return value;

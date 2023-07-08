@@ -5,8 +5,20 @@ import type { RedisConfigNodejs } from "@upstash/redis";
 import { defineDriver, normalizeKey, joinKeys, createError } from "./utils";
 
 export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
+  /**
+   * Optional prefix to use for all keys. Can be used for namespacing.
+   */
   base?: string;
+
+  /**
+   * Optional flag to customzize environment variable prefix (Default is `KV`). Set to `false` to disable env inference for `url` and `token` options
+   */
   env?: false | string;
+
+  /**
+   * Default TTL for all items in seconds.
+   */
+  ttl?: number;
 }
 
 export default defineDriver<VercelKVOptions>((opts) => {
@@ -54,10 +66,17 @@ export default defineDriver<VercelKVOptions>((opts) => {
     getItem(key) {
       return getClient().get(r(key));
     },
-    setItem(key, value) {
-      return getClient()
-        .set(r(key), value)
-        .then(() => {});
+    setItem(key, value, tOptions) {
+      let ttl = tOptions?.ttl ?? opts.ttl;
+      if (ttl) {
+        return getClient()
+          .set(r(key), value, { ex: ttl })
+          .then(() => {});
+      } else {
+        return getClient()
+          .set(r(key), value)
+          .then(() => {});
+      }
     },
     removeItem(key) {
       return getClient()

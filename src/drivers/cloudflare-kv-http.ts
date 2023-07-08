@@ -6,6 +6,7 @@ import {
   joinKeys,
 } from "./utils";
 import { defu } from "defu";
+import { TransactionOptions } from "../types";
 
 interface KVAuthAPIToken {
   /**
@@ -89,6 +90,31 @@ type GetKeysResponse = {
   result_info: { cursor?: string };
 };
 
+// https://developers.cloudflare.com/api/operations/workers-kv-namespace-write-multiple-key-value-pairs
+export type CloudflareKvHttpSetItemOptions = {
+  /**
+   * Whether or not the server should base64 decode the value before storing it.
+   * Useful for writing values that wouldn't otherwise be valid JSON strings, such as images.
+   * @default false
+   */
+  base64?: boolean;
+  /**
+   * The time, measured in number of seconds since the UNIX epoch, at which the key should expire.
+   * @example 1578435000
+   */
+  expiration?: number;
+  /**
+   * The number of seconds for which the key should be visible before it expires. At least 60.
+   * @example 300
+   */
+  expiration_ttl?: number;
+  /**
+   * Arbitrary JSON that is associated with a key.
+   * @example {"someMetadataKey":"someMetadataValue"}
+   */
+  metadata?: Record<string, unknown>;
+};
+
 const DRIVER_NAME = "cloudflare-kv-http";
 
 export default defineDriver<KVHTTPOptions>((opts) => {
@@ -142,11 +168,16 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const setItem = async (
     key: string,
     value: unknown,
-    options: { cloudflareHttp?: Record<string, unknown>; ttl?: number }
+    options: TransactionOptions
   ) => {
-    const cloudflareOptions = defu(options.cloudflareHttp, {
-      expiration_ttl: options.ttl ?? opts.ttl ?? undefined,
-    });
+    const cloudflareOptions = defu(
+      options.cloudflareKvHttp,
+      options.ttl
+        ? { expiration_ttl: options.ttl }
+        : opts.ttl
+        ? { expiration_ttl: opts.ttl }
+        : {}
+    );
     await kvFetch(`/bulk`, {
       method: "PUT",
       body: JSON.stringify([{ key, value, ...cloudflareOptions }]),

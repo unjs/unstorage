@@ -13,6 +13,9 @@ export interface KVOptions {
   ttl?: number;
 }
 
+//https://developers.cloudflare.com/workers/runtime-apis/kv#writing-key-value-pairs
+export type CloudflareKvBindingSetItemOptions = KVNamespacePutOptions;
+
 // https://developers.cloudflare.com/workers/runtime-apis/kv
 
 const DRIVER_NAME = "cloudflare-kv-binding";
@@ -40,15 +43,16 @@ export default defineDriver((opts: KVOptions = {}) => {
       const binding = getBinding(opts.binding);
       return binding.get(key);
     },
-    setItem(
-      key,
-      value,
-      options: { cloudflare?: Record<string, unknown>; ttl?: number }
-    ) {
+    setItem(key, value, options) {
       const binding = getBinding(opts.binding);
-      const cloudflareOptions = defu(options, {
-        expirationTtl: options.ttl ?? opts.ttl ?? undefined,
-      });
+      const cloudflareOptions = defu(
+        options.cloudflareKvBinding,
+        options.ttl
+          ? { expirationTtl: options.ttl }
+          : opts.ttl
+          ? { expirationTtl: opts.ttl }
+          : {}
+      );
       return binding.put(key, value, cloudflareOptions);
     },
     removeItem(key) {

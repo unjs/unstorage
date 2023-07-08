@@ -1,3 +1,6 @@
+import { CloudflareKvBindingSetItemOptions } from "./drivers/cloudflare-kv-binding";
+import { CloudflareKvHttpSetItemOptions } from "./drivers/cloudflare-kv-http";
+
 export type StorageValue = null | string | number | boolean | object;
 export type WatchEvent = "update" | "remove";
 export type WatchCallback = (event: WatchEvent, key: string) => any;
@@ -14,7 +17,11 @@ export interface StorageMeta {
   [key: string]: StorageValue | Date | undefined;
 }
 
-export type TransactionOptions = Record<string, any>;
+export type TransactionOptions = {
+  cloudflareKvBinding?: CloudflareKvBindingSetItemOptions;
+  cloudflareKvHttp?: CloudflareKvHttpSetItemOptions;
+  ttl?: number;
+} & Record<string, unknown>;
 
 export interface Driver {
   name?: string;

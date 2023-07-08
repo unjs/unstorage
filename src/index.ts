@@ -4,13 +4,14 @@ export * from "./utils";
 export { defineDriver } from "./drivers/utils";
 
 export const builtinDrivers = {
-  azureStorageTable: "unstorage/drivers/azure-storage-table",
+  azureAppConfiguration: "unstorage/drivers/azure-app-configuration",
   azureCosmos: "unstorage/drivers/azure-cosmos",
+  azureKeyVault: "unstorage/drivers/azure-key-vault",
   azureStorageBlob: "unstorage/drivers/azure-storage-blob",
-  cloudflareKVHTTP: "unstorage/drivers/cloudflare-kv-http",
+  azureStorageTable: "unstorage/drivers/azure-storage-table",
   cloudflareKVBinding: "unstorage/drivers/cloudflare-kv-binding",
-  "cloudflare-kv-http": "unstorage/drivers/cloudflare-kv-http",
-  "cloudflare-kv-binding": "unstorage/drivers/cloudflare-kv-binding",
+  cloudflareKVHTTP: "unstorage/drivers/cloudflare-kv-http",
+  cloudflareR2Binding: "unstorage/drivers/cloudflare-r2-binding",
   fs: "unstorage/drivers/fs",
   github: "unstorage/drivers/github",
   http: "unstorage/drivers/http",
@@ -21,9 +22,13 @@ export const builtinDrivers = {
   overlay: "unstorage/drivers/overlay",
   planetscale: "unstorage/drivers/planetscale",
   redis: "unstorage/drivers/redis",
-  azureKeyVault: "unstorage/drivers/azure-key-vault",
   sessionStorage: "unstorage/drivers/session-storage",
   vercelKV: "unstorage/drivers/vercel-kv",
+
+  /** @deprecated */
+  "cloudflare-kv-binding": "unstorage/drivers/cloudflare-kv-binding",
+  /** @deprecated */
+  "cloudflare-kv-http": "unstorage/drivers/cloudflare-kv-http",
 };
 
 export type BuiltinDriverName = keyof typeof builtinDrivers;

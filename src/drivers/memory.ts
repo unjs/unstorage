@@ -2,7 +2,7 @@ import { defineDriver } from "./utils";
 
 const DRIVER_NAME = "memory";
 
-export default defineDriver(() => {
+export default defineDriver<void>(() => {
   const data = new Map<string, any>();
 
   return {

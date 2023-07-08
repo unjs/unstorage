@@ -136,9 +136,11 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
       const iterator = getClient()
         .listEntities()
         .byPage({ maxPageSize: pageSize });
-      const keys = [];
+      const keys: string[] = [];
       for await (const page of iterator) {
-        const pageKeys = page.map((entity) => entity.rowKey);
+        const pageKeys = page
+          .map((entity) => entity.rowKey)
+          .filter(Boolean) as string[];
         keys.push(...pageKeys);
       }
       return keys;
@@ -146,7 +148,7 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
     async getMeta(key) {
       const entity = await getClient().getEntity(partitionKey, key);
       return {
-        mtime: new Date(entity.timestamp),
+        mtime: entity.timestamp ? new Date(entity.timestamp) : undefined,
         etag: entity.etag,
       };
     },
@@ -156,10 +158,14 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
         .byPage({ maxPageSize: pageSize });
       for await (const page of iterator) {
         await Promise.all(
-          page.map(
-            async (entity) =>
-              await getClient().deleteEntity(entity.partitionKey, entity.rowKey)
-          )
+          page.map(async (entity) => {
+            if (entity.partitionKey && entity.rowKey) {
+              await getClient().deleteEntity(
+                entity.partitionKey,
+                entity.rowKey
+              );
+            }
+          })
         );
       }
     },

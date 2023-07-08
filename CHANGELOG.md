@@ -2,6 +2,101 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.8.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.7.0...v1.8.0)
+
+### 🚀 Enhancements
+
+- Experimental operation batching ([#240](https://github.com/unjs/unstorage/pull/240))
+- **cloudflare-kv:** Support `base` option for keys ([#261](https://github.com/unjs/unstorage/pull/261))
+- `cloudflare-r2-binding` driver ([#235](https://github.com/unjs/unstorage/pull/235))
+
+### 🩹 Fixes
+
+- Add missing `cloudflareR2Binding` to the `builtinDrivers` ([48d6842](https://github.com/unjs/unstorage/commit/48d6842))
+
+### 📖 Documentation
+
+- Fix typo ([#252](https://github.com/unjs/unstorage/pull/252))
+
+### 🏡 Chore
+
+- Update dev dependencies ([ba44aed](https://github.com/unjs/unstorage/commit/ba44aed))
+
+### ✅ Tests
+
+- Add test for `github` driver ([#259](https://github.com/unjs/unstorage/pull/259))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Hebilicious ([@Hebilicious](http://github.com/Hebilicious))
+- Alex Duval ([@xlanex6](http://github.com/xlanex6))
+
+## v1.7.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.6.1...v1.7.0)
+
+
+### 🚀 Enhancements
+
+  - Generic type support ([#237](https://github.com/unjs/unstorage/pull/237))
+
+### 💅 Refactors
+
+  - Fix issues with typescript strict ([#250](https://github.com/unjs/unstorage/pull/250))
+
+### 📖 Documentation
+
+  - Add social share image ([97b8a87](https://github.com/unjs/unstorage/commit/97b8a87))
+  - Fix typo ([#239](https://github.com/unjs/unstorage/pull/239))
+
+### 🏡 Chore
+
+  - Update deps ([bcf9385](https://github.com/unjs/unstorage/commit/bcf9385))
+  - Update dependencies ([ba82bf0](https://github.com/unjs/unstorage/commit/ba82bf0))
+  - Add type check to ci ([57e6901](https://github.com/unjs/unstorage/commit/57e6901))
+
+### 🤖 CI
+
+  - Skip flaky azure tests ([24cfbd7](https://github.com/unjs/unstorage/commit/24cfbd7))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- 魔王少年 ([@maou-shonen](http://github.com/maou-shonen))
+- Neelansh Mathur 
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
+## v1.6.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.6.0...v1.6.1)
+
+
+### 🩹 Fixes
+
+  - **prefixStorage:** Prefix `getItemRaw` and `setItemRaw` ([#232](https://github.com/unjs/unstorage/pull/232))
+  - **github:** FetchFiles should return files ([#229](https://github.com/unjs/unstorage/pull/229))
+
+### 💅 Refactors
+
+  - Remove unused variable ([97d3e3e](https://github.com/unjs/unstorage/commit/97d3e3e))
+
+### 🏡 Chore
+
+  - Update eslint ([4591831](https://github.com/unjs/unstorage/commit/4591831))
+
+### ✅ Tests
+
+  - Skip cloudflare-kv-http on node >= 18 ([33bc9c0](https://github.com/unjs/unstorage/commit/33bc9c0))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Andrei Dyldin <and@cesbo.com>
+- 魔王少年 <q267009886.work@gmail.com>
+
 ## v1.6.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.5.0...v1.6.0)

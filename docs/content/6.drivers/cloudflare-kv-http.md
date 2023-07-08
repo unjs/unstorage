@@ -66,9 +66,12 @@ Refer to the [cloudflare KV API docs](https://developers.cloudflare.com/api/oper
 
 ```ts
 await storage.setItem("key", "value", {
-  expiration: 1578435000,
-  expiration_ttl: 300,
-  base64: false,
-  metadata: { someMetadataKey: "someMetadataValue" },
+  ttl: 300, // key expiration shorthand (in seconds)
+  cloudflareKvHttp: {
+    expiration: 1578435000,
+    expiration_ttl: 300,
+    base64: false,
+    metadata: { someMetadataKey: "someMetadataValue" },
+  },
 });
 ```

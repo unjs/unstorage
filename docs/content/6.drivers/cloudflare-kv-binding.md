@@ -41,8 +41,11 @@ Refer to the [cloudflare KV docs](https://developers.cloudflare.com/workers/runt
 
 ```ts
 await storage.setItem("key", "value", {
-  expiration: 1578435000,
-  expirationTtl: 300,
-  metadata: { someMetadataKey: "someMetadataValue" },
+  ttl: 300, // key expiration shorthand (in seconds)
+  cloudflareKvBinding: {
+    expiration: 1578435000,
+    expirationTtl: 300,
+    metadata: { someMetadataKey: "someMetadataValue" },
+  },
 });
 ```

@@ -17,11 +17,13 @@ export interface StorageMeta {
   [key: string]: StorageValue | Date | undefined;
 }
 
-export type TransactionOptions = {
-  cloudflareKvBinding?: CloudflareKvBindingSetItemOptions;
-  cloudflareKvHttp?: CloudflareKvHttpSetItemOptions;
-  ttl?: number;
-} & Record<string, any>;
+export type TransactionOptions =
+  | ({
+      cloudflareKvBinding?: CloudflareKvBindingSetItemOptions;
+      cloudflareKvHttp?: CloudflareKvHttpSetItemOptions;
+      ttl?: number;
+    } & Record<string, any>)
+  | undefined;
 
 export interface Driver {
   name?: string;

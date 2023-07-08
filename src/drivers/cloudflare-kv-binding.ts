@@ -46,8 +46,8 @@ export default defineDriver((opts: KVOptions = {}) => {
     setItem(key, value, options) {
       const binding = getBinding(opts.binding);
       const cloudflareOptions = defu(
-        options.cloudflareKvBinding,
-        options.ttl
+        options?.cloudflareKvBinding,
+        options?.ttl
           ? { expirationTtl: options.ttl }
           : opts.ttl
           ? { expirationTtl: opts.ttl }

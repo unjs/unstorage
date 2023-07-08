@@ -21,7 +21,7 @@ export default defineDriver((opts: HTTPOptions) => {
     hasItem(key, topts) {
       return _fetch(r(key), {
         method: "HEAD",
-        headers: { ...opts.headers, ...topts.headers },
+        headers: { ...opts.headers, ...topts?.headers },
       })
         .then(() => true)
         .catch(() => false);
@@ -37,7 +37,7 @@ export default defineDriver((opts: HTTPOptions) => {
         headers: {
           accept: "application/octet-stream",
           ...opts.headers,
-          ...topts.headers,
+          ...topts?.headers,
         },
       });
       return value;
@@ -45,7 +45,7 @@ export default defineDriver((opts: HTTPOptions) => {
     async getMeta(key, topts) {
       const res = await _fetch.raw(r(key), {
         method: "HEAD",
-        headers: { ...opts.headers, ...topts.headers },
+        headers: { ...opts.headers, ...topts?.headers },
       });
       let mtime = undefined;
       const _lastModified = res.headers.get("last-modified");
@@ -71,26 +71,26 @@ export default defineDriver((opts: HTTPOptions) => {
         headers: {
           "content-type": "application/octet-stream",
           ...opts.headers,
-          ...topts.headers,
+          ...topts?.headers,
         },
       });
     },
     async removeItem(key, topts) {
       await _fetch(r(key), {
         method: "DELETE",
-        headers: { ...opts.headers, ...topts.headers },
+        headers: { ...opts.headers, ...topts?.headers },
       });
     },
     async getKeys(base, topts) {
       const value = await _fetch(rBase(base), {
-        headers: { ...opts.headers, ...topts.headers },
+        headers: { ...opts.headers, ...topts?.headers },
       });
       return Array.isArray(value) ? value : [];
     },
     async clear(base, topts) {
       await _fetch(rBase(base), {
         method: "DELETE",
-        headers: { ...opts.headers, ...topts.headers },
+        headers: { ...opts.headers, ...topts?.headers },
       });
     },
   };

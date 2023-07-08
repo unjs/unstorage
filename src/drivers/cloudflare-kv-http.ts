@@ -171,8 +171,8 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     options: TransactionOptions
   ) => {
     const cloudflareOptions = defu(
-      options.cloudflareKvHttp,
-      options.ttl
+      options?.cloudflareKvHttp,
+      options?.ttl
         ? { expiration_ttl: options.ttl }
         : opts.ttl
         ? { expiration_ttl: opts.ttl }

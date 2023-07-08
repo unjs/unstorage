@@ -5,6 +5,7 @@ import {
   defineDriver,
   joinKeys,
 } from "./utils";
+import { defu } from "defu";
 
 interface KVAuthAPIToken {
   /**
@@ -57,6 +58,10 @@ export type KVHTTPOptions = {
    * Adds prefix to all stored keys
    */
   base?: string;
+  /**
+   * Default TTL for all items in seconds.
+   */
+  ttl?: number;
 } & (KVAuthServiceKey | KVAuthAPIToken | KVAuthEmailKey);
 
 type CloudflareAuthorizationHeaders =
@@ -137,11 +142,14 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const setItem = async (
     key: string,
     value: unknown,
-    options: Record<string, unknown>
+    options: { cloudflareHttp?: Record<string, unknown>; ttl?: number }
   ) => {
+    const cloudflareOptions = defu(options.cloudflareHttp, {
+      expiration_ttl: options.ttl ?? opts.ttl ?? undefined,
+    });
     await kvFetch(`/bulk`, {
       method: "PUT",
-      body: JSON.stringify([{ key, value, ...options }]),
+      body: JSON.stringify([{ key, value, ...cloudflareOptions }]),
     });
   };
 

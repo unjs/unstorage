@@ -75,6 +75,7 @@
     "@vue/compiler-sfc": "^3.3.4",
     "azurite": "^3.24.0",
     "changelogen": "^0.5.4",
+    "defu": "^6.1.2",
     "eslint": "^8.44.0",
     "eslint-config-unjs": "^0.2.1",
     "ioredis-mock": "^8.7.0",

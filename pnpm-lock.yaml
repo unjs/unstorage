@@ -97,6 +97,9 @@ devDependencies:
   changelogen:
     specifier: ^0.5.4
     version: 0.5.4
+  defu:
+    specifier: ^6.1.2
+    version: 6.1.2
   eslint:
     specifier: ^8.44.0
     version: 8.44.0

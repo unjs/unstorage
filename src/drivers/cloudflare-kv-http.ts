@@ -180,7 +180,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     );
     await kvFetch(`/bulk`, {
       method: "PUT",
-      body: JSON.stringify([{ key: r(key), value, ...cloudflareOptions }]),
+      body: JSON.stringify([{ ...cloudflareOptions, key: r(key), value }]),
     });
   };
 

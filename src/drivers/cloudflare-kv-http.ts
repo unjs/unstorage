@@ -152,7 +152,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   const hasItem = async (key: string) => {
-    const response = await kvFetch(`/metadata/${key}`);
+    const response = await kvFetch(`/metadata/${r(key)}`);
     if (response.status === 404) return false;
     const data = await response.json<{ success: boolean }>();
     return data?.success === true;
@@ -160,7 +160,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
 
   const getItem = async (key: string) => {
     // Cloudflare API returns with `content-type: application/json`: https://developers.cloudflare.com/api/operations/workers-kv-namespace-read-key-value-pair
-    const response = await kvFetch(`/values/${key}`);
+    const response = await kvFetch(`/values/${r(key)}`);
     if (response.status === 404) return null;
     return response.json();
   };
@@ -180,12 +180,12 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     );
     await kvFetch(`/bulk`, {
       method: "PUT",
-      body: JSON.stringify([{ key, value, ...cloudflareOptions }]),
+      body: JSON.stringify([{ key: r(key), value, ...cloudflareOptions }]),
     });
   };
 
   const removeItem = async (key: string) => {
-    await kvFetch(`/values/${key}`, { method: "DELETE" });
+    await kvFetch(`/values/${r(key)}`, { method: "DELETE" });
   };
 
   const getKeys = async (base?: string) => {

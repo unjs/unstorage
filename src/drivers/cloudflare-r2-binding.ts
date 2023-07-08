@@ -43,22 +43,22 @@ export default defineDriver((opts: CloudflareR2Options) => {
     getItem(key, topts) {
       key = r(key);
       const binding = getBinding(opts.binding);
-      return binding.get(key, topts).then((r) => r?.text());
+      return binding.get(key, topts as any).then((r: any) => r?.text());
     },
     getItemRaw(key, topts) {
       key = r(key);
       const binding = getBinding(opts.binding);
-      return binding.get(key, topts).then((r) => r?.arrayBuffer());
+      return binding.get(key, topts as any).then((r: any) => r?.arrayBuffer());
     },
     async setItem(key, value, topts) {
       key = r(key);
       const binding = getBinding(opts.binding);
-      await binding.put(key, value, topts);
+      await binding.put(key, value, topts as any);
     },
     async setItemRaw(key, value, topts) {
       key = r(key);
       const binding = getBinding(opts.binding);
-      await binding.put(key, value, topts);
+      await binding.put(key, value, topts as any);
     },
     async removeItem(key) {
       key = r(key);

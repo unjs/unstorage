@@ -21,7 +21,7 @@ export type TransactionOptions = {
   cloudflareKvBinding?: CloudflareKvBindingSetItemOptions;
   cloudflareKvHttp?: CloudflareKvHttpSetItemOptions;
   ttl?: number;
-} & Record<string, unknown>;
+} & Record<string, any>;
 
 export interface Driver {
   name?: string;

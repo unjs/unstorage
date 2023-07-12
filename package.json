@@ -62,16 +62,16 @@
     "@azure/identity": "^3.2.3",
     "@azure/keyvault-secrets": "^4.7.0",
     "@azure/storage-blob": "^12.14.0",
-    "@cloudflare/workers-types": "^4.20230518.0",
+    "@cloudflare/workers-types": "^4.20230710.0",
     "@planetscale/database": "^1.8.0",
     "@types/ioredis-mock": "^8.2.2",
     "@types/jsdom": "^21.1.1",
     "@types/mri": "^1.1.1",
-    "@types/node": "^20.3.3",
+    "@types/node": "^20.4.2",
     "@upstash/redis": "^1.22.0",
     "@vercel/kv": "^0.2.2",
     "@vitejs/plugin-vue": "^4.2.3",
-    "@vitest/coverage-v8": "^0.32.4",
+    "@vitest/coverage-v8": "^0.33.0",
     "@vue/compiler-sfc": "^3.3.4",
     "azurite": "^3.24.0",
     "changelogen": "^0.5.4",
@@ -80,16 +80,16 @@
     "ioredis-mock": "^8.7.0",
     "jiti": "^1.19.1",
     "jsdom": "^22.1.0",
-    "monaco-editor": "^0.39.0",
-    "mongodb": "^5.6.0",
+    "monaco-editor": "^0.40.0",
+    "mongodb": "^5.7.0",
     "mongodb-memory-server": "^8.13.0",
     "msw": "^1.2.2",
     "prettier": "^2.8.8",
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "^5.1.6",
     "unbuild": "^1.2.1",
-    "vite": "^4.3.9",
-    "vitest": "^0.32.4",
+    "vite": "^4.4.3",
+    "vitest": "^0.33.0",
     "vue": "^3.3.4"
   },
   "peerDependencies": {
@@ -99,8 +99,8 @@
     "@azure/identity": "^3.2.3",
     "@azure/keyvault-secrets": "^4.7.0",
     "@azure/storage-blob": "^12.14.0",
-    "@planetscale/database": "^1.7.0",
-    "@upstash/redis": "^1.21.0",
+    "@planetscale/database": "^1.8.0",
+    "@upstash/redis": "^1.22.0",
     "@vercel/kv": "^0.2.2"
   },
   "peerDependenciesMeta": {
@@ -132,5 +132,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@8.6.5"
+  "packageManager": "pnpm@8.6.7"
 }

@@ -53,12 +53,12 @@ export default defineDriver((opts: CloudflareR2Options) => {
     async setItem(key, value, topts) {
       key = r(key);
       const binding = getBinding(opts.binding);
-      await binding.put(key, value, topts);
+      await binding.put(key, value, topts as any);
     },
     async setItemRaw(key, value, topts) {
       key = r(key);
       const binding = getBinding(opts.binding);
-      await binding.put(key, value, topts);
+      await binding.put(key, value, topts as any);
     },
     async removeItem(key) {
       key = r(key);

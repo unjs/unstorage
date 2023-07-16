@@ -16,36 +16,36 @@ export interface StorageMeta {
 
 export type TransactionOptions = Record<string, any>;
 
+export type GetItemOptions = TransactionOptions;
+export type SetItemOptions = { ttl?: number } & TransactionOptions;
+
 export interface Driver {
   name?: string;
   options?: any;
   hasItem: (key: string, opts: TransactionOptions) => MaybePromise<boolean>;
-  getItem: (
-    key: string,
-    opts?: TransactionOptions
-  ) => MaybePromise<StorageValue>;
+  getItem: (key: string, opts?: GetItemOptions) => MaybePromise<StorageValue>;
   /** @experimental */
   getItems?: (
-    items: { key: string; options?: TransactionOptions }[],
-    commonOptions?: TransactionOptions
+    items: { key: string; options?: GetItemOptions }[],
+    commonOptions?: GetItemOptions
   ) => MaybePromise<{ key: string; value: StorageValue }[]>;
   /** @experimental */
-  getItemRaw?: (key: string, opts: TransactionOptions) => MaybePromise<unknown>;
+  getItemRaw?: (key: string, opts: GetItemOptions) => MaybePromise<unknown>;
   setItem?: (
     key: string,
     value: string,
-    opts: TransactionOptions
+    opts: SetItemOptions
   ) => MaybePromise<void>;
   /** @experimental */
   setItems?: (
-    items: { key: string; value: string; options?: TransactionOptions }[],
-    commonOptions?: TransactionOptions
+    items: { key: string; value: string; options?: SetItemOptions }[],
+    commonOptions?: SetItemOptions
   ) => MaybePromise<void>;
   /** @experimental */
   setItemRaw?: (
     key: string,
     value: any,
-    opts: TransactionOptions
+    opts: SetItemOptions
   ) => MaybePromise<void>;
   removeItem?: (key: string, opts: TransactionOptions) => MaybePromise<void>;
   getMeta?: (

@@ -80,6 +80,11 @@ export default defineDriver((opts: SqliteDriverOptions = {}) => {
     FROM ${options.table}
     WHERE id=:key;
   `);
+  const metaStatement = getDb().prepare(`
+    SELECT created_at, updated_at
+    FROM ${options.table}
+    WHERE id=:key;
+  `);
   const setStatement = getDb().prepare(`
     INSERT INTO ${options.table} (id, value)
     VALUES (:key, :value)
@@ -125,10 +130,13 @@ export default defineDriver((opts: SqliteDriverOptions = {}) => {
         createError(DRIVER_NAME, `Error retrieving ${key}`, { cause });
       }
     },
-    getItemRaw: (key) => {},
+    // TODO: Experimental feature. To be implemented once it is stable.
+    // getItems: (keys) => {},
+    // TODO: Experimental feature. To be implemented once it is stable.
+    // getItemRaw: (key) => {},
     setItem: (key, value) => {
       try {
-        if (!value) removeStatement.run({ id: key });
+        if (!value) removeStatement.run({ key });
         setStatement.run({
           key,
           value,
@@ -137,22 +145,83 @@ export default defineDriver((opts: SqliteDriverOptions = {}) => {
         createError(DRIVER_NAME, `Error setting ${key}`, { cause });
       }
     },
-    setItemRaw: (key, value) => {},
-    removeItem: (key) => {
+    // TODO: Experimental feature. To be implemented once it is stable.
+    // setItems: (keys) => {},
+    // TODO: Experimental feature. To be implemented once it is stable.
+    // setItemRaw: (key, value) => {},
+    removeItem: (key, removeMeta = true) => {
+      try {
+        removeStatement.run({
+          key,
+        });
+        if (removeMeta) {
+          removeStatement.run({
+            key: `${key}$`,
+          });
+        }
+      } catch (cause) {
+        createError(DRIVER_NAME, `Error removing ${key}`, { cause });
+      }
+    },
+    getMeta: (key, opts = {}) => {
+      try {
+        // We always return the native metadata.
+        const native = metaStatement.run({
+          key,
+        }) as { created_at: string; updated_at: string };
+
+        const timestamps = {
+          birthtime: native?.created_at,
+          mtime: native?.updated_at,
+        };
+
+        if (opts && opts.nativeOnly) {
+          return timestamps;
+        }
+
+        const meta = getStatement.run({
+          key: `${key}$`,
+        }) as { value: string };
+
+        if (!meta.value) {
+          return timestamps;
+        }
+
+        return {
+          ...timestamps,
+          meta: meta.value,
+        };
+      } catch (cause) {
+        createError(DRIVER_NAME, `Error getting meta for ${key}`, { cause });
+      }
+    },
+    setMeta: (key, opts?) => {
+      try {
+        if (!value) removeStatement.run({ key: `${key}$` });
+        setStatement.run({
+          key: `${key}$`,
+          value,
+        });
+      } catch (cause) {
+        createError(DRIVER_NAME, `Error setting meta for ${key}`, { cause });
+      }
+    },
+    removeMeta: (key, opts?) => {
       try {
         return removeStatement.run({
-          key,
+          key: `${key}$`,
         });
       } catch (cause) {
         createError(DRIVER_NAME, `Error removing ${key}`, { cause });
       }
     },
-    getMeta: (key) => {},
     getKeys: (base = "") => {
       try {
         return (
           (getKeysStatement.all({ base: `${base}%` }) as { id: string }[]) ?? []
-        ).map((row) => row.id);
+        )
+          .map((row) => row.id)
+          .filter((row) => !row.endsWith("$"));
       } catch (cause) {
         createError(DRIVER_NAME, `Error retrieving keys using base ${base}`, {
           cause,

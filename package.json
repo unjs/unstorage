@@ -101,7 +101,8 @@
     "@azure/storage-blob": "^12.14.0",
     "@planetscale/database": "^1.8.0",
     "@upstash/redis": "^1.22.0",
-    "@vercel/kv": "^0.2.2"
+    "@vercel/kv": "^0.2.2",
+    "webdav": "^5.2.3"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {

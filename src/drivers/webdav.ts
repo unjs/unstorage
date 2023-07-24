@@ -140,13 +140,13 @@ export default defineDriver<Partial<WebdavOptions>>(
         if (!content) return null;
 
         if (!content.body) {
+          const source = joinURL(opts.directory, `/${key.replace(/\:/g, "/")}`);
           try {
-            const source = `/${key.replace(/\:/g, "/")}`;
             content.body = (await client.getFileContents(source, {
               format: "text",
             })) as string;
           } catch (error) {
-            throw createError(`Failed to fetch ${JSON.stringify(key)}`);
+            throw createError(`Failed to fetch '${source}'`);
           }
         }
         return content.body;

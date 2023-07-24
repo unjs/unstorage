@@ -4,7 +4,7 @@ navigation.title: Webdav
 
 # Webdav
 
-The driver is powered by the `[webdav](https://www.npmjs.com/package/webdav)` module, but currently only supports read-only use via standard username/password authentication.
+The driver is powered by the [`webdav`](https://www.npmjs.com/package/webdav) module, but currently only supports read-only use via standard username/password authentication.
 
 Fetches all possible keys once and keep it in cache for 10 minutes. Cache only applies to fetching keys.
 

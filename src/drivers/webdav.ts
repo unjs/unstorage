@@ -87,6 +87,7 @@ export default defineDriver<Partial<WebdavOptions>>(
           }
 
           const key: string = content.filename
+            .replace(opts.directory, "")
             .replace(/^\//, "")
             .replace(/\//g, ":");
 

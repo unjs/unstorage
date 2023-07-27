@@ -4,9 +4,11 @@ navigation.title: Webdav
 
 # Webdav
 
-The driver is powered by the [`webdav`](https://www.npmjs.com/package/webdav) module, but currently only supports read-only use via standard username/password authentication.
+Store data on a WebDAV server such as [NextCloud](https://nextcloud.com/).
 
-Fetches all possible keys once and keep it in cache for 10 minutes. Cache only applies to fetching keys.
+This driver implements meta for relavent [DAV properties](http://www.webdav.org/specs/rfc4918.html#dav.properties).
+
+The driver currently only supports read-only functions.
 
 ```js
 import { createStorage } from "unstorage";
@@ -14,21 +16,29 @@ import webdavDriver from "unstorage/drivers/webdav";
 
 const storage = createStorage({
   driver: gitlabDriver({
-    serverURL: "https://nextcloud27.our-servers.de",
+    source: "https://nextcloud27.our-servers.de/remote.php/dav/files/user",
     username: "user",
     password: "demo123",
-    // pathPrefix: "/remote.php/dav/files/",
-    // directory: "/",
-    // ttl: 600
   }),
 });
 ```
 
-**Options:**
+**Configuration Options:**
 
-- `serverURL`: Domain of Webdav host.
-- `username`: Webdav username.
-- `password`: Webdav user password.
-- `pathPrefix`: Prefix to content path. Default is `/remote.php/dav/files/`
-- `directory`: Root of content directory. Default is `/`
-- `ttl`: Filenames cache revalidate time. Default is 600 seconds (10 minutes)
+```js
+export interface WebdavDriverOptions {
+  // URI of WebDAV share:
+  source: string;
+  // WebDAV username:
+  username?: string;
+  // WebDAV password:
+  password?: string;
+  // Specify additional headers:
+  headers: { [key: string]: string };
+  // interval: number; (To-do: Implement polling)
+  // Expiration of cache:
+  ttl: number;
+}
+```
+
+To use a subdirectory as root of storage, prepend source such as: `https://nextcloud27.our-servers.de/remote.php/dav/files/user/path/to/content`

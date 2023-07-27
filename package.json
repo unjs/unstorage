@@ -102,7 +102,7 @@
     "@planetscale/database": "^1.8.0",
     "@upstash/redis": "^1.22.0",
     "@vercel/kv": "^0.2.2",
-    "webdav": "^5.2.3"
+    "fast-xml-parser": "^4.2.6"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {

@@ -17,7 +17,7 @@ import { createStorage } from "unstorage";
 import webdavDriver from "unstorage/drivers/webdav";
 
 const storage = createStorage({
-  driver: gitlabDriver({
+  driver: webdavDriver({
     source: "https://nextcloud27.our-servers.de/remote.php/dav/files/user",
     username: "user",
     password: "demo123",

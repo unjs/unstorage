@@ -18,6 +18,8 @@ export interface WebdavDriverOptions {
   //* To-do: Implement polling.
   // interval: number;
   ttl: number;
+
+  infinityDepthHeaderUnavailable?: boolean;
 }
 
 export interface WebdavResource {
@@ -31,11 +33,8 @@ export interface WebdavResource {
   };
 }
 
-export default defineDriver<Partial<WebdavDriverOptions>>((configure) => {
-  const options = Object.assign(
-    defaultOptions,
-    configure
-  ) as WebdavDriverOptions;
+export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
+  const options = Object.assign(defaultOptions, config) as WebdavDriverOptions;
   const client = createWebdavClient(options);
   client.isConnected().then((okay) => {
     if (!okay)
@@ -107,6 +106,8 @@ function createWebdavClient(options: {
   username?: string;
   password?: string;
   headers?: { [key: string]: string };
+
+  infinityDepthHeaderUnavailable?: boolean;
 }) {
   const source = (() => {
     try {
@@ -141,7 +142,10 @@ function createWebdavClient(options: {
     try {
       const response = await fetch(source, {
         method: "PROPFIND",
-        headers,
+        headers: {
+          ...headers,
+          Depth: options.infinityDepthHeaderUnavailable ? "1" : "infinity",
+        },
         body,
       });
 
@@ -221,7 +225,10 @@ function createWebdavClient(options: {
           };
           if (isCollection()) {
             const subdirectory = joinURL(source.origin, href);
-            if (subdirectory !== url) {
+            if (
+              options.infinityDepthHeaderUnavailable &&
+              subdirectory !== url
+            ) {
               subdirectories.push(fetchDirectory(subdirectory));
             }
             continue;
@@ -259,7 +266,8 @@ function createWebdavClient(options: {
             },
           };
         }
-        await Promise.all(subdirectories);
+        if (options.infinityDepthHeaderUnavailable)
+          await Promise.all(subdirectories);
       };
 
       await fetchDirectory(options.source);

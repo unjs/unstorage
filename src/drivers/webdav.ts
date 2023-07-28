@@ -181,8 +181,6 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
           files[record].body = undefined;
         }
 
-        if (record in files && files[record].meta.etag === etag) continue;
-
         files[record] = {
           meta: {
             href,

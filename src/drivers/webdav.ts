@@ -22,12 +22,13 @@ export interface WebdavDriverOptions {
   infinityDepthHeaderUnavailable?: boolean;
 }
 
-export interface WebdavResource {
+export interface WebdavFile {
   body?: string;
   meta: {
     href: string;
     type?: string;
     size?: number;
+    atime?: Date;
     mtime?: Date;
     etag?: string;
   };
@@ -36,12 +37,12 @@ export interface WebdavResource {
 export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
   const options = Object.assign(defaultOptions, config) as WebdavDriverOptions;
   const client = createWebdavClient(options);
-  client.isConnected().then((okay) => {
-    if (!okay)
+  client.isConnected().then((ok) => {
+    if (!ok)
       throw errorMessage(`Failed to connect to source: '${options.source}'`);
   });
 
-  let files: Record<string, WebdavResource> = {};
+  let files: Record<string, WebdavFile> = {};
   let lastCheck = 0;
   let syncPromise: undefined | Promise<any>;
 
@@ -79,19 +80,22 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
     async getItem(key) {
       await syncFiles();
 
-      const resource = files[key];
-      if (!resource) return null;
+      const file = files[key];
+      if (!file) return null;
 
-      if (!resource.body) {
-        const href = resource.meta.href;
+      if (!file.body) {
+        // should re-validate against etag ("0"-Depth PROPFIND on file)?
+
+        const href = file.meta.href;
         try {
+          // receive 'etag' as well; update meta for version control.
           const [success, body] = await client.fetchFile(href);
-          if (success) resource.body = body as string;
+          if (success) file.body = body as string;
         } catch {
           console.error(errorMessage("Failed to fetch source."));
         }
       }
-      return resource.body;
+      return file.body;
     },
     async getMeta(key) {
       await syncFiles();
@@ -174,7 +178,7 @@ function createWebdavClient(options: {
     },
 
     async fetchFiles() {
-      const files: Record<string, WebdavResource> = {};
+      const files: Record<string, WebdavFile> = {};
       const fetchDirectory = async (url: string) => {
         const xml = await fetchXML(url);
         const key = (() => {
@@ -239,14 +243,12 @@ function createWebdavClient(options: {
             (properties[key("getcontenttype")] as string) || undefined;
 
           // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getlastmodified
-          const getLastModified = () => {
-            const date = new Date(properties[key("getlastmodified")]);
-            return Boolean(date.getTime()) ? date : undefined;
-          };
+          const getLastModified = () =>
+            validDate(properties[key("getlastmodified")]);
 
           // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getcontentlength
           const getContentLength = () =>
-            (properties[key("getcontentlength")] as number) || undefined;
+            validInteger(properties[key("getcontentlength")]);
 
           // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getetag
           const getETag = () =>
@@ -288,6 +290,19 @@ function createWebdavClient(options: {
 
 function encodeBase64(string: string) {
   return Buffer.from(string, "utf8").toString("base64");
+}
+
+function validInteger(input: unknown) {
+  if (input === undefined) return;
+  if (Number.isInteger(input)) return input as number;
+  const integer = parseInt(input as string);
+  if (Number.isInteger(integer)) return integer;
+}
+
+function validDate(input: unknown) {
+  if (input === undefined) return;
+  const date = new Date(input as any);
+  return Boolean(date.getTime()) ? date : undefined;
 }
 
 function errorMessage(message: string) {

@@ -79,28 +79,21 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
     },
     async getItem(key) {
       await syncFiles();
+      if (!(key in files)) return null;
 
-      const file = files[key];
-      if (!file) return null;
-
-      if (!file.body) {
+      //* If body does exist, must be re-validated. (Zero-depth request for etag?)
+      if (!files[key]?.body) {
         // should re-validate against etag ("0"-Depth PROPFIND on file)?
 
-        const href = file.meta.href;
-        try {
-          // receive 'etag' as well; update meta for version control.
-          const [success, body] = await client.fetchFile(href);
-          if (success) file.body = body as string;
-        } catch {
-          console.error(errorMessage("Failed to fetch source."));
-        }
+        const href = files[key].meta.href;
+        const response = await client.fetchFile(href);
+        if (response.ok) files[key] = response.file as WebdavFile;
       }
-      return file.body;
+      return files[key].body;
     },
     async getMeta(key) {
       await syncFiles();
-      const resource = files[key]; //?  as keyof typeof files
-      return resource ? resource.meta : null;
+      return key in files ? files[key].meta : null;
     },
   };
 });
@@ -276,13 +269,38 @@ function createWebdavClient(options: {
       return files;
     },
 
-    async fetchFile(href: string) {
+    async fetchFile(href: string): Promise<{
+      ok: boolean;
+      file?: WebdavFile;
+      error?: any;
+    }> {
       const url = joinURL(source.origin, href);
       try {
         const response = await fetch(url, { headers });
-        return [true, await response.text()];
-      } catch {
-        return [false, ""];
+        const getHeader = (key: string) => {
+          const value = response.headers.get(key);
+          return value ? value : undefined;
+        };
+
+        return {
+          ok: true,
+          file: {
+            body: await response.text(),
+            meta: {
+              href,
+              type: getHeader("Content-Type"),
+              size: validInteger(getHeader("Content-Length")),
+              atime: validDate(getHeader("Date")),
+              mtime: validDate(getHeader("Last-Modified")),
+              etag: getHeader("etag"),
+            },
+          } as WebdavFile,
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          error,
+        };
       }
     },
   };

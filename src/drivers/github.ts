@@ -14,7 +14,7 @@ export interface GithubOptions {
    */
   branch?: string;
   /**
-   * @default "main"
+   * @default ""
    */
   dir?: string;
   /**

@@ -119,7 +119,7 @@ export default defineDriver<WebdavDriverOptions>((options) => {
     const fetchDirectory = async (uri: string) => {
       const { ok, data: xml, atime } = await fetchXML(uri);
       if (!ok) return;
-      if (atime) latest.atime = atime;
+      latest.atime = atime || Date.now();
 
       const prop = (() => {
         const prefix = Object.keys(xml)
@@ -186,7 +186,7 @@ export default defineDriver<WebdavDriverOptions>((options) => {
 
         if (key in files) {
           if (files[key].meta.etag === etag) continue;
-          files[key].body = undefined;
+          delete files[key].body;
         }
 
         // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getcontenttype
@@ -213,7 +213,6 @@ export default defineDriver<WebdavDriverOptions>((options) => {
     };
 
     await fetchDirectory(source.href);
-    latest.atime = Date.now();
   };
 
   const parseResponseHeaders = (headers: Headers) => {
@@ -240,8 +239,8 @@ export default defineDriver<WebdavDriverOptions>((options) => {
         meta: {
           href,
           ...parseResponseHeaders(response.headers),
-        } as WebdavFile["meta"],
-      };
+        },
+      } as WebdavFile;
     } catch {
       return;
     }
@@ -275,7 +274,7 @@ export default defineDriver<WebdavDriverOptions>((options) => {
 
     for (let p of path.keys()) {
       if (p < found) continue;
-      if (!(await makeDirectory(path.slice(0, p).join(":")))) return false;
+      await makeDirectory(path.slice(0, p).join(":"));
     }
   };
 
@@ -286,8 +285,7 @@ export default defineDriver<WebdavDriverOptions>((options) => {
       headers,
       body: new Blob([Buffer.from(utf8, "utf8")]),
     });
-    let ok = response.status >= 200 && response.status < 300;
-    if (!ok) {
+    if (!response.ok) {
       console.error(`Failed to PUT file: ${uri}`);
       return false;
     }

@@ -10,8 +10,6 @@ export interface WebdavDriverOptions {
   password?: string;
   headers?: { [key: string]: string };
   ttl?: number;
-  // interval: number; //? Implement polling . .
-
   infinityDepthHeaderUnavailable?: boolean;
 }
 
@@ -230,11 +228,14 @@ export default defineDriver<WebdavDriverOptions>((options) => {
     } as Partial<WebdavFile["meta"]>;
   };
 
-  const fetchFile = async (href: string) => {
+  const fetchFile = async (key: string) => {
+    const { href } = files[key].meta;
     const uri = joinURL(source.origin, href);
     try {
       const response = await fetch(uri, { headers });
-      return {
+      if (response.status !== 200) return;
+
+      files[key] = {
         body: await response.text(),
         meta: {
           href,
@@ -311,12 +312,11 @@ export default defineDriver<WebdavDriverOptions>((options) => {
   };
 
   let syncPromise: undefined | Promise<any>;
-  const syncFiles = async () => {
-    if (
-      latest.etag &&
-      (!options.ttl || Date.now() < latest.atime + options.ttl * 1000)
-    )
-      return;
+  const syncFiles = async (forceSync?: boolean) => {
+    if (latest.atime && !forceSync) {
+      if (!options.ttl) return;
+      if (Date.now() < latest.atime + options.ttl! * 1000) return;
+    }
 
     if (!syncPromise) syncPromise = fetchFiles();
     await syncPromise;
@@ -334,18 +334,15 @@ export default defineDriver<WebdavDriverOptions>((options) => {
       await syncFiles();
       if (!(key in files)) return null;
 
-      if (!files[key]?.body) {
-        const href = files[key].meta.href;
-        const file = await fetchFile(href);
-        if (file) files[key] = file;
-      }
-      return files[key].body;
+      if (files[key].body === undefined) await fetchFile(key);
+      return files[key]?.body || null;
     },
     async getMeta(key) {
       await syncFiles();
-      return key in files ? files[key].meta : null;
+      return files[key]?.meta || null;
     },
     async setItem(key, value, opts) {
+      await syncFiles();
       await ensureParentDirectory(key);
       if (opts.type === "directory") {
         await makeDirectory(key);
@@ -354,10 +351,12 @@ export default defineDriver<WebdavDriverOptions>((options) => {
       }
     },
     async removeItem(key) {
+      await syncFiles();
+      if (!(key in files)) return;
       await deleteResource(key);
     },
     async getKeys() {
-      await syncFiles();
+      await syncFiles(true);
       return Object.keys(files);
     },
   };

@@ -3,21 +3,14 @@ import { joinURL } from "ufo";
 import { XMLParser } from "fast-xml-parser";
 
 const driverName = "webdav";
-const defaultOptions: WebdavDriverOptions = {
-  source: "",
-  headers: {},
-  // interval: 0,
-  ttl: 600,
-};
 
 export interface WebdavDriverOptions {
   source: string;
   username?: string;
   password?: string;
-  headers: { [key: string]: string };
-  //* To-do: Implement polling.
-  // interval: number;
-  ttl: number;
+  headers?: { [key: string]: string };
+  ttl?: number;
+  // interval: number; //? Implement polling . .
 
   infinityDepthHeaderUnavailable?: boolean;
 }
@@ -34,9 +27,7 @@ export interface WebdavFile {
   };
 }
 
-export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
-  const options = Object.assign(defaultOptions, config) as WebdavDriverOptions;
-
+export default defineDriver<WebdavDriverOptions>((options) => {
   const source = (() => {
     try {
       return new URL(
@@ -47,14 +38,14 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
     }
   })();
 
-  const headers = { ...options.headers } as { [key: string]: string };
+  const headers = { ...(options.headers || {}) } as { [key: string]: string };
   if (options.username && options.password) {
     headers.Authorization = `Basic ${encodeBase64(
       `${options.username}:${options.password}`
     )}`;
   }
 
-  const isConnected = async () => {
+  const checkConnection = async () => {
     try {
       const response = await fetch(options.source, {
         method: "PROPFIND",
@@ -68,13 +59,20 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
       return false;
     }
   };
-  isConnected().then((ok) => {
+
+  checkConnection().then((ok) => {
     if (!ok)
       throw errorMessage(`Failed to connect to source: '${options.source}'`);
   });
 
   const xmlParser = new XMLParser();
-  const fetchXML = async (uri: string) => {
+  const fetchXML = async (
+    uri: string
+  ): Promise<{
+    ok: boolean;
+    data?: any;
+    atime?: number;
+  }> => {
     try {
       const response = await fetch(uri, {
         method: "PROPFIND",
@@ -95,10 +93,19 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
       });
 
       return response.status === 207
-        ? xmlParser.parse(await response.text())
-        : {};
-    } catch {
-      return {};
+        ? {
+            ok: true,
+            data: xmlParser.parse(await response.text()),
+            atime: validDate(response.headers.get("Date"))?.getTime(),
+          }
+        : {
+            ok: false,
+          };
+    } catch (error) {
+      console.error(error);
+      return {
+        ok: false,
+      };
     }
   };
 
@@ -110,26 +117,29 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
   const files: Record<string, WebdavFile> = {};
   const fetchFiles = async () => {
     const fetchDirectory = async (uri: string) => {
-      const xml = await fetchXML(uri);
-      const key = (() => {
-        const keyPrefix = Object.keys(xml)
+      const { ok, data: xml, atime } = await fetchXML(uri);
+      if (!ok) return;
+      if (atime) latest.atime = atime;
+
+      const prop = (() => {
+        const prefix = Object.keys(xml)
           .find((key) => key.endsWith("multistatus"))
           ?.split(":")[0];
-        return (key: string) => (keyPrefix ? `${keyPrefix}:${key}` : key);
+        return (prop: string) => (prefix ? `${prefix}:${prop}` : prop);
       })();
 
-      const dirents = xml[key("multistatus")]?.[key("response")] || [];
+      const dirents = xml[prop("multistatus")]?.[prop("response")] || [];
       const subdirectories: Array<Promise<any>> = [];
       for (const dirent of dirents) {
         // http://www.webdav.org/specs/rfc4918.html#ELEMENT_href
-        const href = (dirent[key("href")] as string) || undefined;
+        const href = (dirent[prop("href")] as string) || undefined;
         if (!href) continue;
 
         // http://www.webdav.org/specs/rfc4918.html#ELEMENT_status
         const getStatus = (propstat: any) => {
-          const status = (propstat[key("status")] as string | undefined)?.split(
-            " "
-          );
+          const status = (
+            propstat[prop("status")] as string | undefined
+          )?.split(" ");
           if (status) {
             const [protocol, code, message] = status;
             return validInteger(code);
@@ -138,19 +148,17 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
 
         // http://www.webdav.org/specs/rfc4918.html#ELEMENT_propstat
         const properties = (() => {
-          const p = dirent[key("propstat")];
+          const p = dirent[prop("propstat")];
           const propstats = Array.isArray(p) ? p : [p];
           const propstat = propstats.find((propstat) =>
             Boolean(getStatus(propstat) === 200)
           );
-          if (propstat) return propstat[key("prop")];
+          if (propstat) return propstat[prop("prop")];
         })();
         if (!properties) continue;
 
         // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getetag
-        const etag = (properties[key("getetag")] as string)
-          ?.match(/[^"]+/)
-          ?.shift();
+        const etag = formatEtag(properties[prop("getetag")]);
         if (!etag) continue;
 
         if (href === source.pathname) {
@@ -160,8 +168,8 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
 
         // http://www.webdav.org/specs/rfc4918.html#PROPERTY_resourcetype
         const isCollection = Boolean(
-          typeof properties[key("resourcetype")] === "object" &&
-            key("collection") in properties[key("resourcetype")]
+          typeof properties[prop("resourcetype")] === "object" &&
+            prop("collection") in properties[prop("resourcetype")]
         );
 
         if (isCollection) {
@@ -172,28 +180,31 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
           continue;
         }
 
-        const record = decodeURI(href)
+        const key = decodeURI(href)
           .replace(source.pathname, "")
           .replace(/\//g, ":");
 
-        if (record in files) {
-          if (files[record].meta.etag === etag) continue;
-          files[record].body = undefined;
+        if (key in files) {
+          if (files[key].meta.etag === etag) continue;
+          files[key].body = undefined;
         }
 
-        files[record] = {
+        // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getcontenttype
+        const type = formatMediaType(properties[prop("getcontenttype")]);
+
+        // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getcontentlength
+        const size = validInteger(properties[prop("getcontentlength")]);
+
+        // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getlastmodified
+        const mtime = validDate(properties[prop("getlastmodified")]);
+
+        files[key] = {
           meta: {
             href,
             etag,
-
-            // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getcontenttype
-            type: (properties[key("getcontenttype")] as string) || undefined,
-
-            // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getcontentlength
-            size: validInteger(properties[key("getcontentlength")]),
-
-            // http://www.webdav.org/specs/rfc4918.html#PROPERTY_getlastmodified
-            mtime: validDate(properties[key("getlastmodified")]),
+            type,
+            size,
+            mtime,
           },
         };
       }
@@ -205,34 +216,109 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
     latest.atime = Date.now();
   };
 
+  const parseResponseHeaders = (headers: Headers) => {
+    const getHeader = (key: string) => {
+      const value = headers.get(key);
+      if (value) return value;
+    };
+
+    return {
+      etag: formatEtag(getHeader("etag")),
+      type: formatMediaType(getHeader("Content-Type")),
+      size: validInteger(getHeader("Content-Length")),
+      atime: validDate(getHeader("Date")),
+      mtime: validDate(getHeader("Last-Modified")),
+    } as Partial<WebdavFile["meta"]>;
+  };
+
   const fetchFile = async (href: string) => {
     const uri = joinURL(source.origin, href);
     try {
       const response = await fetch(uri, { headers });
-      const getHeader = (key: string) => {
-        const value = response.headers.get(key);
-        if (value) return value;
-      };
-
       return {
         body: await response.text(),
         meta: {
           href,
-          etag: getHeader("etag"),
-          type: getHeader("Content-Type"),
-          size: validInteger(getHeader("Content-Length")),
-          atime: validDate(getHeader("Date")),
-          mtime: validDate(getHeader("Last-Modified")),
-        },
-      } as WebdavFile;
+          ...parseResponseHeaders(response.headers),
+        } as WebdavFile["meta"],
+      };
     } catch {
       return;
     }
   };
 
+  const makeDirectory = async (key: string) => {
+    let uri = joinURL(source.href, encodeURI(key.replace(/\:/g, "/")));
+    const response = await fetch(uri, {
+      method: "MKCOL",
+      headers,
+    });
+    const ok = Boolean(response.status === 201);
+    if (!ok) console.error(`Failed to make directory: ${uri}`);
+    return ok;
+  };
+
+  const ensureParentDirectory = async (key: string) => {
+    const path = key.split(":");
+    if (path.length === 1) return;
+
+    const findNonexistent = () => {
+      let keys = Object.keys(files);
+      for (let d = 1; d < path.length; d++) {
+        let dir = [...path.slice(0, d), ""].join(":");
+        keys = keys.filter((k) => k.startsWith(dir));
+        if (!keys.length) return d;
+      }
+    };
+    const found = findNonexistent();
+    if (!found) return;
+
+    for (let p of path.keys()) {
+      if (p < found) continue;
+      if (!(await makeDirectory(path.slice(0, p).join(":")))) return false;
+    }
+  };
+
+  const putFile = async (key: string, utf8: string) => {
+    const uri = joinURL(source.href, encodeURI(key.replace(/\:/g, "/")));
+    const response = await fetch(uri, {
+      method: "PUT",
+      headers,
+      body: new Blob([Buffer.from(utf8, "utf8")]),
+    });
+    let ok = response.status >= 200 && response.status < 300;
+    if (!ok) {
+      console.error(`Failed to PUT file: ${uri}`);
+      return false;
+    }
+
+    files[key] = {
+      body: utf8,
+      meta: {
+        href: new URL(uri).pathname,
+        ...parseResponseHeaders(response.headers),
+      } as WebdavFile["meta"],
+    };
+    return true;
+  };
+
+  const deleteResource = async (key: string) => {
+    const uri = joinURL(source.href, encodeURI(key.replace(/\:/g, "/")));
+    const response = await fetch(uri, {
+      method: "DELETE",
+      headers,
+    });
+    if (response.status !== 204)
+      console.error(`Failed to DELETE resource: ${uri}`);
+  };
+
   let syncPromise: undefined | Promise<any>;
   const syncFiles = async () => {
-    if (options.ttl && Date.now() < latest.atime + options.ttl * 1000) return;
+    if (
+      latest.etag &&
+      (!options.ttl || Date.now() < latest.atime + options.ttl * 1000)
+    )
+      return;
 
     if (!syncPromise) syncPromise = fetchFiles();
     await syncPromise;
@@ -242,10 +328,6 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
   return {
     name: driverName,
     options,
-    async getKeys() {
-      await syncFiles();
-      return Object.keys(files);
-    },
     async hasItem(key) {
       await syncFiles();
       return key in files;
@@ -265,6 +347,21 @@ export default defineDriver<Partial<WebdavDriverOptions>>((config) => {
       await syncFiles();
       return key in files ? files[key].meta : null;
     },
+    async setItem(key, value, opts) {
+      await ensureParentDirectory(key);
+      if (opts.type === "directory") {
+        await makeDirectory(key);
+      } else {
+        await putFile(key, value);
+      }
+    },
+    async removeItem(key) {
+      await deleteResource(key);
+    },
+    async getKeys() {
+      await syncFiles();
+      return Object.keys(files);
+    },
   };
 });
 
@@ -283,6 +380,14 @@ function validDate(input: unknown) {
   if (input === undefined) return;
   const date = new Date(input as any);
   return Boolean(date.getTime()) ? date : undefined;
+}
+
+function formatEtag(input?: string) {
+  if (input) return input.match(/[^"]+/)?.shift();
+}
+
+function formatMediaType(input?: string) {
+  if (input) return input.split(";").shift();
 }
 
 function errorMessage(message: string) {

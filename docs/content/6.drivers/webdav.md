@@ -39,13 +39,13 @@ export interface WebdavDriverOptions {
   password?: string;
 
   // Specify additional headers:
-  headers: { [key: string]: string };
+  headers?: { [key: string]: string };
 
   // To-do: Implement polling
   // interval: number;
 
   // Expiration of cache:
-  ttl: number;
+  ttl?: number;
 
   // Provides fallback mechanism (recursive re-fetching of subdirectories)
   // for any WebDAV service that does not support `Depth: "infinity"` header:

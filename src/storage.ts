@@ -276,7 +276,7 @@ export function createStorage<T extends StorageValue>(
     async removeItem(key, opts = {}) {
       // TODO: Remove in next major version
       if (typeof opts === "boolean") {
-        opts = { removeMata: opts };
+        opts = { removeMeta: opts };
       }
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
@@ -284,7 +284,7 @@ export function createStorage<T extends StorageValue>(
         return; // Readonly
       }
       await asyncCall(driver.removeItem, relativeKey, opts);
-      if (opts.removeMata) {
+      if (opts.removeMeta) {
         await asyncCall(driver.removeItem, relativeKey + "$", opts);
       }
       if (!driver.watch) {

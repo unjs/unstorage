@@ -58,6 +58,9 @@ devDependencies:
   '@azure/storage-blob':
     specifier: ^12.14.0
     version: 12.14.0
+  '@capacitor/preferences':
+    specifier: ^5.0.6
+    version: 5.0.6(@capacitor/core@5.2.2)
   '@cloudflare/workers-types':
     specifier: ^4.20230710.0
     version: 4.20230710.0
@@ -1197,6 +1200,20 @@ packages:
 
   /@bcoe/v8-coverage@0.2.3:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
+    dev: true
+
+  /@capacitor/core@5.2.2:
+    resolution: {integrity: sha512-3jKECZC5+YD2rljMZm1e/K3AYyoxUmLDZCyofTPbRYPBSI0wJh5ZCkX+XIGzNM0o/Wokl3Voa1JB8xsLC0MPxA==}
+    dependencies:
+      tslib: 2.6.0
+    dev: true
+
+  /@capacitor/preferences@5.0.6(@capacitor/core@5.2.2):
+    resolution: {integrity: sha512-aDe4wGTVSAIue6XXdUFgyz7SGszxK/Ptt/iWTydMpzc1PlZXw1XTTnciM+S+SLLNZFzXlkpXT3wMnh9t0DojUA==}
+    peerDependencies:
+      '@capacitor/core': ^5.0.0
+    dependencies:
+      '@capacitor/core': 5.2.2
     dev: true
 
   /@cloudflare/workers-types@4.20230710.0:

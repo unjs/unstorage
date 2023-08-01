@@ -1,3 +1,5 @@
+import { EventEmitter } from "events";
+
 export type StorageValue = null | string | number | boolean | object;
 export type WatchEvent = "update" | "remove";
 export type WatchCallback = (event: WatchEvent, key: string) => any;
@@ -100,4 +102,5 @@ export interface Storage {
     base?: string,
     options?: { parents?: boolean }
   ) => { base: string; driver: Driver }[];
+  eventEmitter:EventEmitter,
 }

@@ -33,4 +33,8 @@ describe("drivers: capacitor-preferences", () => {
   testDriver({
     driver: driver({}),
   });
+
+  testDriver({
+    driver: driver({ base: "test" }),
+  });
 });

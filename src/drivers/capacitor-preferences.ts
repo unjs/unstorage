@@ -12,6 +12,14 @@ export default defineDriver<CapacitorPreferencesOptions>((opts) => {
   const base = normalizeKey(opts?.base);
   const r = (key: string) => joinKeys(base, key);
 
+  const filterKeysByBase = (base: string) => {
+    if (!base) return Preferences.keys().then(({ keys }) => keys);
+
+    return Preferences.keys().then(({ keys }) =>
+      keys.filter((key) => key.startsWith(base))
+    );
+  };
+
   return {
     name: DRIVER_NAME,
     options: opts,
@@ -33,22 +41,19 @@ export default defineDriver<CapacitorPreferencesOptions>((opts) => {
     removeItem(key) {
       return Preferences.remove({ key: r(key) });
     },
-    getKeys(base) {
-      if (!base) return Preferences.keys().then(({ keys }) => keys);
-
-      const filteredKeys = Preferences.keys().then(({ keys }) =>
-        keys.filter((key) => key.startsWith(base))
-      );
-
-      const optionBase = opts?.base;
-      if (!optionBase) return filteredKeys;
-
-      return filteredKeys.then((keys) =>
-        keys.map((key) => key.slice(optionBase.length))
+    getKeys() {
+      const optionsBase = opts?.base ?? "";
+      return filterKeysByBase(optionsBase).then((keys) =>
+        keys.map((key) => key.slice(optionsBase.length))
       );
     },
     clear() {
-      return Preferences.clear();
+      const optionsBase = opts?.base ?? "";
+      return filterKeysByBase(optionsBase).then((keys) =>
+        Promise.all(keys.map((key) => Preferences.remove({ key }))).then(
+          () => void 0
+        )
+      );
     },
   };
 });

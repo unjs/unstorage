@@ -62,7 +62,7 @@ export async function readdirRecursive(
         const dirFiles = await readdirRecursive(entryPath, ignore);
         files.push(...dirFiles.map((f) => entry.name + "/" + f));
       } else {
-        if (ignore && !ignore(entry.name)) {
+        if (!(ignore && ignore(entry.name))) {
           files.push(entry.name);
         }
       }

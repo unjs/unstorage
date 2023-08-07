@@ -1,6 +1,6 @@
 # Memcached
 
-Store data in [Memcached](https://memcached.org/) using the [memcached](https://github.com/3rd-Eden/memcached) library.
+Store data in [Memcached](https://memcached.org/) using the [3rd-Eden/memcached](https://github.com/3rd-Eden/memcached) library.
 
 ::alert{type="warning"}
 Memcached does _NOT_ supports the `getKeys` method. It will always return an empty array.

@@ -3,13 +3,16 @@ import memcachedDriver from "../../src/drivers/memcached";
 import { createStorage } from "../../src";
 import { testDriver } from "./utils";
 
-describe("Memcached storage", () => {
+const MEMCACHED_LOCATION = process.env.MEMCACHED_LOCATION
+
+describe.skipIf(!MEMCACHED_LOCATION)("Memcached storage", () => {
   const driver = memcachedDriver({
-    location: "localhost:11211",
+    location: MEMCACHED_LOCATION,
   });
+
   const storage = createStorage({ driver });
 
-  testDriver({ driver, skip: ["getKeys"] });
+  testDriver({ driver, canListKeys: false });
 
   it("can set, get, has and clear keys", async () => {
     await storage.setItem("first", "foo");

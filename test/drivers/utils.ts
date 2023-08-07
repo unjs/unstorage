@@ -9,7 +9,7 @@ export interface TestContext {
 export interface TestOptions {
   driver: Driver;
   additionalTests?: (ctx: TestContext) => void;
-  skip?: string[];
+  canListKeys?: boolean;
 }
 
 export function testDriver(opts: TestOptions) {
@@ -39,16 +39,14 @@ export function testDriver(opts: TestOptions) {
     expect(await ctx.storage.getItem("s3:a?q=2")).toBe("test_data");
   });
 
-  if (!opts.skip?.includes("getKeys")) {
-    it("getKeys", async () => {
-      expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
-        ["s1:a", "s2:a", "s3:a"].sort()
-      );
-      expect(
-        await ctx.storage.getKeys("s1").then((k) => k.sort())
-      ).toMatchObject(["s1:a"].sort());
-    });
-  }
+  it.skipIf(opts.canListKeys === false)("getKeys", async () => {
+    expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
+      ["s1:a", "s2:a", "s3:a"].sort()
+    );
+    expect(await ctx.storage.getKeys("s1").then((k) => k.sort())).toMatchObject(
+      ["s1:a"].sort()
+    );
+  });
 
   it("serialize (object)", async () => {
     await ctx.storage.setItem("/data/test.json", { json: "works" });

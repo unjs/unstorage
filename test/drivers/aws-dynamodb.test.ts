@@ -48,54 +48,60 @@ describe("drivers: aws-dynamodb", () => {
 
   // Test hooks
 
-  beforeAll(async () => {
-    await client.send(
-      new CreateTableCommand({
-        TableName: options.table,
-        BillingMode: "PAY_PER_REQUEST",
-        AttributeDefinitions: [
-          {
-            AttributeName: options.attributes?.key,
-            AttributeType: "S",
+  beforeAll(
+    async () => {
+      await client.send(
+        new CreateTableCommand({
+          TableName: options.table,
+          BillingMode: "PAY_PER_REQUEST",
+          AttributeDefinitions: [
+            {
+              AttributeName: options.attributes?.key,
+              AttributeType: "S",
+            },
+          ],
+          KeySchema: [
+            {
+              AttributeName: options.attributes?.key,
+              KeyType: "HASH",
+            },
+          ],
+        })
+      );
+
+      await waitUntilTableExists(
+        { client, maxWaitTime: TABLE_OPERATIONS_TIMEOUT_SECONDS },
+        { TableName: options.table }
+      );
+
+      await client.send(
+        new UpdateTimeToLiveCommand({
+          TableName: options.table,
+          TimeToLiveSpecification: {
+            AttributeName: options.attributes?.ttl,
+            Enabled: true,
           },
-        ],
-        KeySchema: [
-          {
-            AttributeName: options.attributes?.key,
-            KeyType: "HASH",
-          },
-        ],
-      })
-    );
+        })
+      );
+    },
+    (TABLE_OPERATIONS_TIMEOUT_SECONDS + 2) * 1000
+  );
 
-    await waitUntilTableExists(
-      { client, maxWaitTime: TABLE_OPERATIONS_TIMEOUT_SECONDS },
-      { TableName: options.table }
-    );
+  afterAll(
+    async () => {
+      await client.send(
+        new DeleteTableCommand({
+          TableName: options.table,
+        })
+      );
 
-    await client.send(
-      new UpdateTimeToLiveCommand({
-        TableName: options.table,
-        TimeToLiveSpecification: {
-          AttributeName: options.attributes?.ttl,
-          Enabled: true,
-        },
-      })
-    );
-  }, (TABLE_OPERATIONS_TIMEOUT_SECONDS + 2) * 1000);
-
-  afterAll(async () => {
-    await client.send(
-      new DeleteTableCommand({
-        TableName: options.table,
-      })
-    );
-
-    await waitUntilTableNotExists(
-      { client, maxWaitTime: TABLE_OPERATIONS_TIMEOUT_SECONDS },
-      { TableName: options.table }
-    );
-  }, (TABLE_OPERATIONS_TIMEOUT_SECONDS + 2) * 1000);
+      await waitUntilTableNotExists(
+        { client, maxWaitTime: TABLE_OPERATIONS_TIMEOUT_SECONDS },
+        { TableName: options.table }
+      );
+    },
+    (TABLE_OPERATIONS_TIMEOUT_SECONDS + 2) * 1000
+  );
 
   // Common tests
 

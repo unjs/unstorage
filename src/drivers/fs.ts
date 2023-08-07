@@ -44,7 +44,13 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     return resolved;
   };
 
-  let _watcher: FSWatcher;
+  let _watcher: FSWatcher | undefined;
+  const _unwatch = async () => {
+    if (_watcher) {
+      await _watcher.close();
+      _watcher = undefined;
+    }
+  };
 
   return {
     name: DRIVER_NAME,
@@ -61,7 +67,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     async getMeta(key) {
       const { atime, mtime, size, birthtime, ctime } = await fsp
         .stat(r(key))
-        .catch(() => ({} as Stats));
+        .catch(() => ({}) as Stats);
       return { atime, mtime, size, birthtime, ctime };
     },
     setItem(key, value) {
@@ -96,18 +102,18 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
         await _watcher.close();
       }
     },
-    watch(callback) {
+    async watch(callback) {
       if (_watcher) {
-        return;
+        return _unwatch;
       }
-      return new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         _watcher = watch(opts.base!, {
           ignoreInitial: true,
           ignored: opts.ignore,
           ...opts.watchOptions,
         })
           .on("ready", () => {
-            resolve(() => _watcher.close().then(() => (_watcher = undefined)));
+            resolve();
           })
           .on("error", reject)
           .on("all", (eventName, path) => {
@@ -119,6 +125,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
             }
           });
       });
+      return _unwatch;
     },
   };
 });

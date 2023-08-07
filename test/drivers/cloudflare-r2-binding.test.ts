@@ -1,40 +1,56 @@
 /// <reference types="@cloudflare/workers-types" />
-import { describe, expect, test } from "vitest";
+import { describe, test, expect } from "vitest";
 import { createStorage, snapshot } from "../../src";
-import CloudflareKVBinding from "../../src/drivers/cloudflare-kv-binding";
+import CloudflareR2Binding from "../../src/drivers/cloudflare-r2-binding";
 import { testDriver } from "./utils";
 
 const mockStorage = createStorage();
 
 // https://developers.cloudflare.com/workers/runtime-apis/kv/
-const mockBinding: KVNamespace = {
-  get(key) {
-    return mockStorage.getItem(key) as any;
+const mockBinding: R2Bucket = {
+  async head(key) {
+    return (await mockStorage.hasItem(key)) ? ({ key } as any) : null;
   },
-  getWithMetadata(key: string) {
-    return mockStorage.getItem(key) as any;
+  async get(key) {
+    return {
+      text: () => mockStorage.getItem(key),
+      arrayBuffer: () => mockStorage.getItemRaw(key),
+    } as any;
   },
   put(key, value) {
-    return mockStorage.setItem(key, value) as any;
+    return mockStorage.setItemRaw(key, value) as any;
   },
   delete(key) {
-    return mockStorage.removeItem(key) as any;
+    if (Array.isArray(key)) {
+      return Promise.all(key.map((k) => mockStorage.removeItem(k))) as any;
+    }
+    return mockStorage.removeItem(key as string) as any;
   },
   list(opts) {
     return mockStorage
       .getKeys(opts?.prefix || undefined)
-      .then((keys) => ({ keys: keys.map((name) => ({ name })) })) as any;
+      .then((keys) => ({ objects: keys.map((key) => ({ key })) })) as any;
+  },
+  createMultipartUpload() {
+    throw new Error("Not implemented");
+  },
+  resumeMultipartUpload() {
+    throw new Error("Not implemented");
   },
 };
 
-describe("drivers: cloudflare-kv", () => {
+describe("drivers: cloudflare-r2-binding", () => {
   testDriver({
-    driver: CloudflareKVBinding({ binding: mockBinding, base: "base" }),
+    driver: CloudflareR2Binding({ binding: mockBinding, base: "base" }),
     async additionalTests(ctx) {
       test("snapshot", async () => {
         expect(await snapshot(mockStorage, "")).toMatchInlineSnapshot(`
           {
-            "base:data:raw.bin": "base64:AQID",
+            "base:data:raw.bin": Uint8Array [
+              1,
+              2,
+              3,
+            ],
             "base:data:serialized1.json": "SERIALIZED",
             "base:data:serialized2.json": {
               "serializedObj": "works",

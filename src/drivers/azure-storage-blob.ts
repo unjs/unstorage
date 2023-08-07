@@ -90,9 +90,11 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
           .getBlockBlobClient(key)
           .download();
         if (isBrowser) {
-          return await blobToString(await blob.blobBody);
+          return blob.blobBody ? await blobToString(await blob.blobBody) : null;
         }
-        return (await streamToBuffer(blob.readableStreamBody)).toString();
+        return blob.readableStreamBody
+          ? (await streamToBuffer(blob.readableStreamBody)).toString()
+          : null;
       } catch {
         return null;
       }
@@ -168,7 +170,7 @@ async function blobToString(blob: Blob) {
   const fileReader = new FileReader();
   return new Promise((resolve, reject) => {
     fileReader.onloadend = (ev) => {
-      resolve(ev.target.result);
+      resolve(ev.target?.result);
     };
     fileReader.onerror = reject;
     fileReader.readAsText(blob);

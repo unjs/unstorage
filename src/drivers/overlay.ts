@@ -14,9 +14,9 @@ export default defineDriver((options: OverlayStorageOptions) => {
   return {
     name: DRIVER_NAME,
     options: options,
-    async hasItem(key) {
+    async hasItem(key, opts) {
       for (const layer of options.layers) {
-        if (await layer.hasItem(key)) {
+        if (await layer.hasItem(key, opts)) {
           if (layer === options.layers[0]) {
             if ((await options.layers[0]?.getItem(key)) === OVERLAY_REMOVED) {
               return false;
@@ -41,16 +41,16 @@ export default defineDriver((options: OverlayStorageOptions) => {
     },
     // TODO: Support native meta
     // async getMeta (key) {},
-    async setItem(key, value) {
-      await options.layers[0]?.setItem(key, value);
+    async setItem(key, value, opts) {
+      await options.layers[0]?.setItem?.(key, value, opts);
     },
-    async removeItem(key) {
-      await options.layers[0]?.setItem(key, OVERLAY_REMOVED);
+    async removeItem(key, opts) {
+      await options.layers[0]?.setItem?.(key, OVERLAY_REMOVED, opts);
     },
-    async getKeys(base) {
+    async getKeys(base, opts) {
       const allKeys = await Promise.all(
         options.layers.map(async (layer) => {
-          const keys = await layer.getKeys(base);
+          const keys = await layer.getKeys(base, opts);
           return keys.map((key) => normalizeKey(key));
         })
       );

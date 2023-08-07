@@ -47,17 +47,23 @@ export function createH3StorageHandler(
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
 
     // Authorize Request
+    if (!(method in MethodToTypeMap)) {
+      throw createError({
+        statusCode: 405,
+        statusMessage: `Method Not Allowed: ${method}`,
+      });
+    }
     try {
       await opts.authorize?.({
-        type: MethodToTypeMap[method],
+        type: MethodToTypeMap[method as keyof typeof MethodToTypeMap],
         event,
         key,
       });
-    } catch (error) {
+    } catch (error: any) {
       const _httpError = isError(error)
         ? error
         : createError({
-            statusMessage: error.message,
+            statusMessage: error?.message,
             statusCode: 401,
             ...error,
           });

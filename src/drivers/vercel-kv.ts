@@ -77,7 +77,9 @@ export default defineDriver<VercelKVOptions>((opts) => {
         .del(r(key))
         .then(() => {});
     },
-    getKeys(base) {},
+    getKeys(base) {
+      return getClient().keys(r(base, "*"));
+    },
     async clear(base) {
       const keys = await getClient().keys(r(base, "*"));
       if (keys.length === 0) {

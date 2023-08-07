@@ -67,7 +67,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     async getMeta(key) {
       const { atime, mtime, size, birthtime, ctime } = await fsp
         .stat(r(key))
-        .catch(() => ({} as Stats));
+        .catch(() => ({}) as Stats);
       return { atime, mtime, size, birthtime, ctime };
     },
     setItem(key, value) {

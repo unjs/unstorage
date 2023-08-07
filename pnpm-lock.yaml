@@ -103,6 +103,9 @@ devDependencies:
   eslint-config-unjs:
     specifier: ^0.2.1
     version: 0.2.1(eslint@8.46.0)(typescript@5.1.6)
+  execa:
+    specifier: ^7.1.1
+    version: 7.2.0
   ioredis-mock:
     specifier: ^8.8.1
     version: 8.8.1(@types/ioredis-mock@8.2.2)(ioredis@5.3.2)

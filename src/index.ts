@@ -4,6 +4,7 @@ export * from "./utils";
 export { defineDriver } from "./drivers/utils";
 
 export const builtinDrivers = {
+  awsDynamoDB: "unstorage/drivers/aws-dynamodb",
   azureAppConfiguration: "unstorage/drivers/azure-app-configuration",
   azureCosmos: "unstorage/drivers/azure-cosmos",
   azureKeyVault: "unstorage/drivers/azure-key-vault",
@@ -34,6 +35,9 @@ export const builtinDrivers = {
 type ExtractOpts<T> = T extends (opts: infer Opts) => any ? Opts : never;
 
 export type BuiltinDriverOptions = {
+  awsDynamoDB: ExtractOpts<
+    (typeof import("./drivers/aws-dynamodb"))["default"]
+  >;
   azureAppConfiguration: ExtractOpts<
     (typeof import("./drivers/azure-app-configuration"))["default"]
   >;

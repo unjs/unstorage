@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.9.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.8.0...v1.9.0)
+
+### 🚀 Enhancements
+
+- Expose `BuiltinDriverOptions`  type ([#273](https://github.com/unjs/unstorage/pull/273))
+- **vercel-kv:** Support `ttl` for `setItem` ([#269](https://github.com/unjs/unstorage/pull/269))
+- Add `indexedb` driver ([#221](https://github.com/unjs/unstorage/pull/221))
+- Add `capacitor-preferences` driver ([#283](https://github.com/unjs/unstorage/pull/283))
+- `fs-lite` driver ([#284](https://github.com/unjs/unstorage/pull/284))
+
+### 🩹 Fixes
+
+- **cloudflare-r2-binding:** Get binding for r2 `getMeta` ([#272](https://github.com/unjs/unstorage/pull/272))
+
+### 💅 Refactors
+
+- Fix typo in `removeMeta` option for `removeItem` ([#281](https://github.com/unjs/unstorage/pull/281))
+
+### 📖 Documentation
+
+- Upgrade Docus ([cc9cb6e](https://github.com/unjs/unstorage/commit/cc9cb6e))
+- Fix 404 link ([1e37246](https://github.com/unjs/unstorage/commit/1e37246))
+- Update ([b43e0d4](https://github.com/unjs/unstorage/commit/b43e0d4))
+- Typo for the option dir in github driver ([#278](https://github.com/unjs/unstorage/pull/278))
+
+### 🏡 Chore
+
+- Update docus ([bc0be1b](https://github.com/unjs/unstorage/commit/bc0be1b))
+- Update dependencies ([1d0395d](https://github.com/unjs/unstorage/commit/1d0395d))
+- Add autofix ci ([a0a1cdd](https://github.com/unjs/unstorage/commit/a0a1cdd))
+
+### 🎨 Styles
+
+- Format with prettier v3 ([22b797e](https://github.com/unjs/unstorage/commit/22b797e))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Marco 
+- João Pedro Antunes Silva <github@joaopedroas.com>
+- Abdurrahman Shofy Adianto <azophy@gmail.com>
+- Timbological 
+- Daniel Roe <daniel@roe.dev>
+- Estéban ([@Barbapapazes](http://github.com/Barbapapazes))
+- Heb ([@Hebilicious](http://github.com/Hebilicious))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v1.8.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.7.0...v1.8.0)

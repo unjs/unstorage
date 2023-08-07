@@ -62,6 +62,7 @@
     "@azure/identity": "^3.2.4",
     "@azure/keyvault-secrets": "^4.7.0",
     "@azure/storage-blob": "^12.15.0",
+    "@capacitor/preferences": "^5.0.6",
     "@cloudflare/workers-types": "^4.20230801.0",
     "@planetscale/database": "^1.10.0",
     "@types/ioredis-mock": "^8.2.2",
@@ -101,6 +102,7 @@
     "@azure/identity": "^3.2.3",
     "@azure/keyvault-secrets": "^4.7.0",
     "@azure/storage-blob": "^12.14.0",
+    "@capacitor/preferences": "^5.0.0",
     "idb-keyval": "^6.2.1",
     "@planetscale/database": "^1.8.0",
     "@upstash/redis": "^1.22.0",
@@ -123,6 +125,9 @@
       "optional": true
     },
     "@azure/storage-blob": {
+      "optional": true
+    },
+    "@capacitor/preferences": {
       "optional": true
     },
     "@planetscale/database": {

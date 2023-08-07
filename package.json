@@ -135,6 +135,12 @@
     },
     "@vercel/kv": {
       "optional": true
+    },
+    "@aws-sdk/client-dynamodb": {
+      "optional": true
+    },
+    "@aws-sdk/lib-dynamodb": {
+      "optional": true
     }
   },
   "packageManager": "pnpm@8.6.7"

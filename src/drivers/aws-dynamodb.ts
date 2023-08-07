@@ -23,38 +23,23 @@ export interface DynamoDBStorageOptions {
 const DRIVER_NAME = "aws-dynamodb";
 
 export default defineDriver((opts: DynamoDBStorageOptions) => {
-  if (!opts.table) {
-    throw createRequiredError(DRIVER_NAME, "table");
-  }
+  const expireIn = parseInt(String(opts.expireIn)) || 0;
 
-  if (!opts.attributes) {
-    opts.attributes = {
-      key: "key",
-      value: "value",
-      ttl: "ttl",
-    };
-  } else {
-    if (!opts.attributes.key) {
-      opts.attributes.key = "key";
-    }
+  const attributes = {
+    key: "key",
+    value: "value",
+    ttl: "ttl",
+    ...opts.attributes,
+  };
 
-    if (!opts.attributes.value) {
-      opts.attributes.value = "value";
-    }
-
-    if (!opts.attributes.ttl) {
-      opts.attributes.value = "ttl";
-    }
-  }
-
-  opts.expireIn =
-    opts.expireIn === undefined ? 0 : parseInt(`${opts.expireIn}`);
-  if (Number.isNaN(opts.expireIn) || opts.expireIn < 0) {
-    throw createError(DRIVER_NAME, "Invalid option `expireIn`.");
-  }
-
-  let client;
+  let client: DynamoDBDocumentClient;
   function getClient(): DynamoDBDocumentClient {
+    if (!opts.table) {
+      throw createRequiredError(DRIVER_NAME, "table");
+    }
+    if (Number.isNaN(opts.expireIn) || expireIn < 0) {
+      throw createError(DRIVER_NAME, "Invalid option `expireIn`.");
+    }
     if (!client) {
       client = DynamoDBDocumentClient.from(
         new DynamoDBClient({
@@ -71,14 +56,14 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
   }
 
   function createObject(key: string, value: any = undefined, ttl: number = 0) {
-    const obj = {};
-    obj[opts.attributes.key] = key;
+    const obj: Record<string, any> = {};
+    obj[attributes.key] = key;
     if (value) {
-      obj[opts.attributes.value] = value;
+      obj[attributes.value] = value;
     }
     if (ttl > 0) {
       const timestamp = Math.round(Date.now() / 1000);
-      obj[opts.attributes.ttl] = timestamp + ttl;
+      obj[attributes.ttl] = timestamp + ttl;
     }
     return obj;
   }
@@ -95,14 +80,14 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
       return null;
     }
 
-    if (opts.expireIn > 0) {
+    if (expireIn > 0) {
       const timestamp = getTimestamp();
       if (timestamp > parseInt(item.ttl || 0)) {
         return null;
       }
     }
 
-    return item[opts.attributes.value];
+    return item[attributes.value];
   }
 
   async function putItemValue(key: string, value: any): Promise<void> {

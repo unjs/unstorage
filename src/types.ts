@@ -94,8 +94,8 @@ export interface Storage<T extends StorageValue = StorageValue> {
   removeItem: (
     key: string,
     opts?:
-      | (TransactionOptions & { removeMata?: boolean })
-      | boolean /* legacy: removeMata */
+      | (TransactionOptions & { removeMeta?: boolean })
+      | boolean /* legacy: removeMeta */
   ) => Promise<void>;
   // Meta
   getMeta: (

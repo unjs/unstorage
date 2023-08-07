@@ -100,6 +100,7 @@
     "@azure/identity": "^3.2.3",
     "@azure/keyvault-secrets": "^4.7.0",
     "@azure/storage-blob": "^12.14.0",
+    "@capacitor/preferences": "^5.0.0",
     "@planetscale/database": "^1.8.0",
     "@upstash/redis": "^1.22.0",
     "@vercel/kv": "^0.2.2"
@@ -121,6 +122,9 @@
       "optional": true
     },
     "@azure/storage-blob": {
+      "optional": true
+    },
+    "@capacitor/preferences": {
       "optional": true
     },
     "@planetscale/database": {

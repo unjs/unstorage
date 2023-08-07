@@ -1,5 +1,10 @@
 import { $fetch } from "ofetch";
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+  joinKeys,
+} from "./utils";
 
 interface KVAuthAPIToken {
   /**
@@ -48,6 +53,10 @@ export type KVHTTPOptions = {
    * @default https://api.cloudflare.com
    */
   apiURL?: string;
+  /**
+   * Adds prefix to all stored keys
+   */
+  base?: string;
 } & (KVAuthServiceKey | KVAuthAPIToken | KVAuthEmailKey);
 
 type CloudflareAuthorizationHeaders =
@@ -99,9 +108,11 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const baseURL = `${apiURL}/client/v4/accounts/${opts.accountId}/storage/kv/namespaces/${opts.namespaceId}`;
   const kvFetch = $fetch.create({ baseURL, headers });
 
+  const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
+
   const hasItem = async (key: string) => {
     try {
-      const res = await kvFetch(`/metadata/${key}`);
+      const res = await kvFetch(`/metadata/${r(key)}`);
       return res?.success === true;
     } catch (err: any) {
       if (!err?.response) {
@@ -117,7 +128,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const getItem = async (key: string) => {
     try {
       // Cloudflare API returns with `content-type: application/octet-stream`
-      return await kvFetch(`/values/${key}`).then((r) => r.text());
+      return await kvFetch(`/values/${r(key)}`).then((r) => r.text());
     } catch (err: any) {
       if (!err?.response) {
         throw err;
@@ -130,19 +141,19 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   };
 
   const setItem = async (key: string, value: any) => {
-    return await kvFetch(`/values/${key}`, { method: "PUT", body: value });
+    return await kvFetch(`/values/${r(key)}`, { method: "PUT", body: value });
   };
 
   const removeItem = async (key: string) => {
-    return await kvFetch(`/values/${key}`, { method: "DELETE" });
+    return await kvFetch(`/values/${r(key)}`, { method: "DELETE" });
   };
 
   const getKeys = async (base?: string) => {
     const keys: string[] = [];
 
     const params: Record<string, string | undefined> = {};
-    if (base) {
-      params.prefix = base;
+    if (base || opts.base) {
+      params.prefix = r(base);
     }
 
     const firstPage = await kvFetch("/keys", { params });
@@ -199,7 +210,10 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     getItem,
     setItem,
     removeItem,
-    getKeys,
+    getKeys: (base?: string) =>
+      getKeys(base).then((keys) =>
+        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key))
+      ),
     clear,
   };
 });

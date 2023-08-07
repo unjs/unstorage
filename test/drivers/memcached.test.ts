@@ -3,7 +3,7 @@ import memcachedDriver from "../../src/drivers/memcached";
 import { createStorage } from "../../src";
 import { testDriver } from "./utils";
 
-const MEMCACHED_LOCATION = process.env.MEMCACHED_LOCATION
+const MEMCACHED_LOCATION = process.env.MEMCACHED_LOCATION;
 
 describe.skipIf(!MEMCACHED_LOCATION)("Memcached storage", () => {
   const driver = memcachedDriver({

@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.8.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.7.0...v1.8.0)
+
+### 🚀 Enhancements
+
+- Experimental operation batching ([#240](https://github.com/unjs/unstorage/pull/240))
+- **cloudflare-kv:** Support `base` option for keys ([#261](https://github.com/unjs/unstorage/pull/261))
+- `cloudflare-r2-binding` driver ([#235](https://github.com/unjs/unstorage/pull/235))
+
+### 🩹 Fixes
+
+- Add missing `cloudflareR2Binding` to the `builtinDrivers` ([48d6842](https://github.com/unjs/unstorage/commit/48d6842))
+
+### 📖 Documentation
+
+- Fix typo ([#252](https://github.com/unjs/unstorage/pull/252))
+
+### 🏡 Chore
+
+- Update dev dependencies ([ba44aed](https://github.com/unjs/unstorage/commit/ba44aed))
+
+### ✅ Tests
+
+- Add test for `github` driver ([#259](https://github.com/unjs/unstorage/pull/259))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Hebilicious ([@Hebilicious](http://github.com/Hebilicious))
+- Alex Duval ([@xlanex6](http://github.com/xlanex6))
+
 ## v1.7.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.6.1...v1.7.0)

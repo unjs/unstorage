@@ -1,6 +1,5 @@
-import { del } from "idb-keyval";
 import { describe, expect, it } from "vitest";
-import driver from "../../src/drivers/indexeddb";
+import driver from "../../src/drivers/idb-keyval";
 import { testDriver } from "./utils";
 import "fake-indexeddb/auto";
 import { createStorage } from "../../src";

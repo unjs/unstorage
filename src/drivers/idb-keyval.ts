@@ -10,21 +10,21 @@ import {
 } from "idb-keyval";
 
 export interface IDBKeyvalOptions {
+  base?: string;
   dbName?: string;
   storeName?: string;
-  base?: string;
 }
 
-const DRIVER_NAME = "indexeddb";
+const DRIVER_NAME = "idb-keyval";
 
 export default defineDriver((opts: IDBKeyvalOptions = {}) => {
-  let customStore: UseStore | undefined;
+  const base = opts.base && opts.base.length > 0 ? `${opts.base}:` : "";
+  const makeKey = (key: string) => base + key;
 
+  let customStore: UseStore | undefined;
   if (opts.dbName && opts.storeName) {
     customStore = createStore(opts.dbName, opts.storeName);
   }
-  const base = opts.base && opts.base.length > 0 ? `${opts.base}:` : "";
-  const makeKey = (key: string) => base + key;
 
   return {
     name: DRIVER_NAME,

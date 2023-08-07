@@ -35,49 +35,53 @@ type ExtractOpts<T> = T extends (opts: infer Opts) => any ? Opts : never;
 
 export type BuiltinDriverOptions = {
   azureAppConfiguration: ExtractOpts<
-    typeof import("./drivers/azure-app-configuration")["default"]
+    (typeof import("./drivers/azure-app-configuration"))["default"]
   >;
-  azureCosmos: ExtractOpts<typeof import("./drivers/azure-cosmos")["default"]>;
+  azureCosmos: ExtractOpts<
+    (typeof import("./drivers/azure-cosmos"))["default"]
+  >;
   azureKeyVault: ExtractOpts<
-    typeof import("./drivers/azure-key-vault")["default"]
+    (typeof import("./drivers/azure-key-vault"))["default"]
   >;
   azureStorageBlob: ExtractOpts<
-    typeof import("./drivers/azure-storage-blob")["default"]
+    (typeof import("./drivers/azure-storage-blob"))["default"]
   >;
   azureStorageTable: ExtractOpts<
-    typeof import("./drivers/azure-storage-table")["default"]
+    (typeof import("./drivers/azure-storage-table"))["default"]
   >;
   cloudflareKVBinding: ExtractOpts<
-    typeof import("./drivers/cloudflare-kv-binding")["default"]
+    (typeof import("./drivers/cloudflare-kv-binding"))["default"]
   >;
   cloudflareKVHTTP: ExtractOpts<
-    typeof import("./drivers/cloudflare-kv-http")["default"]
+    (typeof import("./drivers/cloudflare-kv-http"))["default"]
   >;
   cloudflareR2Binding: ExtractOpts<
-    typeof import("./drivers/cloudflare-r2-binding")["default"]
+    (typeof import("./drivers/cloudflare-r2-binding"))["default"]
   >;
-  fs: ExtractOpts<typeof import("./drivers/fs")["default"]>;
-  github: ExtractOpts<typeof import("./drivers/github")["default"]>;
-  http: ExtractOpts<typeof import("./drivers/http")["default"]>;
-  localStorage: ExtractOpts<typeof import("./drivers/localstorage")["default"]>;
-  lruCache: ExtractOpts<typeof import("./drivers/lru-cache")["default"]>;
-  memory: ExtractOpts<typeof import("./drivers/memory")["default"]>;
-  mongodb: ExtractOpts<typeof import("./drivers/mongodb")["default"]>;
-  overlay: ExtractOpts<typeof import("./drivers/overlay")["default"]>;
-  planetscale: ExtractOpts<typeof import("./drivers/planetscale")["default"]>;
-  redis: ExtractOpts<typeof import("./drivers/redis")["default"]>;
+  fs: ExtractOpts<(typeof import("./drivers/fs"))["default"]>;
+  github: ExtractOpts<(typeof import("./drivers/github"))["default"]>;
+  http: ExtractOpts<(typeof import("./drivers/http"))["default"]>;
+  localStorage: ExtractOpts<
+    (typeof import("./drivers/localstorage"))["default"]
+  >;
+  lruCache: ExtractOpts<(typeof import("./drivers/lru-cache"))["default"]>;
+  memory: ExtractOpts<(typeof import("./drivers/memory"))["default"]>;
+  mongodb: ExtractOpts<(typeof import("./drivers/mongodb"))["default"]>;
+  overlay: ExtractOpts<(typeof import("./drivers/overlay"))["default"]>;
+  planetscale: ExtractOpts<(typeof import("./drivers/planetscale"))["default"]>;
+  redis: ExtractOpts<(typeof import("./drivers/redis"))["default"]>;
   sessionStorage: ExtractOpts<
-    typeof import("./drivers/session-storage")["default"]
+    (typeof import("./drivers/session-storage"))["default"]
   >;
-  vercelKV: ExtractOpts<typeof import("./drivers/vercel-kv")["default"]>;
+  vercelKV: ExtractOpts<(typeof import("./drivers/vercel-kv"))["default"]>;
 
   /** @deprecated */
   "cloudflare-kv-binding": ExtractOpts<
-    typeof import("./drivers/cloudflare-kv-binding")["default"]
+    (typeof import("./drivers/cloudflare-kv-binding"))["default"]
   >;
   /** @deprecated */
   "cloudflare-kv-http": ExtractOpts<
-    typeof import("./drivers/cloudflare-kv-http")["default"]
+    (typeof import("./drivers/cloudflare-kv-http"))["default"]
   >;
 };
 

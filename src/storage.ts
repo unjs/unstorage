@@ -284,7 +284,7 @@ export function createStorage<T extends StorageValue>(
         return; // Readonly
       }
       await asyncCall(driver.removeItem, relativeKey, opts);
-      if (opts.removeMeta) {
+      if (opts.removeMeta || opts.removeMata /* #281 */) {
         await asyncCall(driver.removeItem, relativeKey + "$", opts);
       }
       if (!driver.watch) {

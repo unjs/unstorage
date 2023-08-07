@@ -1,11 +1,11 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { resolve } from "path";
-import { readFile, writeFile } from "../../src/drivers/utils/node-fs";
+import { readFile } from "../../src/drivers/utils/node-fs";
 import { testDriver } from "./utils";
-import driver from "../../src/drivers/fs";
+import driver from "../../src/drivers/fs-lite";
 
-describe("drivers: fs", () => {
-  const dir = resolve(__dirname, "tmp/fs");
+describe("drivers: fs-lite", () => {
+  const dir = resolve(__dirname, "tmp/fs-lite");
 
   testDriver({
     driver: driver({ base: dir }),
@@ -18,13 +18,6 @@ describe("drivers: fs", () => {
         expect(meta.atime?.constructor.name).toBe("Date");
         expect(meta.mtime?.constructor.name).toBe("Date");
         expect(meta.size).toBeGreaterThan(0);
-      });
-      it("watch filesystem", async () => {
-        const watcher = vi.fn();
-        await ctx.storage.watch(watcher);
-        await writeFile(resolve(dir, "s1/random_file"), "random", "utf8");
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        expect(watcher).toHaveBeenCalledWith("update", "s1:random_file");
       });
 
       const invalidKeys = ["../foobar", "..:foobar", "../", "..:", ".."];

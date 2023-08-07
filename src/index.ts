@@ -15,6 +15,7 @@ export const builtinDrivers = {
   fs: "unstorage/drivers/fs",
   github: "unstorage/drivers/github",
   http: "unstorage/drivers/http",
+  indexedb: "unstorage/drivers/indexedb",
   localStorage: "unstorage/drivers/localstorage",
   lruCache: "unstorage/drivers/lru-cache",
   memory: "unstorage/drivers/memory",
@@ -61,6 +62,7 @@ export type BuiltinDriverOptions = {
   fs: ExtractOpts<(typeof import("./drivers/fs"))["default"]>;
   github: ExtractOpts<(typeof import("./drivers/github"))["default"]>;
   http: ExtractOpts<(typeof import("./drivers/http"))["default"]>;
+  indexedb: ExtractOpts<(typeof import("./drivers/indexedb"))["default"]>;
   localStorage: ExtractOpts<
     (typeof import("./drivers/localstorage"))["default"]
   >;

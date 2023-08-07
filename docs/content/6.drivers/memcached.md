@@ -15,7 +15,7 @@ import memcachedDriver from "unstorage/drivers/memcached";
 const storage = createStorage({
   driver: memcachedDriver({
     location: "localhost:11211",
-    defaultLifetime: 0, //default
+    defaultTTL: 0, //default
     options: {},
   }),
 });
@@ -27,15 +27,15 @@ const storage = createStorage({
 - Cluster of Memcached servers : `["127.0.0.1:11211","127.0.0.1:11212"]`
 - Servers with weight : `{"127.0.0.1:11211": 1,"127.0.0.1:11212": 2}`
 
-## Lifetime
+## TTL
 
-Memcached requires that you set a key lifetime (expiration time) for each key. Unstorage exposes a `defaultLifetime` setting to configure the driver,
-which allows you to not specify the lifetime for each key. By default this value is set to 0, which means the keys will never expire.
+Memcached requires that you set a key `ttl` (expiration time) for each key. Unstorage exposes a `defaultTTL` setting to configure the driver,
+which allows you to not specify the ttl for each key. By default this value is set to 0, which means the keys will never expire.
 
 You can override the default value like this :
 
 ```ts
-await storage.set("hello", "world", { lifetime: 60 }); // expires in 60 seconds
+await storage.set("hello", "world", { ttl: 60 }); // expires in 60 seconds
 ```
 
 ## Options

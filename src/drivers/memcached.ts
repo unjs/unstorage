@@ -1,10 +1,10 @@
-import { defineDriver } from "./utils";
+import { defineDriver, createError } from "./utils";
 import Memcached from "memcached";
 
 export interface MemcachedOptions {
   location?: Memcached.Location;
   options?: Memcached.options;
-  defaultLifetime?: number;
+  defaultTTL?: number;
 }
 
 const DRIVER_NAME = "memcached";
@@ -13,7 +13,7 @@ export default defineDriver<MemcachedOptions>((opts: MemcachedOptions) => {
   const {
     location = "localhost:11211",
     options = {},
-    defaultLifetime = 0,
+    defaultTTL = 0,
   } = opts;
 
   let memcached: Memcached | undefined;
@@ -34,8 +34,12 @@ export default defineDriver<MemcachedOptions>((opts: MemcachedOptions) => {
     async getItem(key) {
       return await new Promise((resolve, reject) => {
         getMemcached().get(key, (err, data) => {
-          if (err) reject(err);
-          if (typeof data === "undefined") resolve(null);
+          if (err) {
+            return reject(err);
+          }
+          if (typeof data === "undefined"){
+            return  resolve(null);
+          }
           resolve(data);
         });
       });
@@ -44,23 +48,26 @@ export default defineDriver<MemcachedOptions>((opts: MemcachedOptions) => {
     async hasItem(key: string) {
       return await new Promise((resolve, reject) => {
         getMemcached().get(key, (err, data) => {
-          if (err) reject(err);
+          if (err) {
+            return reject(err);
+          }
           resolve(!!data);
         });
       });
     },
 
     async setItem(key: string, value: string, options) {
-      const lifetime = options.lifetime ?? defaultLifetime;
-      if (isNaN(lifetime))
-        throw new Error(
-          `[unstorage-memcached]: Invalid lifetime: ${lifetime}. Pass a lifetime value in seconds like this : { lifetime: 60 }`
-        );
+      const ttl = options.ttl ?? defaultTTL;
+      if (isNaN(ttl))
+        throw createError(DRIVER_NAME, `Invalid ttl: ${ttl}. Pass a ttl value in seconds like this : { ttl: 60 }`)
       await new Promise((resolve, reject) => {
-        getMemcached().set(key, value, lifetime, (err, result) => {
-          if (err) reject(err);
-          if (!result)
-            reject("[unstorage-memcached] Error while using setItem");
+        getMemcached().set(key, value, ttl, (err, result) => {
+          if (err) {
+            return reject(err);
+          }
+          if (!result) {
+            return reject(createError(DRIVER_NAME, "Error while using setItem"));
+          }
           resolve(value);
         });
       });
@@ -69,9 +76,12 @@ export default defineDriver<MemcachedOptions>((opts: MemcachedOptions) => {
     async removeItem(key) {
       return await new Promise((resolve, reject) => {
         getMemcached().del(key, (err, result) => {
-          if (err) reject(err);
-          if (!result)
-            reject("[unstorage-memcached] Error while using removeItem");
+          if (err) {
+            return reject(err);
+          }
+          if (!result) {
+            return reject(createError(DRIVER_NAME, "Error while using removeItem"));
+          }
           resolve();
         });
       });
@@ -80,7 +90,9 @@ export default defineDriver<MemcachedOptions>((opts: MemcachedOptions) => {
     async clear() {
       await new Promise((resolve, reject) => {
         getMemcached().flush((err) => {
-          if (err) reject(err);
+          if (err) {
+            return reject(err);
+          }
           resolve(true);
         });
       });

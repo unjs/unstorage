@@ -7,17 +7,17 @@ This driver uses the DynamoDB table as a key value store. By default it uses the
 To use it, you will need to install `@aws-sdk/client-dynamodb` and `@aws-sdk/lib-dynamodb` in your project:
 
 ```bash
-npm i @aws-sdk/client-dynamodb @aws-sdk/lib-dynamodb
+npm i -D @aws-sdk/client-dynamodb @aws-sdk/lib-dynamodb
 ```
 
-Minimal usage:
+**Usage:**
 
 ```js
 import { createStorage } from "unstorage";
-import dynamoDbCacheDriver from "unstorage/drivers/aws-dynamodb";
+import dynamoDBDriver from "unstorage/drivers/aws-dynamodb";
 
 const storage = createStorage({
-  driver: dynamoDbCacheDriver({
+  driver: dynamoDBDriver({
     table: "my-persistent-storage", // required
     region: "us-east-1", // optional, retrieved via environment variables
     credentials: {
@@ -33,10 +33,10 @@ Persistent configuration usage:
 
 ```js
 import { createStorage } from "unstorage";
-import dynamoDbCacheDriver from "unstorage/drivers/aws-dynamodb";
+import dynamoDBDriver from "unstorage/drivers/aws-dynamodb";
 
 const storage = createStorage({
-  driver: dynamoDbCacheDriver({
+  driver: dynamoDBDriver({
     table: "my-table-name", // required
     attributes: {
       key: "key", // optional, configure attributes name

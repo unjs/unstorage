@@ -67,25 +67,17 @@ export default defineDriver<VercelKVOptions>((opts) => {
       return getClient().get(r(key));
     },
     setItem(key, value, tOptions) {
-      let ttl = tOptions?.ttl ?? opts.ttl;
-      if (ttl) {
-        return getClient()
-          .set(r(key), value, { ex: ttl })
-          .then(() => {});
-      } else {
-        return getClient()
-          .set(r(key), value)
-          .then(() => {});
-      }
+      const ttl = tOptions?.ttl ?? opts.ttl;
+      return getClient()
+        .set(r(key), value, ttl ? { ex: ttl } : undefined)
+        .then(() => {});
     },
     removeItem(key) {
       return getClient()
         .del(r(key))
         .then(() => {});
     },
-    getKeys(base) {
-      return getClient().keys(r(base, "*"));
-    },
+    getKeys(base) {},
     async clear(base) {
       const keys = await getClient().keys(r(base, "*"));
       if (keys.length === 0) {

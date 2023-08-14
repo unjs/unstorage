@@ -1,6 +1,6 @@
 # Memory
 
-Keeps data in memory using [Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set).
+Keeps data in memory using [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
 
 By default it is mounted to top level so it is unlikely you need to mount it again.
 

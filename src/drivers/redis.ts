@@ -5,7 +5,6 @@ import Redis, {
   ClusterOptions,
   RedisOptions as _RedisOptions,
 } from "ioredis";
-import { ReplyError } from "redis-errors";
 
 export interface RedisOptions extends _RedisOptions {
   /**
@@ -47,11 +46,6 @@ export default defineDriver((opts: RedisOptions = {}) => {
     } else {
       redisClient = new Redis(opts);
     }
-    redisClient.on("error", (e: ReplyError) => {
-      if (e.code === "ECONNREFUSED") {
-        redisClient.disconnect();
-      }
-    });
     return redisClient;
   };
 

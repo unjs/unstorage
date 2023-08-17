@@ -1,4 +1,4 @@
-import { describe, it } from "vitest";
+import { describe } from "vitest";
 import { testDriver } from "./utils";
 import driver from "../../src/drivers/redis-upstash";
 
@@ -8,10 +8,8 @@ import "dotenv/config";
 const hasEnv =
   process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN;
 
-describe("drivers: redis-upstash", async () => {
-  if (hasEnv) {
-    testDriver({
-      driver: driver({}),
-    });
-  }
+describe.skipIf(!hasEnv)("drivers: redis-upstash", async () => {
+  testDriver({
+    driver: driver({}),
+  });
 });

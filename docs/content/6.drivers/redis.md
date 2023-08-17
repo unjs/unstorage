@@ -61,7 +61,7 @@ See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-h
 
 ## Upstash Redis
 
-[Upstash](https://upstash.com/) is a serverless Redis cloud service. The `redis-upstash` driver is a HTTP only driver that can be used in environment where TCP isn't available.
+The `redis-upstash` driver is an [Upstash](https://upstash.com/) based HTTP only driver that can be used in environments where TCP isn't available.
 
 ```ts
 import { createStorage } from "unstorage";

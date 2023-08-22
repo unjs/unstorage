@@ -39,4 +39,4 @@ const storage = createStorage({
 **Options:**
 
 - `base`: Base directory to isolate operations on this directory
-- `ignore`: Optional callback function `(path: stirng) => boolean`
+- `ignore`: Optional callback function `(path: string) => boolean`

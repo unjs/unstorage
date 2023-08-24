@@ -1,5 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createError, defineDriver, joinKeys, getBinding } from "./utils";
+import { getBinding } from "./utils/cloudflare";
+import { defineDriver, joinKeys } from "./utils";
+
 export interface KVOptions {
   binding?: string | KVNamespace;
 

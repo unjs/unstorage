@@ -1,8 +1,9 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createError, defineDriver, joinKeys, getBinding } from "./utils";
+import { getBinding } from "./utils/cloudflare";
+import { defineDriver, joinKeys } from "./utils";
 
 export interface CloudflareR2Options {
-  binding: string | R2Bucket;
+  binding?: string | R2Bucket;
   base?: string;
 }
 

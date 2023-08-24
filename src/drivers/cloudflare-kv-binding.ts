@@ -1,5 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createError, defineDriver, joinKeys } from "./utils";
+import { createError, defineDriver, joinKeys, getBinding } from "./utils";
 export interface KVOptions {
   binding?: string | KVNamespace;
 
@@ -11,7 +11,7 @@ export interface KVOptions {
 
 const DRIVER_NAME = "cloudflare-kv-binding";
 
-export default defineDriver((opts: KVOptions = {}) => {
+export default defineDriver((opts: KVOptions = { binding: 'STORAGE' }) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   async function getKeys(base: string = "") {
@@ -57,30 +57,3 @@ export default defineDriver((opts: KVOptions = {}) => {
   };
 });
 
-function getBinding(binding: KVNamespace | string = "STORAGE") {
-  let bindingName = "[binding]";
-
-  if (typeof binding === "string") {
-    bindingName = binding;
-    binding = ((globalThis as any)[bindingName] ||
-      (globalThis as any).__env__?.[bindingName]) as KVNamespace;
-  }
-
-  if (!binding) {
-    throw createError(
-      DRIVER_NAME,
-      `Invalid binding \`${bindingName}\`: \`${binding}\``
-    );
-  }
-
-  for (const key of ["get", "put", "delete"]) {
-    if (!(key in binding)) {
-      throw createError(
-        DRIVER_NAME,
-        `Invalid binding \`${bindingName}\`: \`${key}\` key is missing`
-      );
-    }
-  }
-
-  return binding;
-}

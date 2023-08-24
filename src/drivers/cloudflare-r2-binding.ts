@@ -1,5 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createError, defineDriver, joinKeys } from "./utils";
+import { createError, defineDriver, joinKeys, getBinding } from "./utils";
 
 export interface CloudflareR2Options {
   binding: string | R2Bucket;
@@ -10,7 +10,7 @@ export interface CloudflareR2Options {
 
 const DRIVER_NAME = "cloudflare-r2-binding";
 
-export default defineDriver((opts: CloudflareR2Options) => {
+export default defineDriver((opts: CloudflareR2Options = { binding: 'BUCKET' }) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   const getKeys = async (base?: string) => {
@@ -77,31 +77,3 @@ export default defineDriver((opts: CloudflareR2Options) => {
     },
   };
 });
-
-function getBinding(binding: R2Bucket | string) {
-  let bindingName = "[binding]";
-
-  if (typeof binding === "string") {
-    bindingName = binding;
-    binding = ((globalThis as any)[bindingName] ||
-      (globalThis as any).__env__?.[bindingName]) as R2Bucket;
-  }
-
-  if (!binding) {
-    throw createError(
-      DRIVER_NAME,
-      `Invalid binding \`${bindingName}\`: \`${binding}\``
-    );
-  }
-
-  for (const key of ["get", "put", "delete"]) {
-    if (!(key in binding)) {
-      throw createError(
-        DRIVER_NAME,
-        `Invalid binding \`${bindingName}\`: \`${key}\` key is missing`
-      );
-    }
-  }
-
-  return binding;
-}

@@ -18,6 +18,7 @@ export interface DynamoDBStorageOptions {
     ttl?: string;
   };
   expireIn?: number;
+  client?: DynamoDBDocumentClient;
 }
 
 const DRIVER_NAME = "aws-dynamodb";
@@ -41,12 +42,14 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
       throw createError(DRIVER_NAME, "Invalid option `expireIn`.");
     }
     if (!client) {
-      client = DynamoDBDocumentClient.from(
-        new DynamoDBClient({
-          region: opts.region,
-          credentials: opts.credentials,
-        })
-      );
+      client =
+        opts.client ||
+        DynamoDBDocumentClient.from(
+          new DynamoDBClient({
+            region: opts.region,
+            credentials: opts.credentials,
+          })
+        );
     }
     return client;
   }
@@ -108,7 +111,7 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
     );
   }
 
-  async function listKeys(startKey = undefined) {
+  async function listKeys(startKey: any = undefined) {
     let { Items: items, LastEvaluatedKey: lastKey } = await getClient().send(
       new ScanCommand({
         TableName: opts.table,
@@ -116,12 +119,14 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
       })
     );
 
-    if (opts.expireIn > 0) {
+    items = items || [];
+
+    if (expireIn > 0) {
       const timestamp = getTimestamp();
       items = items.filter((item) => parseInt(item.ttl || 0) >= timestamp);
     }
 
-    let keys = items.map((item) => item[opts.attributes.key]);
+    let keys = items.map((item) => item[attributes.key]);
     if (lastKey) {
       keys = keys.concat(await listKeys(lastKey));
     }

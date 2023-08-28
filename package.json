@@ -39,6 +39,7 @@
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
+    "test:dynamodb": "vitest run test/drivers/aws-dynamodb.test.ts",
     "test:types": "tsc --noEmit --skipLibCheck",
     "unstorage": "pnpm jiti src/cli"
   },
@@ -56,9 +57,8 @@
     "ufo": "^1.2.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-dynamodb": "^3.338.0",
-    "@aws-sdk/credential-providers": "^3.338.0",
-    "@aws-sdk/lib-dynamodb": "^3.338.0",
+    "@aws-sdk/client-dynamodb": "^3.398.0",
+    "@aws-sdk/lib-dynamodb": "^3.398.0",
     "@azure/app-configuration": "^1.4.1",
     "@azure/cosmos": "^3.17.3",
     "@azure/data-tables": "^13.2.2",
@@ -76,6 +76,7 @@
     "@vitejs/plugin-vue": "^4.2.3",
     "@vitest/coverage-v8": "^0.34.1",
     "@vue/compiler-sfc": "^3.3.4",
+    "aws-sdk-client-mock": "^3.0.0",
     "azurite": "^3.25.1",
     "changelogen": "^0.5.4",
     "eslint": "^8.46.0",
@@ -96,8 +97,8 @@
     "vue": "^3.3.4"
   },
   "peerDependencies": {
-    "@aws-sdk/client-dynamodb": "^3.338.0",
-    "@aws-sdk/lib-dynamodb": "^3.338.0",
+    "@aws-sdk/client-dynamodb": "^3.398.0",
+    "@aws-sdk/lib-dynamodb": "^3.398.0",
     "@azure/app-configuration": "^1.4.1",
     "@azure/cosmos": "^3.17.3",
     "@azure/data-tables": "^13.2.2",

@@ -84,7 +84,7 @@
     "jiti": "^1.19.1",
     "jsdom": "^22.1.0",
     "monaco-editor": "^0.41.0",
-    "mongodb": "^5.7.0",
+    "mongodb": "^6.0.0",
     "mongodb-memory-server": "^8.14.0",
     "msw": "^1.2.3",
     "prettier": "^3.0.1",

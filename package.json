@@ -39,7 +39,6 @@
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
-    "test:dynamodb": "vitest run test/drivers/aws-dynamodb.test.ts",
     "test:types": "tsc --noEmit --skipLibCheck",
     "unstorage": "pnpm jiti src/cli"
   },

@@ -17,14 +17,18 @@ export interface DynamoDBStorageOptions {
     value?: string;
     ttl?: string;
   };
-  expireIn?: number;
+  ttl?: number;
   client?: DynamoDBDocumentClient;
+}
+
+export interface DynamoDBSetItemOptions {
+  ttl?: number;
 }
 
 const DRIVER_NAME = "aws-dynamodb";
 
 export default defineDriver((opts: DynamoDBStorageOptions) => {
-  const expireIn = parseInt(String(opts.expireIn)) || 0;
+  const ttl = opts.ttl !== undefined ? parseInt(String(opts.ttl)) : 0;
 
   const attributes = {
     key: "key",
@@ -38,8 +42,8 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
     if (!opts.table) {
       throw createRequiredError(DRIVER_NAME, "table");
     }
-    if (Number.isNaN(opts.expireIn) || expireIn < 0) {
-      throw createError(DRIVER_NAME, "Invalid option `expireIn`.");
+    if (Number.isNaN(ttl) || ttl < 0) {
+      throw createError(DRIVER_NAME, "Invalid option `ttl`.");
     }
     if (!client) {
       client =
@@ -83,7 +87,7 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
       return null;
     }
 
-    if (expireIn > 0) {
+    if (ttl > 0) {
       const timestamp = getTimestamp();
       if (timestamp > parseInt(item.ttl || 0)) {
         return null;
@@ -93,11 +97,21 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
     return item[attributes.value];
   }
 
-  async function putItemValue(key: string, value: any): Promise<void> {
+  async function putItemValue(
+    key: string,
+    value: any,
+    options: DynamoDBSetItemOptions = {}
+  ): Promise<void> {
+    const ttlOverride =
+      options.ttl !== undefined ? parseInt(String(options.ttl)) : ttl;
+    if (Number.isNaN(ttlOverride) || ttlOverride < 0) {
+      throw createError(DRIVER_NAME, "Invalid option `ttl`.");
+    }
+
     await getClient().send(
       new PutCommand({
         TableName: opts.table,
-        Item: createObject(key, value, opts.expireIn),
+        Item: createObject(key, value, ttlOverride),
       })
     );
   }
@@ -121,7 +135,7 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
 
     items = items || [];
 
-    if (expireIn > 0) {
+    if (ttl > 0) {
       const timestamp = getTimestamp();
       items = items.filter((item) => parseInt(item.ttl || 0) >= timestamp);
     }
@@ -144,8 +158,8 @@ export default defineDriver((opts: DynamoDBStorageOptions) => {
     async getItem(key) {
       return await getItemValue(key);
     },
-    async setItem(key, value) {
-      await putItemValue(key, value);
+    async setItem(key, value, opts: DynamoDBSetItemOptions = {}) {
+      await putItemValue(key, value, opts);
     },
     async removeItem(key) {
       await removeItem(key);

@@ -2,44 +2,52 @@ import { describe, afterEach, beforeEach } from "vitest";
 import driver, { DynamoDBStorageOptions } from "../../src/drivers/aws-dynamodb";
 import { testDriver } from "./utils";
 import { mockClient } from "aws-sdk-client-mock";
-import { DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  ScanCommand,
+  DeleteCommand,
+} from "@aws-sdk/lib-dynamodb";
 
-const TABLE_NAME = 'mocked'
+const TABLE_NAME = "mocked";
 
 // Mocked in-memory data
-let data = new Map()
+let data = new Map();
 
 describe("drivers: aws-dynamodb", () => {
   // Init mocked client for test purpose
 
-  const client = mockClient(
-    DynamoDBDocumentClient
-  );
+  const client = mockClient(DynamoDBDocumentClient);
 
   // Add command resolvers
 
   client
     .on(GetCommand)
-    .callsFake(input => {
-      const key = input.Key.key
+    .callsFake((input) => {
+      const key = input.Key.key;
       if (!data.has(key)) {
-        return { Item: undefined }
+        return { Item: undefined };
       }
-      return { Item: { key, value: data.get(key) } }
+      return { Item: { key, value: data.get(key) } };
     })
     .on(ScanCommand)
     .callsFake(() => {
-      return { Items: Array.from(data.entries()).map(([ key, value ]) => ({ key, value })) }
+      return {
+        Items: Array.from(data.entries()).map(([key, value]) => ({
+          key,
+          value,
+        })),
+      };
     })
     .on(PutCommand)
-    .callsFake(input => {
-      data.set(input.Item.key, input.Item.value)
+    .callsFake((input) => {
+      data.set(input.Item.key, input.Item.value);
     })
     .on(DeleteCommand)
-    .callsFake(input => {
-      data.delete(input.Key.key)
-    })
-    
+    .callsFake((input) => {
+      data.delete(input.Key.key);
+    });
 
   // Setup test driver options
 
@@ -52,7 +60,7 @@ describe("drivers: aws-dynamodb", () => {
       value: "value",
       ttl: "ttl",
     },
-    expireIn: 0,
+    ttl: 0,
     client: client as unknown as DynamoDBDocumentClient,
   };
 

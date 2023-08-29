@@ -56,17 +56,22 @@ const storage = createStorage({
   driver: dynamoDbCacheDriver({
     table: "my-table-name", // required
     attributes: {
-      key: "key",
-      value: "value",
+      key: "key", // optional but recommended
+      value: "value", // optional but recommended
       ttl: "ttl", // optional, configure attributes name
     },
-    expireIn: 300, // optional, values in seconds or 0 to disable
+    ttl: 300, // optional, values in seconds or 0 to disable
   }),
 });
 ```
 
-When `expireIn` is set to a number greater than 0 the driver will add seconds to the current timestamp and set the TTL attribute.
-Otherwise removing the `expireIn` option or setting it to 0 will disable this functionality.
+When `ttl` is set to a number greater than 0 the driver will add seconds to the current timestamp and set the TTL attribute.
+Otherwise removing the `ttl` option or setting it to 0 will disable this functionality.
+
+The `setItem` method support an additional options which allows you to override the general `ttl` option:
+```js
+await storage.setItem('key', 'value', { ttl: 900 })
+```
 
 Since the DynamoDB items deletion is asynchronous the driver will check the validity of the TTL attribute before returning them from `getItem` and `getKeys` operations. This in order to ensure that no expired items will be returned.
 
@@ -100,4 +105,4 @@ The IAM role or IAM user that use the driver need the following permissions:
 - `region`: The AWS region to use.
 - `credentials`: The AWS SDK credentials object.
 - `attributes`: The key, value and TTL attributes mapping to table item attributes.
-- `expireIn`: The number of seconds to add to the current timestamp to set the TTL attribute. Set to 0 to disable it.
+- `ttl`: The number of seconds to add to the current timestamp to set the TTL attribute. Set to 0 to disable it.

@@ -1,11 +1,20 @@
 /// <reference types="@cloudflare/workers-types" />
 import { createError, defineDriver, joinKeys } from "./utils";
+import defu from "defu";
+
 export interface KVOptions {
   binding?: string | KVNamespace;
 
   /** Adds prefix to all stored keys */
   base?: string;
+  /**
+   * Default TTL for all items in seconds.
+   */
+  ttl?: number;
 }
+
+//https://developers.cloudflare.com/workers/runtime-apis/kv#writing-key-value-pairs
+export type CloudflareKvBindingSetItemOptions = KVNamespacePutOptions;
 
 // https://developers.cloudflare.com/workers/runtime-apis/kv
 
@@ -34,10 +43,18 @@ export default defineDriver((opts: KVOptions = {}) => {
       const binding = getBinding(opts.binding);
       return binding.get(key);
     },
-    setItem(key, value) {
+    setItem(key, value, options) {
       key = r(key);
       const binding = getBinding(opts.binding);
-      return binding.put(key, value);
+      const o = defu(
+        options?.cloudflareKvBinding,
+        options?.ttl
+          ? { expirationTtl: options.ttl }
+          : opts.ttl
+          ? { expirationTtl: opts.ttl }
+          : {}
+      );
+      return binding.put(key, value, o);
     },
     removeItem(key) {
       key = r(key);

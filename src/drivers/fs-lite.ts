@@ -1,6 +1,5 @@
 import { existsSync, promises as fsp, Stats } from "fs";
-import { resolve, relative, join } from "path";
-import { FSWatcher, WatchOptions, watch } from "chokidar";
+import { resolve, join } from "path";
 import { createError, createRequiredError, defineDriver } from "./utils";
 import {
   readFile,
@@ -13,23 +12,18 @@ import anymatch from "anymatch";
 
 export interface FSStorageOptions {
   base?: string;
-  ignore?: string[];
+  ignore?: (path: string) => boolean;
   readOnly?: boolean;
   noClear?: boolean;
-  watchOptions?: WatchOptions;
 }
 
 const PATH_TRAVERSE_RE = /\.\.\:|\.\.$/;
 
-const DRIVER_NAME = "fs";
+const DRIVER_NAME = "fs-lite";
 
 export default defineDriver((opts: FSStorageOptions = {}) => {
   if (!opts.base) {
     throw createRequiredError(DRIVER_NAME, "base");
-  }
-
-  if (!opts.ignore) {
-    opts.ignore = ["**/node_modules/**", "**/.git/**"];
   }
 
   opts.base = resolve(opts.base);
@@ -42,14 +36,6 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     }
     const resolved = join(opts.base!, key.replace(/:/g, "/"));
     return resolved;
-  };
-
-  let _watcher: FSWatcher | undefined;
-  const _unwatch = async () => {
-    if (_watcher) {
-      await _watcher.close();
-      _watcher = undefined;
-    }
   };
 
   return {
@@ -89,43 +75,13 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       return unlink(r(key));
     },
     getKeys() {
-      return readdirRecursive(r("."), anymatch(opts.ignore || []));
+      return readdirRecursive(r("."), opts.ignore);
     },
     async clear() {
       if (opts.readOnly || opts.noClear) {
         return;
       }
       await rmRecursive(r("."));
-    },
-    async dispose() {
-      if (_watcher) {
-        await _watcher.close();
-      }
-    },
-    async watch(callback) {
-      if (_watcher) {
-        return _unwatch;
-      }
-      await new Promise<void>((resolve, reject) => {
-        _watcher = watch(opts.base!, {
-          ignoreInitial: true,
-          ignored: opts.ignore,
-          ...opts.watchOptions,
-        })
-          .on("ready", () => {
-            resolve();
-          })
-          .on("error", reject)
-          .on("all", (eventName, path) => {
-            path = relative(opts.base!, path);
-            if (eventName === "change" || eventName === "add") {
-              callback("update", path);
-            } else if (eventName === "unlink") {
-              callback("remove", path);
-            }
-          });
-      });
-      return _unwatch;
     },
   };
 });

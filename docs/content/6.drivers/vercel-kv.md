@@ -16,6 +16,7 @@ const storage = createStorage({
     // token: "<your secret token>", // KV_REST_API_TOKEN
     // base: "test",
     // env: "KV",
+    // ttl: 60, // in seconds
   }),
 });
 ```

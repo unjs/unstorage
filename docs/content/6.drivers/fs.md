@@ -22,3 +22,21 @@ const storage = createStorage({
 - `base`: Base directory to isolate operations on this directory
 - `ignore`: Ignore patterns for watch <!-- and key listing -->
 - `watchOptions`: Additional [chokidar](https://github.com/paulmillr/chokidar) options.
+
+## Node.js Filesystem (Lite)
+
+This driver uses pure Node.js API without extra dependencies.
+
+```js
+import { createStorage } from "unstorage";
+import fsLiteDriver from "unstorage/drivers/fs-lite";
+
+const storage = createStorage({
+  driver: fsLiteDriver({ base: "./tmp" }),
+});
+```
+
+**Options:**
+
+- `base`: Base directory to isolate operations on this directory
+- `ignore`: Optional callback function `(path: string) => boolean`

@@ -106,7 +106,8 @@
     "idb-keyval": "^6.2.1",
     "@planetscale/database": "^1.11.0",
     "@upstash/redis": "^1.22.0",
-    "@vercel/kv": "^0.2.2"
+    "@vercel/kv": "^0.2.2",
+    "fast-xml-parser": "^4.2.6"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {

@@ -125,8 +125,8 @@ devDependencies:
     specifier: ^0.43.0
     version: 0.43.0
   mongodb:
-    specifier: ^5.9.0
-    version: 5.9.0
+    specifier: ^6.1.0
+    version: 6.1.0
   mongodb-memory-server:
     specifier: ^8.15.1
     version: 8.15.1
@@ -1782,7 +1782,6 @@ packages:
     dependencies:
       sparse-bitfield: 3.0.3
     dev: true
-    optional: true
 
   /@mswjs/cookies@0.2.2:
     resolution: {integrity: sha512-mlN83YSrcFgk7Dm1Mys40DLssI1KdJji2CMKN8eOlBqsTADYzj2+jWzsANsUTFbxDMWPD5e9bfA1RGqBpS3O1g==}
@@ -1925,6 +1924,7 @@ packages:
     dependencies:
       is-glob: 4.0.3
       micromatch: 4.0.5
+      napi-wasm: 1.1.0
     dev: false
     bundledDependencies:
       - napi-wasm
@@ -3313,9 +3313,9 @@ packages:
       buffer: 5.7.1
     dev: true
 
-  /bson@5.5.0:
-    resolution: {integrity: sha512-B+QB4YmDx9RStKv8LLSl/aVIEV3nYJc3cJNNTK2Cd1TL+7P+cNpw9mAPeCgc5K+j01Dv6sxUzcITXDx7ZU3F0w==}
-    engines: {node: '>=14.20.1'}
+  /bson@6.1.0:
+    resolution: {integrity: sha512-yiQ3KxvpVoRpx1oD1uPz4Jit9tAVTJgjdmjDKtUErkOoL9VNoF8Dd58qtAOL5E40exx2jvAT9sqdRSK/r+SHlA==}
+    engines: {node: '>=16.20.1'}
     dev: true
 
   /buffer-crc32@0.2.13:
@@ -5918,7 +5918,6 @@ packages:
     resolution: {integrity: sha512-ZS4Bp4r/Zoeq6+NLJpP+0Zzm0pR8whtGPf1XExKLJBAczGMnSi3It14OiNCStjQjM6NU1okjQGSxgEZN8eBYKg==}
     requiresBuild: true
     dev: true
-    optional: true
 
   /merge-descriptors@1.0.1:
     resolution: {integrity: sha512-cCi6g3/Zr1iqQi6ySbseM1Xvooa98N0w31jzUYrXPX2xqObmFGHJ0tQ5u74H3mVh7wLouTseZyYIq39g8cNp1w==}
@@ -6128,19 +6127,23 @@ packages:
       - aws-crt
     dev: true
 
-  /mongodb@5.9.0:
-    resolution: {integrity: sha512-g+GCMHN1CoRUA+wb1Agv0TI4YTSiWr42B5ulkiAfLLHitGK1R+PkSAf3Lr5rPZwi/3F04LiaZEW0Kxro9Fi2TA==}
-    engines: {node: '>=14.20.1'}
+  /mongodb@6.1.0:
+    resolution: {integrity: sha512-AvzNY0zMkpothZ5mJAaIo2bGDjlJQqqAbn9fvtVgwIIUPEfdrqGxqNjjbuKyrgQxg2EvCmfWdjq+4uj96c0YPw==}
+    engines: {node: '>=16.20.1'}
     peerDependencies:
       '@aws-sdk/credential-providers': ^3.188.0
-      '@mongodb-js/zstd': ^1.0.0
-      kerberos: ^1.0.0 || ^2.0.0
-      mongodb-client-encryption: '>=2.3.0 <3'
+      '@mongodb-js/zstd': ^1.1.0
+      gcp-metadata: ^5.2.0
+      kerberos: ^2.0.1
+      mongodb-client-encryption: '>=6.0.0 <7'
       snappy: ^7.2.2
+      socks: ^2.7.1
     peerDependenciesMeta:
       '@aws-sdk/credential-providers':
         optional: true
       '@mongodb-js/zstd':
+        optional: true
+      gcp-metadata:
         optional: true
       kerberos:
         optional: true
@@ -6148,12 +6151,12 @@ packages:
         optional: true
       snappy:
         optional: true
+      socks:
+        optional: true
     dependencies:
-      bson: 5.5.0
-      mongodb-connection-string-url: 2.6.0
-      socks: 2.7.1
-    optionalDependencies:
       '@mongodb-js/saslprep': 1.1.0
+      bson: 6.1.0
+      mongodb-connection-string-url: 2.6.0
     dev: true
 
   /morgan@1.10.0:
@@ -6262,6 +6265,10 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: true
+
+  /napi-wasm@1.1.0:
+    resolution: {integrity: sha512-lHwIAJbmLSjF9VDRm9GoVOy9AGp3aIvkjv+Kvz9h16QR3uSVYH78PNQUnT2U4X53mhlnV2M7wrhibQ3GHicDmg==}
+    dev: false
 
   /native-duplexpair@1.0.0:
     resolution: {integrity: sha512-E7QQoM+3jvNtlmyfqRZ0/U75VFgCls+fSkbml2MpgWkWyz3ox8Y58gNhfuziuQYGNNQAbFZJQck55LHCnCK6CA==}
@@ -7242,7 +7249,6 @@ packages:
     dependencies:
       memory-pager: 1.5.0
     dev: true
-    optional: true
 
   /spdx-correct@3.2.0:
     resolution: {integrity: sha512-kN9dJbvnySHULIluDHy32WHRUu3Og7B9sbY7tsFLctQkIqnMh3hErYgdMjTYuqmcXX+lK5T1lnUt3G7zNswmZA==}

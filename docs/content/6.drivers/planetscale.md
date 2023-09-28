@@ -16,7 +16,7 @@ To use, you will need to install `@planetscale/database` in your project:
 
 Then you can create a table to store your data by running the following query in your Planetscale database, where <storage> is the name of the table you want to use:
 
-```sql
+```
 create table <storage> (
  id varchar(255) not null primary key,
  value longtext,

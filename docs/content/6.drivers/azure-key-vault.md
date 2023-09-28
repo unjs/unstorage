@@ -5,7 +5,7 @@ Store data in a Azure Key Vault [secrets](https://docs.microsoft.com/en-us/azure
 This driver stores KV information in Azure Key Vault secrets by using the key as secret id and the value as secret content.
 Please be aware that key vault secrets don't have the fastest access time and are not designed for high throughput. You also have to disable purge protection for your key vault to be able to delete secrets. This implementation deletes and purges a secret when it is deleted to avoid conflicts with soft delete.
 
-⚠️ Be aware that this driver stores the keys of your key:value pairs in a encoded way in Key Vault to avoid conflicts with naming requirements for secrets. This means that you will not be able to access manually (outside of unstorage) created secrets inside your Key Vault, as long as they are not encoded in the same way.
+⚠️ Be aware that this driver stores the keys of your `key:value` pairs in an encoded way in Key Vault to avoid conflicts with naming requirements for secrets. This means that you will not be able to access manually (outside of unstorage) created secrets inside your Key Vault, as long as they are not encoded in the same way.
 
 To use it, you will need to install `@azure/keyvault-secrets` and `@azure/identity` in your project:
 

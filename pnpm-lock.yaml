@@ -44,8 +44,8 @@ devDependencies:
     specifier: ^1.4.1
     version: 1.4.1
   '@azure/cosmos':
-    specifier: ^3.17.3
-    version: 3.17.3
+    specifier: ^4.0.0
+    version: 4.0.0
   '@azure/data-tables':
     specifier: ^13.2.2
     version: 13.2.2
@@ -850,8 +850,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /@azure/cosmos@3.17.3:
-    resolution: {integrity: sha512-wBglkQ6Irjv5Vo2iw8fd6eYj60WYRSSg4/0DBkeOP6BwQ4RA91znsOHd6s3qG6UAbNgYuzC9Nnq07vlFFZkHEw==}
+  /@azure/cosmos@4.0.0:
+    resolution: {integrity: sha512-/Z27p1+FTkmjmm8jk90zi/HrczPHw2t8WecFnsnTe4xGocWl0Z4clP0YlLUTJPhRLWYa5upwD9rMvKJkS1f1kg==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@azure/abort-controller': 1.1.0

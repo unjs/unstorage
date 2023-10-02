@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@azure/app-configuration": "^1.4.1",
-    "@azure/cosmos": "^3.17.3",
+    "@azure/cosmos": "^4.0.0",
     "@azure/data-tables": "^13.2.2",
     "@azure/identity": "^3.3.0",
     "@azure/keyvault-secrets": "^4.7.0",
@@ -97,7 +97,7 @@
   },
   "peerDependencies": {
     "@azure/app-configuration": "^1.4.1",
-    "@azure/cosmos": "^3.17.3",
+    "@azure/cosmos": "^4.0.0",
     "@azure/data-tables": "^13.2.2",
     "@azure/identity": "^3.3.0",
     "@azure/keyvault-secrets": "^4.7.0",

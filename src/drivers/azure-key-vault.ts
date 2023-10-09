@@ -107,9 +107,9 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
 });
 
 const base64Map: { [key: string]: string } = {
-  "=": "e",
-  "+": "p",
-  "/": "s",
+  "=": "-e-",
+  "+": "-p-",
+  "/": "-s-",
 };
 
 function encode(value: string): string {

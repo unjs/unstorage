@@ -77,7 +77,6 @@
     "azurite": "^3.26.0",
     "changelogen": "^0.5.5",
     "dotenv": "^16.3.1",
-    "eslint": "^8.50.0",
     "eslint-config-unjs": "^0.2.1",
     "fake-indexeddb": "^4.0.2",
     "idb-keyval": "^6.2.1",

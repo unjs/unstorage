@@ -34,7 +34,7 @@ export interface Driver {
   setItem?: (
     key: string,
     value: string,
-    opts?: TransactionOptions
+    opts: TransactionOptions
   ) => MaybePromise<void>;
   /** @experimental */
   setItems?: (

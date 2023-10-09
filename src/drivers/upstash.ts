@@ -1,7 +1,7 @@
 import { createError, defineDriver, joinKeys } from "./utils";
 import { Redis, type RedisConfigNodejs } from "@upstash/redis";
 
-export interface RedisOptions extends Partial<RedisConfigNodejs> {
+export interface UpstashRedisOptions extends Partial<RedisConfigNodejs> {
   /**
    * Optional prefix to use for all keys. Can be used for namespacing.
    */
@@ -18,7 +18,7 @@ export interface RedisOptions extends Partial<RedisConfigNodejs> {
   ttl?: number;
 }
 
-const DRIVER_NAME = "redis-upstash";
+const DRIVER_NAME = "upstash";
 
 const validate = (option: string | undefined, envOption: string): string => {
   if (option) {
@@ -33,7 +33,7 @@ const validate = (option: string | undefined, envOption: string): string => {
     `missing required option or environment variable '${envOption}'.`
   );
 };
-export default defineDriver((opts: RedisOptions = {}) => {
+export default defineDriver((opts: UpstashRedisOptions = {}) => {
   let redisClient: Redis;
 
   const getRedisClient = () => {

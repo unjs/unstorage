@@ -100,9 +100,6 @@ devDependencies:
   changelogen:
     specifier: ^0.5.5
     version: 0.5.5
-  dotenv:
-    specifier: ^16.3.1
-    version: 16.3.1
   eslint-config-unjs:
     specifier: ^0.2.1
     version: 0.2.1(eslint@8.51.0)(typescript@5.2.2)

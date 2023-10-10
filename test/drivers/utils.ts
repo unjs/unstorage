@@ -177,6 +177,8 @@ export function testDriver(opts: TestOptions) {
     expect(await ctx.storage.getItem("t|1")).toBe("test_data_t1");
     expect(await ctx.storage.getItem("t|2")).toBe("test_data_t2");
     expect(await ctx.storage.getItem("t|3")).toBe("test_data_t3");
+
+    await ctx.storage.clear();
     setSeparator(":");
   });
 }

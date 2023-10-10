@@ -6,7 +6,6 @@ import {
   readBody,
   eventHandler,
   toNodeListener,
-  getMethod,
   getRequestHeader,
   setResponseHeader,
   readRawBody,
@@ -15,7 +14,7 @@ import {
 } from "h3";
 import { Storage } from "./types";
 import { stringify } from "./_utils";
-import { normalizeKey, normalizeBaseKey } from "./utils";
+import { normalizeKey, normalizeBaseKey, getSeparator } from "./utils";
 
 export type StorageServerRequest = {
   event: H3Event;
@@ -42,7 +41,11 @@ export function createH3StorageHandler(
 ): EventHandler {
   return eventHandler(async (event) => {
     const _path = opts.resolvePath?.(event) ?? event.path;
-    const isBaseKey = _path.endsWith(":") || _path.endsWith("/");
+    const isBaseKey =
+      _path.endsWith(":") ||
+      _path.endsWith("/") ||
+      _path.endsWith(getSeparator());
+
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
 
     // Authorize Request

@@ -15,7 +15,7 @@ export default defineDriver((opts: HTTPOptions) => {
     joinURL(opts.base!, replaceSeparator(key, "/"));
 
   const rBase = (key: string = "") =>
-    joinURL(opts.base!, replaceSeparator(key || "/", "/"), getSeparator());
+    joinURL(opts.base!, replaceSeparator(key || "/", "/"), ":");
 
   return {
     name: DRIVER_NAME,

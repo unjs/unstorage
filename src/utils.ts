@@ -59,8 +59,8 @@ export function normalizeKey(key?: string) {
   return key
     .split("?")[0]
     .replace(/[/\\]/g, separator)
-    .replace(new RegExp(`${separator}+`, "g"), separator)
-    .replace(new RegExp(`^${separator}|${separator}$`, "g"), "");
+    .replace(new RegExp(`\\${separator}+`, "g"), separator)
+    .replace(new RegExp(`^\\${separator}|\\${separator}$`, "g"), "");
 }
 
 export function joinKeys(...keys: string[]) {
@@ -77,7 +77,7 @@ export function normalizeBaseKey(base?: string) {
 }
 
 export function replaceSeparator(key: string, sep: string) {
-  return key.replace(/:/g, sep).replace(new RegExp(separator, "g"), sep);
+  return key.replace(/:/g, sep).replace(new RegExp(`\\${separator}`, "g"), sep);
 }
 
 export const PATH_TRAVERSE_RE = new RegExp(

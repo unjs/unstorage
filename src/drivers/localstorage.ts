@@ -1,3 +1,4 @@
+import { getSeparator } from "../utils";
 import { createRequiredError, defineDriver } from "./utils";
 
 export interface LocalStorageOptions {
@@ -19,7 +20,8 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
     throw createRequiredError(DRIVER_NAME, "localStorage");
   }
 
-  const r = (key: string) => (opts.base ? opts.base + ":" : "") + key;
+  const r = (key: string) =>
+    (opts.base ? opts.base + getSeparator() : "") + key;
 
   let _storageListener: undefined | ((ev: StorageEvent) => void);
   const _unwatch = () => {

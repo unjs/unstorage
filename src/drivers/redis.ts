@@ -1,4 +1,4 @@
-import { defineDriver, joinKeys } from "./utils";
+import { defineDriver, joinKeys, normalizeKey } from "./utils";
 import Redis, {
   Cluster,
   ClusterNode,
@@ -51,7 +51,7 @@ export default defineDriver((opts: RedisOptions = {}) => {
     return redisClient;
   };
 
-  const base = (opts.base || "").replace(/:$/, "");
+  const base = normalizeKey(opts.base || "");
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
 

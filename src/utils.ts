@@ -42,22 +42,44 @@ export function prefixStorage<T extends StorageValue>(
   return nsStorage;
 }
 
+let separator = ":";
+
+export function setSeparator(s: string) {
+  separator = s;
+}
+
+export function getSeparator() {
+  return separator;
+}
+
 export function normalizeKey(key?: string) {
   if (!key) {
     return "";
   }
   return key
     .split("?")[0]
-    .replace(/[/\\]/g, ":")
-    .replace(/:+/g, ":")
-    .replace(/^:|:$/g, "");
+    .replace(/[/\\]/g, separator)
+    .replace(new RegExp(`${separator}+`, "g"), separator)
+    .replace(new RegExp(`^${separator}|${separator}$`, "g"), "");
 }
 
 export function joinKeys(...keys: string[]) {
-  return normalizeKey(keys.join(":"));
+  return normalizeKey(keys.join(separator));
+}
+
+export function joinKeysWithSep(...keys: string[]) {
+  return normalizeKey(keys.join(separator));
 }
 
 export function normalizeBaseKey(base?: string) {
   base = normalizeKey(base);
-  return base ? base + ":" : "";
+  return base ? base + separator : "";
 }
+
+export function replaceSeparator(key: string, sep: string) {
+  return key.replace(/:/g, sep).replace(new RegExp(separator, "g"), sep);
+}
+
+export const PATH_TRAVERSE_RE = new RegExp(
+  `\\.\\.\\:|\\.\\.\\${getSeparator()}|\\.\\.$`
+);

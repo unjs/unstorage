@@ -1,3 +1,4 @@
+import { getSeparator } from "../utils";
 import { defineDriver } from "./utils";
 import {
   get,
@@ -18,7 +19,8 @@ export interface IDBKeyvalOptions {
 const DRIVER_NAME = "idb-keyval";
 
 export default defineDriver((opts: IDBKeyvalOptions = {}) => {
-  const base = opts.base && opts.base.length > 0 ? `${opts.base}:` : "";
+  const base =
+    opts.base && opts.base.length > 0 ? `${opts.base}${getSeparator()}` : "";
   const makeKey = (key: string) => base + key;
 
   let customStore: UseStore | undefined;

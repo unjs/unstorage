@@ -1,5 +1,11 @@
 import { it, expect } from "vitest";
-import { Storage, Driver, createStorage, restoreSnapshot } from "../../src";
+import {
+  Storage,
+  Driver,
+  createStorage,
+  restoreSnapshot,
+  setSeparator,
+} from "../../src";
 
 export interface TestContext {
   storage: Storage;
@@ -156,5 +162,21 @@ export function testDriver(opts: TestOptions) {
 
   it("dispose", async () => {
     await ctx.storage.dispose();
+  });
+
+  it("can set storage meta", async () => {
+    await ctx.storage.clear();
+    expect(await ctx.storage.getKeys()).toMatchObject([]);
+
+    setSeparator("|");
+    await ctx.storage.setItems([
+      { key: "t|1", value: "test_data_t1" },
+      { key: "t|2", value: "test_data_t2" },
+      { key: "t|3", value: "test_data_t3" },
+    ]);
+    expect(await ctx.storage.getItem("t|1")).toBe("test_data_t1");
+    expect(await ctx.storage.getItem("t|2")).toBe("test_data_t2");
+    expect(await ctx.storage.getItem("t|3")).toBe("test_data_t3");
+    setSeparator(":");
   });
 }

@@ -1,3 +1,4 @@
+import { getSeparator } from "../utils";
 import { createError, createRequiredError, defineDriver } from "./utils";
 
 export interface SessionStorageOptions {
@@ -19,7 +20,8 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
     throw createRequiredError(DRIVER_NAME, "sessionStorage");
   }
 
-  const r = (key: string) => (opts.base ? opts.base + ":" : "") + key;
+  const r = (key: string) =>
+    (opts.base ? opts.base + getSeparator() : "") + key;
 
   let _storageListener: undefined | ((ev: StorageEvent) => void);
   const _unwatch = () => {

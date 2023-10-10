@@ -10,6 +10,7 @@ import {
   unlink,
 } from "./utils/node-fs";
 import anymatch from "anymatch";
+import { getSeparator, PATH_TRAVERSE_RE, replaceSeparator } from "../utils";
 
 export interface FSStorageOptions {
   base?: string;
@@ -18,8 +19,6 @@ export interface FSStorageOptions {
   noClear?: boolean;
   watchOptions?: WatchOptions;
 }
-
-const PATH_TRAVERSE_RE = /\.\.\:|\.\.$/;
 
 const DRIVER_NAME = "fs";
 
@@ -40,7 +39,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
         `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`
       );
     }
-    const resolved = join(opts.base!, key.replace(/:/g, "/"));
+    const resolved = join(opts.base!, replaceSeparator(key, "/"));
     return resolved;
   };
 

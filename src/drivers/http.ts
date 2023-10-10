@@ -1,6 +1,7 @@
 import { defineDriver } from "./utils";
 import { $fetch as _fetch } from "ofetch";
 import { joinURL } from "ufo";
+import { getSeparator, replaceSeparator } from "../utils";
 
 export interface HTTPOptions {
   base: string;
@@ -10,10 +11,11 @@ export interface HTTPOptions {
 const DRIVER_NAME = "http";
 
 export default defineDriver((opts: HTTPOptions) => {
-  const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
+  const r = (key: string = "") =>
+    joinURL(opts.base!, replaceSeparator(key, "/"));
 
   const rBase = (key: string = "") =>
-    joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
+    joinURL(opts.base!, replaceSeparator(key || "/", "/"), getSeparator());
 
   return {
     name: DRIVER_NAME,

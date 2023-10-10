@@ -1,8 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 import { resolve } from "path";
-import { readFile, writeFile } from "../../src/drivers/utils/node-fs";
+import { readFile, writeFile, unlink } from "../../src/drivers/utils/node-fs";
 import { testDriver } from "./utils";
 import driver from "../../src/drivers/fs";
+import { getSeparator } from "../../src";
 
 describe("drivers: fs", () => {
   const dir = resolve(__dirname, "tmp/fs");
@@ -21,10 +22,22 @@ describe("drivers: fs", () => {
       });
       it("watch filesystem", async () => {
         const watcher = vi.fn();
-        await ctx.storage.watch(watcher);
-        await writeFile(resolve(dir, "s1/random_file"), "random", "utf8");
+        const dispose = await ctx.storage.watch(watcher);
+        await writeFile(
+          resolve(dir, "s1/random_file"),
+          "random" + `${Math.random()}`,
+          "utf8"
+        );
+
         await new Promise((resolve) => setTimeout(resolve, 500));
-        expect(watcher).toHaveBeenCalledWith("update", "s1:random_file");
+
+        expect(watcher).toHaveBeenCalledWith(
+          "update",
+          `s1${getSeparator()}random_file`
+        );
+
+        await unlink(resolve(dir, "s1/random_file"));
+        await dispose();
       });
 
       const invalidKeys = ["../foobar", "..:foobar", "../", "..:", ".."];

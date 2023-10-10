@@ -15,6 +15,7 @@ export interface TestContext {
 export interface TestOptions {
   driver: Driver;
   additionalTests?: (ctx: TestContext) => void;
+  separator?: string;
 }
 
 export function testDriver(opts: TestOptions) {
@@ -23,19 +24,25 @@ export function testDriver(opts: TestOptions) {
     driver: opts.driver,
   };
 
-  it("init", async () => {
+  if (opts.separator) {
+    setSeparator(opts.separator);
+  }
+
+  const suffix = opts.separator ? ` sep:(${opts.separator})` : "";
+
+  it("init" + suffix, async () => {
     await restoreSnapshot(ctx.storage, { initial: "works" });
     expect(await ctx.storage.getItem("initial")).toBe("works");
     await ctx.storage.clear();
   });
 
-  it("initial state", async () => {
+  it("initial state" + suffix, async () => {
     expect(await ctx.storage.hasItem("s1:a")).toBe(false);
     expect(await ctx.storage.getItem("s2:a")).toBe(null);
     expect(await ctx.storage.getKeys()).toMatchObject([]);
   });
 
-  it("setItem", async () => {
+  it("setItem" + suffix, async () => {
     await ctx.storage.setItem("s1:a", "test_data");
     await ctx.storage.setItem("s2:a", "test_data");
     await ctx.storage.setItem("s3:a?q=1", "test_data");
@@ -44,7 +51,7 @@ export function testDriver(opts: TestOptions) {
     expect(await ctx.storage.getItem("s3:a?q=2")).toBe("test_data");
   });
 
-  it("getKeys", async () => {
+  it("getKeys" + suffix, async () => {
     expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
       ["s1:a", "s2:a", "s3:a"].sort()
     );
@@ -53,19 +60,19 @@ export function testDriver(opts: TestOptions) {
     );
   });
 
-  it("serialize (object)", async () => {
+  it("serialize (object)" + suffix, async () => {
     await ctx.storage.setItem("/data/test.json", { json: "works" });
     expect(await ctx.storage.getItem("/data/test.json")).toMatchObject({
       json: "works",
     });
   });
 
-  it("serialize (primitive)", async () => {
+  it("serialize (primitive)" + suffix, async () => {
     await ctx.storage.setItem("/data/true.json", true);
     expect(await ctx.storage.getItem("/data/true.json")).toBe(true);
   });
 
-  it("serialize (lossy object with toJSON())", async () => {
+  it("serialize (lossy object with toJSON())" + suffix, async () => {
     class Test1 {
       toJSON() {
         return "SERIALIZED";
@@ -93,7 +100,7 @@ export function testDriver(opts: TestOptions) {
     ).rejects.toThrow("[unstorage] Cannot stringify value!");
   });
 
-  it("raw support", async () => {
+  it("raw support" + suffix, async () => {
     const value = new Uint8Array([1, 2, 3]);
     await ctx.storage.setItemRaw("/data/raw.bin", value);
     const rValue = await ctx.storage.getItemRaw("/data/raw.bin");
@@ -107,7 +114,7 @@ export function testDriver(opts: TestOptions) {
   });
 
   // Bulk tests
-  it("setItems", async () => {
+  it("setItems" + suffix, async () => {
     await ctx.storage.setItems([
       { key: "t:1", value: "test_data_t1" },
       { key: "t:2", value: "test_data_t2" },
@@ -118,7 +125,7 @@ export function testDriver(opts: TestOptions) {
     expect(await ctx.storage.getItem("t:3")).toBe("test_data_t3");
   });
 
-  it("getItems", async () => {
+  it("getItems" + suffix, async () => {
     await ctx.storage.setItem("v1:a", "test_data_v1:a");
     await ctx.storage.setItem("v2:a", "test_data_v2:a");
     await ctx.storage.setItem("v3:a?q=1", "test_data_v3:a?q=1");
@@ -146,13 +153,13 @@ export function testDriver(opts: TestOptions) {
     opts.additionalTests(ctx);
   }
 
-  it("removeItem", async () => {
+  it("removeItem" + suffix, async () => {
     await ctx.storage.removeItem("s1:a", false);
     expect(await ctx.storage.hasItem("s1:a")).toBe(false);
     expect(await ctx.storage.getItem("s1:a")).toBe(null);
   });
 
-  it("clear", async () => {
+  it("clear" + suffix, async () => {
     await ctx.storage.clear();
     expect(await ctx.storage.getKeys()).toMatchObject([]);
     // ensure we can clear empty storage as well: #162
@@ -160,25 +167,17 @@ export function testDriver(opts: TestOptions) {
     expect(await ctx.storage.getKeys()).toMatchObject([]);
   });
 
-  it("dispose", async () => {
+  it("dispose" + suffix, async () => {
     await ctx.storage.dispose();
   });
 
-  it("can set storage meta", async () => {
-    await ctx.storage.clear();
-    expect(await ctx.storage.getKeys()).toMatchObject([]);
+  setSeparator(":");
 
-    setSeparator("|");
-    await ctx.storage.setItems([
-      { key: "t|1", value: "test_data_t1" },
-      { key: "t|2", value: "test_data_t2" },
-      { key: "t|3", value: "test_data_t3" },
-    ]);
-    expect(await ctx.storage.getItem("t|1")).toBe("test_data_t1");
-    expect(await ctx.storage.getItem("t|2")).toBe("test_data_t2");
-    expect(await ctx.storage.getItem("t|3")).toBe("test_data_t3");
-
-    await ctx.storage.clear();
-    setSeparator(":");
-  });
+  // a hacky way to test with different separators
+  if (!opts.separator) {
+    testDriver({
+      ...opts,
+      separator: "|",
+    });
+  }
 }

@@ -79,6 +79,7 @@
     "eslint": "^8.51.0",
     "eslint-config-unjs": "^0.2.1",
     "fake-indexeddb": "^4.0.2",
+    "file-system-access": "^1.0.4",
     "idb-keyval": "^6.2.1",
     "ioredis-mock": "^8.9.0",
     "jiti": "^1.20.0",

@@ -138,7 +138,7 @@ async function getHandle(
   if (create && handleType !== "file" && handleType !== "directory") {
     throw createError(
       DRIVER_NAME,
-      'Invalid handle type, must be "file" or "directory" when creating'
+      "Invalid handle type, must be `file` or `directory` when creating"
     );
   }
 

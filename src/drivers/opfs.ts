@@ -30,16 +30,6 @@ export interface OPFSStorageOptions {
    * A callback to ignore certain files in getKeys()
    */
   ignore?: (path: string) => boolean;
-
-  /**
-   * Whether to ignore any write operations
-   */
-  readOnly?: boolean;
-
-  /**
-   * Whether to disallow clearing the storage
-   */
-  noClear?: boolean;
 }
 
 export default defineDriver<OPFSStorageOptions | undefined>(
@@ -77,26 +67,18 @@ export default defineDriver<OPFSStorageOptions | undefined>(
         };
       },
       async setItem(key, value) {
-        if (opts.readOnly) return;
-
         return writeFile(await fsPromise, resolve(key), value);
       },
       async setItemRaw(key, value) {
-        if (opts.readOnly) return;
-
         return writeFile(await fsPromise, resolve(key), value);
       },
       async removeItem(key) {
-        if (opts.readOnly) return;
-
         return unlink(await fsPromise, resolve(key));
       },
       async getKeys() {
         return readdirRecursive(await fsPromise, resolve(""), opts.ignore);
       },
       async clear() {
-        if (opts.readOnly || opts.noClear) return;
-
         if (opts.base!.length === 0) {
           // We cannot delete an OPFS root, so we just empty it
           await removeChildren(await fsPromise, resolve(""));

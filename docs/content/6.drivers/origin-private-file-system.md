@@ -23,6 +23,4 @@ const storage = createStorage({
 
 - `base`: Base directory to isolate operations on this directory
 - `ignore`: Ignore patterns for key listing
-- `readOnly`: Whether to ignore any write operations
-- `noClear`: Whether to disallow clearing the storage
 - `fs`: An alternative file system handle using the [`FileSystemDirectoryHandle`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle) interface (e.g. the user's native file system using `window.showDirectoryPicker()`)

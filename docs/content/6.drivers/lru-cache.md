@@ -20,3 +20,26 @@ const storage = createStorage({
   driver: lruCacheDriver(),
 });
 ```
+
+## Stale while revalidate
+
+LRU cache allows you to easily create a `stale-while-revalidate` storage.
+
+```ts
+const staleWhileRevalidateStorage = createStorage({
+  driver: driver({
+    max: 100,
+    ttl: 1000 * 60 * 15, // 15 minutes
+    allowStale: true,
+    fetchMethod: async (key, value, options) => {
+      const data = await fetch("https://your.api.com/endpoint?query${key}");
+      return data;
+    },
+  }),
+});
+
+const data = await staleWhileRevalidateStorage.get("my-search-result");
+```
+
+That approach will invoke API call maximum once per 15 minutes and will return cached values. Additionally after 15 minutes it will return stale value and will trigger API call in the background to update the cache.
+It allows you for great performance and user experience when the accuracy of the returned data is not critical.

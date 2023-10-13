@@ -11,15 +11,11 @@ function ignoreNotfoundError(error: any): null {
  * Normalize a path, removing empty segments and leading/trailing slashes
  */
 export function normalizePath(path: string): string {
-  const normalizedWrappedPath = `/${path}/`
-    // Replace colons with slashes
-    .replace(/:/g, "/")
-
-    // Remove . segments
-    .replace(/\/\.\//g, "/")
-
-    // Remove duplicate slashes
-    .replace(/\/{2,}/g, "/");
+  // Wrap path in slashes, remove . segments and collapse subsequent namespace separators
+  const normalizedWrappedPath = `/${path}/`.replace(
+    /[/:]+(\.[/:]+)*[/:]*/g,
+    "/"
+  );
 
   // Disallow .. segments
   if (normalizedWrappedPath.includes("/../")) {
@@ -29,14 +25,7 @@ export function normalizePath(path: string): string {
     );
   }
 
-  return (
-    normalizedWrappedPath
-      // Remove leading slashes
-      .replace(/^\//g, "")
-
-      // Remove trailing slashes
-      .replace(/\/$/g, "")
-  );
+  return normalizedWrappedPath.slice(1, -1);
 }
 
 /**

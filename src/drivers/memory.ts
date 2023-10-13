@@ -12,10 +12,10 @@ export default defineDriver<void>(() => {
       return data.has(key);
     },
     getItem(key) {
-      return data.get(key) || null;
+      return data.get(key) ?? null;
     },
     getItemRaw(key) {
-      return data.get(key) || null;
+      return data.get(key) ?? null;
     },
     setItem(key, value) {
       data.set(key, value);

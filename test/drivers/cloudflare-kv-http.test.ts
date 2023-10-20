@@ -102,6 +102,7 @@ describe.skipIf(isNode18)("drivers: cloudflare-kv-http", () => {
             "base:data:serialized2.json": "{\\"serializedObj\\":\\"works\\"}",
             "base:data:test.json": "{\\"json\\":\\"works\\"}",
             "base:data:true.json": "true",
+            "base:my-false-flag": "false",
             "base:s1:a": "test_data",
             "base:s2:a": "test_data",
             "base:s3:a": "test_data",
@@ -111,6 +112,7 @@ describe.skipIf(isNode18)("drivers: cloudflare-kv-http", () => {
             "base:v1:a": "test_data_v1:a",
             "base:v2:a": "test_data_v2:a",
             "base:v3:a": "test_data_v3:a?q=1",
+            "base:zero": "0",
           }
         `);
       });

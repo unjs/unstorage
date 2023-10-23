@@ -109,6 +109,9 @@ devDependencies:
   fake-indexeddb:
     specifier: ^4.0.2
     version: 4.0.2
+  file-system-access:
+    specifier: ^1.0.4
+    version: 1.0.4
   idb-keyval:
     specifier: ^6.2.1
     version: 6.2.1
@@ -1671,6 +1674,10 @@ packages:
     dependencies:
       '@types/node': 20.8.3
       '@types/webidl-conversions': 7.0.1
+    dev: true
+
+  /@types/wicg-file-system-access@2020.9.8:
+    resolution: {integrity: sha512-ggMz8nOygG7d/stpH40WVaNvBwuyYLnrg5Mbyf6bmsj/8+gb6Ei4ZZ9/4PNpcPNTT8th9Q8sM8wYmWGjMWLX/A==}
     dev: true
 
   /@typescript-eslint/eslint-plugin@5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.51.0)(typescript@5.2.2):
@@ -3686,6 +3693,14 @@ packages:
       tmp: 0.0.33
     dev: true
 
+  /fetch-blob@3.2.0:
+    resolution: {integrity: sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ==}
+    engines: {node: ^12.20 || >= 14.13}
+    dependencies:
+      node-domexception: 1.0.0
+      web-streams-polyfill: 3.2.1
+    dev: true
+
   /figures@3.2.0:
     resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
     engines: {node: '>=8'}
@@ -3698,6 +3713,17 @@ packages:
     engines: {node: ^10.12.0 || >=12.0.0}
     dependencies:
       flat-cache: 3.1.0
+    dev: true
+
+  /file-system-access@1.0.4:
+    resolution: {integrity: sha512-JDlhH+gJfZu/oExmtN4/6VX+q1etlrbJbR5uzoBa4BzfTRQbEXGFuGIBRk3ZcPocko3WdEclZSu+d/SByjG6Rg==}
+    engines: {node: '>=14'}
+    dependencies:
+      '@types/wicg-file-system-access': 2020.9.8
+      fetch-blob: 3.2.0
+      node-domexception: 1.0.0
+    optionalDependencies:
+      web-streams-polyfill: 3.2.1
     dev: true
 
   /fill-range@7.0.1:
@@ -5366,6 +5392,11 @@ packages:
   /node-addon-api@7.0.0:
     resolution: {integrity: sha512-vgbBJTS4m5/KkE16t5Ly0WW9hz46swAstv0hYYwMtbG7AznRhNyfLRe8HZAiWIpcHzoO7HxhLuBQj9rJ/Ho0ZA==}
     dev: false
+
+  /node-domexception@1.0.0:
+    resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
+    engines: {node: '>=10.5.0'}
+    dev: true
 
   /node-fetch-native@1.4.0:
     resolution: {integrity: sha512-F5kfEj95kX8tkDhUCYdV8dg3/8Olx/94zB8+ZNthFs6Bz31UpUi8Xh40TN3thLwXgrwXry1pEg9lJ++tLWTcqA==}
@@ -7159,6 +7190,11 @@ packages:
       util: 0.12.5
     optionalDependencies:
       '@zxing/text-encoding': 0.9.0
+    dev: true
+
+  /web-streams-polyfill@3.2.1:
+    resolution: {integrity: sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==}
+    engines: {node: '>= 8'}
     dev: true
 
   /webidl-conversions@3.0.1:

@@ -92,5 +92,8 @@ export default defineDriver((opts: RedisOptions = {}) => {
     dispose() {
       return getRedisClient().disconnect();
     },
+    get client () {
+      return getRedisClient();
+    },
   };
 });

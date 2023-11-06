@@ -10,8 +10,6 @@ import type {
 import memory from "./drivers/memory";
 import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
-import { EventEmitter } from 'events';
-
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -26,7 +24,7 @@ export interface CreateStorageOptions {
 }
 
 export function createStorage(options: CreateStorageOptions = {}): Storage {
-  const eventEmitter = new EventEmitter();
+  const client = options.driver?.client;
 
   const context: StorageCTX = {
     mounts: { "": options.driver || memory() },
@@ -110,14 +108,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
     hasItem(key, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
-
-      try {
-        return asyncCall(driver.hasItem, relativeKey, opts);
-      } catch (e) {
-        eventEmitter.emit('error',e)
-        return undefined;
-      }
-
+      return asyncCall(driver.hasItem, relativeKey, opts);
     },
     getItem(key, opts = {}) {
       key = normalizeKey(key);
@@ -145,14 +136,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
       if (!driver.setItem) {
         return; // Readonly
       }
-
-      try {
-        await asyncCall(driver.setItem, relativeKey, stringify(value), opts);
-      } catch (e){
-        eventEmitter.emit('error',e)
-      }
-
-
+      await asyncCall(driver.setItem, relativeKey, stringify(value), opts);
       if (!driver.watch) {
         onChange("update", key);
       }
@@ -346,7 +330,7 @@ export function createStorage(options: CreateStorageOptions = {}): Storage {
         base: m.mountpoint,
       }));
     },
-    eventEmitter,
+    client
   };
 
   return storage;

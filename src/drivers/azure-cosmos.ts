@@ -96,7 +96,7 @@ export default defineDriver((opts: AzureCosmosOptions) => {
       const item = await (await getCosmosClient())
         .item(key)
         .read<AzureCosmosItem>();
-      return item.resource ? item.resource.value : null;
+      return item.resource ? item.resource.value : undefined;
     },
     async setItem(key, value) {
       const modified = new Date();

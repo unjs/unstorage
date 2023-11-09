@@ -119,7 +119,7 @@ describe("storage", () => {
 
     await storage.setItem("/mnt/foo/test.txt", "v3");
     storage.mount("/mnt/foo", memory());
-    expect(await storage.getItem("/mnt/foo/test.txt")).toBe(null);
+    expect(await storage.getItem("/mnt/foo/test.txt")).toBe(undefined);
 
     expect(await storage.getItem("/mnt/test.txt")).toBe("v2");
     expect(await storage.getKeys()).toMatchInlineSnapshot(`

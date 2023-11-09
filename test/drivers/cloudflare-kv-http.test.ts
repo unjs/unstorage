@@ -14,7 +14,7 @@ const server = setupServer(
   rest.get(`${baseURL}/values/:key`, (req, res, ctx) => {
     const key = req.params.key as string;
     if (!(key in store)) {
-      return res(ctx.status(404), ctx.json(null));
+      return res(ctx.status(404), ctx.json(undefined));
     }
     return res(
       ctx.status(200),
@@ -34,7 +34,7 @@ const server = setupServer(
   rest.put(`${baseURL}/values/:key`, async (req, res, ctx) => {
     const key = req.params.key as string;
     store[key] = await req.text();
-    return res(ctx.status(204), ctx.json(null));
+    return res(ctx.status(204), ctx.json(undefined));
   }),
 
   rest.delete(`${baseURL}/values/:key`, (req, res, ctx) => {

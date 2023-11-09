@@ -23,7 +23,7 @@ export interface Driver {
   getItem: (
     key: string,
     opts?: TransactionOptions
-  ) => MaybePromise<StorageValue>;
+  ) => MaybePromise<StorageValue | undefined>;
   /** @experimental */
   getItems?: (
     items: { key: string; options?: TransactionOptions }[],
@@ -51,7 +51,7 @@ export interface Driver {
   getMeta?: (
     key: string,
     opts: TransactionOptions
-  ) => MaybePromise<StorageMeta | null>;
+  ) => MaybePromise<StorageMeta | undefined>;
   getKeys: (base: string, opts: TransactionOptions) => MaybePromise<string[]>;
   clear?: (base: string, opts: TransactionOptions) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
@@ -64,7 +64,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
   getItem: <U extends T>(
     key: string,
     opts?: TransactionOptions
-  ) => Promise<U | null>;
+  ) => Promise<U | undefined>;
   /** @experimental */
   getItems: (
     items: (string | { key: string; options?: TransactionOptions })[],
@@ -74,7 +74,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
   getItemRaw: <T = any>(
     key: string,
     opts?: TransactionOptions
-  ) => Promise<MaybeDefined<T> | null>;
+  ) => Promise<MaybeDefined<T> | undefined>;
   setItem: <U extends T>(
     key: string,
     value: U,

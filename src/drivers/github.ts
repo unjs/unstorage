@@ -98,7 +98,7 @@ export default defineDriver<GithubOptions>((_opts) => {
       const item = files[key];
 
       if (!item) {
-        return null;
+        return undefined;
       }
 
       if (!item.body) {
@@ -124,7 +124,7 @@ export default defineDriver<GithubOptions>((_opts) => {
     async getMeta(key) {
       await syncFiles();
       const item = files[key as keyof typeof files];
-      return item ? item.meta : null;
+      return item ? item.meta : undefined;
     },
   };
 });

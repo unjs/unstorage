@@ -50,12 +50,12 @@ const DRIVER_NAME = "azure-storage-table";
 
 export default defineDriver((opts: AzureStorageTableOptions) => {
   const {
-    accountName = null,
+    accountName = undefined,
     tableName = "unstorage",
     partitionKey = "unstorage",
-    accountKey = null,
-    sasKey = null,
-    connectionString = null,
+    accountKey = undefined,
+    sasKey = undefined,
+    connectionString = undefined,
     pageSize = 1000,
   } = opts;
 
@@ -118,7 +118,7 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
         const entity = await getClient().getEntity(partitionKey, key);
         return entity.unstorageValue;
       } catch {
-        return null;
+        return undefined;
       }
     },
     async setItem(key, value) {

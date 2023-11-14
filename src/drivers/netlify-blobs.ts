@@ -18,6 +18,7 @@ interface NetlifyBaseStoreOptions {
 interface NetlifyDeployStoreOptions extends NetlifyBaseStoreOptions {
   deploy: true;
   name?: never;
+  deployID?: string;
 }
 
 interface NetlifyNamedStoreOptions extends NetlifyBaseStoreOptions {
@@ -62,7 +63,7 @@ export default defineDriver(
       name: DRIVER_NAME,
       options: {},
       async hasItem(key) {
-        return getClient().getMetadata(key).then(Boolean);
+        return getClient().get(key).then(Boolean);
       },
       getItem: (key) => {
         return getClient().get(key);

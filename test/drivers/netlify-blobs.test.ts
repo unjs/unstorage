@@ -26,6 +26,16 @@ describe("drivers: netlify-blobs", () => {
     }),
   });
 
+  testDriver({
+    driver: driver({
+      deploy: true,
+      edgeURL: `http://localhost:8971`,
+      token,
+      siteID,
+      deployID: "test",
+    }),
+  });
+
   afterAll(async () => {
     await server.stop();
   });

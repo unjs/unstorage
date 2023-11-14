@@ -1,8 +1,11 @@
 import { createError, createRequiredError, defineDriver } from "./utils";
-import { getStore, getDeployStore } from "@netlify/blobs";
+import {
+  getStore,
+  getDeployStore,
+  type Store,
+  type BlobResponseType,
+} from "@netlify/blobs";
 import { fetch } from "ofetch";
-
-type Store = ReturnType<typeof getStore>;
 
 const DRIVER_NAME = "netlify-blobs";
 
@@ -31,7 +34,7 @@ export type NetlifyStoreOptions =
   | NetlifyNamedStoreOptions;
 
 type GetOptions = {
-  type?: "text" | "json" | "arrayBuffer" | "stream" | "blob";
+  type?: BlobResponseType;
 };
 
 export default defineDriver(
@@ -63,7 +66,7 @@ export default defineDriver(
       name: DRIVER_NAME,
       options: {},
       async hasItem(key) {
-        return getClient().get(key).then(Boolean);
+        return getClient().getMetadata(key).then(Boolean);
       },
       getItem: (key) => {
         return getClient().get(key);

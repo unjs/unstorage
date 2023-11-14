@@ -79,7 +79,7 @@
     "changelogen": "^0.5.5",
     "eslint": "^8.53.0",
     "eslint-config-unjs": "^0.2.1",
-    "fake-indexeddb": "^4.0.2",
+    "fake-indexeddb": "^5.0.1",
     "idb-keyval": "^6.2.1",
     "ioredis-mock": "^8.9.0",
     "jiti": "^1.21.0",

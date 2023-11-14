@@ -32,6 +32,8 @@ describe("drivers: redis", () => {
             "test:v1:a",
             "test:v2:a",
             "test:v3:a",
+            "test:zero",
+            "test:my-false-flag",
           ]
         `);
         await client.disconnect();

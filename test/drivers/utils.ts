@@ -135,6 +135,14 @@ export function testDriver(opts: TestOptions) {
     ]);
   });
 
+  it("getItem - return falsy values when set in storage", async () => {
+    await ctx.storage.setItem("zero", 0);
+    expect(await ctx.storage.getItem("zero")).toBe(0);
+
+    await ctx.storage.setItem("my-false-flag", false);
+    expect(await ctx.storage.getItem("my-false-flag")).toBe(false);
+  });
+
   // TODO: Refactor to move after cleanup
   if (opts.additionalTests) {
     opts.additionalTests(ctx);

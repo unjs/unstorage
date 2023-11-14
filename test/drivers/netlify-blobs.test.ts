@@ -2,15 +2,21 @@ import { afterAll, beforeAll, describe } from "vitest";
 import driver from "../../src/drivers/netlify-blobs";
 import { testDriver } from "./utils";
 import { BlobsServer } from "@netlify/blobs";
+import { resolve } from "path";
+import { rm, mkdir } from "node:fs/promises";
 
-describe("drivers: netlify-blobs", () => {
+describe("drivers: netlify-blobs", async () => {
+  const dataDir = resolve(__dirname, "tmp/netlify-blobs");
+  await rm(dataDir, { recursive: true, force: true }).catch(() => {});
+  await mkdir(dataDir, { recursive: true });
+
   let server: BlobsServer;
   const token = "mock";
   const siteID = "1";
   beforeAll(async () => {
     server = new BlobsServer({
-      directory: "./.netlify/blobs",
-      debug: true,
+      directory: dataDir,
+      debug: !true,
       token,
       port: 8971,
     });

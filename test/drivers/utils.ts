@@ -91,10 +91,11 @@ export function testDriver(opts: TestOptions) {
     const value = new Uint8Array([1, 2, 3]);
     await ctx.storage.setItemRaw("/data/raw.bin", value);
     const rValue = await ctx.storage.getItemRaw("/data/raw.bin");
-    if (rValue?.length !== value.length) {
-      console.log(rValue);
+    const rValueLen = rValue?.length || rValue?.byteLength;
+    if (rValueLen !== value.length) {
+      console.log("Invalid raw value length:", rValue, "Length:", rValueLen);
     }
-    expect(rValue?.length).toBe(value.length);
+    expect(rValueLen).toBe(value.length);
     expect(Buffer.from(rValue).toString("base64")).toBe(
       Buffer.from(value).toString("base64")
     );

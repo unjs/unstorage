@@ -77,6 +77,9 @@ export default defineDriver(
         // @ts-expect-error has trouble with the overloaded types
         return getClient().get(key, tops);
       },
+      getMeta(key) {
+        return getClient().getMetadata(key);
+      },
       getItemRaw(key, topts?: GetOptions) {
         // @ts-expect-error has trouble with the overloaded types
         return getClient().get(key, { type: topts?.type ?? "text" });

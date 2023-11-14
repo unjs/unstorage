@@ -73,11 +73,11 @@ export default defineDriver(
       async hasItem(key) {
         return getClient().getMetadata(key).then(Boolean);
       },
-      getItem: (key, tops: GetOptions) => {
+      getItem: (key, tops?: GetOptions) => {
         // @ts-expect-error has trouble with the overloaded types
         return getClient().get(key, tops);
       },
-      getItemRaw(key, topts: GetOptions) {
+      getItemRaw(key, topts?: GetOptions) {
         // @ts-expect-error has trouble with the overloaded types
         return getClient().get(key, { type: topts?.type ?? "text" });
       },

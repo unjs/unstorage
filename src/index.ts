@@ -21,6 +21,7 @@ export const builtinDrivers = {
   lruCache: "unstorage/drivers/lru-cache",
   memory: "unstorage/drivers/memory",
   mongodb: "unstorage/drivers/mongodb",
+  netlifyBlobs: "unstorage/drivers/netlify-blobs",
   overlay: "unstorage/drivers/overlay",
   planetscale: "unstorage/drivers/planetscale",
   redis: "unstorage/drivers/redis",
@@ -71,6 +72,9 @@ export type BuiltinDriverOptions = {
   lruCache: ExtractOpts<(typeof import("./drivers/lru-cache"))["default"]>;
   memory: ExtractOpts<(typeof import("./drivers/memory"))["default"]>;
   mongodb: ExtractOpts<(typeof import("./drivers/mongodb"))["default"]>;
+  netlifyBlobs: ExtractOpts<
+    (typeof import("./drivers/netlify-blobs"))["default"]
+  >;
   overlay: ExtractOpts<(typeof import("./drivers/overlay"))["default"]>;
   planetscale: ExtractOpts<(typeof import("./drivers/planetscale"))["default"]>;
   redis: ExtractOpts<(typeof import("./drivers/redis"))["default"]>;

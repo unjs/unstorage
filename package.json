@@ -64,6 +64,7 @@
     "@azure/storage-blob": "^12.17.0",
     "@capacitor/preferences": "^5.0.6",
     "@cloudflare/workers-types": "^4.20231025.0",
+    "@netlify/blobs": "^6.2.0",
     "@planetscale/database": "^1.11.0",
     "@types/ioredis-mock": "^8.2.5",
     "@types/jsdom": "^21.1.5",
@@ -103,6 +104,7 @@
     "@azure/keyvault-secrets": "^4.7.0",
     "@azure/storage-blob": "^12.16.0",
     "@capacitor/preferences": "^5.0.6",
+    "@netlify/blobs": "^6.2.0",
     "@planetscale/database": "^1.11.0",
     "@upstash/redis": "^1.23.4",
     "@vercel/kv": "^0.2.3",
@@ -128,6 +130,9 @@
       "optional": true
     },
     "@capacitor/preferences": {
+      "optional": true
+    },
+    "@netlify/blobs": {
       "optional": true
     },
     "@planetscale/database": {

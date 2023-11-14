@@ -7,7 +7,7 @@ type Store = ReturnType<typeof getStore>;
 const DRIVER_NAME = "netlify-blobs";
 
 interface NetlifyBaseStoreOptions {
-  deploy?: boolean;
+  deployScoped?: boolean;
   name?: string;
   apiURL?: string;
   edgeURL?: string;
@@ -16,13 +16,13 @@ interface NetlifyBaseStoreOptions {
 }
 
 interface NetlifyDeployStoreOptions extends NetlifyBaseStoreOptions {
-  deploy: true;
+  deployScoped: true;
   name?: never;
   deployID?: string;
 }
 
 interface NetlifyNamedStoreOptions extends NetlifyBaseStoreOptions {
-  deploy?: false;
+  deployScoped?: false;
   name: string;
 }
 
@@ -35,12 +35,12 @@ type GetOptions = {
 };
 
 export default defineDriver(
-  ({ deploy, name, ...opts }: NetlifyStoreOptions) => {
+  ({ deployScoped, name, ...opts }: NetlifyStoreOptions) => {
     let store: Store;
 
     const getClient = () => {
       if (!store) {
-        if (deploy) {
+        if (deployScoped) {
           if (name) {
             throw createError(
               DRIVER_NAME,

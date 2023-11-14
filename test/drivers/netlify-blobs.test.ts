@@ -28,7 +28,7 @@ describe("drivers: netlify-blobs", () => {
 
   testDriver({
     driver: driver({
-      deploy: true,
+      deployScoped: true,
       edgeURL: `http://localhost:8971`,
       token,
       siteID,

@@ -82,7 +82,7 @@ export default defineDriver(
       },
       getItemRaw(key, topts?: GetOptions) {
         // @ts-expect-error has trouble with the overloaded types
-        return getClient().get(key, { type: topts?.type ?? "text" });
+        return getClient().get(key, { type: topts?.type ?? "arrayBuffer" });
       },
       setItem(key, value, topts?: SetOptions) {
         return getClient().set(key, value, topts);

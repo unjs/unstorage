@@ -30,12 +30,12 @@ const storage = createStorage({
 });
 ```
 
-To use, you will need to install `@netlify/blobs` dependency in your project:
+To use, you will need to install `@netlify/blobs` as dependency or devDependency in your project:
 
 ```json
 {
-  "dependencies": {
-    "@netlify/blobs": "latest"
+  "devDependencies": {
+    "@netlify/blobs": "*"
   }
 }
 ```

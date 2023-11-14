@@ -1,13 +1,16 @@
 import { createError, createRequiredError, defineDriver } from "./utils";
-import {
-  getStore,
-  getDeployStore,
-  type Store,
-  type BlobResponseType,
+import { getStore, getDeployStore } from "@netlify/blobs";
+import type {
+  Store,
+  BlobResponseType,
+  SetOptions,
+  ListOptions,
 } from "@netlify/blobs";
 import { fetch } from "ofetch";
 
 const DRIVER_NAME = "netlify-blobs";
+
+type GetOptions = { type?: BlobResponseType };
 
 export interface NetlifyBaseStoreOptions {
   /** The name of the store to use. It is created if needed. This is required except for deploy-scoped stores. */
@@ -38,10 +41,6 @@ export interface NetlifyNamedStoreOptions extends NetlifyBaseStoreOptions {
 export type NetlifyStoreOptions =
   | NetlifyDeployStoreOptions
   | NetlifyNamedStoreOptions;
-
-type GetOptions = {
-  type?: BlobResponseType;
-};
 
 export default defineDriver(
   ({ deployScoped, name, ...opts }: NetlifyStoreOptions) => {
@@ -74,28 +73,28 @@ export default defineDriver(
       async hasItem(key) {
         return getClient().getMetadata(key).then(Boolean);
       },
-      getItem: (key) => {
-        return getClient().get(key);
-      },
-      getItemRaw(key, opts: GetOptions) {
+      getItem: (key, tops: GetOptions) => {
         // @ts-expect-error has trouble with the overloaded types
-        return getClient().get(key, { type: opts?.type ?? "text" });
+        return getClient().get(key, tops);
       },
-      setItem(key, value) {
-        return getClient().set(key, value);
+      getItemRaw(key, topts: GetOptions) {
+        // @ts-expect-error has trouble with the overloaded types
+        return getClient().get(key, { type: topts?.type ?? "text" });
       },
-      setItemRaw(
-        key,
-        value: string | ArrayBuffer | Blob,
-        opts?: { metadata?: any }
-      ) {
-        return getClient().set(key, value, opts);
+      setItem(key, value, topts?: SetOptions) {
+        return getClient().set(key, value, topts);
+      },
+      setItemRaw(key, value: string | ArrayBuffer | Blob, topts?: SetOptions) {
+        return getClient().set(key, value, topts);
       },
       removeItem(key) {
         return getClient().delete(key);
       },
-      async getKeys(base?: string) {
-        return (await getClient().list({ prefix: base })).blobs.map(
+      async getKeys(
+        base?: string,
+        tops?: Omit<ListOptions, "prefix" | "paginate">
+      ) {
+        return (await getClient().list({ ...tops, prefix: base })).blobs.map(
           (item) => item.key
         );
       },

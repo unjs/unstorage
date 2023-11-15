@@ -17,7 +17,6 @@ export const builtinDrivers = {
   github: "unstorage/drivers/github",
   http: "unstorage/drivers/http",
   indexedb: "unstorage/drivers/indexedb",
-  localStorage: "unstorage/drivers/localstorage",
   lruCache: "unstorage/drivers/lru-cache",
   memory: "unstorage/drivers/memory",
   mongodb: "unstorage/drivers/mongodb",
@@ -25,9 +24,13 @@ export const builtinDrivers = {
   overlay: "unstorage/drivers/overlay",
   planetscale: "unstorage/drivers/planetscale",
   redis: "unstorage/drivers/redis",
-  sessionStorage: "unstorage/drivers/session-storage",
   vercelKV: "unstorage/drivers/vercel-kv",
+  webStorage: "unstorage/drivers/web-storage",
 
+  /** @deprecated */
+  sessionStorage: "unstorage/drivers/session-storage",
+  /** @deprecated */
+  localStorage: "unstorage/drivers/localstorage",
   /** @deprecated */
   "cloudflare-kv-binding": "unstorage/drivers/cloudflare-kv-binding",
   /** @deprecated */

@@ -29,6 +29,6 @@ const storage = createStorage({
 - `dbName`: Custom name for database. Defaults to `keyval-store`
 - `storeName`: Custom name for store. Defaults to `keyval`
 
-::alert{type="info"}
+::callout{type="info"}
 IndexedDB is a browser database. avoid using this preset on server environments.
 ::

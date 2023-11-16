@@ -1,6 +1,6 @@
 # CloudFlare R2 (binding)
 
-::alert
+::callout
 This is an experimental driver! This driver only works in a cloudflare worker environment and cannot be used in other runtime environments such as Node.js (r2-http driver is coming soon)
 ::
 

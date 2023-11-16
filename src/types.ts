@@ -2,7 +2,7 @@ export type StorageValue = null | string | number | boolean | object;
 export type WatchEvent = "update" | "remove";
 export type WatchCallback = (
   event: WatchEvent,
-  resource: string | Record<"key" | string, any>
+  resource: string | (Record<string, any> & { key: string })
 ) => any;
 
 type MaybePromise<T> = T | Promise<T>;

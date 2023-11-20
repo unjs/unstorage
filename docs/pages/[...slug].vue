@@ -48,7 +48,7 @@ const communityLinks = computed(() => [
 
 <template>
   <UPage>
-    <UPageHeader :title="page.title" :description="page.description" :links="page.links" :headline="headline" />
+    <UPageHeader :title="page.title" :description="page.description" :headline="headline" />
 
     <UPageBody prose class="pb-0">
       <ContentRenderer v-if="page.body" :value="page" />

@@ -29,9 +29,10 @@ export default defineNuxtConfig({
 
   nitro: {
     prerender: {
-      routes: ['/api/search.json'],
-      autoSubfolderIndex: false,
-    },
+      routes: [
+        '/api/search.json'
+      ]
+    }
   },
 
   routeRules: {

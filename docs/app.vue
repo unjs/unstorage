@@ -52,7 +52,7 @@ provide('navigation', navigation)
     <NuxtPage />
   </NuxtLayout>
 
-  <UFooter :links="links">
+  <UFooter>
     <template #right>
       <UColorModeButton v-if="!$colorMode.forced" />
       <UButton

@@ -31,7 +31,7 @@ provide('navigation', navigation)
     <template #right>
       <UColorModeButton v-if="!$colorMode.forced" />
       <UButton
-        aria-label="Nuxt on X" icon="i-simple-icons-x"
+        aria-label="Unjs on X" icon="i-simple-icons-x"
         to="https://twitter.com/unjsio"
         target="_blank" color="gray" variant="ghost"
       />
@@ -61,7 +61,7 @@ provide('navigation', navigation)
         target="_blank" color="gray" variant="ghost"
       />
       <UButton
-        aria-label="Nuxt on X" icon="i-simple-icons-x"
+        aria-label="Unjs on X" icon="i-simple-icons-x"
         to="https://twitter.com/unjsio"
         target="_blank" color="gray" variant="ghost"
       />

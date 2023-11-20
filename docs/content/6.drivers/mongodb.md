@@ -1,6 +1,9 @@
-# MongoDB
+---
+title: MongoDB
+description: Store data in MongoDB using Node.js mongodb package.
+---
 
-Store data in [MongoDB](https://www.npmjs.com/package/mongodb) using [Node.js mongodb package](https://www.npmjs.com/package/mongodb)
+Learn more about [MongoDB](https://www.npmjs.com/package/mongodb) and [Node.js mongodb package](https://www.npmjs.com/package/mongodb)
 
 This driver stores KV information in a MongoDB collection with a separate document for each key value pair.
 

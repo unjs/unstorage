@@ -1,10 +1,9 @@
 ---
-navigation.title: LRU Cache
+title: LRU Cache
+description: Keeps cached data in memory using LRU Cache.
 ---
 
-# LRU Cache
-
-Keeps cached data in memory using [LRU Cache](https://www.npmjs.com/package/lru-cache).
+Learn more about [LRU Cache](https://www.npmjs.com/package/lru-cache).
 
 See [`lru-cache`](https://www.npmjs.com/package/lru-cache) for supported options.
 

@@ -1,6 +1,9 @@
-# Azure Cosmos DB
+---
+title: Azure Cosmos DB
+description: Store data in Azure Cosmos DB NoSQL API documents.
+---
 
-Store data in [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/) NoSQL API documents.
+Learn more about [Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/).
 
 This driver stores KV information in a NoSQL API Cosmos DB collection as documents. It uses the `id` field as the key and adds `value` and `modified` fields to the document.
 

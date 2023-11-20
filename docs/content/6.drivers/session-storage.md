@@ -1,10 +1,9 @@
 ---
-navigation.title: Session Storage
+title: Session Storage
+description: Store data in sessionStorage.
 ---
 
-# Session Storage
-
-Store data in [sessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
+Learn more about [sessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
 
 ```js
 import { createStorage } from "unstorage";

@@ -1,6 +1,7 @@
-# Azure Table Storage
-
-⚠️ This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
+---
+title: Azure Table Storage
+description: ⚠️ This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
+---
 
 Store data in a Azure table storage [data-tables](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables).
 

@@ -1,10 +1,9 @@
 ---
-navigation.title: IndexedDB
+title: IndexedDB
+description: Store data in IndexedDB using idb-keyval.
 ---
 
-# IndexedDB
-
-Store data in [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) using [idb-keyval](https://github.com/jakearchibald/idb-keyval).
+Learn more about [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) and [idb-keyval](https://github.com/jakearchibald/idb-keyval).
 
 To use it, you will need to install `idb-keyval` in your project:
 
@@ -29,6 +28,6 @@ const storage = createStorage({
 - `dbName`: Custom name for database. Defaults to `keyval-store`
 - `storeName`: Custom name for store. Defaults to `keyval`
 
-::callout{type="info"}
+::callout{ color="blue" icon="i-ph-info-duotone" }
 IndexedDB is a browser database. avoid using this preset on server environments.
 ::

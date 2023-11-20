@@ -1,10 +1,9 @@
 ---
-navigation.title: Node.js Filesystem
+title: Node.js Filesystem
+description: Maps data to the real filesystem using directory structure for nested keys. Supports watching using chokidar.
 ---
 
-# Node.js Filesystem
-
-Maps data to the real filesystem using directory structure for nested keys. Supports watching using [chokidar](https://github.com/paulmillr/chokidar).
+Learn more about [chokidar](https://github.com/paulmillr/chokidar).
 
 This driver implements meta for each key including `mtime` (last modified time), `atime` (last access time), and `size` (file size) using `fs.stat`.
 

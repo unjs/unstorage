@@ -1,6 +1,9 @@
-# Azure Key Vault
+---
+title: Azure Key Vault
+description: Store data in a Azure Key Vault secrets.
+---
 
-Store data in a Azure Key Vault [secrets](https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets).
+Learn more about [secrets](https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets).
 
 This driver stores KV information in Azure Key Vault secrets by using the key as secret id and the value as secret content.
 Please be aware that key vault secrets don't have the fastest access time and are not designed for high throughput. You also have to disable purge protection for your key vault to be able to delete secrets. This implementation deletes and purges a secret when it is deleted to avoid conflicts with soft delete.

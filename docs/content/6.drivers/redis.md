@@ -1,6 +1,9 @@
-# Redis
+---
+title: Redis
+description: Store data in a Redis storage using ioredis.
+---
 
-Store data in a [Redis](https://redis.com/) storage using [ioredis](https://github.com/luin/ioredis).
+Learn more about [Redis](https://redis.com/) and [ioredis](https://github.com/luin/ioredis).
 
 Usage with single Redis instance:
 

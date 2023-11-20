@@ -1,6 +1,9 @@
-# PlanetScale
+---
+title: PlanetScale
+description: Stores data in PlanetScale.
+---
 
-Stores data in [PlanetScale](https://planetscale.com/)
+Learn more about [PlanetScale](https://planetscale.com/).
 
 This driver stores KV information in a Planetscale DB with columns of `id`, `value`, `created_at` and `updated_at`.
 

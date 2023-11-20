@@ -1,6 +1,9 @@
-# CloudFlare R2 (binding)
+---
+title: CloudFlare R2 (binding)
+description: R2 gives you the freedom to create the multi-cloud architectures you desire with an S3-compatible object storage.
+---
 
-::callout
+::callout{ color="blue" icon="i-ph-info-duotone" }
 This is an experimental driver! This driver only works in a cloudflare worker environment and cannot be used in other runtime environments such as Node.js (r2-http driver is coming soon)
 ::
 

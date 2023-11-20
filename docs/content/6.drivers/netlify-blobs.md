@@ -1,8 +1,11 @@
-# Netlify Blobs
+---
+title: Netlify Blobs
+description: Store data in a Netlify Blobs store. This is supported in both edge and Node.js runtimes, as well at during builds.
+---
 
-Store data in a [Netlify Blobs](https://docs.netlify.com/blobs/overview/) store. This is supported in both edge and Node.js runtimes, as well at during builds.
+Learn more about [Netlify Blobs](https://docs.netlify.com/blobs/overview/).
 
-::callout{type="warning"}
+::callout{ color="red" icon="i-ph-warning-duotone" }
 Netlify Blobs are in beta.
 ::
 

@@ -1,6 +1,9 @@
-# Cloudflare KV (http)
+---
+title: Cloudflare KV (http)
+description: Store data in Cloudflare KV using the Cloudflare API v4.
+---
 
-Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/learning/how-kv-works/) using the [Cloudflare API v4](https://api.cloudflare.com/).
+Learn more about [Cloudflare KV](https://developers.cloudflare.com/workers/learning/how-kv-works/) and [Cloudflare API v4](https://api.cloudflare.com/).
 
 You need to create a KV namespace. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
 

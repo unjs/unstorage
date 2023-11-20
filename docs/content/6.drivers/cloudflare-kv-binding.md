@@ -1,6 +1,9 @@
-# CloudFlare KV (binding)
+---
+title: CloudFlare KV (binding)
+description: Store data in Cloudflare KV and access from worker bindings.
+---
 
-Store data in [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv) and access from worker bindings.
+Learn more about [Cloudflare KV](https://developers.cloudflare.com/workers/runtime-apis/kv).
 
 **Note:** This driver only works in a cloudflare worker environment, use [`cloudflare-kv-http`](/drivers/cloudflare-kv-http) for other environments.
 

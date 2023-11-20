@@ -1,10 +1,7 @@
 ---
-navigation.title: GitHub
+title: GitHub
+description: Map files from a remote github repository (readonly).
 ---
-
-# GitHub
-
-Map files from a remote github repository (readonly).
 
 This driver fetches all possible keys once and keep it in cache for 10 minutes. Due to GitHub rate limit, it is highly recommanded to provide a token. It only applies to fetching keys.
 

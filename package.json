@@ -83,7 +83,7 @@
     "idb-keyval": "^6.2.1",
     "ioredis-mock": "^8.9.0",
     "jiti": "^1.21.0",
-    "jsdom": "^22.1.0",
+    "jsdom": "^23.0.0",
     "monaco-editor": "^0.44.0",
     "mongodb": "^6.3.0",
     "mongodb-memory-server": "^9.1.1",

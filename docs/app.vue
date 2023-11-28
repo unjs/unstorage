@@ -56,10 +56,12 @@ provide('navigation', navigation)
     <template #right>
       <UColorModeButton v-if="!$colorMode.forced" />
       <UButton
-        aria-label="Unjs Website" icon="i-simple-icons-javascript"
+        aria-label="Unjs Website"
         to="https://unjs.io/"
         target="_blank" color="gray" variant="ghost"
-      />
+      >
+        <IconUnJS class="w-5 h-5" />
+      </UButton>
       <UButton
         aria-label="Unjs on X" icon="i-simple-icons-x"
         to="https://twitter.com/unjsio"

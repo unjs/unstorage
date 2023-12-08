@@ -3,9 +3,6 @@ export default defineAppConfig({
     primary: 'yellow',
     gray: 'neutral',
   },
-  seo: {
-    siteName: "Unjs/Unstorage Documentation",
-  },
   header: {
     logo: {
       alt: "",

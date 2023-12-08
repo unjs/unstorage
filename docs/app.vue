@@ -30,6 +30,6 @@ provide('navigation', navigation)
   <Footer />
 
   <ClientOnly>
-    <LazyUDocsSearch :files="files" :navigation="navigation" :links="links" />
+    <LazyUDocsSearch :files="files" :navigation="navigation" />
   </ClientOnly>
 </template>

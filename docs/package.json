@@ -9,15 +9,15 @@
     "preview": "nuxi preview"
   },
   "devDependencies": {
-    "@iconify-json/ph": "^1.1.6",
-    "@iconify-json/simple-icons": "^1.1.77",
-    "nuxt": "npm:nuxt-nightly@latest",
-    "nuxt-og-image": "^2.2.4",
+    "@iconify-json/ph": "^1.1.8",
+    "@iconify-json/simple-icons": "^1.1.82",
     "@nuxt/content": "^2.9.0",
     "@nuxt/image": "1.0.0",
     "@nuxt/ui-pro": "^0.4.2",
     "@nuxtjs/fontaine": "^0.4.1",
-    "@nuxtjs/google-fonts": "^3.0.2",
-    "@nuxtjs/plausible": "^0.2.3"
+    "@nuxtjs/google-fonts": "^3.1.0",
+    "@nuxtjs/plausible": "^0.2.4",
+    "nuxt": "npm:nuxt-nightly@latest",
+    "nuxt-og-image": "^2.2.4"
   }
 }

@@ -12,6 +12,7 @@ export const builtinDrivers = {
   cloudflareKVBinding: "unstorage/drivers/cloudflare-kv-binding",
   cloudflareKVHTTP: "unstorage/drivers/cloudflare-kv-http",
   cloudflareR2Binding: "unstorage/drivers/cloudflare-r2-binding",
+  dragonfly: "unstorage/drivers/redis",
   fs: "unstorage/drivers/fs",
   fsLite: "unstorage/drivers/fs-lite",
   github: "unstorage/drivers/github",

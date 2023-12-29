@@ -54,7 +54,8 @@
     "mri": "^1.2.0",
     "node-fetch-native": "^1.4.1",
     "ofetch": "^1.3.3",
-    "ufo": "^1.3.2"
+    "ufo": "^1.3.2",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@azure/app-configuration": "^1.5.0",
@@ -71,6 +72,7 @@
     "@types/jsdom": "^21.1.6",
     "@types/mri": "^1.1.5",
     "@types/node": "^20.10.5",
+    "@types/xml2js": "^0.4.14",
     "@upstash/redis": "^1.25.2",
     "@vercel/kv": "^0.2.4",
     "@vitejs/plugin-vue": "^4.5.2",

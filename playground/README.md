@@ -76,4 +76,4 @@
 
 > Removes all stored key/values. If a base is provided, only mounts matching base will be cleared.
 
-✔️ Supported via [DeleteObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html).
+💬 Supported via [DeleteObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html).

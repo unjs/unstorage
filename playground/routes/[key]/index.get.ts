@@ -3,7 +3,13 @@
 export default eventHandler((event) => {
   const key = event.context.params['key']
 
-  // Content-Type header should be set
+  const opts = {
+    headers: {}
+  }
 
-  return useStorage('s3').getItemRaw(key)
+  return useStorage('s3').getItemRaw(key, opts)
+    .then((res) => {
+      setResponseHeaders(event, opts.headers)
+      return res
+    })
 })

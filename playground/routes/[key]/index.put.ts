@@ -5,5 +5,12 @@ export default eventHandler(async (event) => {
 
   const body = await readRawBody(event, false)
 
-  return useStorage('s3').setItemRaw(key, body)
+  const opts = {
+    headers: {},
+    meta: {
+      //  'user-id': '123'
+    }
+  }
+
+  return useStorage('s3').setItemRaw(key, body, opts)
 })

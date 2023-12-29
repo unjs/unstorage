@@ -23,7 +23,6 @@ interface GetItemOptions {
 
 interface SetItemOptions {
     headers?: HeadersInit;
-    // https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html#UserMetadata
     meta?: Record<string, string>;
 }
 
@@ -40,10 +39,13 @@ export default defineDriver((options: S3DriverOptions) => {
         service: DRIVER_NAME,
     });
 
+    const normalizedKey = (key: string) => key.replace(/:/g, "/")
+
     const awsUrlWithoutKey = () => `${options.endpoint}/${options.bucket}`;
 
-    const awsUrlWithKey = (key: string) => `${awsUrlWithoutKey()}/${normalizeKey(key)}`;
+    const awsUrlWithKey = (key: string) => `${awsUrlWithoutKey()}/${normalizedKey(key)}`;
 
+    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html
     async function _getMeta(key: string) {
         const request = await awsClient.sign(awsUrlWithKey(key), {
             method: "HEAD",
@@ -62,6 +64,7 @@ export default defineDriver((options: S3DriverOptions) => {
             })
     }
 
+    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
     async function _getKeys(base?: string) {
         const request = await awsClient.sign(awsUrlWithoutKey(), {
             method: "GET",
@@ -70,7 +73,7 @@ export default defineDriver((options: S3DriverOptions) => {
         return $fetch(request,
             {
                 params: {
-                    prefix: base && normalizeBase(base)
+                    prefix: base && normalizedKey(base)
                 }
             })
             .then((res) => {
@@ -112,6 +115,7 @@ export default defineDriver((options: S3DriverOptions) => {
             notImplemented("watch");
         },
 
+        // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
         async getItemRaw(key, opts: GetItemOptions) {
             const request = await awsClient.sign(awsUrlWithKey(key), {
                 method: "GET",
@@ -125,6 +129,7 @@ export default defineDriver((options: S3DriverOptions) => {
                 .catch(() => null)
         },
 
+        // https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
         async setItemRaw(key, value, opts: SetItemOptions) {
             const metaHeaders: HeadersInit = {};
 
@@ -146,6 +151,7 @@ export default defineDriver((options: S3DriverOptions) => {
             return $fetch(request);
         },
 
+        // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
         async removeItem(key, opts) {
             const request = await awsClient.sign(awsUrlWithKey(key), {
                 method: "DELETE",
@@ -165,15 +171,6 @@ export default defineDriver((options: S3DriverOptions) => {
         getKeys: _getKeys,
     };
 });
-
-function normalizeKey(key: string) {
-    // https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html
-    return key.replace(/:/g, "/");
-}
-
-function normalizeBase(base: string) {
-    return base.replace(/:/g, "/");
-}
 
 function notImplemented(api: string) {
     console.warn(`[${DRIVER_NAME}] ${api} is not implemented`);

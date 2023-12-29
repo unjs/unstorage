@@ -113,7 +113,20 @@ export default defineDriver((options: S3DriverOptions) => {
                 }
             )
 
-            return $fetch(request)
+            return $fetch(request, {
+                onResponse({ response }) {
+                    const metaHeaders: HeadersInit = {}
+
+                    for (const item of response.headers.entries()) {
+                        const match = /x-amz-meta-(.*)/.exec(item[0])
+                        if (match) {
+                            metaHeaders[match[1]] = item[1]
+                        }
+                    }
+
+                    response._data = metaHeaders
+                }
+            })
         },
 
         async getKeys(base, opts) {

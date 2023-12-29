@@ -1,8 +1,14 @@
 import { $fetch } from 'ofetch';
 import { defineDriver, createRequiredError } from './utils'
 import { AwsClient } from 'aws4fetch'
+import crypto from 'crypto'
 
-export interface S3Options {
+if (!globalThis.crypto) {
+    // @ts-ignore
+    globalThis.crypto = crypto
+}
+
+export interface S3DriverOptions {
     accessKeyId: string;
     secretAccessKey: string;
     endpoint: string;
@@ -10,9 +16,19 @@ export interface S3Options {
     bucket: string;
 }
 
+interface GetItemOptions {
+    headers?: HeadersInit
+}
+
+interface SetItemOptions {
+    headers?: HeadersInit,
+    // https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html#UserMetadata
+    meta?: Record<string, string>
+}
+
 const DRIVER_NAME = "s3";
 
-export default defineDriver((options: S3Options) => {
+export default defineDriver((options: S3DriverOptions) => {
     checkOptions(options)
 
     const awsClient = new AwsClient({
@@ -36,23 +52,42 @@ export default defineDriver((options: S3Options) => {
         dispose() { notImplemented('dispose') },
         watch(callback) { notImplemented('watch') },
 
-        async getItemRaw(key, opts) {
+        async getItemRaw(key, opts: GetItemOptions) {
             const request = await awsClient.sign(
                 awsUrlWithKey(key),
                 {
-                    method: 'GET',
+                    method: 'GET'
                 }
             )
 
-            return $fetch(request)
+            return $fetch(request,
+                {
+                    onResponse({ response }) {
+                        opts.headers = response.headers
+                    }
+                }
+            )
         },
 
-        async setItemRaw(key, value, opts) {
+        async setItemRaw(key, value, opts: SetItemOptions) {
+            const metaHeaders: HeadersInit = {}
+
+            if (typeof opts.meta === 'object') {
+                Object.keys(opts.meta).forEach((key) => {
+                    metaHeaders[`x-amz-meta-${key}`] = opts.meta![key]
+                })
+            }
+
+
             const request = await awsClient.sign(
                 awsUrlWithKey(key),
                 {
                     method: 'PUT',
-                    body: value
+                    body: value,
+                    headers: {
+                        ...opts.headers,
+                        ...metaHeaders
+                    }
                 }
             )
 
@@ -119,7 +154,7 @@ function notImplemented(api: string) {
     console.warn(`[${DRIVER_NAME}] ${api} is not implemented`)
 }
 
-function checkOptions(options: S3Options) {
+function checkOptions(options: S3DriverOptions) {
     if (!options.accessKeyId) {
         throw createRequiredError(DRIVER_NAME, "accessKeyId");
     }

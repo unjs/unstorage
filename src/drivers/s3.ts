@@ -29,6 +29,7 @@ interface SetItemOptions {
 
 const DRIVER_NAME = "s3";
 
+//@ts-ignore
 export default defineDriver((options: S3DriverOptions) => {
     checkOptions(options);
 
@@ -39,9 +40,50 @@ export default defineDriver((options: S3DriverOptions) => {
         service: DRIVER_NAME,
     });
 
-    const awsUrlWithKey = (key: string) =>
-        `${options.endpoint}/${options.bucket}/${normalizeKey(key)}`;
     const awsUrlWithoutKey = () => `${options.endpoint}/${options.bucket}`;
+
+    const awsUrlWithKey = (key: string) => `${awsUrlWithoutKey()}/${normalizeKey(key)}`;
+
+    async function _getMeta(key: string) {
+        const request = await awsClient.sign(awsUrlWithKey(key), {
+            method: "HEAD",
+        });
+
+        return $fetch.raw(request)
+            .then((res) => {
+                const metaHeaders: HeadersInit = {};
+                for (const item of res.headers.entries()) {
+                    const match = /x-amz-meta-(.*)/.exec(item[0]);
+                    if (match) {
+                        metaHeaders[match[1]] = item[1];
+                    }
+                }
+                return metaHeaders
+            })
+    }
+
+    async function _getKeys(base: string) {
+        const request = await awsClient.sign(awsUrlWithoutKey(), {
+            method: "GET",
+        });
+
+        return $fetch(request,
+            {
+                params: {
+                    prefix: base && normalizeBase(base)
+                }
+            })
+            .then((res) => {
+                parseString(res, (error, result) => {
+                    if (error === null) {
+                        const contents = result['ListBucketResult']['Contents'] as Array<any>
+                        return contents.map(item => item['Key'][0])
+                    }
+                    return []
+                })
+            }).catch(() => [])
+    };
+
 
     return {
         name: DRIVER_NAME,
@@ -71,11 +113,12 @@ export default defineDriver((options: S3DriverOptions) => {
                 method: "GET",
             });
 
-            return $fetch(request, {
-                onResponse({ response }) {
-                    opts.headers = response.ok ? response.headers : {};
-                },
-            });
+            return $fetch.raw(request)
+                .then((res) => {
+                    opts.headers = res.headers;
+                    return res._data
+                })
+                .catch(() => null)
         },
 
         async setItemRaw(key, value, opts: SetItemOptions) {
@@ -107,51 +150,9 @@ export default defineDriver((options: S3DriverOptions) => {
             return $fetch(request);
         },
 
-        async getMeta(key, opts) {
-            const request = await awsClient.sign(awsUrlWithKey(key), {
-                method: "HEAD",
-            });
+        getMeta: (key) => _getMeta(key).catch(() => ({})),
 
-            return $fetch(request, {
-                onResponse({ response }) {
-                    const metaHeaders: HeadersInit = {};
-                    if (response.ok) {
-                        for (const item of response.headers.entries()) {
-                            const match = /x-amz-meta-(.*)/.exec(item[0]);
-                            if (match) {
-                                metaHeaders[match[1]] = item[1];
-                            }
-                        }
-
-                    }
-                    response._data = metaHeaders;
-                },
-            });
-        },
-
-        async getKeys(base, opts) {
-            const request = await awsClient.sign(awsUrlWithoutKey(), {
-                method: "GET",
-            });
-
-            return $fetch(request, {
-                params: {
-                    prefix: base && normalizeBase(base)
-                },
-                onResponse({ response }) {
-                    let keys: Array<string> = []
-                    if (response.ok) {
-                        parseString(response._data, (error, result) => {
-                            if (error === null) {
-                                const contents = result['ListBucketResult']['Contents'] as Array<any>
-                                keys = contents.map(item => item['Key'][0])
-                            }
-                        })
-                    }
-                    response._data = keys
-                },
-            });
-        },
+        getKeys: _getKeys,
 
         async clear(base, opts) {
             const request = await awsClient.sign(awsUrlWithoutKey(), {
@@ -162,8 +163,9 @@ export default defineDriver((options: S3DriverOptions) => {
         },
 
         async hasItem(key, opts) {
-            const meta = await this.getMeta!(key, {});
-            return meta ? Object.keys(meta).length > 0 : false;
+            return _getMeta(key)
+                .then(() => true)
+                .catch(() => false);
         },
     };
 });

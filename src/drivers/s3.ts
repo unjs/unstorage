@@ -2,7 +2,7 @@ import { $fetch } from "ofetch";
 import { defineDriver, createRequiredError } from "./utils";
 import { AwsClient } from "aws4fetch";
 import crypto from "crypto";
-import { parseString } from 'xml2js'
+import xml2js from 'xml2js'
 
 if (!globalThis.crypto) {
     // @ts-ignore
@@ -62,7 +62,7 @@ export default defineDriver((options: S3DriverOptions) => {
             })
     }
 
-    async function _getKeys(base: string) {
+    async function _getKeys(base?: string) {
         const request = await awsClient.sign(awsUrlWithoutKey(), {
             method: "GET",
         });
@@ -74,13 +74,14 @@ export default defineDriver((options: S3DriverOptions) => {
                 }
             })
             .then((res) => {
-                parseString(res, (error, result) => {
+                let keys: Array<string> = []
+                xml2js.parseString(res, (error, result) => {
                     if (error === null) {
                         const contents = result['ListBucketResult']['Contents'] as Array<any>
-                        return contents.map(item => item['Key'][0])
+                        keys = contents.map(item => item['Key'][0])
                     }
-                    return []
                 })
+                return keys
             }).catch(() => [])
     };
 
@@ -100,6 +101,9 @@ export default defineDriver((options: S3DriverOptions) => {
         },
         setItems(items, commonOptions) {
             notImplemented("setItems");
+        },
+        clear(base, opts) {
+            notImplemented("clear");
         },
         dispose() {
             notImplemented("dispose");
@@ -150,23 +154,15 @@ export default defineDriver((options: S3DriverOptions) => {
             return $fetch(request);
         },
 
-        getMeta: (key) => _getMeta(key).catch(() => ({})),
-
-        getKeys: _getKeys,
-
-        async clear(base, opts) {
-            const request = await awsClient.sign(awsUrlWithoutKey(), {
-                method: "DELETE",
-            });
-
-            return $fetch(request);
-        },
-
         async hasItem(key, opts) {
             return _getMeta(key)
                 .then(() => true)
                 .catch(() => false);
         },
+
+        getMeta: (key) => _getMeta(key).catch(() => ({})),
+
+        getKeys: _getKeys,
     };
 });
 

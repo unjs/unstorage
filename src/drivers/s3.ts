@@ -1,4 +1,6 @@
+import { $fetch } from 'ofetch';
 import { defineDriver, createRequiredError } from './utils'
+import { AwsClient } from 'aws4fetch'
 
 export interface S3Options {
     accessKeyId: string;
@@ -13,6 +15,16 @@ const DRIVER_NAME = "s3";
 export default defineDriver((options: S3Options) => {
     checkOptions(options)
 
+    const awsClient = new AwsClient({
+        accessKeyId: options.accessKeyId,
+        secretAccessKey: options.secretAccessKey,
+        region: options.region,
+        service: DRIVER_NAME
+    })
+
+    const awsUrlWithKey = (key: string) => `${options.endpoint}/${options.bucket}/${normalizeKey(key)}`
+    const awsUrlWithoutKey = () => `${options.endpoint}/${options.bucket}`
+
     return {
         name: DRIVER_NAME,
         options,
@@ -24,16 +36,84 @@ export default defineDriver((options: S3Options) => {
         dispose() { notImplemented('dispose') },
         watch(callback) { notImplemented('watch') },
 
-        getItemRaw(key, opts) { },
-        setItemRaw(key, value, opts) { },
-        hasItem(key, opts) { },
-        removeItem(key, opts) { },
-        getKeys(base, opts) { },
-        clear(base, opts) { },
-        getMeta(key, opts) { },
+        async getItemRaw(key, opts) {
+            const request = await awsClient.sign(
+                awsUrlWithKey(key),
+                {
+                    method: 'GET',
+                }
+            )
+
+            return $fetch(request)
+        },
+
+        async setItemRaw(key, value, opts) {
+            const request = await awsClient.sign(
+                awsUrlWithKey(key),
+                {
+                    method: 'PUT',
+                    body: value
+                }
+            )
+
+            return $fetch(request)
+        },
+
+        async removeItem(key, opts) {
+            const request = await awsClient.sign(
+                awsUrlWithKey(key),
+                {
+                    method: 'DELETE',
+                }
+            )
+
+            return $fetch(request)
+        },
+
+        async getMeta(key, opts) {
+            const request = await awsClient.sign(
+                awsUrlWithKey(key),
+                {
+                    method: 'HEAD',
+                }
+            )
+
+            return $fetch(request)
+        },
+
+        async getKeys(base, opts) {
+            const request = await awsClient.sign(
+                awsUrlWithoutKey(),
+                {
+                    method: 'GET',
+                }
+            )
+
+            return $fetch(request)
+        },
+
+        async clear(base, opts) {
+            const request = await awsClient.sign(
+                awsUrlWithoutKey(),
+                {
+                    method: 'DELETE',
+                }
+            )
+
+            return $fetch(request)
+        },
+
+        async hasItem(key, opts) {
+            const meta = await this.getMeta!(key, {})
+            return meta ? (Object.keys(meta).length > 0) : false
+        },
     }
 })
 
+function normalizeKey(key: string) {
+    // https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html
+    return key.replace(/:/g, '/')
+}
 
 function notImplemented(api: string) {
     console.warn(`[${DRIVER_NAME}] ${api} is not implemented`)

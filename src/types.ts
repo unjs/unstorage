@@ -26,9 +26,9 @@ export interface Driver {
   ) => MaybePromise<StorageValue>;
   /** @experimental */
   getItems?: (
-    items: { key: string; options?: TransactionOptions }[],
+    items: { key: string; options?: TransactionOptions; }[],
     commonOptions?: TransactionOptions
-  ) => MaybePromise<{ key: string; value: StorageValue }[]>;
+  ) => MaybePromise<{ key: string; value: StorageValue; }[]>;
   /** @experimental */
   getItemRaw?: (key: string, opts: TransactionOptions) => MaybePromise<unknown>;
   setItem?: (
@@ -38,7 +38,7 @@ export interface Driver {
   ) => MaybePromise<void>;
   /** @experimental */
   setItems?: (
-    items: { key: string; value: string; options?: TransactionOptions }[],
+    items: { key: string; value: string; options?: TransactionOptions; }[],
     commonOptions?: TransactionOptions
   ) => MaybePromise<void>;
   /** @experimental */
@@ -67,9 +67,9 @@ export interface Storage<T extends StorageValue = StorageValue> {
   ) => Promise<U | null>;
   /** @experimental */
   getItems: (
-    items: (string | { key: string; options?: TransactionOptions })[],
+    items: (string | { key: string; options?: TransactionOptions; })[],
     commonOptions?: TransactionOptions
-  ) => Promise<{ key: string; value: StorageValue }[]>;
+  ) => Promise<{ key: string; value: StorageValue; }[]>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   getItemRaw: <T = any>(
     key: string,
@@ -81,8 +81,8 @@ export interface Storage<T extends StorageValue = StorageValue> {
     opts?: TransactionOptions
   ) => Promise<void>;
   /** @experimental */
-  setItems: (
-    items: { key: string; value: string; options?: TransactionOptions }[],
+  setItems: <U extends Partial<StorageValue> = StorageValue>(
+    items: { key: string; value: U; options?: TransactionOptions; }[],
     commonOptions?: TransactionOptions
   ) => Promise<void>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
@@ -94,14 +94,14 @@ export interface Storage<T extends StorageValue = StorageValue> {
   removeItem: (
     key: string,
     opts?:
-      | (TransactionOptions & { removeMeta?: boolean })
+      | (TransactionOptions & { removeMeta?: boolean; })
       | boolean /* legacy: removeMeta */
   ) => Promise<void>;
   // Meta
   getMeta: (
     key: string,
     opts?:
-      | (TransactionOptions & { nativeOnly?: boolean })
+      | (TransactionOptions & { nativeOnly?: boolean; })
       | boolean /* legacy: nativeOnly */
   ) => MaybePromise<StorageMeta>;
   setMeta: (
@@ -120,9 +120,9 @@ export interface Storage<T extends StorageValue = StorageValue> {
   // Mount
   mount: (base: string, driver: Driver) => Storage;
   unmount: (base: string, dispose?: boolean) => Promise<void>;
-  getMount: (key?: string) => { base: string; driver: Driver };
+  getMount: (key?: string) => { base: string; driver: Driver; };
   getMounts: (
     base?: string,
-    options?: { parents?: boolean }
-  ) => { base: string; driver: Driver }[];
+    options?: { parents?: boolean; }
+  ) => { base: string; driver: Driver; }[];
 }

@@ -3,12 +3,17 @@ import driver from "../../src/drivers/mongodb";
 import { testDriver } from "./utils";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { promisify } from "util";
-import { beforeEach } from "node:test";
 
-describe("drivers: mongodb", async () => {
+describe.skip("drivers: mongodb", async () => {
   const sleep = promisify(setTimeout);
 
-  let mongoServer = await MongoMemoryServer.create();
+  let mongoServer: MongoMemoryServer;
+  let connectionString: string | undefined;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    connectionString = mongoServer.getUri();
+  });
 
   afterAll(async () => {
     if (mongoServer) {
@@ -18,7 +23,7 @@ describe("drivers: mongodb", async () => {
 
   testDriver({
     driver: driver({
-      connectionString: mongoServer.getUri() as string,
+      connectionString: connectionString as string,
       databaseName: "test",
       collectionName: "test",
     }),

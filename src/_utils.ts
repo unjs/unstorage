@@ -1,24 +1,9 @@
 import { subtle, getRandomValues } from "uncrypto";
+import { xchacha20poly1305 } from '@noble/ciphers/chacha';
+import { siv } from '@noble/ciphers/aes';
 
 type Awaited<T> = T extends Promise<infer U> ? Awaited<U> : T;
 type Promisified<T> = Promise<Awaited<T>>;
-
-type EncryptStorageOptions = Omit<EncryptionOptions, 'key' | 'iv'> & {
-  key: string;
-  encryptKeys?: boolean;
-};
-
-type DecryptStorageOptions = Omit<EncryptionOptions, 'key' | 'iv'> & {
-  key: string;
-  decryptKeys?: boolean;
-};
-
-interface EncryptionOptions {
-  key: CryptoKey;
-  algorithm: "AES-GCM" | "AES-CBC" | "RSA-OAEP";
-  iv?: Uint8Array;
-  raw?: boolean;
-}
 
 export function wrapToPromise<T>(value: T) {
   if (!value || typeof (value as any).then !== "function") {
@@ -97,25 +82,17 @@ export function deserializeRaw(value: any) {
 
 // Encryption
 
+// Use only for GCM-SIV, due to nonce-misuse-resistance. We need deterministic keys.
+const predefinedSivNonce = 'ThtnxLK9eCF4OLMg';
+const encryptionPrefix = '$enc:';
+
 export interface StorageValueEnvelope {
-  iv: string;
+  nonce: string;
   encryptedValue: string;
 }
 
-export async function generateAesKey(algorithm: "AES-GCM" | "AES-CBC" = "AES-GCM") {
-  return genBase64FromBytes(
-    new Uint8Array(
-      await subtle.exportKey(
-        'raw', await subtle.generateKey(
-          {
-            name: algorithm,
-            length: 256,
-          },
-          true,
-          ['encrypt', 'decrypt'])
-      )
-    )
-  );
+export function generateEncryptionKey() {
+  return genBase64FromBytes(getRandomValues(new Uint8Array(32)));
 }
 
 export async function generateRsaKeyPair() {
@@ -134,145 +111,40 @@ export async function generateRsaKeyPair() {
   };
 }
 
-export async function encryptStorageValue(storageValue: any, options: EncryptStorageOptions) {
-  const { key, algorithm, raw } = options;
-  const cryptoKey = await subtle.importKey('raw', genBytesFromBase64(key), {
-    name: "AES-GCM",
-    length: 256
-  }, true, ['encrypt', 'decrypt']);
-  const iv = getRandomValues(new Uint8Array(12));
-  const encryptedValue = await encryptSym(storageValue, { key: cryptoKey, algorithm, raw, iv });
+export function encryptStorageValue(storageValue: any, key: string, raw?: boolean): StorageValueEnvelope {
+  const cryptoKey = genBytesFromBase64(key);
+  const nonce = getRandomValues(new Uint8Array(24));
+  const chacha = xchacha20poly1305(cryptoKey, nonce);
+  const encryptedValue = chacha.encrypt(raw ? storageValue : new TextEncoder().encode(storageValue));
   return {
-    encryptedValue,
-    iv: genBase64FromBytes(iv),
+    encryptedValue: genBase64FromBytes(new Uint8Array(encryptedValue)),
+    nonce: genBase64FromBytes(nonce),
   };
 }
 
-export async function decryptStorageValue<T>(storageValue: StorageValueEnvelope, options: DecryptStorageOptions): Promise<T> {
-  const { key, algorithm, raw } = options;
-  const { encryptedValue, iv } = storageValue;
-  const cryptoKey = await subtle.importKey('raw', genBytesFromBase64(key), {
-    name: "AES-GCM",
-    length: 256
-  }, true, ['encrypt', 'decrypt']);
-  const decrypted = await decryptSym(encryptedValue, { key: cryptoKey, algorithm, raw, iv: genBytesFromBase64(iv) });
-  return decrypted as T;
+export function decryptStorageValue<T>(storageValue: StorageValueEnvelope, key: string, raw?: boolean): T {
+  const { encryptedValue, nonce } = storageValue;
+  const cryptoKey = genBytesFromBase64(key);
+  const chacha = xchacha20poly1305(cryptoKey, genBytesFromBase64(nonce));
+  const decryptedValue = chacha.decrypt(genBytesFromBase64(encryptedValue));
+  return raw ? decryptedValue as T : new TextDecoder().decode(decryptedValue) as T;
 }
 
-export async function encryptStorageKey(storageKey: string, options: EncryptStorageOptions) {
-  const { key, algorithm, raw } = options;
-  const cryptoKey = await subtle.importKey('raw', genBytesFromBase64(key), {
-    name: "AES-GCM",
-    length: 256
-  }, true, ['encrypt', 'decrypt']);
-  return await encryptSym(storageKey, { key: cryptoKey, algorithm, raw, iv: new Uint8Array(12) });
+export function encryptStorageKey(storageKey: string, key: string) {
+  const cryptoKey = genBytesFromBase64(key);
+  const gcmSiv = siv(cryptoKey, genBytesFromBase64(predefinedSivNonce));
+  const encryptedKey = gcmSiv.encrypt(new Uint8Array(new TextEncoder().encode(storageKey)));
+  return encryptionPrefix + genBase64FromBytes(encryptedKey);
 }
 
-export async function decryptStorageKey(encryptedKey: string, options: DecryptStorageOptions) {
-  const { key, algorithm } = options;
-  const cryptoKey = await subtle.importKey('raw', genBytesFromBase64(key), {
-    name: "AES-GCM",
-    length: 256
-  }, true, ['encrypt', 'decrypt']);
-  const decrypted = await decryptSym(encryptedKey, { key: cryptoKey, algorithm, iv: new Uint8Array(12) });
-  return decrypted as string;
-}
-
-async function encryptSym(content: any, options: EncryptionOptions) {
-  if (options.raw) {
-    return genBase64FromBytes(new Uint8Array(await subtle.encrypt(
-      {
-        name: options.algorithm,
-        iv: options.iv,
-      },
-      options.key,
-      content
-    )));
-  }
-  const encoded = new TextEncoder().encode(content);
-  const ciphertext = await subtle.encrypt(
-    {
-      name: options.algorithm,
-      iv: options.iv,
-    },
-    options.key,
-    encoded
-  );
-  return genBase64FromBytes(new Uint8Array(ciphertext));
-}
-
-async function encryptAsym(content: any, options: EncryptionOptions) {
-  if (options.raw) {
-    return await subtle.encrypt(
-      {
-        name: options.algorithm,
-      },
-      options.key,
-      content
-    );
-  }
-  const encoded = new TextEncoder().encode(content);
-  const ciphertext = await subtle.encrypt(
-    {
-      name: options.algorithm,
-    },
-    options.key,
-    encoded
-  );
-  return genBase64FromBytes(new Uint8Array(ciphertext));
-}
-
-async function decryptSym(content: any, options: EncryptionOptions) {
-  const decoded = genBytesFromBase64(content);
-  if (options.raw) {
-    return await subtle.decrypt(
-      {
-        name: options.algorithm,
-        iv: options.iv,
-      },
-      options.key,
-      decoded
-    );
-  }
-  const decrypted = await subtle.decrypt(
-    {
-      name: 'AES-GCM',
-      iv: options.iv,
-    },
-    options.key,
-    decoded
-  );
-  return new TextDecoder().decode(decrypted);
-}
-
-async function decryptAsym(content: any, options: EncryptionOptions) {
-  if (options.raw) {
-    return await subtle.decrypt(
-      {
-        name: options.algorithm,
-      },
-      options.key,
-      content
-    );
-  }
-
-  const decoded = genBytesFromBase64(content);
-
-  return await subtle.decrypt(
-    {
-      name: 'AES-GCM',
-      iv: options.iv,
-    },
-    options.key,
-    decoded
-  );
+export function decryptStorageKey(encryptedKey: string, key: string) {
+  const cryptoKey = genBytesFromBase64(key);
+  const gcmSiv = siv(cryptoKey, genBytesFromBase64(predefinedSivNonce));
+  const decryptedKey = gcmSiv.decrypt(genBytesFromBase64(encryptedKey.slice(encryptionPrefix.length)));
+  return new TextDecoder().decode(decryptedKey);
 }
 
 // Base64 utilities - Waiting for https://github.com/unjs/knitwork/pull/83 // TODO: Replace with knitwork imports as soon as PR is merged
-
-interface CodegenOptions {
-  encoding?: 'utf8' | 'ascii' | 'url';
-}
 
 function genBytesFromBase64(input: string) {
   return Uint8Array.from(
@@ -290,40 +162,4 @@ function genBase64FromBytes(input: Uint8Array, urlSafe?: boolean) {
       .replace(/=+$/, '');
   }
   return globalThis.btoa(String.fromCodePoint(...input));
-}
-
-function genBase64FromString(
-  input: string,
-  options: CodegenOptions = {}
-) {
-  if (options.encoding === 'utf8') {
-    return genBase64FromBytes(new TextEncoder().encode(input));
-  }
-  if (options.encoding === 'url') {
-    return genBase64FromBytes(new TextEncoder().encode(input))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
-  }
-  return globalThis.btoa(input);
-}
-
-function genStringFromBase64(
-  input: string,
-  options: CodegenOptions = {}
-) {
-  if (options.encoding === 'utf8') {
-    return new TextDecoder().decode(genBytesFromBase64(input));
-  }
-  if (options.encoding === 'url') {
-    input = input.replace(/-/g, '+').replace(/_/g, '/');
-    const paddingLength = input.length % 4;
-    if (paddingLength === 2) {
-      input += '==';
-    } else if (paddingLength === 3) {
-      input += '=';
-    }
-    return new TextDecoder().decode(genBytesFromBase64(input));
-  }
-  return globalThis.atob(input);
 }

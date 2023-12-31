@@ -43,6 +43,7 @@
     "unstorage": "pnpm jiti src/cli"
   },
   "dependencies": {
+    "@noble/ciphers": "^0.4.1",
     "anymatch": "^3.1.3",
     "chokidar": "^3.5.3",
     "destr": "^2.0.2",

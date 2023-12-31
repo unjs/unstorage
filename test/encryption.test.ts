@@ -10,15 +10,29 @@ import { TestContext, TestOptions } from "./drivers/utils";
 const encryptionKey = 'e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=';
 
 describe("encryption", () => {
-  it.skip("encryptedStorage", async () => {
-    const storage = createStorage();
-    const encStorage = encryptedStorage(storage, encryptionKey);
+  const keyEncryptionEnabled = true;
+  const storage = createStorage();
+  const encStorage = encryptedStorage(storage, encryptionKey, keyEncryptionEnabled);
+
+  it.skip("setItem", async () => {
     await encStorage.setItem("s1:a", "test_data");
+    await encStorage.setItem("s3:a?q=1", "test_data");
+    await encStorage.clear();
+  });
+
+  it.skip("hasItem", async () => {
+    await encStorage.setItem("s1:a", "test_data");
+    expect(await encStorage.hasItem("s1:a")).toBe(true);
+    await encStorage.clear();
+  });
+
+  it.skip("getItem", async () => {
     await encStorage.setItem("s2:a", "test_data");
     await encStorage.setItem("s3:a?q=1", "test_data");
-    expect(await encStorage.hasItem("s1:a")).toBe(true);
-    expect(await encStorage.getItem("s1:a")).toBe("test_data");
+    expect(await encStorage.getItem("s2:a")).toBe("test_data");
+    expect(await encStorage.getItem("s3:a?q=1")).toBe("test_data");
     expect(await encStorage.getItem("s3:a?q=2")).toBe("test_data");
+    await encStorage.clear();
   });
 
   testEncryptionDriver({
@@ -28,7 +42,7 @@ describe("encryption", () => {
 
 export function testEncryptionDriver(opts: TestOptions) {
   const ctx: TestContext = {
-    storage: encryptedStorage(createStorage({ driver: opts.driver }), encryptionKey, false),
+    storage: encryptedStorage(createStorage({ driver: opts.driver }), encryptionKey, true),
     driver: opts.driver,
   };
 
@@ -97,7 +111,7 @@ export function testEncryptionDriver(opts: TestOptions) {
 
   // eslint-disable-next-line require-await
   it("serialize (error for non primitives)", async () => {
-    class Test {}
+    class Test { }
     expect(
       ctx.storage.setItem("/data/badvalue.json", new Test())
     ).rejects.toThrow("[unstorage] Cannot stringify value!");

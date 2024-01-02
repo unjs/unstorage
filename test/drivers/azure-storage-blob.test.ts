@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, beforeAll, afterAll } from "vitest";
 import driver from "../../src/drivers/azure-storage-blob";
 import { testDriver } from "./utils";
 import { BlobServiceClient } from "@azure/storage-blob";

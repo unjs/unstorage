@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { Storage, Driver, createStorage, restoreSnapshot } from "../../src";
+import { Storage, Driver, createStorage, restoreSnapshot, encryptedStorage } from "../../src";
 
 export interface TestContext {
   storage: Storage;
@@ -8,12 +8,15 @@ export interface TestContext {
 
 export interface TestOptions {
   driver: Driver;
+  contentEncryption?: boolean;
+  keyEncryption?: boolean;
   additionalTests?: (ctx: TestContext) => void;
 }
 
 export function testDriver(opts: TestOptions) {
+  const encryptionKey = 'e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=';
   const ctx: TestContext = {
-    storage: createStorage({ driver: opts.driver }),
+    storage: opts.contentEncryption ? encryptedStorage(createStorage({ driver: opts.driver }), encryptionKey, opts.keyEncryption) : createStorage({ driver: opts.driver }),
     driver: opts.driver,
   };
 

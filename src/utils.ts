@@ -51,7 +51,7 @@ export function encryptedStorage<T extends StorageValue>(
 ): Storage<T> {
   const encStorage: Storage = { ...storage };
 
-  encStorage.hasItem = (key = "", ...args) =>
+  encStorage.hasItem = (key, ...args) =>
     storage.hasItem(encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...args);
 
   encStorage.getItem = async (key, ...args) => {
@@ -97,7 +97,7 @@ export function encryptedStorage<T extends StorageValue>(
       key = encryptStorageKey(normalizeKey(key), encryptionKey);
     }
     const encryptedValue = encryptStorageValue(stringify(value), encryptionKey);
-    storage.setItem(key, encryptedValue as T, ...args);
+    return storage.setItem(key, encryptedValue as T, ...args);
   };
 
   // eslint-disable-next-line require-await
@@ -107,37 +107,37 @@ export function encryptedStorage<T extends StorageValue>(
       const encryptedValue: StorageValueEnvelope = encryptStorageValue(stringify(value), encryptionKey);
       return { value: encryptedValue, key: encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...rest };
     });
-    storage.setItems<StorageValueEnvelope>(encryptedItems, ...args);
+    return storage.setItems<StorageValueEnvelope>(encryptedItems, ...args);
   };
 
   // eslint-disable-next-line require-await
   encStorage.setItemRaw = async (key, value, ...args) => {
     const encryptedValue = encryptStorageValue(value, encryptionKey, true);
-    storage.setItem(key, encryptedValue as T, ...args);
+    return storage.setItem(key, encryptedValue as T, ...args);
   };
 
   encStorage.removeItem = (key, ...args) =>
     storage.removeItem(encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...args);
 
-  // TODO: Meta encryption
   encStorage.setMeta = (key, ...args) =>
     storage.setMeta(encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...args);
 
-  // TODO: Meta encryption
   encStorage.getMeta = (key, ...args) =>
     storage.getMeta(encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...args);
 
-  // TODO: Meta encryption
   encStorage.removeMeta = (key, ...args) =>
     storage.removeMeta(encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...args);
 
   encStorage.getKeys = async (base, ...args) => {
-    const keys = await storage.getKeys('', ...args);
-    const decryptedKeys = keys.map((key) => decryptStorageKey(key, encryptionKey));
-    if (base) {
-      return decryptedKeys.filter((key) => key.startsWith(base!) && !key.endsWith("$"));
+    if (encryptKeys) {
+      const keys = await storage.getKeys('', ...args);
+      const decryptedKeys = keys.map((key) => decryptStorageKey(key, encryptionKey));
+      if (base) {
+        return decryptedKeys.filter((key) => key.startsWith(base!) && !key.endsWith("$"));
+      }
+      return decryptedKeys.filter((key) => !key.endsWith("$"));
     }
-    return decryptedKeys.filter((key) => !key.endsWith("$"));
+    return storage.getKeys(base, ...args);
   };
 
   return encStorage;

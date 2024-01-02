@@ -134,19 +134,28 @@ export function encryptStorageKey(storageKey: string, key: string) {
   const cryptoKey = genBytesFromBase64(key);
   const gcmSiv = siv(cryptoKey, genBytesFromBase64(predefinedSivNonce));
   const encryptedKey = gcmSiv.encrypt(new Uint8Array(new TextEncoder().encode(storageKey)));
-  return encryptionPrefix + genBase64FromBytes(encryptedKey);
+  return encryptionPrefix + genBase64FromBytes(encryptedKey, true);
 }
 
 export function decryptStorageKey(encryptedKey: string, key: string) {
   const cryptoKey = genBytesFromBase64(key);
   const gcmSiv = siv(cryptoKey, genBytesFromBase64(predefinedSivNonce));
-  const decryptedKey = gcmSiv.decrypt(genBytesFromBase64(encryptedKey.slice(encryptionPrefix.length)));
+  const decryptedKey = gcmSiv.decrypt(genBytesFromBase64(encryptedKey.slice(encryptionPrefix.length), true));
   return new TextDecoder().decode(decryptedKey);
 }
 
 // Base64 utilities - Waiting for https://github.com/unjs/knitwork/pull/83 // TODO: Replace with knitwork imports as soon as PR is merged
 
-function genBytesFromBase64(input: string) {
+function genBytesFromBase64(input: string, urlSafe?: boolean) {
+  if (urlSafe) {
+    input = input.replace(/-/g, "+").replace(/_/g, "/");
+    const paddingLength = input.length % 4;
+    if (paddingLength === 2) {
+      input += "==";
+    } else if (paddingLength === 3) {
+      input += "=";
+    }
+  }
   return Uint8Array.from(
     globalThis.atob(input),
     (c) => c.codePointAt(0) as number

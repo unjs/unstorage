@@ -91,26 +91,6 @@ export interface StorageValueEnvelope {
   encryptedValue: string;
 }
 
-export function generateEncryptionKey() {
-  return genBase64FromBytes(getRandomValues(new Uint8Array(32)));
-}
-
-export async function generateRsaKeyPair() {
-  const keyPair = await subtle.generateKey(
-    {
-      name: "RSA-OAEP",
-      modulusLength: 4096,
-      publicExponent: new Uint8Array([1, 0, 1]),
-      hash: "SHA-256",
-    },
-    true,
-    ['encrypt', 'decrypt']);
-  return {
-    privateKey: keyPair.privateKey,
-    publicKey: keyPair.publicKey,
-  };
-}
-
 export function encryptStorageValue(storageValue: any, key: string, raw?: boolean): StorageValueEnvelope {
   const cryptoKey = genBytesFromBase64(key);
   const nonce = getRandomValues(new Uint8Array(24));

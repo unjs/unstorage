@@ -1,6 +1,6 @@
 import { getRandomValues } from "uncrypto";
-import { xchacha20poly1305 } from '@noble/ciphers/chacha';
-import { siv } from '@noble/ciphers/aes';
+import { xchacha20poly1305 } from "@noble/ciphers/chacha";
+import { siv } from "@noble/ciphers/aes";
 
 type Awaited<T> = T extends Promise<infer U> ? Awaited<U> : T;
 type Promisified<T> = Promise<Awaited<T>>;
@@ -83,44 +83,60 @@ export function deserializeRaw(value: any) {
 // Encryption
 
 // Use only for GCM-SIV, due to nonce-misuse-resistance. We need deterministic keys.
-const predefinedSivNonce = 'ThtnxLK9eCF4OLMg';
-const encryptionPrefix = '$enc:';
+const predefinedSivNonce = "ThtnxLK9eCF4OLMg";
+const encryptionPrefix = "$enc:";
 
 export interface StorageValueEnvelope {
   nonce: string;
   encryptedValue: string;
 }
 
-export function encryptStorageValue(storageValue: any, key: string, raw?: boolean): StorageValueEnvelope {
+export function encryptStorageValue(
+  storageValue: any,
+  key: string,
+  raw?: boolean
+): StorageValueEnvelope {
   const cryptoKey = genBytesFromBase64(key);
   const nonce = getRandomValues(new Uint8Array(24));
   const chacha = xchacha20poly1305(cryptoKey, nonce);
-  const encryptedValue = chacha.encrypt(raw ? storageValue : new TextEncoder().encode(storageValue));
+  const encryptedValue = chacha.encrypt(
+    raw ? storageValue : new TextEncoder().encode(storageValue)
+  );
   return {
     encryptedValue: genBase64FromBytes(new Uint8Array(encryptedValue)),
     nonce: genBase64FromBytes(nonce),
   };
 }
 
-export function decryptStorageValue<T>(storageValue: StorageValueEnvelope, key: string, raw?: boolean): T {
+export function decryptStorageValue<T>(
+  storageValue: StorageValueEnvelope,
+  key: string,
+  raw?: boolean
+): T {
   const { encryptedValue, nonce } = storageValue;
   const cryptoKey = genBytesFromBase64(key);
   const chacha = xchacha20poly1305(cryptoKey, genBytesFromBase64(nonce));
   const decryptedValue = chacha.decrypt(genBytesFromBase64(encryptedValue));
-  return raw ? decryptedValue as T : new TextDecoder().decode(decryptedValue) as T;
+  return raw
+    ? (decryptedValue as T)
+    : (new TextDecoder().decode(decryptedValue) as T);
 }
 
 export function encryptStorageKey(storageKey: string, key: string) {
   const cryptoKey = genBytesFromBase64(key);
   const gcmSiv = siv(cryptoKey, genBytesFromBase64(predefinedSivNonce));
-  const encryptedKey = gcmSiv.encrypt(new Uint8Array(new TextEncoder().encode(storageKey)));
+  const encryptedKey = gcmSiv.encrypt(
+    new Uint8Array(new TextEncoder().encode(storageKey))
+  );
   return encryptionPrefix + genBase64FromBytes(encryptedKey, true);
 }
 
 export function decryptStorageKey(encryptedKey: string, key: string) {
   const cryptoKey = genBytesFromBase64(key);
   const gcmSiv = siv(cryptoKey, genBytesFromBase64(predefinedSivNonce));
-  const decryptedKey = gcmSiv.decrypt(genBytesFromBase64(encryptedKey.slice(encryptionPrefix.length), true));
+  const decryptedKey = gcmSiv.decrypt(
+    genBytesFromBase64(encryptedKey.slice(encryptionPrefix.length), true)
+  );
   return new TextDecoder().decode(decryptedKey);
 }
 
@@ -146,9 +162,9 @@ function genBase64FromBytes(input: Uint8Array, urlSafe?: boolean) {
   if (urlSafe) {
     return globalThis
       .btoa(String.fromCodePoint(...input))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
   }
   return globalThis.btoa(String.fromCodePoint(...input));
 }

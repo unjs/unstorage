@@ -1,5 +1,12 @@
 import destr from "destr";
-import { StorageValueEnvelope, decryptStorageKey, decryptStorageValue, encryptStorageKey, encryptStorageValue, stringify } from "./_utils";
+import {
+  StorageValueEnvelope,
+  decryptStorageKey,
+  decryptStorageValue,
+  encryptStorageKey,
+  encryptStorageValue,
+  stringify,
+} from "./_utils";
 import type { Storage, StorageValue } from "./types";
 
 type StorageKeys = Array<keyof Storage>;
@@ -47,19 +54,24 @@ export function prefixStorage<T extends StorageValue>(
 export function encryptedStorage<T extends StorageValue>(
   storage: Storage<T>,
   encryptionKey: string,
-  encryptKeys?: boolean,
+  encryptKeys?: boolean
 ): Storage<T> {
   const encStorage: Storage = { ...storage };
 
   encStorage.hasItem = (key, ...args) =>
-    storage.hasItem(encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...args);
+    storage.hasItem(
+      encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
+      ...args
+    );
 
   encStorage.getItem = async (key, ...args) => {
     if (encryptKeys) {
       key = encryptStorageKey(normalizeKey(key), encryptionKey);
     }
     const value = await storage.getItem(key, ...args);
-    return value ? destr(decryptStorageValue(value as StorageValueEnvelope, encryptionKey)) : null;
+    return value
+      ? destr(decryptStorageValue(value as StorageValueEnvelope, encryptionKey))
+      : null;
   };
 
   encStorage.getItems = async (items, commonOptions) => {
@@ -67,7 +79,10 @@ export function encryptedStorage<T extends StorageValue>(
     if (encryptKeys) {
       const encryptedKeyItems = items.map((item) => {
         const isStringItem = typeof item === "string";
-        const key = encryptStorageKey(normalizeKey(isStringItem ? item : item.key), encryptionKey);
+        const key = encryptStorageKey(
+          normalizeKey(isStringItem ? item : item.key),
+          encryptionKey
+        );
         const options =
           isStringItem || !item.options
             ? commonOptions
@@ -79,16 +94,27 @@ export function encryptedStorage<T extends StorageValue>(
     } else {
       encryptedItems = await storage.getItems(items, commonOptions);
     }
-    return (encryptedItems.map((encryptedItem) => {
+    return encryptedItems.map((encryptedItem) => {
       const { value, key, ...rest } = encryptedItem;
-      const decryptedValue = (decryptStorageValue(value as StorageValueEnvelope, encryptionKey)) as StorageValue;
-      return { value: decryptedValue, key: encryptKeys ? decryptStorageKey(normalizeKey(key), encryptionKey) : key, ...rest };
-    }));
+      const decryptedValue = decryptStorageValue(
+        value as StorageValueEnvelope,
+        encryptionKey
+      ) as StorageValue;
+      return {
+        value: decryptedValue,
+        key: encryptKeys
+          ? decryptStorageKey(normalizeKey(key), encryptionKey)
+          : key,
+        ...rest,
+      };
+    });
   };
 
   encStorage.getItemRaw = async (key, ...args) => {
     const value = await storage.getItem(key, ...args);
-    return value ? decryptStorageValue(value as StorageValueEnvelope, encryptionKey, true) : null;
+    return value
+      ? decryptStorageValue(value as StorageValueEnvelope, encryptionKey, true)
+      : null;
   };
 
   // eslint-disable-next-line require-await
@@ -104,8 +130,17 @@ export function encryptedStorage<T extends StorageValue>(
   encStorage.setItems = async (items, ...args) => {
     const encryptedItems = items.map((item) => {
       const { value, key, ...rest } = item;
-      const encryptedValue: StorageValueEnvelope = encryptStorageValue(stringify(value), encryptionKey);
-      return { value: encryptedValue, key: encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...rest };
+      const encryptedValue: StorageValueEnvelope = encryptStorageValue(
+        stringify(value),
+        encryptionKey
+      );
+      return {
+        value: encryptedValue,
+        key: encryptKeys
+          ? encryptStorageKey(normalizeKey(key), encryptionKey)
+          : key,
+        ...rest,
+      };
     });
     return storage.setItems<StorageValueEnvelope>(encryptedItems, ...args);
   };
@@ -117,23 +152,39 @@ export function encryptedStorage<T extends StorageValue>(
   };
 
   encStorage.removeItem = (key, ...args) =>
-    storage.removeItem(encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...args);
+    storage.removeItem(
+      encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
+      ...args
+    );
 
   encStorage.setMeta = (key, ...args) =>
-    storage.setMeta(encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...args);
+    storage.setMeta(
+      encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
+      ...args
+    );
 
   encStorage.getMeta = (key, ...args) =>
-    storage.getMeta(encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...args);
+    storage.getMeta(
+      encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
+      ...args
+    );
 
   encStorage.removeMeta = (key, ...args) =>
-    storage.removeMeta(encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key, ...args);
+    storage.removeMeta(
+      encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
+      ...args
+    );
 
   encStorage.getKeys = async (base, ...args) => {
     if (encryptKeys) {
-      const keys = await storage.getKeys('', ...args);
-      const decryptedKeys = keys.map((key) => decryptStorageKey(key, encryptionKey));
+      const keys = await storage.getKeys("", ...args);
+      const decryptedKeys = keys.map((key) =>
+        decryptStorageKey(key, encryptionKey)
+      );
       if (base) {
-        return decryptedKeys.filter((key) => key.startsWith(base!) && !key.endsWith("$"));
+        return decryptedKeys.filter(
+          (key) => key.startsWith(base!) && !key.endsWith("$")
+        );
       }
       return decryptedKeys.filter((key) => !key.endsWith("$"));
     }

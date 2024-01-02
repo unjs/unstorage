@@ -50,11 +50,11 @@ describe("server", () => {
 });
 
 describe("encrypted server", () => {
-  const encryptionKey = 'e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=';
+  const encryptionKey = "e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=";
 
   it("basic", async () => {
     const storage = createStorage();
-    const encStorage = encryptedStorage(storage, encryptionKey, true)
+    const encStorage = encryptedStorage(storage, encryptionKey, true);
     const storageServer = createStorageServer(encStorage, {
       authorize(req) {
         if (req.type === "read" && req.key.startsWith("private:")) {

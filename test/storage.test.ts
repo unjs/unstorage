@@ -137,7 +137,7 @@ describe("storage", () => {
 });
 
 describe("utils", () => {
-  const encryptionKey = 'e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=';
+  const encryptionKey = "e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=";
 
   it("prefixStorage", async () => {
     const storage = createStorage();

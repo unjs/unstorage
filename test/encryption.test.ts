@@ -5,6 +5,7 @@ import { writeFile } from "../src/drivers/utils/node-fs";
 import { testDriver } from "./drivers/utils";
 
 describe("encryption", () => {
+  // eslint-disable-next-line unicorn/prefer-module
   const dir = resolve(__dirname, "tmp/fs");
 
   // Example for fs driver

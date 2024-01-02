@@ -1,4 +1,4 @@
-import { subtle, getRandomValues } from "uncrypto";
+import { getRandomValues } from "uncrypto";
 import { xchacha20poly1305 } from '@noble/ciphers/chacha';
 import { siv } from '@noble/ciphers/aes';
 

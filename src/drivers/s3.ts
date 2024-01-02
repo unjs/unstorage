@@ -54,10 +54,10 @@ export default defineDriver((options: S3DriverOptions) => {
         return $fetch.raw(request)
             .then((res) => {
                 const metaHeaders: HeadersInit = {};
-                for (const item of res.headers.entries()) {
-                    const match = /x-amz-meta-(.*)/.exec(item[0]);
+                for (const [key, value] of res.headers.entries()) {
+                    const match = /x-amz-meta-(.*)/.exec(key);
                     if (match) {
-                        metaHeaders[match[1]] = item[1];
+                        metaHeaders[match[1]] = value;
                     }
                 }
                 return metaHeaders
@@ -134,9 +134,9 @@ export default defineDriver((options: S3DriverOptions) => {
             const metaHeaders: HeadersInit = {};
 
             if (typeof opts.meta === "object") {
-                Object.keys(opts.meta).forEach((key) => {
-                    metaHeaders[`x-amz-meta-${key}`] = opts.meta![key];
-                });
+                for (const [key, value] of Object.entries(opts.meta)) {
+                    metaHeaders[`x-amz-meta-${key}`] = value;
+                }
             }
 
             const request = await awsClient.sign(awsUrlWithKey(key), {

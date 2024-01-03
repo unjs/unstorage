@@ -135,10 +135,10 @@ export default defineDriver((options: S3DriverOptions) => {
         name: DRIVER_NAME,
         options,
 
-        getItems(items, commonOptions) { notImplemented("getItems") },
-        setItems(items, commonOptions) { notImplemented("setItems") },
+        getItems() { notImplemented("getItems") },
+        setItems() { notImplemented("setItems") },
         dispose() { notImplemented("dispose") },
-        watch(callback) { notImplemented("watch") },
+        watch() { notImplemented("watch") },
 
         getItemRaw: _getItemRaw,
         setItemRaw: _setItemRaw,
@@ -168,7 +168,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
         // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
         // Further compatibility check is needed (R2 not supported, Backblaze requires POST method..)
-        async clear(base, opts) {
+        async clear(base) {
             const keys = await _getKeys(base)
 
             const body = js2xml.toXML({
@@ -187,7 +187,7 @@ export default defineDriver((options: S3DriverOptions) => {
         },
 
         // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
-        async removeItem(key, opts) {
+        async removeItem(key) {
             const request = await awsClient.sign(awsUrlWithKey(key), {
                 method: "DELETE",
             });
@@ -195,7 +195,7 @@ export default defineDriver((options: S3DriverOptions) => {
             return $fetch(request);
         },
 
-        async hasItem(key, opts) {
+        async hasItem(key) {
             return _getMeta(key).then(() => true).catch(() => false);
         },
     };

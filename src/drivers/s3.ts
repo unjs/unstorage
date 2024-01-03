@@ -3,6 +3,7 @@ import { defineDriver, createRequiredError } from "./utils";
 import { AwsClient } from "aws4fetch";
 import crypto from "crypto";
 import xml2js from 'xml2js'
+import js2xml from 'jstoxml'
 
 if (!globalThis.crypto) {
     // @ts-ignore
@@ -15,6 +16,7 @@ export interface S3DriverOptions {
     endpoint: string;
     region: string;
     bucket: string;
+    accountId: string;
 }
 
 interface GetItemOptions {
@@ -147,7 +149,7 @@ export default defineDriver((options: S3DriverOptions) => {
         getItem(key, opts: GetItemOptions) {
             return _getItemRaw(key, opts)
         },
-        
+
         setItem(key, value, opts: SetItemOptions) {
             let contentType = 'text/plain'
 
@@ -164,8 +166,24 @@ export default defineDriver((options: S3DriverOptions) => {
             return _setItemRaw(key, value, opts)
         },
 
-        clear(base, opts) {
-            notImplemented("clear");
+        // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
+        // Further compatibility check is needed (R2 not supported, Backblaze requires POST method..)
+        async clear(base, opts) {
+            const keys = await _getKeys(base)
+
+            const body = js2xml.toXML({
+                'Delete': keys.map((key) => ({ 'Object': { 'Key': key } }))
+            })
+
+            const request = await awsClient.sign(awsUrlWithoutKey(), {
+                method: "DELETE",
+                body,
+                headers: {
+                    'x-amz-expected-bucket-owner': options.accountId
+                }
+            });
+
+            return $fetch(request)
         },
 
         // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html

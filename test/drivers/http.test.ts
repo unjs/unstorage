@@ -41,7 +41,7 @@ describe("drivers: http", async () => {
           headers: { "x-auth-header": "1" },
         });
       });
-      it.only("null item", async () => {
+      it("null item", async () => {
         await storage.setItem("nullItem", null);
         await storage.setItem("nullStringItem", "null");
         expect(await storage.getItem("nullItem")).toBeNull();

@@ -88,6 +88,41 @@ export default defineDriver((options: S3DriverOptions) => {
             }).catch(() => [])
     };
 
+    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
+    async function _getItemRaw(key: string, opts: GetItemOptions) {
+        const request = await awsClient.sign(awsUrlWithKey(key), {
+            method: "GET",
+        });
+
+        return $fetch.raw(request)
+            .then((res) => {
+                opts.headers = res.headers;
+                return res._data
+            })
+            .catch(() => null)
+    }
+
+    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
+    async function _setItemRaw(key: string, value: any, opts: SetItemOptions) {
+        const metaHeaders: HeadersInit = {};
+
+        if (typeof opts.meta === "object") {
+            for (const [key, value] of Object.entries(opts.meta)) {
+                metaHeaders[`x-amz-meta-${key}`] = value;
+            }
+        }
+
+        const request = await awsClient.sign(awsUrlWithKey(key), {
+            method: "PUT",
+            body: value,
+            headers: {
+                ...opts.headers,
+                ...metaHeaders,
+            },
+        });
+
+        return $fetch(request);
+    }
 
     return {
         name: DRIVER_NAME,
@@ -115,41 +150,10 @@ export default defineDriver((options: S3DriverOptions) => {
             notImplemented("watch");
         },
 
-        // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
-        async getItemRaw(key, opts: GetItemOptions) {
-            const request = await awsClient.sign(awsUrlWithKey(key), {
-                method: "GET",
-            });
-
-            return $fetch.raw(request)
-                .then((res) => {
-                    opts.headers = res.headers;
-                    return res._data
-                })
-                .catch(() => null)
-        },
-
-        // https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
-        async setItemRaw(key, value, opts: SetItemOptions) {
-            const metaHeaders: HeadersInit = {};
-
-            if (typeof opts.meta === "object") {
-                for (const [key, value] of Object.entries(opts.meta)) {
-                    metaHeaders[`x-amz-meta-${key}`] = value;
-                }
-            }
-
-            const request = await awsClient.sign(awsUrlWithKey(key), {
-                method: "PUT",
-                body: value,
-                headers: {
-                    ...opts.headers,
-                    ...metaHeaders,
-                },
-            });
-
-            return $fetch(request);
-        },
+        getItemRaw: _getItemRaw,
+        setItemRaw: _setItemRaw,
+        getKeys: _getKeys,
+        getMeta: (key) => _getMeta(key).catch(() => ({})),
 
         // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
         async removeItem(key, opts) {
@@ -161,14 +165,8 @@ export default defineDriver((options: S3DriverOptions) => {
         },
 
         async hasItem(key, opts) {
-            return _getMeta(key)
-                .then(() => true)
-                .catch(() => false);
+            return _getMeta(key).then(() => true).catch(() => false);
         },
-
-        getMeta: (key) => _getMeta(key).catch(() => ({})),
-
-        getKeys: _getKeys,
     };
 });
 

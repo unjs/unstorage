@@ -18,11 +18,11 @@ export interface S3DriverOptions {
 }
 
 interface GetItemOptions {
-    headers?: HeadersInit;
+    headers?: Record<string, string>;
 }
 
 interface SetItemOptions {
-    headers?: HeadersInit;
+    headers?: Record<string, string>;
     meta?: Record<string, string>;
 }
 
@@ -96,7 +96,12 @@ export default defineDriver((options: S3DriverOptions) => {
 
         return $fetch.raw(request)
             .then((res) => {
-                opts.headers = res.headers;
+                opts.headers ||= {}
+
+                for (const [key, value] of res.headers.entries()) {
+                    opts.headers[key] = value
+                }
+
                 return res._data
             })
             .catch(() => null)
@@ -153,11 +158,10 @@ export default defineDriver((options: S3DriverOptions) => {
             return _getItemRaw(key, opts)
         },
         setItem(key, value, opts: SetItemOptions) {
-            let content = value
             let contentType = 'text/plain'
 
             try {
-                content = JSON.parse(value)
+                JSON.parse(value)
                 contentType = 'application/json'
 
             } catch { }
@@ -167,7 +171,7 @@ export default defineDriver((options: S3DriverOptions) => {
                 ...opts.headers
             }
 
-            return _setItemRaw(key, content, opts)
+            return _setItemRaw(key, value, opts)
         },
 
         // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html

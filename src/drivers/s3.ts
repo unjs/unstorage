@@ -133,37 +133,27 @@ export default defineDriver((options: S3DriverOptions) => {
         name: DRIVER_NAME,
         options,
 
-        getItems(items, commonOptions) {
-            notImplemented("getItems");
-        },
-        setItems(items, commonOptions) {
-            notImplemented("setItems");
-        },
-        clear(base, opts) {
-            notImplemented("clear");
-        },
-        dispose() {
-            notImplemented("dispose");
-        },
-        watch(callback) {
-            notImplemented("watch");
-        },
+        getItems(items, commonOptions) { notImplemented("getItems") },
+        setItems(items, commonOptions) { notImplemented("setItems") },
+        dispose() { notImplemented("dispose") },
+        watch(callback) { notImplemented("watch") },
 
         getItemRaw: _getItemRaw,
         setItemRaw: _setItemRaw,
         getKeys: _getKeys,
+
         getMeta: (key) => _getMeta(key).catch(() => ({})),
 
         getItem(key, opts: GetItemOptions) {
             return _getItemRaw(key, opts)
         },
+        
         setItem(key, value, opts: SetItemOptions) {
             let contentType = 'text/plain'
 
             try {
                 JSON.parse(value)
                 contentType = 'application/json'
-
             } catch { }
 
             opts.headers = {
@@ -172,6 +162,10 @@ export default defineDriver((options: S3DriverOptions) => {
             }
 
             return _setItemRaw(key, value, opts)
+        },
+
+        clear(base, opts) {
+            notImplemented("clear");
         },
 
         // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html

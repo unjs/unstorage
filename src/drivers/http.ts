@@ -27,20 +27,34 @@ export default defineDriver((opts: HTTPOptions) => {
         .catch(() => false);
     },
     async getItem(key, tops = {}) {
-      const value = await _fetch(r(key), {
-        headers: { ...opts.headers, ...tops.headers },
-      });
-      return value;
+      try {
+        return await _fetch(r(key), {
+          headers: { ...opts.headers, ...tops.headers },
+        });
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          return null;
+        }
+
+        throw err;
+      }
     },
     async getItemRaw(key, topts) {
-      const value = await _fetch(r(key), {
-        headers: {
-          accept: "application/octet-stream",
-          ...opts.headers,
-          ...topts.headers,
-        },
-      });
-      return value;
+      try {
+        return await await _fetch(r(key), {
+          headers: {
+            accept: "application/octet-stream",
+            ...opts.headers,
+            ...topts.headers,
+          },
+        });
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          return null;
+        }
+
+        throw err;
+      }
     },
     async getMeta(key, topts) {
       const res = await _fetch.raw(r(key), {

@@ -34,12 +34,19 @@ const DRIVER_NAME = "s3";
 export default defineDriver((options: S3DriverOptions) => {
     checkOptions(options);
 
-    const awsClient = new AwsClient({
-        accessKeyId: options.accessKeyId,
-        secretAccessKey: options.secretAccessKey,
-        region: options.region,
-        service: DRIVER_NAME,
-    });
+    let awsClient: AwsClient
+
+    function getAwsClient() {
+        if (!awsClient) {
+            awsClient = new AwsClient({
+                accessKeyId: options.accessKeyId,
+                secretAccessKey: options.secretAccessKey,
+                region: options.region,
+                service: DRIVER_NAME,
+            })
+        }
+        return awsClient
+    }
 
     const normalizedKey = (key: string) => key.replace(/:/g, "/")
 
@@ -49,7 +56,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html
     async function _getMeta(key: string) {
-        const request = await awsClient.sign(awsUrlWithKey(key), {
+        const request = await getAwsClient().sign(awsUrlWithKey(key), {
             method: "HEAD",
         });
 
@@ -68,7 +75,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
     async function _getKeys(base?: string) {
-        const request = await awsClient.sign(awsUrlWithoutKey(), {
+        const request = await getAwsClient().sign(awsUrlWithoutKey(), {
             method: "GET",
         });
 
@@ -92,7 +99,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
     async function _getItemRaw(key: string, opts: GetItemOptions) {
-        const request = await awsClient.sign(awsUrlWithKey(key), {
+        const request = await getAwsClient().sign(awsUrlWithKey(key), {
             method: "GET",
         });
 
@@ -119,7 +126,7 @@ export default defineDriver((options: S3DriverOptions) => {
             }
         }
 
-        const request = await awsClient.sign(awsUrlWithKey(key), {
+        const request = await getAwsClient().sign(awsUrlWithKey(key), {
             method: "PUT",
             body: value,
             headers: {
@@ -133,7 +140,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
     async function _removeItem(key: string) {
-        const request = await awsClient.sign(awsUrlWithKey(key), {
+        const request = await getAwsClient().sign(awsUrlWithKey(key), {
             method: "DELETE",
         });
 
@@ -185,7 +192,7 @@ export default defineDriver((options: S3DriverOptions) => {
                     'Delete': keys.map((key) => ({ 'Object': { 'Key': key } }))
                 })
 
-                const request = await awsClient.sign(awsUrlWithoutKey(), {
+                const request = await getAwsClient().sign(awsUrlWithoutKey(), {
                     method: "DELETE",
                     body,
                     headers: {

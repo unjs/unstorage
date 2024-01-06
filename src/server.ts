@@ -76,11 +76,25 @@ export function createH3StorageHandler(
 
       const isRaw =
         getRequestHeader(event, "accept") === "application/octet-stream";
+
+      const checkNull = (value: any) => {
+        if (value !== null) {
+          return;
+        }
+
+        throw createError({
+          statusMessage: "File not found",
+          statusCode: 404,
+        });
+      };
+
       if (isRaw) {
         const value = await storage.getItemRaw(key);
+        checkNull(value);
         return value;
       } else {
         const value = await storage.getItem(key);
+        checkNull(value);
         return stringify(value);
       }
     }

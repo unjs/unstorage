@@ -4,6 +4,7 @@ import { AwsClient } from "aws4fetch";
 import crypto from "crypto";
 import xml2js from 'xml2js'
 import js2xml from 'jstoxml'
+import { joinURL } from 'ufo'
 
 if (!globalThis.crypto) {
     // @ts-ignore
@@ -49,7 +50,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
     const normalizedKey = (key: string) => key.replace(/:/g, "/")
 
-    const awsUrlWithoutKey = () => `${options.endpoint}/${options.bucket}`;
+    const awsUrlWithoutKey = () => joinURL(options.endpoint, options.bucket);
 
     const awsUrlWithKey = (key: string) => `${awsUrlWithoutKey()}/${normalizedKey(key)}`;
 

@@ -16,7 +16,7 @@ export interface S3DriverOptions {
     endpoint: string;
     region: string;
     bucket: string;
-    accountId: string;
+    accountId?: string;
 }
 
 interface GetItemOptions {
@@ -131,6 +131,15 @@ export default defineDriver((options: S3DriverOptions) => {
         return $fetch(request);
     }
 
+    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
+    async function _removeItem(key: string) {
+        const request = await awsClient.sign(awsUrlWithKey(key), {
+            method: "DELETE",
+        });
+
+        return $fetch(request);
+    }
+
     return {
         name: DRIVER_NAME,
         options,
@@ -143,6 +152,7 @@ export default defineDriver((options: S3DriverOptions) => {
         getItemRaw: _getItemRaw,
         setItemRaw: _setItemRaw,
         getKeys: _getKeys,
+        removeItem: _removeItem,
 
         getMeta: (key) => _getMeta(key).catch(() => ({})),
 
@@ -167,32 +177,26 @@ export default defineDriver((options: S3DriverOptions) => {
         },
 
         // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
-        // Further compatibility check is needed (R2 not supported, Backblaze requires POST method..)
         async clear(base) {
             const keys = await _getKeys(base)
 
-            const body = js2xml.toXML({
-                'Delete': keys.map((key) => ({ 'Object': { 'Key': key } }))
-            })
+            if (options.accountId) {
+                const body = js2xml.toXML({
+                    'Delete': keys.map((key) => ({ 'Object': { 'Key': key } }))
+                })
 
-            const request = await awsClient.sign(awsUrlWithoutKey(), {
-                method: "DELETE",
-                body,
-                headers: {
-                    'x-amz-expected-bucket-owner': options.accountId
-                }
-            });
+                const request = await awsClient.sign(awsUrlWithoutKey(), {
+                    method: "DELETE",
+                    body,
+                    headers: {
+                        'x-amz-expected-bucket-owner': options.accountId
+                    }
+                });
 
-            return $fetch(request)
-        },
+                return $fetch(request)
+            }
 
-        // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
-        async removeItem(key) {
-            const request = await awsClient.sign(awsUrlWithKey(key), {
-                method: "DELETE",
-            });
-
-            return $fetch(request);
+            return Promise.all(keys.map(key => _removeItem(key)))
         },
 
         async hasItem(key) {

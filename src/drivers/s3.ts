@@ -52,7 +52,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
     const awsUrlWithoutKey = () => joinURL(options.endpoint, options.bucket);
 
-    const awsUrlWithKey = (key: string) => `${awsUrlWithoutKey()}/${normalizedKey(key)}`;
+    const awsUrlWithKey = (key: string) => joinURL(options.endpoint, options.bucket, normalizedKey(key));
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html
     async function _getMeta(key: string) {

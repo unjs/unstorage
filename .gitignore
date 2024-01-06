@@ -11,3 +11,4 @@ __*
 .vercel
 .netlify
 playground
+.env

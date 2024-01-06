@@ -19,18 +19,17 @@ export interface S3DriverOptions {
     accountId?: string;
 }
 
-interface GetItemOptions {
+type GetItemOptions = undefined | {
     headers?: Record<string, string>;
 }
 
-interface SetItemOptions {
+type SetItemOptions = undefined | {
     headers?: Record<string, string>;
     meta?: Record<string, string>;
 }
 
 const DRIVER_NAME = "s3";
 
-//@ts-ignore
 export default defineDriver((options: S3DriverOptions) => {
     checkOptions(options);
 
@@ -98,7 +97,7 @@ export default defineDriver((options: S3DriverOptions) => {
     };
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
-    async function _getItemRaw(key: string, opts: GetItemOptions) {
+    async function _getItemRaw(key: string, opts: GetItemOptions = {}) {
         const request = await getAwsClient().sign(awsUrlWithKey(key), {
             method: "GET",
         });
@@ -117,7 +116,7 @@ export default defineDriver((options: S3DriverOptions) => {
     }
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
-    async function _setItemRaw(key: string, value: any, opts: SetItemOptions) {
+    async function _setItemRaw(key: string, value: any, opts: SetItemOptions = {}) {
         const metaHeaders: HeadersInit = {};
 
         if (typeof opts.meta === "object") {
@@ -151,11 +150,6 @@ export default defineDriver((options: S3DriverOptions) => {
         name: DRIVER_NAME,
         options,
 
-        getItems() { notImplemented("getItems") },
-        setItems() { notImplemented("setItems") },
-        dispose() { notImplemented("dispose") },
-        watch() { notImplemented("watch") },
-
         getItemRaw: _getItemRaw,
         setItemRaw: _setItemRaw,
         getKeys: _getKeys,
@@ -167,7 +161,7 @@ export default defineDriver((options: S3DriverOptions) => {
             return _getItemRaw(key, opts)
         },
 
-        setItem(key, value, opts: SetItemOptions) {
+        setItem(key, value, opts: SetItemOptions = {}) {
             let contentType = 'text/plain'
 
             try {
@@ -200,10 +194,10 @@ export default defineDriver((options: S3DriverOptions) => {
                     }
                 });
 
-                return $fetch(request)
+                await $fetch(request)
             }
 
-            return Promise.all(keys.map(key => _removeItem(key)))
+            await Promise.all(keys.map(key => _removeItem(key)))
         },
 
         async hasItem(key) {
@@ -211,10 +205,6 @@ export default defineDriver((options: S3DriverOptions) => {
         },
     };
 });
-
-function notImplemented(api: string) {
-    console.warn(`[${DRIVER_NAME}] ${api} is not implemented`);
-}
 
 function checkOptions(options: S3DriverOptions) {
     if (!options.accessKeyId) {

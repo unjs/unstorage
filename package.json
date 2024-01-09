@@ -64,6 +64,7 @@
     "@azure/storage-blob": "^12.17.0",
     "@capacitor/preferences": "^5.0.6",
     "@cloudflare/workers-types": "^4.20231121.0",
+    "@neondatabase/serverless": "^0.6.1",
     "@netlify/blobs": "^6.3.1",
     "@planetscale/database": "^1.13.0",
     "@types/ioredis-mock": "^8.2.5",
@@ -104,6 +105,7 @@
     "@azure/keyvault-secrets": "^4.7.0",
     "@azure/storage-blob": "^12.17.0",
     "@capacitor/preferences": "^5.0.6",
+    "@neondatabase/serverless": "^0.6.1",
     "@netlify/blobs": "^6.3.1",
     "@planetscale/database": "^1.13.0",
     "@upstash/redis": "^1.25.2",
@@ -130,6 +132,9 @@
       "optional": true
     },
     "@capacitor/preferences": {
+      "optional": true
+    },
+    "@neondatabase/serverless": {
       "optional": true
     },
     "@netlify/blobs": {

@@ -33,14 +33,14 @@ export default defineDriver((opts: HTTPOptions) => {
       return value;
     },
     async getItemRaw(key, topts) {
-      const value = await _fetch(r(key), {
+      const value = await _fetch.native(r(key), {
         headers: {
           accept: "application/octet-stream",
           ...opts.headers,
           ...topts.headers,
         },
       });
-      return value;
+      return new Uint8Array(await value.arrayBuffer());
     },
     async getMeta(key, topts) {
       const res = await _fetch.raw(r(key), {

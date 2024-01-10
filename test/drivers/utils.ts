@@ -1,5 +1,6 @@
 import { it, expect } from "vitest";
 import { Storage, Driver, createStorage, restoreSnapshot } from "../../src";
+import { genBase64FromBytes } from "../../src/_utils";
 
 export interface TestContext {
   storage: Storage;
@@ -96,9 +97,7 @@ export function testDriver(opts: TestOptions) {
       console.log("Invalid raw value length:", rValue, "Length:", rValueLen);
     }
     expect(rValueLen).toBe(value.length);
-    expect(Buffer.from(rValue).toString("base64")).toBe(
-      Buffer.from(value).toString("base64")
-    );
+    expect(genBase64FromBytes(rValue)).toBe(genBase64FromBytes(value));
   });
 
   // Bulk tests

@@ -57,8 +57,8 @@ import neonDriver from "unstorage/drivers/neon";
 
 const storage = createStorage({
   driver: neonDriver({
-    // This should loaded via runtime config
-    // or environment variables
+    // This should be loaded from a runtime config
+    // or environment variable.
     url: "<database-url-from-env-variable>",
     // table: 'unstorage'
     // fetchConnectionCache: true,
@@ -68,9 +68,9 @@ const storage = createStorage({
 
 **Options:**
 
-- **`url`** (required): You can find the database URL in the [Neon Console](https://console.neon.tech/).
+- **`url`** (Required): You can find the database URL in the [Neon Console](https://console.neon.tech/).
 - `table`: The name of the table to use. It defaults to `unstorage`.
-- [`fetchConnectionCache`](https://neon.tech/docs/serverless/serverless-driver#experimental-connection-caching): **Experimentally**, when `fetchConnectionCache` is `true`, queries carried via HTTP `fetch` will make use of a connection cache (pool) on the server.
+- [`fetchConnectionCache` (Experimental)](https://neon.tech/docs/serverless/serverless-driver#experimental-connection-caching): When `fetchConnectionCache` is `true`, queries carried via HTTP `fetch` will make use of a connection cache (pool) on the server.
 
 **Advanced:**
 

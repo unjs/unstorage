@@ -4,7 +4,7 @@ Stores data in [Neon Serverless Postgres](https://neon.tech).
 
 This driver stores Key-Value (KV) information in a Neon Postgres database with columns of `id`, `value`, `created_at` and `updated_at`.
 
-To use, you will need to install the [`@neondatabase/serverless`](https://github.com/neondatabase/serverless) in your project. This is the Neon PostgreSQL driver for JavaScript and TypeScript.
+To use, you will need to install [`@neondatabase/serverless`](https://github.com/neondatabase/serverless) in your project. This is the Neon PostgreSQL driver for JavaScript and TypeScript.
 
 ```
 pnpm add @neondatabase/serverless
@@ -20,7 +20,7 @@ pnpm add @neondatabase/serverless
 
 Then, create a table to store your data by running the following queries in your Neon database, where <unstorage> is the name of the table you want to use.
 
-This will create create a database table and associate a `BEFORE` trigger that will update the `updated_at` timestamp value when a row is modifed.
+This will create a database table and associate a `BEFORE` trigger that will update the `updated_at` timestamp value when a row is modified.
 
 ```sql
 
@@ -59,9 +59,9 @@ const storage = createStorage({
   driver: neonDriver({
     // This should loaded via runtime config
     // or environment variables
-    url: "<database-url-from-env-variable",
+    url: "<database-url-from-env-variable>",
     // table: 'unstorage'
-    // fetchConnectionCache: false,
+    // fetchConnectionCache: true,
   }),
 });
 ```
@@ -70,4 +70,8 @@ const storage = createStorage({
 
 - **`url`** (required): You can find the database URL in the [Neon Console](https://console.neon.tech/).
 - `table`: The name of the table to use. It defaults to `unstorage`.
-- `fetchConnectionCache`: **Experimentally**, when `fetchConnectionCache` is `true`, queries carried via HTTP `fetch` will make use of a connection cache (pool) on the server.
+- [`fetchConnectionCache`](https://neon.tech/docs/serverless/serverless-driver#experimental-connection-caching): **Experimentally**, when `fetchConnectionCache` is `true`, queries carried via HTTP `fetch` will make use of a connection cache (pool) on the server.
+
+**Advanced:**
+
+If needed, the Neon client can be configured with advanced options using the [`neonConfig` configuration](https://neon.tech/docs/serverless/serverless-driver#advanced-configuration-options).

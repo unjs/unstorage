@@ -1,5 +1,5 @@
 import { createError, createRequiredError, defineDriver } from "./utils";
-import { neon, NeonQueryFunction, neonConfig } from "@neondatabase/serverless";
+import { neon, neonConfig, NeonQueryFunction } from "@neondatabase/serverless";
 
 export interface NeonDriverOptions {
   /**
@@ -16,6 +16,7 @@ export interface NeonDriverOptions {
   /**
    * Whether to fetch connection cache or not.
    * @default false
+   * @link https://neon.tech/docs/serverless/serverless-driver#experimental-connection-caching
    */
   fetchConnectionCache?: boolean;
 }
@@ -23,6 +24,10 @@ export interface NeonDriverOptions {
 const DRIVER_NAME = "neon";
 
 export default defineDriver((opts: NeonDriverOptions = {}) => {
+  if (!opts.url) {
+    throw createRequiredError(DRIVER_NAME, "url");
+  }
+
   opts.table = opts.table || "unstorage";
   neonConfig.fetchConnectionCache = opts.fetchConnectionCache || false;
 
@@ -30,10 +35,7 @@ export default defineDriver((opts: NeonDriverOptions = {}) => {
 
   const getConnection = () => {
     if (!_connection) {
-      if (!opts.url) {
-        throw createRequiredError(DRIVER_NAME, "url");
-      }
-      _connection = neon(opts.url);
+      _connection = neon(opts.url!);
     }
 
     if (!_connection) {

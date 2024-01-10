@@ -74,16 +74,14 @@ describe("drivers: neon", () => {
         expect(() =>
           driver({
             table: "unstorage_test",
-          }).getItem("")
-        ).rejects.toThrowError(
-          "[unstorage] [neon] Missing required option `url`."
-        );
+          })
+        ).toThrowError("[unstorage] [neon] Missing required option `url`.");
       });
 
       it("should throw error if no connection is established", async () => {
         expect(() =>
           driver({
-            url: "postgresql://do-not-exist:5432",
+            url: "postgresql://does-not-exist:5432",
             table: "unstorage_test",
           }).getItem("")
         ).rejects.toThrowError(

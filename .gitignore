@@ -10,6 +10,3 @@ tmp
 __*
 .vercel
 .netlify
-docs/.nuxt
-docs/dist
-docs/.output

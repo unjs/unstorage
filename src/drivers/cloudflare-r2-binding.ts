@@ -11,12 +11,7 @@ export interface CloudflareR2Options {
 
 const DRIVER_NAME = "cloudflare-r2-binding";
 
-export default defineDriver((_opts: CloudflareR2Options = {}) => {
-  const opts: CloudflareR2Options = {
-    binding: "BUCKET",
-    ..._opts,
-  };
-
+export default defineDriver((opts: CloudflareR2Options = {}) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   const getKeys = async (base?: string) => {

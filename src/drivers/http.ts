@@ -1,6 +1,7 @@
 import { defineDriver } from "./utils";
-import { $fetch as _fetch } from "ofetch";
+import { FetchError, $fetch as _fetch } from "ofetch";
 import { joinURL } from "ufo";
+import { TransactionOptions } from "../types";
 
 export interface HTTPOptions {
   base: string;
@@ -15,6 +16,13 @@ export default defineDriver((opts: HTTPOptions) => {
   const rBase = (key: string = "") =>
     joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
 
+  const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
+    if (error?.response?.status === 404) {
+      return fallbackVal;
+    }
+    throw error;
+  };
+
   return {
     name: DRIVER_NAME,
     options: opts,
@@ -24,37 +32,23 @@ export default defineDriver((opts: HTTPOptions) => {
         headers: { ...opts.headers, ...topts.headers },
       })
         .then(() => true)
-        .catch(() => false);
+        .catch((err) => catchFetchError(err, false));
     },
     async getItem(key, tops = {}) {
-      try {
-        return await _fetch(r(key), {
-          headers: { ...opts.headers, ...tops.headers },
-        });
-      } catch (err: any) {
-        if (err?.response?.status === 404) {
-          return null;
-        }
-
-        throw err;
-      }
+      const value = await _fetch(r(key), {
+        headers: { ...opts.headers, ...tops.headers },
+      }).catch(catchFetchError);
+      return value;
     },
     async getItemRaw(key, topts) {
-      try {
-        return await await _fetch(r(key), {
-          headers: {
-            accept: "application/octet-stream",
-            ...opts.headers,
-            ...topts.headers,
-          },
-        });
-      } catch (err: any) {
-        if (err?.response?.status === 404) {
-          return null;
-        }
-
-        throw err;
-      }
+      const value = await _fetch(r(key), {
+        headers: {
+          accept: "application/octet-stream",
+          ...opts.headers,
+          ...topts.headers,
+        },
+      }).catch(catchFetchError);
+      return value;
     },
     async getMeta(key, topts) {
       const res = await _fetch.raw(r(key), {

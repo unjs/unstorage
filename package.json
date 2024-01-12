@@ -72,7 +72,7 @@
     "@types/node": "^20.11.0",
     "@upstash/redis": "^1.28.0",
     "@vercel/kv": "^0.2.4",
-    "@vitejs/plugin-vue": "^4.6.2",
+    "@vitejs/plugin-vue": "^5.0.3",
     "@vitest/coverage-v8": "^0.34.6",
     "@vue/compiler-sfc": "^3.4.10",
     "azurite": "^3.29.0",

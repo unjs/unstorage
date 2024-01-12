@@ -28,3 +28,11 @@ export function getBinding(binding: KVNamespace | R2Bucket | string) {
 
   return binding;
 }
+
+export function getKVBinding(binding: KVNamespace | string = "STORAGE") {
+  return getBinding(binding) as KVNamespace;
+}
+
+export function getR2Binding(binding: R2Bucket | string = "BUCKET") {
+  return getBinding(binding) as R2Bucket;
+}

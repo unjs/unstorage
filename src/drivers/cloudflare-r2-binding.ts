@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createError, defineDriver, joinKeys } from "./utils";
-import { getBinding } from "./utils/cloudflare";
+import { defineDriver, joinKeys } from "./utils";
+import { getR2Binding } from "./utils/cloudflare";
 
 export interface CloudflareR2Options {
   binding?: string | R2Bucket;
@@ -20,7 +20,7 @@ export default defineDriver((_opts: CloudflareR2Options = {}) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   const getKeys = async (base?: string) => {
-    const binding = getBinding(opts.binding!);
+    const binding = getR2Binding(opts.binding);
     const kvList = await binding.list(
       base || opts.base ? { prefix: r(base) } : undefined
     );
@@ -32,12 +32,12 @@ export default defineDriver((_opts: CloudflareR2Options = {}) => {
     options: opts,
     async hasItem(key) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getR2Binding(opts.binding);
       return (await binding.head(key)) !== null;
     },
     async getMeta(key, topts) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getR2Binding(opts.binding);
       const obj = await binding.head(key);
       if (!obj) return null;
       return {
@@ -48,27 +48,27 @@ export default defineDriver((_opts: CloudflareR2Options = {}) => {
     },
     getItem(key, topts) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getR2Binding(opts.binding);
       return binding.get(key, topts).then((r) => r?.text());
     },
     getItemRaw(key, topts) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getR2Binding(opts.binding);
       return binding.get(key, topts).then((r) => r?.arrayBuffer());
     },
     async setItem(key, value, topts) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getR2Binding(opts.binding);
       await binding.put(key, value, topts);
     },
     async setItemRaw(key, value, topts) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getR2Binding(opts.binding);
       await binding.put(key, value, topts);
     },
     async removeItem(key) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getR2Binding(opts.binding);
       await binding.delete(key);
     },
     getKeys(base) {
@@ -77,7 +77,7 @@ export default defineDriver((_opts: CloudflareR2Options = {}) => {
       );
     },
     async clear(base) {
-      const binding = getBinding(opts.binding!);
+      const binding = getR2Binding(opts.binding);
       const keys = await getKeys(base);
       await binding.delete(keys);
     },

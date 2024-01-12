@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createError, defineDriver, joinKeys } from "./utils";
-import { getBinding } from "./utils/cloudflare";
+import { defineDriver, joinKeys } from "./utils";
+import { getKVBinding } from "./utils/cloudflare";
 export interface KVOptions {
   binding?: string | KVNamespace;
 
@@ -12,17 +12,12 @@ export interface KVOptions {
 
 const DRIVER_NAME = "cloudflare-kv-binding";
 
-export default defineDriver((_opts: KVOptions = {}) => {
-  const opts: KVOptions = {
-    binding: "STORAGE",
-    ..._opts,
-  };
-
+export default defineDriver((opts: KVOptions) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   async function getKeys(base: string = "") {
     base = r(base);
-    const binding = getBinding(opts.binding!);
+    const binding = getKVBinding(opts.binding);
     const kvList = await binding.list(base ? { prefix: base } : undefined);
     return kvList.keys.map((key) => key.name);
   }
@@ -32,22 +27,22 @@ export default defineDriver((_opts: KVOptions = {}) => {
     options: opts,
     async hasItem(key) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getKVBinding(opts.binding);
       return (await binding.get(key)) !== null;
     },
     getItem(key) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getKVBinding(opts.binding);
       return binding.get(key);
     },
     setItem(key, value) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getKVBinding(opts.binding);
       return binding.put(key, value);
     },
     removeItem(key) {
       key = r(key);
-      const binding = getBinding(opts.binding!);
+      const binding = getKVBinding(opts.binding);
       return binding.delete(key);
     },
     getKeys() {
@@ -56,7 +51,7 @@ export default defineDriver((_opts: KVOptions = {}) => {
       );
     },
     async clear(base) {
-      const binding = getBinding(opts.binding!);
+      const binding = getKVBinding(opts.binding);
       const keys = await getKeys(base);
       await Promise.all(keys.map((key) => binding.delete(key)));
     },

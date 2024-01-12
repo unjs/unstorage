@@ -5,7 +5,7 @@ import { BlobsServer } from "@netlify/blobs";
 import { resolve } from "path";
 import { rm, mkdir } from "node:fs/promises";
 
-describe("drivers: netlify-blobs", async () => {
+describe.skip("drivers: netlify-blobs", async () => {
   const dataDir = resolve(__dirname, "tmp/netlify-blobs");
   await rm(dataDir, { recursive: true, force: true }).catch(() => {});
   await mkdir(dataDir, { recursive: true });

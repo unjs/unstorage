@@ -37,6 +37,15 @@ describe("server", () => {
     expect(await fetchStorage("foo/bar/", {})).toMatchObject([]);
 
     await expect(
+      fetchStorage("/non", { method: "GET" }).catch((error) => {
+        throw error.data;
+      })
+    ).rejects.toMatchObject({
+      statusCode: 404,
+      statusMessage: "KV value not found",
+    });
+
+    await expect(
       fetchStorage("private/foo/bar", { method: "GET" }).catch((error) => {
         throw error.data;
       })

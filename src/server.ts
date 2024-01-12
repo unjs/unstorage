@@ -3,10 +3,8 @@ import {
   createApp,
   createError,
   isError,
-  readBody,
   eventHandler,
   toNodeListener,
-  getMethod,
   getRequestHeader,
   setResponseHeader,
   readRawBody,
@@ -41,21 +39,20 @@ export function createH3StorageHandler(
   opts: StorageServerOptions = {}
 ): EventHandler {
   return eventHandler(async (event) => {
-    const method = getMethod(event);
     const _path = opts.resolvePath?.(event) ?? event.path;
     const isBaseKey = _path.endsWith(":") || _path.endsWith("/");
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
 
     // Authorize Request
-    if (!(method in MethodToTypeMap)) {
+    if (!(event.method in MethodToTypeMap)) {
       throw createError({
         statusCode: 405,
-        statusMessage: `Method Not Allowed: ${method}`,
+        statusMessage: `Method Not Allowed: ${event.method}`,
       });
     }
     try {
       await opts.authorize?.({
-        type: MethodToTypeMap[method as keyof typeof MethodToTypeMap],
+        type: MethodToTypeMap[event.method as keyof typeof MethodToTypeMap],
         event,
         key,
       });
@@ -71,7 +68,7 @@ export function createH3StorageHandler(
     }
 
     // GET => getItem
-    if (method === "GET") {
+    if (event.method === "GET") {
       if (isBaseKey) {
         const keys = await storage.getKeys(key);
         return keys.map((key) => key.replace(/:/g, "/"));
@@ -79,17 +76,29 @@ export function createH3StorageHandler(
 
       const isRaw =
         getRequestHeader(event, "accept") === "application/octet-stream";
+
+      const checkNotFound = (value: any) => {
+        if (value === null) {
+          throw createError({
+            statusMessage: "KV value not found",
+            statusCode: 404,
+          });
+        }
+      };
+
       if (isRaw) {
         const value = await storage.getItemRaw(key);
+        checkNotFound(value);
         return value;
       } else {
         const value = await storage.getItem(key);
+        checkNotFound(value);
         return stringify(value);
       }
     }
 
     // HEAD => hasItem + meta (mtime)
-    if (method === "HEAD") {
+    if (event.method === "HEAD") {
       const _hasItem = await storage.hasItem(key);
       event.node.res.statusCode = _hasItem ? 200 : 404;
       if (_hasItem) {
@@ -106,28 +115,30 @@ export function createH3StorageHandler(
     }
 
     // PUT => setItem
-    if (method === "PUT") {
+    if (event.method === "PUT") {
       const isRaw =
         getRequestHeader(event, "content-type") === "application/octet-stream";
       if (isRaw) {
         const value = await readRawBody(event);
         await storage.setItemRaw(key, value);
       } else {
-        const value = await readBody(event);
-        await storage.setItem(key, value);
+        const value = await readRawBody(event, "utf8");
+        if (value !== undefined) {
+          await storage.setItem(key, value);
+        }
       }
       return "OK";
     }
 
     // DELETE => removeItem
-    if (method === "DELETE") {
+    if (event.method === "DELETE") {
       await (isBaseKey ? storage.clear(key) : storage.removeItem(key));
       return "OK";
     }
 
     throw createError({
       statusCode: 405,
-      statusMessage: `Method Not Allowed: ${method}`,
+      statusMessage: `Method Not Allowed: ${event.method}`,
     });
   });
 }
@@ -136,7 +147,7 @@ export function createStorageServer(
   storage: Storage,
   options: StorageServerOptions = {}
 ): { handle: RequestListener } {
-  const app = createApp();
+  const app = createApp({ debug: true });
   const handler = createH3StorageHandler(storage, options);
   app.use(handler);
   return {

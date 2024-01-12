@@ -11,7 +11,7 @@ export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
   base?: string;
 
   /**
-   * Optional flag to customzize environment variable prefix (Default is `KV`). Set to `false` to disable env inference for `url` and `token` options
+   * Optional flag to customize environment variable prefix (Default is `KV`). Set to `false` to disable env inference for `url` and `token` options
    */
   env?: false | string;
 

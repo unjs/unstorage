@@ -2,6 +2,68 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.10.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.10.0...v1.10.1)
+
+### 📦 Build
+
+- Update mkdist for cjs dist hotfix ([cae8533](https://github.com/unjs/unstorage/commit/cae8533))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
+## v1.10.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.9.0...v1.10.0)
+
+### 🚀 Enhancements
+
+- Add `netlify-blobs` driver ([#337](https://github.com/unjs/unstorage/pull/337))
+
+### 🩹 Fixes
+
+- **server:** Read body as string ([dfda25f](https://github.com/unjs/unstorage/commit/dfda25f))
+- **azure-key-vault-driver:** Fix character encoding ([#308](https://github.com/unjs/unstorage/pull/308))
+- **lru-cache, memory, mongodb, redis:** Return falsy values when set in storage ([#320](https://github.com/unjs/unstorage/pull/320))
+
+### 📖 Documentation
+
+- Fix memory driver description ([#286](https://github.com/unjs/unstorage/pull/286))
+- **fs:** Fix typo ([#290](https://github.com/unjs/unstorage/pull/290))
+- Fix typo in `getMount` usage ([#297](https://github.com/unjs/unstorage/pull/297))
+- Update deps ([#310](https://github.com/unjs/unstorage/pull/310))
+- **indexedb:** Fix typo in import ([#327](https://github.com/unjs/unstorage/pull/327))
+
+### 🏡 Chore
+
+- **release:** V1.9.0 ([b0faff7](https://github.com/unjs/unstorage/commit/b0faff7))
+- Update dependencies ([2644320](https://github.com/unjs/unstorage/commit/2644320))
+- Update dependencies and lockfile ([061f74c](https://github.com/unjs/unstorage/commit/061f74c))
+- Remove unused imports ([9e975d9](https://github.com/unjs/unstorage/commit/9e975d9))
+- **docs:** Update dependencies ([db6c5b7](https://github.com/unjs/unstorage/commit/db6c5b7))
+
+### ✅ Tests
+
+- **mongo:** Update and disable tests ([44ffe1d](https://github.com/unjs/unstorage/commit/44ffe1d))
+
+### 🤖 CI
+
+- Test against node 18 ([ad09e94](https://github.com/unjs/unstorage/commit/ad09e94))
+
+### ❤️ Contributors
+
+- Matt Kane <m@mk.gg>
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Patryk Tomczyk 
+- Lsh 
+- Jan-Henrik Damaschke <jdamaschke@outlook.de>
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+- Mehdi 
+- Gustavo Conte 
+- Brian Evans
+
 ## v1.9.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.8.0...v1.9.0)

@@ -1,7 +1,6 @@
 import { defineDriver } from "./utils";
-import { FetchError, $fetch as _fetch } from "ofetch";
+import { type FetchError, $fetch as _fetch } from "ofetch";
 import { joinURL } from "ufo";
-import { TransactionOptions } from "../types";
 
 export interface HTTPOptions {
   base: string;

@@ -1,4 +1,3 @@
 export default defineNuxtConfig({
-  extends: "@nuxt-themes/docus",
-  modules: ["@nuxtjs/plausible"]
-});
+  extends: './_theme',
+})

@@ -1,0 +1,57 @@
+title: "Unstorage - The Web Framework for Modern JavaScript Era"
+description: "A simple, small, and fast key-value storage library for JavaScript."
+navigation: false
+hero:
+  title: "[Unstorage]{.text-primary} :br [The Universal Key-Value Storage.]{.text-4xl}"
+  description: "Unstorage provides an async Key-Value storage API with conventional features like multi driver mounting, watching, working with metadata and has 20+ built-in drivers."
+  orientation: horizontal
+  links:
+    - label: "Get started"
+      icon: "i-heroicons-rocket-launch"
+      to: "/getting-started/usage"
+      size: lg
+    - label: "Contribute on GitHub"
+      icon: "i-simple-icons-github"
+      color: "white"
+      to: "https://github.com/unjs/unstorage"
+      target: "_blank"
+      size: lg
+  code: |
+    ```ts [app.ts]
+    import { createStorage } from "unstorage";
+
+    const storage = createStorage(/* opts */);
+
+    await storage.setItem("foo:bar", "baz");
+
+    const fooBar = await storage.getItem("foo:bar");
+    // or storage.getItem('/foo/bar')
+    ```
+features:
+  title: "Shipped with many Features"
+  links:
+    - label: "Get started"
+      icon: "i-heroicons-rocket-launch"
+      trailingIcon: "i-heroicons-arrow-right-20-solid"
+      color: "gray"
+      to: "/getting-started/usage"
+      size: lg
+  items:
+    - title: "Runtime Agnostic"
+      description: "Your code will work on any JavaScript runtime including Node.js, Bun, Deno and Workers."
+      icon: "i-material-symbols-lock-open-right-outline-rounded"
+    - title: "Built-in drivers"
+      description: "Unstorage is shipped with 20+ built-in drivers for different platforms: Memory (default), FS, Redis, Memory, MongoDB, CloudFlare, GitHub..."
+      icon: "i-material-symbols-usb"
+    - title: "Snapshots"
+      description: "Expand your server and add capabilities. Your codebase will scale with your project."
+      icon: "i-material-symbols-add-a-photo-outline"
+    - title: "Multi Storages"
+      description: "Unix-style driver mounting to combine storages on different mounts."
+      icon: "i-material-symbols-view-list-outline"
+    - title: "JSON friendly"
+      description: "Unstorage automatically serialization and deserialization JSON values."
+      icon: "i-material-symbols-magic-button"
+    - title: "Binary Support"
+      description: "Store binary and raw data like images, videos, audio files, etc."
+      icon: "i-material-symbols-audio-file"

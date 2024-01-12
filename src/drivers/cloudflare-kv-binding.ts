@@ -13,7 +13,7 @@ export interface KVOptions {
 
 const DRIVER_NAME = "cloudflare-kv-binding";
 
-export default defineDriver((opts: KVOptions = { binding: 'STORAGE' }) => {
+export default defineDriver((opts: KVOptions = { binding: "STORAGE" }) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   async function getKeys(base: string = "") {
@@ -58,4 +58,3 @@ export default defineDriver((opts: KVOptions = { binding: 'STORAGE' }) => {
     },
   };
 });
-

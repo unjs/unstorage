@@ -1,5 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createError } from '.'
+import { createError } from ".";
 
 export function getBinding(binding: KVNamespace | R2Bucket | string) {
   let bindingName = "[binding]";
@@ -12,7 +12,7 @@ export function getBinding(binding: KVNamespace | R2Bucket | string) {
 
   if (!binding) {
     throw createError(
-      'Cloudflare',
+      "Cloudflare",
       `Invalid binding \`${bindingName}\`: \`${binding}\``
     );
   }
@@ -20,7 +20,7 @@ export function getBinding(binding: KVNamespace | R2Bucket | string) {
   for (const key of ["get", "put", "delete"]) {
     if (!(key in binding)) {
       throw createError(
-        'Cloudflare',
+        "Cloudflare",
         `Invalid binding \`${bindingName}\`: \`${key}\` key is missing`
       );
     }

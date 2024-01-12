@@ -14,16 +14,21 @@ import cloudflareR2BindingDriver from "unstorage/drivers/cloudflare-r2-binding";
 
 // Using binding name to be picked from globalThis
 const storage = createStorage({
-  driver: cloudflareR2BindingDriver({ binding: "MY_BUCKET" }),
+  driver: cloudflareR2BindingDriver({ binding: "BUCKET" }),
 });
 
 // Directly setting binding
 const storage = createStorage({
-  driver: cloudflareR2BindingDriver({ binding: globalThis.MY_BUCKET }),
+  driver: cloudflareR2BindingDriver({ binding: globalThis.BUCKET }),
+});
+
+// Using from Durable Objects and Workers using Modules Syntax
+const storage = createStorage({
+  driver: cloudflareR2BindingDriver({ binding: this.env.BUCKET }),
 });
 ```
 
 **Options:**
 
-- `binding`: Bucket binding or name.
+- `binding`: Bucket binding or name. Default is `BUCKET`.
 - `base`: Prefix all keys with base.

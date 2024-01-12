@@ -78,7 +78,7 @@ export function createH3StorageHandler(
         getRequestHeader(event, "accept") === "application/octet-stream";
 
       const checkNotFound = (value: any) => {
-        if (value !== null) {
+        if (value === null) {
           throw createError({
             statusMessage: "KV value not found",
             statusCode: 404,

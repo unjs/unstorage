@@ -6,7 +6,7 @@ description: Use a remote HTTP/HTTPS endpoint as data storage.
 ## Usage
 
 ::callout
-Supports built-in [http server](/http-server) methods.
+Supports built-in [http server](/getting-started/http-server) methods.
 ::
 
 This driver implements meta for each key including `mtime` (last modified time) and `status` from HTTP headers by making a `HEAD` request.

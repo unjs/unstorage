@@ -4,7 +4,7 @@ import { AwsClient } from "aws4fetch";
 import crypto from "crypto";
 import xml2js from 'xml2js'
 import js2xml from 'jstoxml'
-import { joinURL } from 'ufo'
+import { joinURL, withQuery } from 'ufo'
 
 if (!globalThis.crypto) {
     // @ts-ignore
@@ -89,16 +89,13 @@ export default defineDriver((options: S3DriverOptions) => {
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
     async function _getKeys(base?: string) {
-        const request = await getAwsClient().sign(awsUrlWithoutKey, {
+        const url = withQuery(awsUrlWithoutKey, { prefix: base && normalizedKey(base) })
+
+        const request = await getAwsClient().sign(url, {
             method: "GET",
         });
 
-        return $fetch(request,
-            {
-                params: {
-                    prefix: base && normalizedKey(base)
-                }
-            })
+        return $fetch(request)
             .then((res) => {
                 let keys: Array<string> = []
                 xml2js.parseString(res, (error, result) => {

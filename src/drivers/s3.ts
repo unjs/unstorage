@@ -62,7 +62,7 @@ export default defineDriver((options: S3DriverOptions) => {
         return awsClient
     }
 
-    const normalizedKey = (key: string) => key.replace(/:/g, "/")
+    const normalizedKey = (key: string) => key.replace(/:/g, "/").replace(/\/+$/, '')
 
     const awsUrlWithoutKey = joinURL(options.endpoint, options.bucket);
 

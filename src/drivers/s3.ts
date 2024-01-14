@@ -32,7 +32,21 @@ type SetItemOptions = undefined | {
 const DRIVER_NAME = "s3";
 
 export default defineDriver((options: S3DriverOptions) => {
-    checkOptions(options);
+    if (!options.accessKeyId) {
+        throw createRequiredError(DRIVER_NAME, "accessKeyId");
+    }
+    if (!options.secretAccessKey) {
+        throw createRequiredError(DRIVER_NAME, "secretAccessKey");
+    }
+    if (!options.bucket) {
+        throw createRequiredError(DRIVER_NAME, "bucket");
+    }
+    if (!options.endpoint) {
+        throw createRequiredError(DRIVER_NAME, "endpoint");
+    }
+    if (!options.region) {
+        throw createRequiredError(DRIVER_NAME, "region");
+    }
 
     let awsClient: AwsClient
 
@@ -50,7 +64,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
     const normalizedKey = (key: string) => key.replace(/:/g, "/")
 
-    const awsUrlWithoutKey = () => joinURL(options.endpoint, options.bucket);
+    const awsUrlWithoutKey = joinURL(options.endpoint, options.bucket);
 
     const awsUrlWithKey = (key: string) => joinURL(options.endpoint, options.bucket, normalizedKey(key));
 
@@ -75,7 +89,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
     async function _getKeys(base?: string) {
-        const request = await getAwsClient().sign(awsUrlWithoutKey(), {
+        const request = await getAwsClient().sign(awsUrlWithoutKey, {
             method: "GET",
         });
 
@@ -187,7 +201,7 @@ export default defineDriver((options: S3DriverOptions) => {
                     'Delete': keys.map((key) => ({ 'Object': { 'Key': key } }))
                 })
 
-                const request = await getAwsClient().sign(awsUrlWithoutKey(), {
+                const request = await getAwsClient().sign(awsUrlWithoutKey, {
                     method: "DELETE",
                     body,
                     headers: {
@@ -206,21 +220,3 @@ export default defineDriver((options: S3DriverOptions) => {
         },
     };
 });
-
-function checkOptions(options: S3DriverOptions) {
-    if (!options.accessKeyId) {
-        throw createRequiredError(DRIVER_NAME, "accessKeyId");
-    }
-    if (!options.secretAccessKey) {
-        throw createRequiredError(DRIVER_NAME, "secretAccessKey");
-    }
-    if (!options.bucket) {
-        throw createRequiredError(DRIVER_NAME, "bucket");
-    }
-    if (!options.endpoint) {
-        throw createRequiredError(DRIVER_NAME, "endpoint");
-    }
-    if (!options.region) {
-        throw createRequiredError(DRIVER_NAME, "region");
-    }
-}

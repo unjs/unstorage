@@ -183,6 +183,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
             opts.headers = {
                 'Content-Type': contentType,
+                'Content-Length': value.length.toString(),
                 ...opts.headers
             }
 

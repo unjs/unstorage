@@ -1,9 +1,9 @@
-title: "Unstorage - The Web Framework for Modern JavaScript Era"
-description: "A simple, small, and fast key-value storage library for JavaScript."
+title: "Unstorage: The Universal Key-Value Storage."
+description: "Unstorage is TypeScript library that provides an async key-value storage API with conventional features like multi driver mounting, watching, working with metadata and has 20+ built-in drivers."
 navigation: false
 hero:
   title: "[Unstorage]{.text-primary} :br [The Universal Key-Value Storage.]{.text-4xl}"
-  description: "Unstorage provides an async Key-Value storage API with conventional features like multi driver mounting, watching, working with metadata and has 20+ built-in drivers."
+  description: "Unstorage is TypeScript library that provides an async key-value storage API with conventional features like multi driver mounting, watching, working with metadata and has 20+ built-in drivers."
   orientation: horizontal
   links:
     - label: "Get started"

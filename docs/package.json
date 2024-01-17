@@ -7,6 +7,6 @@
     "dev": "unjs-docs dev"
   },
   "devDependencies": {
-    "unjs-docs-nightly": "0.0.1-1705486927.0c66b1d"
+    "unjs-docs-nightly": "latest"
   }
 }

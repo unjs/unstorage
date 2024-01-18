@@ -1,12 +1,9 @@
 {
-  "private": true,
-  "name": "unstorage-docs",
-  "type": "module",
   "scripts": {
     "build": "unjs-docs build",
     "dev": "unjs-docs dev"
   },
   "devDependencies": {
-    "unjs-docs-nightly": "0.0.1-1705604922.65d1ede"
+    "unjs-docs": "^0.1.0"
   }
 }

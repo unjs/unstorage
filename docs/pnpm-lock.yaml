@@ -5,9 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 devDependencies:
-  unjs-docs-nightly:
-    specifier: 0.0.1-1705604922.65d1ede
-    version: 0.0.1-1705604922.65d1ede(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0)
+  unjs-docs:
+    specifier: ^0.1.0
+    version: 0.1.0(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0)
 
 packages:
 
@@ -3476,7 +3476,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001579
-      electron-to-chromium: 1.4.637
+      electron-to-chromium: 1.4.638
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.22.2)
     dev: true
@@ -4250,8 +4250,8 @@ packages:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
-  /electron-to-chromium@1.4.637:
-    resolution: {integrity: sha512-G7j3UCOukFtxVO1vWrPQUoDk3kL70mtvjc/DC/k2o7lE0wAdq+Vwp1ipagOow+BH0uVztFysLWbkM/RTIrbK3w==}
+  /electron-to-chromium@1.4.638:
+    resolution: {integrity: sha512-gpmbAG2LbfPKcDaL5m9IKutKjUx4ZRkvGNkgL/8nKqxkXsBVYykVULboWlqCrHsh3razucgDJDuKoWJmGPdItA==}
     dev: true
 
   /emoji-regex@10.3.0:
@@ -9126,8 +9126,8 @@ packages:
     engines: {node: '>= 10.0.0'}
     dev: true
 
-  /unjs-docs-nightly@0.0.1-1705604922.65d1ede(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0):
-    resolution: {integrity: sha512-g3PktE2zdFSp8kmwcZdj48rqC7QxrMLrt2Op1IxEq5wK7g9jsPJ9O5XuodHoob2s/KMe7jqcN+/Yaw/EIlwzfA==}
+  /unjs-docs@0.1.0(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0):
+    resolution: {integrity: sha512-S3iH5hCHneb1OzbL6ZkcV3YjHhp38fjlHeTaVYfm0t+u8882G3nFYd6NZ0fu23wlNF2xIrm9tJO8cdurLt89hA==}
     hasBin: true
     dependencies:
       '@iconify/json': 2.2.170

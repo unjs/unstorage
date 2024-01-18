@@ -977,7 +977,7 @@ packages:
     resolution: {integrity: sha512-HZ+1RJJc2SZc/FPYvbsME7b8++a2uf6g9JlMm+qUMDjnCWJaF38pbrsmYq2b9whXx/3WjpBmCRkWCJy6bjSP+g==}
     dependencies:
       '@nuxt/kit': 3.9.3
-      '@nuxtjs/mdc': 0.3.1
+      '@nuxtjs/mdc': 0.3.2
       '@vueuse/core': 10.7.2(vue@3.3.13)
       '@vueuse/head': 2.0.0(vue@3.3.13)
       '@vueuse/nuxt': 10.7.2(nuxt@3.9.3)(vue@3.3.13)
@@ -1433,8 +1433,8 @@ packages:
       - supports-color
     dev: true
 
-  /@nuxtjs/mdc@0.3.1:
-    resolution: {integrity: sha512-5uj6CjzwND58wuG1ZcDyPFzmafl6RNN1HpUF+yiITeIdBS5WpPmepY14n4zwBQpt2AnQWMtFtRKXeZzVmiKc0w==}
+  /@nuxtjs/mdc@0.3.2:
+    resolution: {integrity: sha512-iSepiwfNCh5dgO3ETqSdBHWdendRuRIZ7OsgIpEQXX2J9ubHK5XvRsK3DSUOqZZ8PHbRZ3eSr/9ZF9+IeZ0GFw==}
     dependencies:
       '@nuxt/kit': 3.9.3
       '@types/hast': 3.0.3

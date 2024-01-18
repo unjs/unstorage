@@ -1,7 +1,6 @@
----
-title: Cloudflare KV (http)
-description: Store data in Cloudflare KV using the Cloudflare API v4.
----
+# Cloudflare KV (http)
+
+Store data in Cloudflare KV using the Cloudflare API v4.
 
 ## Usage
 

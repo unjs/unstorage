@@ -1,7 +1,6 @@
----
-title: MongoDB
-description: Store data in MongoDB using Node.js mongodb package.
----
+# MongoDB
+
+Store data in MongoDB using Node.js mongodb package.
 
 ## Usage
 

@@ -1,7 +1,6 @@
----
-title: CloudFlare KV (binding)
-description: Store data in Cloudflare KV and access from worker bindings.
----
+# CloudFlare KV (binding)
+
+Store data in Cloudflare KV and access from worker bindings.
 
 ## Usage
 

@@ -1,7 +1,6 @@
----
-title: Local Storage
-description: Store data in localStorage.
----
+# Local Storage
+
+Store data in localStorage.
 
 ## Usage
 

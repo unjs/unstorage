@@ -1,7 +1,6 @@
----
-title: Node.js Filesystem
-description: Store data in the real filesystem using Node.js API.
----
+# Node.js Filesystem
+
+Store data in the real filesystem using Node.js API.
 
 ## Usage
 

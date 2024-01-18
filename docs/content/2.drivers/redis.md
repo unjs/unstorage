@@ -1,7 +1,6 @@
----
-title: Redis
-description: Store data in a Redis.
----
+# Redis
+
+Store data in a Redis.
 
 ## Usage
 

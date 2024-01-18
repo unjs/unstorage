@@ -1,7 +1,6 @@
----
-title: Vercel KV
-description: Store data in a Vercel KV Store.
----
+# Vercel KV
+
+Store data in a Vercel KV Store.
 
 ::tip{to="https://vercel.com/docs/storage/vercel-kv"}
 Learn more about Vercel KV.

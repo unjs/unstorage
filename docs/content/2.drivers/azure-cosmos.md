@@ -1,7 +1,6 @@
----
-title: Azure Cosmos DB
-description: Store data in Azure Cosmos DB NoSQL API documents.
----
+# Azure Cosmos DB
+
+Store data in Azure Cosmos DB NoSQL API documents.
 
 ## Usage
 

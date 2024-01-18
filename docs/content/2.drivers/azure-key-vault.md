@@ -1,7 +1,6 @@
----
-title: Azure Key Vault
-description: Store data in a Azure Key Vault secrets.
----
+# Azure Key Vault
+
+Store data in a Azure Key Vault secrets.
 
 ## Usage
 

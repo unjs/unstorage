@@ -1,7 +1,6 @@
----
-title: Capacitor Preferences
-description: Stores data via Capacitor Preferences API on mobile devices or the local storage on the web.
----
+# Capacitor Preferences
+
+Stores data via Capacitor Preferences API on mobile devices or the local storage on the web.
 
 ## Usage
 

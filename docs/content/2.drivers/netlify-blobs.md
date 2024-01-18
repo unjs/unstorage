@@ -1,7 +1,6 @@
----
-title: Netlify Blobs
-description: Store data in Netlify Blobs.
----
+# Netlify Blobs
+
+Store data in Netlify Blobs.
 
 ## Usage
 

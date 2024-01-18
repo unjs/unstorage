@@ -1,7 +1,6 @@
----
-title: Azure Table Storage
-description: Store data in a Azure table storage.
----
+# Azure Table Storage
+
+Store data in a Azure table storage.
 
 ## Usage
 

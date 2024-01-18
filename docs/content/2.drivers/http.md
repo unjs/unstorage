@@ -1,7 +1,6 @@
----
-title: HTTP
-description: Use a remote HTTP/HTTPS endpoint as data storage.
----
+# HTTP
+
+Use a remote HTTP/HTTPS endpoint as data storage.
 
 ## Usage
 

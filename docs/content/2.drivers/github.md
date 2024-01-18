@@ -1,7 +1,6 @@
----
-title: GitHub
-description: Map files from a remote github repository (readonly).
----
+# GitHub
+
+Map files from a remote github repository (readonly).
 
 ## Usage
 

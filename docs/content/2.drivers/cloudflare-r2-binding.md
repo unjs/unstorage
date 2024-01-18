@@ -1,7 +1,6 @@
----
-title: CloudFlare R2 (binding)
-description: Store data in Cloudflare R2 buckets and access from worker bindings.
----
+# CloudFlare R2 (binding)
+
+Store data in Cloudflare R2 buckets and access from worker bindings.
 
 ::callout{color="amber" icon="i-ph-warning-duotone"}
 This is an experimental driver! This driver only works in a cloudflare worker environment and cannot be used in other runtime environments such as Node.js (r2-http driver is coming soon)

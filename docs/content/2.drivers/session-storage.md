@@ -1,7 +1,6 @@
----
-title: Session Storage
-description: Store data in sessionStorage.
----
+# Session Storage
+
+Store data in sessionStorage.
 
 # Session Storage
 

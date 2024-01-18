@@ -1,7 +1,6 @@
----
-title: IndexedDB
-description: Store key-value in IndexedDB.
----
+# IndexedDB
+
+Store key-value in IndexedDB.
 
 ## Usage
 

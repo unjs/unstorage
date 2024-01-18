@@ -1,7 +1,6 @@
----
-title: PlanetScale
-description: Stores data in MySQL database via PlanetScale.
----
+# PlanetScale
+
+Stores data in MySQL database via PlanetScale.
 
 ## Usage
 

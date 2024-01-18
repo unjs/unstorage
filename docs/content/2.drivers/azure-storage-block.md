@@ -1,7 +1,6 @@
----
-title: Azure Blob Storage
-description: Store data in a Azure blob storage.
----
+# Azure Blob Storage
+
+Store data in a Azure blob storage.
 
 ## Usage
 

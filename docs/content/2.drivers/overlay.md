@@ -1,7 +1,6 @@
----
-title: Overlay
-description: This is a special driver that creates a multi-layer overlay driver.
----
+# Overlay
+
+This is a special driver that creates a multi-layer overlay driver.
 
 All write operations happen on the top level layer while values are read from all layers.
 

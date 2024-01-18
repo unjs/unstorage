@@ -1,4 +1,7 @@
 {
+  "name": "unstorage-docs",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
     "build": "unjs-docs build",
     "dev": "unjs-docs dev"

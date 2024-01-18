@@ -3,7 +3,7 @@ title: Vercel KV
 description: Store data in a Vercel KV Store.
 ---
 
-::callout{to="https://vercel.com/docs/storage/vercel-kv" target="\_blank" icon="i-ph-info-duotone" color="blue"}
+::tip{to="https://vercel.com/docs/storage/vercel-kv"}
 Learn more about Vercel KV.
 ::
 

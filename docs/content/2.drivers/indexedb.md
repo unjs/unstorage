@@ -5,7 +5,7 @@ description: Store key-value in IndexedDB.
 
 ## Usage
 
-::callout{to="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API" target="\_blank" icon="i-ph-info-duotone" color="blue"}
+::tip{to="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API"}
 Learn more about IndexedDB.
 ::
 
@@ -32,6 +32,6 @@ const storage = createStorage({
 - `dbName`: Custom name for database. Defaults to `keyval-store`
 - `storeName`: Custom name for store. Defaults to `keyval`
 
-::callout{icon="i-ph-info-duotone" color="blue"}
+::note
 IndexedDB is a browser database. avoid using this preset on server environments.
 ::

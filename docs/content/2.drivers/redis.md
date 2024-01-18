@@ -5,7 +5,7 @@ description: Store data in a Redis.
 
 ## Usage
 
-::callout{to="https://redis.com" target="\_blank" icon="i-ph-info-duotone" color="blue"}
+::tip{to="https://redis.com"}
 Learn more about Redis.
 ::
 

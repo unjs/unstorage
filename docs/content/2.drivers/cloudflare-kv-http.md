@@ -5,7 +5,7 @@ description: Store data in Cloudflare KV using the Cloudflare API v4.
 
 ## Usage
 
-::callout{to="https://developers.cloudflare.com/api/operations/workers-kv-namespace-list-namespaces" target="\_blank" icon="i-ph-info-duotone" color="blue"}
+::tip{to="https://developers.cloudflare.com/api/operations/workers-kv-namespace-list-namespaces"}
 Learn more about Cloudflare KV API.
 ::
 

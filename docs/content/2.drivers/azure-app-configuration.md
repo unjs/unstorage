@@ -5,7 +5,7 @@ decription: Store data in the key value store of Azure App Configuration.
 
 ## Usage
 
-::callout{to="https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview" target="\_blank" icon="i-ph-info-duotone" color="blue"}
+::tip{to="https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview"}
 Learn more about Azure App Configuration.
 ::
 

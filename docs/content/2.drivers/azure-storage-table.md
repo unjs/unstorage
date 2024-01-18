@@ -5,7 +5,7 @@ description: Store data in a Azure table storage.
 
 ## Usage
 
-::callout{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables" target="\_blank" icon="i-ph-info-duotone" color="blue"}
+::tip{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables"}
 Learn more about Azure table storage.
 ::
 

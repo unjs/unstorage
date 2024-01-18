@@ -6,8 +6,8 @@ settings:
 
 devDependencies:
   unjs-docs-nightly:
-    specifier: latest
-    version: 0.0.1-1705600792.65d1ede(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0)
+    specifier: 0.0.1-1705604922.65d1ede
+    version: 0.0.1-1705604922.65d1ede(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0)
 
 packages:
 
@@ -9126,8 +9126,8 @@ packages:
     engines: {node: '>= 10.0.0'}
     dev: true
 
-  /unjs-docs-nightly@0.0.1-1705600792.65d1ede(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0):
-    resolution: {integrity: sha512-0lmh9Z8OngIC9c4UfC3nI2hR0g0oJl6dUlheZU1TGNo4US4gvfU6hiKEeTD3nWAwYZl/quJjwrDmp47uGxoPIA==}
+  /unjs-docs-nightly@0.0.1-1705604922.65d1ede(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0):
+    resolution: {integrity: sha512-g3PktE2zdFSp8kmwcZdj48rqC7QxrMLrt2Op1IxEq5wK7g9jsPJ9O5XuodHoob2s/KMe7jqcN+/Yaw/EIlwzfA==}
     hasBin: true
     dependencies:
       '@iconify/json': 2.2.170

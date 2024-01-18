@@ -1,6 +1,12 @@
 # PlanetScale
 
-Stores data in [PlanetScale](https://planetscale.com/)
+Stores data in MySQL database via PlanetScale.
+
+## Usage
+
+::tip{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
+Learn more about PlanetScale.
+::
 
 This driver stores KV information in a Planetscale DB with columns of `id`, `value`, `created_at` and `updated_at`.
 

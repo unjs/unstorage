@@ -1,6 +1,12 @@
 # HTTP
 
-Use a remote HTTP/HTTPS endpoint as data storage. Supports built-in [http server](/http-server) methods.
+Use a remote HTTP/HTTPS endpoint as data storage.
+
+## Usage
+
+::note
+Supports built-in [http server](/getting-started/http-server) methods.
+::
 
 This driver implements meta for each key including `mtime` (last modified time) and `status` from HTTP headers by making a `HEAD` request.
 

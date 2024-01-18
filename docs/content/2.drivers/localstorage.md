@@ -1,10 +1,12 @@
----
-navigation.title: Local Storage
----
-
 # Local Storage
 
-Store data in [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
+Store data in localStorage.
+
+## Usage
+
+::tip{to="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage"}
+Learn more about localStorage.
+::
 
 ```js
 import { createStorage } from "unstorage";

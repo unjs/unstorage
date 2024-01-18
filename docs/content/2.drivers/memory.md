@@ -1,4 +1,8 @@
-# Memory
+---
+title: Memory
+description: Keeps data in memory using Map.
+navigation.badge: Default
+---
 
 Keeps data in memory using [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
 

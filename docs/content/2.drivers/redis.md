@@ -8,7 +8,7 @@ Store data in a Redis.
 Learn more about Redis.
 ::
 
-::callout
+::note
 Unstorage uses [`ioredis`](https://github.com/luin/ioredis) internally to connect to Redis.
 ::
 

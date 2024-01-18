@@ -4,7 +4,7 @@ Use a remote HTTP/HTTPS endpoint as data storage.
 
 ## Usage
 
-::callout
+::note
 Supports built-in [http server](/getting-started/http-server) methods.
 ::
 

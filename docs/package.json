@@ -3,7 +3,7 @@
   "name": "unstorage-docs",
   "type": "module",
   "scripts": {
-    "build": "export && ls -la .. && unjs-docs build",
+    "build": "unjs-docs build",
     "dev": "unjs-docs dev"
   },
   "devDependencies": {

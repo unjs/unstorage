@@ -7,7 +7,7 @@ settings:
 devDependencies:
   unjs-docs-nightly:
     specifier: latest
-    version: 0.0.1-1705594803.65d1ede(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0)
+    version: 0.0.1-1705600792.65d1ede(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0)
 
 packages:
 
@@ -1236,10 +1236,10 @@ packages:
       - supports-color
     dev: true
 
-  /@nuxt/ui-pro-edge@0.7.1-28426550.013ea74(nuxt@3.9.3)(vite@5.0.11)(vue@3.3.13):
-    resolution: {integrity: sha512-mxLbIGSZzBcFaNkCOgaKzs4G4jNq1VJSRCbR6zLJ2J/rDLjrI2qqG8xcP2oRsqtp+S2qEbO+Gg4BQUyxUH3Lrg==}
+  /@nuxt/ui-pro-edge@0.7.2-28426677.47c8f66(nuxt@3.9.3)(vite@5.0.11)(vue@3.3.13):
+    resolution: {integrity: sha512-P11QQOdlDyUVnT/Bu0g/nzMMfdyDjrbpQth4XBEUfNVBpE4uoFsV0yUlnQH/q/01aB1xik+/J2xJ+2KGuHprww==}
     dependencies:
-      '@nuxt/ui': 2.12.2(nuxt@3.9.3)(vite@5.0.11)(vue@3.3.13)
+      '@nuxt/ui': 2.12.3(nuxt@3.9.3)(vite@5.0.11)(vue@3.3.13)
       '@vueuse/core': 10.7.2(vue@3.3.13)
       defu: 6.1.4
       git-url-parse: 14.0.0
@@ -1273,8 +1273,8 @@ packages:
     resolution: {integrity: sha512-5gc02Pu1HycOVUWJ8aYsWeeXcSTPe8iX8+KIrhyEtEoOSkY0eMBuo0ssljB8wALuEmepv31DlYe5gpiRwkjESA==}
     dev: true
 
-  /@nuxt/ui@2.12.2(nuxt@3.9.3)(vite@5.0.11)(vue@3.3.13):
-    resolution: {integrity: sha512-n9/yr1httrImnDC3TwYhFQ/UVvPiFc6RpBObNf1sF3zcmxDvzAO0QPQEX+UpI+3ye5EpSizTxntFVcL96h+vxA==}
+  /@nuxt/ui@2.12.3(nuxt@3.9.3)(vite@5.0.11)(vue@3.3.13):
+    resolution: {integrity: sha512-F/eoqU8pTBVCdJ1QHvWKZjXHVNNV6Q1SCgPRWJyNnfbnIi97a50/aiHVJZfvr0zp3FQKa/ogWTITF5Vxss5TtA==}
     engines: {node: '>=v16.20.2'}
     dependencies:
       '@egoist/tailwindcss-icons': 1.7.2(tailwindcss@3.4.1)
@@ -9126,14 +9126,14 @@ packages:
     engines: {node: '>= 10.0.0'}
     dev: true
 
-  /unjs-docs-nightly@0.0.1-1705594803.65d1ede(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0):
-    resolution: {integrity: sha512-Gm0OWeevAPaXUReoNagRrq625si83pZ4cm4d7KCbQYlQxhU9MNMxirl86BLeKd1JWpMTXTA7qMDP2poUJyyoqA==}
+  /unjs-docs-nightly@0.0.1-1705600792.65d1ede(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0):
+    resolution: {integrity: sha512-0lmh9Z8OngIC9c4UfC3nI2hR0g0oJl6dUlheZU1TGNo4US4gvfU6hiKEeTD3nWAwYZl/quJjwrDmp47uGxoPIA==}
     hasBin: true
     dependencies:
       '@iconify/json': 2.2.170
       '@nuxt/content': 2.10.0(nuxt@3.9.3)(vue@3.3.13)
-      '@nuxt/ui': 2.12.2(nuxt@3.9.3)(vite@5.0.11)(vue@3.3.13)
-      '@nuxt/ui-pro': /@nuxt/ui-pro-edge@0.7.1-28426550.013ea74(nuxt@3.9.3)(vite@5.0.11)(vue@3.3.13)
+      '@nuxt/ui': 2.12.3(nuxt@3.9.3)(vite@5.0.11)(vue@3.3.13)
+      '@nuxt/ui-pro': /@nuxt/ui-pro-edge@0.7.2-28426677.47c8f66(nuxt@3.9.3)(vite@5.0.11)(vue@3.3.13)
       '@nuxthq/studio': 1.0.8
       '@nuxtjs/fontaine': 0.4.1
       '@nuxtjs/google-fonts': 3.1.3

@@ -5,7 +5,7 @@ description: Store key-value in IndexedDB.
 
 ## Usage
 
-::callout{to="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API" target="_blank" icon="i-ph-info-duotone" color="blue"}
+::callout{to="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API" target="\_blank" icon="i-ph-info-duotone" color="blue"}
 Learn more about IndexedDB.
 ::
 

@@ -5,7 +5,7 @@ description: Store data in a Azure blob storage.
 
 ## Usage
 
-::callout{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob" target="_blank" icon="i-ph-info-duotone" color="blue"}
+::callout{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob" target="\_blank" icon="i-ph-info-duotone" color="blue"}
 Learn more about Azure blob storage.
 ::
 

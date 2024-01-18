@@ -5,7 +5,7 @@ description: Store data in MongoDB using Node.js mongodb package.
 
 ## Usage
 
-::callout{to="https://www.mongodb.com/" target="_blank" icon="i-ph-info-duotone" color="blue"}
+::callout{to="https://www.mongodb.com/" target="\_blank" icon="i-ph-info-duotone" color="blue"}
 Learn more about MongoDB.
 ::
 

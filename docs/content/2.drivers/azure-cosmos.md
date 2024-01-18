@@ -5,7 +5,7 @@ description: Store data in Azure Cosmos DB NoSQL API documents.
 
 ## Usage
 
-::callout{to="https://azure.microsoft.com/en-us/services/cosmos-db/" target="_blank" icon="i-ph-info-duotone" color="blue"}
+::callout{to="https://azure.microsoft.com/en-us/services/cosmos-db/" target="\_blank" icon="i-ph-info-duotone" color="blue"}
 Learn more about Azure Cosmos DB.
 ::
 

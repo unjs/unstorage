@@ -5,7 +5,7 @@ description: Stores data via Capacitor Preferences API on mobile devices or the 
 
 ## Usage
 
-::callout{to="https://capacitorjs.com/docs/apis/preferences" target="_blank" icon="i-ph-info-duotone" color="blue"}
+::callout{to="https://capacitorjs.com/docs/apis/preferences" target="\_blank" icon="i-ph-info-duotone" color="blue"}
 Learn more about Capacitor Preferences API.
 ::
 

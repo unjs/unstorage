@@ -5,7 +5,7 @@ description: Store data in Cloudflare KV and access from worker bindings.
 
 ## Usage
 
-::callout{to="https://developers.cloudflare.com/workers/runtime-apis/kv" target="_blank" icon="i-ph-info-duotone" color="blue"}
+::callout{to="https://developers.cloudflare.com/workers/runtime-apis/kv" target="\_blank" icon="i-ph-info-duotone" color="blue"}
 Learn more about Cloudflare KV.
 ::
 

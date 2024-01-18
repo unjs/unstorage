@@ -5,7 +5,7 @@ description: Store data in localStorage.
 
 ## Usage
 
-::callout{to="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage" target="_blank" icon="i-ph-info-duotone" color="blue"}
+::callout{to="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage" target="\_blank" icon="i-ph-info-duotone" color="blue"}
 Learn more about localStorage.
 ::
 

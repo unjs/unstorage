@@ -6,7 +6,7 @@ Store data in a Vercel KV Store.
 Learn more about Vercel KV.
 ::
 
-::callout{color="amber" icon="i-ph-warning-duotone"}
+::warning
 Vercel KV driver is in beta. Please check [Vercel KV Limits](https://vercel.com/docs/storage/vercel-kv/limits) and [unjs/unstorage#218](https://github.com/unjs/unstorage/issues/218) for known issues and possible workarounds.
 ::
 

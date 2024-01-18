@@ -6,7 +6,7 @@ Store data in Netlify Blobs.
 
 Store data in a [Netlify Blobs](https://docs.netlify.com/blobs/overview/) store. This is supported in both edge and Node.js runtimes, as well at during builds.
 
-::callout{color="amber" icon="i-ph-warning-duotone"}
+::warning
 Netlify Blobs are in beta.
 ::
 

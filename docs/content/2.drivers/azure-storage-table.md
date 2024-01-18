@@ -8,7 +8,7 @@ Store data in a Azure table storage.
 Learn more about Azure table storage.
 ::
 
-::callout{color="amber" icon="i-ph-warning-duotone"}
+::warning
 This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
 ::
 

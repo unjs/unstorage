@@ -4,7 +4,7 @@ Store data in a Azure Key Vault secrets.
 
 ## Usage
 
-::tip{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
+::note{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
 Learn more about Azure Key Vault secrets.
 ::
 

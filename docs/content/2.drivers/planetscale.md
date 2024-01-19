@@ -4,7 +4,7 @@ Stores data in MySQL database via PlanetScale.
 
 ## Usage
 
-::tip{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
+::note{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
 Learn more about PlanetScale.
 ::
 

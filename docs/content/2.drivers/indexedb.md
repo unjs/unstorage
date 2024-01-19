@@ -4,7 +4,7 @@ Store key-value in IndexedDB.
 
 ## Usage
 
-::tip{to="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API"}
+::note{to="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API"}
 Learn more about IndexedDB.
 ::
 

@@ -4,7 +4,7 @@ Store data in localStorage.
 
 ## Usage
 
-::tip{to="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage"}
+::note{to="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage"}
 Learn more about localStorage.
 ::
 

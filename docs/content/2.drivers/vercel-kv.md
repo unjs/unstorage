@@ -2,7 +2,7 @@
 
 Store data in a Vercel KV Store.
 
-::tip{to="https://vercel.com/docs/storage/vercel-kv"}
+::note{to="https://vercel.com/docs/storage/vercel-kv"}
 Learn more about Vercel KV.
 ::
 

@@ -4,7 +4,7 @@ Store data in a Redis.
 
 ## Usage
 
-::tip{to="https://redis.com"}
+::note{to="https://redis.com"}
 Learn more about Redis.
 ::
 

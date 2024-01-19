@@ -1,11 +1,11 @@
 ---
 title: Azure App Configuration
-decription: Store data in the key value store of Azure App Configuration.
+description: Store data in the key value store of Azure App Configuration.
 ---
 
 ## Usage
 
-::tip{to="https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview"}
+::note{to="https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview"}
 Learn more about Azure App Configuration.
 ::
 

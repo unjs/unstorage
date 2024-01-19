@@ -4,7 +4,7 @@ Store data in a Azure table storage.
 
 ## Usage
 
-::tip{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables"}
+::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables"}
 Learn more about Azure table storage.
 ::
 

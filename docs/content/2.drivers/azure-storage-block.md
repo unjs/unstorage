@@ -4,7 +4,7 @@ Store data in a Azure blob storage.
 
 ## Usage
 
-::tip{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob"}
+::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob"}
 Learn more about Azure blob storage.
 ::
 

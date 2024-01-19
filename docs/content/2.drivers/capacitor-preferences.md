@@ -4,7 +4,7 @@ Stores data via Capacitor Preferences API on mobile devices or the local storage
 
 ## Usage
 
-::tip{to="https://capacitorjs.com/docs/apis/preferences"}
+::note{to="https://capacitorjs.com/docs/apis/preferences"}
 Learn more about Capacitor Preferences API.
 ::
 

@@ -4,7 +4,7 @@ Store data in sessionStorage.
 
 # Session Storage
 
-::tip{to="https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage"}
+::note{to="https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage"}
 Learn more about sessionStorage.
 ::
 

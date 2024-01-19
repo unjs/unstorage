@@ -4,7 +4,7 @@ Store data in MongoDB using Node.js mongodb package.
 
 ## Usage
 
-::tip{to="https://www.mongodb.com/"}
+::note{to="https://www.mongodb.com/"}
 Learn more about MongoDB.
 ::
 

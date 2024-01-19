@@ -7,6 +7,6 @@
     "dev": "unjs-docs dev"
   },
   "devDependencies": {
-    "unjs-docs": "^0.1.1"
+    "unjs-docs": "npm:unjs-docs-nightly@latest"
   }
 }

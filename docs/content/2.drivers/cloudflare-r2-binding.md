@@ -6,7 +6,7 @@ Store data in Cloudflare R2 buckets and access from worker bindings.
 This is an experimental driver! This driver only works in a cloudflare worker environment and cannot be used in other runtime environments such as Node.js (r2-http driver is coming soon)
 ::
 
-::tip{to="https://developers.cloudflare.com/r2/api/workers/workers-api-reference/"}
+::note{to="https://developers.cloudflare.com/r2/api/workers/workers-api-reference/"}
 Learn more about Cloudflare R2 buckets.
 ::
 

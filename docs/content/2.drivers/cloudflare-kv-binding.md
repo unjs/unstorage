@@ -4,7 +4,7 @@ Store data in Cloudflare KV and access from worker bindings.
 
 ## Usage
 
-::tip{to="https://developers.cloudflare.com/workers/runtime-apis/kv"}
+::note{to="https://developers.cloudflare.com/workers/runtime-apis/kv"}
 Learn more about Cloudflare KV.
 ::
 

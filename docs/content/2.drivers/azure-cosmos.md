@@ -4,7 +4,7 @@ Store data in Azure Cosmos DB NoSQL API documents.
 
 ## Usage
 
-::tip{to="https://azure.microsoft.com/en-us/services/cosmos-db/"}
+::note{to="https://azure.microsoft.com/en-us/services/cosmos-db/"}
 Learn more about Azure Cosmos DB.
 ::
 

@@ -4,7 +4,7 @@ Store data in Cloudflare KV using the Cloudflare API v4.
 
 ## Usage
 
-::tip{to="https://developers.cloudflare.com/api/operations/workers-kv-namespace-list-namespaces"}
+::note{to="https://developers.cloudflare.com/api/operations/workers-kv-namespace-list-namespaces"}
 Learn more about Cloudflare KV API.
 ::
 

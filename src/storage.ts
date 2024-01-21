@@ -204,6 +204,8 @@ export function createStorage<T extends StorageValue>(
         );
       });
     },
+    findItems(key, opts = {}) {
+    },
     getItemRaw(key, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);

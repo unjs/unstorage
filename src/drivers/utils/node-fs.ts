@@ -54,20 +54,17 @@ export async function readdirRecursive(
     return [];
   }
   const entries: Dirent[] = await readdir(dir);
-  const files: string[] = [];
-  await Promise.all(
-    entries.map(async (entry) => {
-      const entryPath = resolve(dir, entry.name);
-      if (entry.isDirectory()) {
-        const dirFiles = await readdirRecursive(entryPath, ignore);
-        files.push(...dirFiles.map((f) => entry.name + "/" + f));
-      } else {
-        if (!(ignore && ignore(entry.name))) {
-          files.push(entry.name);
-        }
-      }
-    })
-  );
+  const tasks = entries.map(async (entry) => {
+    const entryPath = resolve(dir, entry.name);
+    if (entry.isDirectory()) {
+      const dirFiles = await readdirRecursive(entryPath, ignore);
+      return dirFiles.map((f) => entry.name + "/" + f);
+    } else {
+      return (ignore && ignore(entry.name)) ? [] : [entry.name];
+    }
+  });
+  const nestedFiles = await Promise.all(tasks);
+  const files = nestedFiles.flat();
   return files;
 }
 

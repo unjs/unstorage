@@ -205,7 +205,8 @@ export function createStorage<T extends StorageValue>(
       });
     },
     async findItems(key, opts = {}) {
-      const keys = await getKeys(getMount())
+      const keys = await getKeys(driver.name)
+      return keys.filter(keyd=>keyd.includes(key))
     },
     getItemRaw(key, opts = {}) {
       key = normalizeKey(key);

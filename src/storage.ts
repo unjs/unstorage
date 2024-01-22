@@ -204,7 +204,8 @@ export function createStorage<T extends StorageValue>(
         );
       });
     },
-    findItems(key, opts = {}) {
+    async findItems(key, opts = {}) {
+      const keys = await getKeys(getMount())
     },
     getItemRaw(key, opts = {}) {
       key = normalizeKey(key);

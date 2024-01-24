@@ -353,8 +353,8 @@ export function createStorage<T extends StorageValue>(
         ];
       }
       return base
-        ? allKeys.filter((key) => key.startsWith(base!) && !key.endsWith("$"))
-        : allKeys.filter((key) => !key.endsWith("$"));
+        ? allKeys.filter((key) => key.startsWith(base!) && key[key.length-1] !== "$")
+        : allKeys.filter((key) => key[key.length-1] !== "$");
     },
     // Utils
     async clear(base, opts = {}) {

@@ -67,7 +67,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
   ) => Promise<U | null>;
   /** @experimental */
   getItems: (
-    items: (string | { key: string; options?: TransactionOptions })[],
+    items: string | (string | { key: string; options?: TransactionOptions })[],
     commonOptions?: TransactionOptions
   ) => Promise<{ key: string; value: StorageValue }[]>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */

@@ -209,7 +209,7 @@ export function createStorage<T extends StorageValue>(
       const items = []
       for (const keyd of keys) {
         if (keyd.includes(key)) {
-          items.push(getItem(keyd))
+          items.push({key: keyd, value: await getItem(keyd)})
         }
       }
       return items

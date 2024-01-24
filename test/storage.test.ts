@@ -25,7 +25,7 @@ describe("storage", () => {
     await storage.setItem("test", "v1")
     await storage.setItem("test2", "v2")
     await storage.setItem("tset", "v3")
-    expect(await storage.findItems("test")).toMatchObject([{key: "test", value: "v1"},{key: "test2", value:"v2"}]);
+    expect(await storage.findItems("test")).toMatchObject([{key: "test", value: "v1"}, {key: "test2", value: "v2"}]);
   });
   
   it("getMount and getMounts", () => {

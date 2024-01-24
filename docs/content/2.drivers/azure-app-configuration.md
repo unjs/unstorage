@@ -1,7 +1,6 @@
----
-title: Azure App Configuration
-description: Store data in the key value store of Azure App Configuration.
----
+# Azure App Configuration
+
+Store data in the key value store of Azure App Configuration.
 
 ## Usage
 

@@ -204,12 +204,22 @@ export function createStorage<T extends StorageValue>(
         );
       });
     },
-    async findItems(key, opts = {}) {
+    async findItems(key) {
       const keys = await getKeys()
       const items = []
       for (const keyd of keys) {
         if (keyd.includes(key)) {
           items.push({key: keyd, value: await getItem(keyd)})
+        }
+      }
+      return items
+    },
+    async findItemsRaw(key) {
+      const keys = await getKeys()
+      const items = []
+      for (const keyd of keys) {
+        if (keyd.includes(key)) {
+          items.push({key: keyd, value: await getItemRaw(keyd)})
         }
       }
       return items

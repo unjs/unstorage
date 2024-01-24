@@ -40,7 +40,8 @@ export function createH3StorageHandler(
 ): EventHandler {
   return eventHandler(async (event) => {
     const _path = opts.resolvePath?.(event) ?? event.path;
-    const isBaseKey = _path.endsWith(":") || _path.endsWith("/");
+    const lastChar = _path[_path.length-1]
+    const isBaseKey = lastChar === ":" || lastChar === "/";
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
 
     // Authorize Request

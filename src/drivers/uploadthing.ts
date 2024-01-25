@@ -24,7 +24,6 @@ export default defineDriver<UploadThingOptions>((opts) => {
     return (client ??= new UTApi({
       apiKey: opts.apiKey,
       fetch: ofetch.native,
-      logLevel: "debug",
     }));
   };
 
@@ -64,7 +63,9 @@ export default defineDriver<UploadThingOptions>((opts) => {
     getKeys() {
       return getClient()
         .listFiles({})
-        .then((res) => res.map((file) => fromUTKey(file.key) ?? file.key));
+        .then((res) =>
+          res.map((file) => fromUTKey(file.key)).filter((k): k is string => !!k)
+        );
     },
     setItem(key, value, opts) {
       return getClient()

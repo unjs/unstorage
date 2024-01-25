@@ -92,6 +92,7 @@
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "^5.3.3",
     "unbuild": "^2.0.0",
+    "uploadthing": "^6.3.0",
     "vite": "^5.0.11",
     "vitest": "^1.2.1",
     "vue": "^3.4.14"
@@ -108,7 +109,8 @@
     "@planetscale/database": "^1.13.0",
     "@upstash/redis": "^1.28.1",
     "@vercel/kv": "^0.2.4",
-    "idb-keyval": "^6.2.1"
+    "idb-keyval": "^6.2.1",
+    "uploadthing": "^6.0.0"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {
@@ -145,6 +147,9 @@
       "optional": true
     },
     "idb-keyval": {
+      "optional": true
+    },
+    "uploadthing": {
       "optional": true
     }
   },

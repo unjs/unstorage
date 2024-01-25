@@ -148,6 +148,9 @@ devDependencies:
   unbuild:
     specifier: ^2.0.0
     version: 2.0.0(typescript@5.3.3)
+  uploadthing:
+    specifier: ^6.3.0
+    version: 6.3.0
   vite:
     specifier: ^5.0.11
     version: 5.0.11(@types/node@20.11.5)
@@ -1741,6 +1744,22 @@ packages:
 
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
+    dev: true
+
+  /@uploadthing/mime-types@0.2.2:
+    resolution: {integrity: sha512-ZUo1JHOPPMZDsUw1mOhhVDIvJGlsjj6T0xJ/YJtulyJwL43S9B5pxg1cHcRuTEgjaxj7B55jiqQ6r9mDrrjH9A==}
+    dev: true
+
+  /@uploadthing/shared@6.2.0(@uploadthing/mime-types@0.2.2):
+    resolution: {integrity: sha512-GMC1gwZa9X48RZwuY7gGse7E8TXYMAMUNaYWEQL2ctVhMZv7viCPyMyZ0yMqBsQmOeGfbmycPnUeNE9IuesJGg==}
+    peerDependencies:
+      '@uploadthing/mime-types': ^0.2.2
+    peerDependenciesMeta:
+      '@uploadthing/mime-types':
+        optional: true
+    dependencies:
+      '@uploadthing/mime-types': 0.2.2
+      std-env: 3.7.0
     dev: true
 
   /@upstash/redis@1.24.3:
@@ -7418,6 +7437,16 @@ packages:
       browserslist: 4.22.2
       escalade: 3.1.1
       picocolors: 1.0.0
+    dev: true
+
+  /uploadthing@6.3.0:
+    resolution: {integrity: sha512-Herfy6a59jFv+5pAKuyUHZrOGcDrtfo7jqKOOhfd80/5vae8LCESVauJj37ZIoUVaPQzNs6sqvF3g86O4+JNFg==}
+    engines: {node: '>=18.13.0'}
+    dependencies:
+      '@uploadthing/mime-types': 0.2.2
+      '@uploadthing/shared': 6.2.0(@uploadthing/mime-types@0.2.2)
+      consola: 3.2.3
+      std-env: 3.7.0
     dev: true
 
   /uqr@0.1.2:

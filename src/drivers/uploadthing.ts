@@ -4,6 +4,16 @@ import { UTApi } from "uploadthing/server";
 
 export interface UploadThingOptions {
   apiKey: string;
+  /**
+   * Primarily used for testing
+   * @default "https://uploadthing.com/api"
+   */
+  uploadthignApiUrl?: string;
+  /**
+   * Primarily used for testing
+   * @default "https://utfs.io/f"
+   */
+  uploadthingFileUrl?: string;
 }
 
 export default defineDriver<UploadThingOptions>((opts) => {
@@ -19,7 +29,7 @@ export default defineDriver<UploadThingOptions>((opts) => {
 
   const getUTFetch = () => {
     return (utFetch ??= ofetch.create({
-      baseURL: "https://uploadthing.com/api",
+      baseURL: opts.uploadthignApiUrl ?? "https://uploadthing.com/api",
       headers: {
         "x-uploadthing-api-key": opts.apiKey,
       },
@@ -34,22 +44,14 @@ export default defineDriver<UploadThingOptions>((opts) => {
       }).then((res) => res.ok);
     },
     getItem(key) {
-      return ofetch(`https://utfs.io/f/${key}`);
+      return ofetch(`/${key}`, {
+        baseURL: opts.uploadthingFileUrl ?? "https://utfs.io/f",
+      });
     },
     getItemRaw(key) {
       return ofetch
         .native(`https://utfs.io/f/${key}`)
         .then((res) => res.arrayBuffer());
-    },
-    getItems(items) {
-      return Promise.all(
-        items.map((item) =>
-          ofetch(`https://utfs.io/f/${item.key}`).then((res) => ({
-            key: item.key,
-            value: res,
-          }))
-        )
-      );
     },
     getKeys() {
       return getClient()

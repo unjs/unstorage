@@ -1,5 +1,5 @@
 import { defineDriver } from "./utils";
-import { $fetch, ofetch, $Fetch } from "ofetch";
+import { ofetch, $Fetch } from "ofetch";
 import { UTApi } from "uploadthing/server";
 
 export interface UploadThingOptions {
@@ -13,7 +13,7 @@ export default defineDriver<UploadThingOptions>((opts) => {
   const getClient = () => {
     return (client ??= new UTApi({
       apiKey: opts.apiKey,
-      fetch: $fetch.native,
+      fetch: ofetch.native,
     }));
   };
 

@@ -71,8 +71,7 @@ describe(
 
     testDriver({
       driver: driver({
-        apiKey:
-          "sk_live_4603822c7c4574cc90495ff3b31204adf20311bc953903d8081be7a5176f31aa",
+        apiKey: "sk_live_xxx",
       }),
       async additionalTests(ctx) {},
     });

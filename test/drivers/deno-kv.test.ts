@@ -61,8 +61,7 @@ denoKVtest("in memory w/ no prefix", async ({ createStorage, run }) => {
   await run(storage);
 });
 
-// only run this test if you have a local instance of deno-kv running on 4512 with password MYPASSWORD1234
-denoKVtest.skipIf(!HAS_DENO_KV_LOCAL)(
+denoKVtest.runIf(HAS_DENO_KV_LOCAL)(
   "url and access token",
   async ({ createStorage, run }) => {
     const storage = createStorage({
@@ -73,12 +72,15 @@ denoKVtest.skipIf(!HAS_DENO_KV_LOCAL)(
   }
 );
 
-denoKVtest("url and access token", async ({ expect, createStorage, run }) => {
-  expect(async () => {
-    const storage = createStorage({
-      path: "http://0.0.00:4512",
-      accessToken: "MYPASSWORD1234",
-    });
-    await run(storage);
-  }).rejects.toThrow();
-});
+denoKVtest.skipIf(HAS_DENO_KV_LOCAL)(
+  "url and access token",
+  async ({ expect, createStorage, run }) => {
+    expect(async () => {
+      const storage = createStorage({
+        path: "http://0.0.00:4512",
+        accessToken: "MYPASSWORD1234",
+      });
+      await run(storage);
+    }).rejects.toThrow();
+  }
+);

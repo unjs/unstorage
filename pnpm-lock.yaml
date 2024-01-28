@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@deno/kv':
+    specifier: ^0.7.0
+    version: 0.7.0
   anymatch:
     specifier: ^3.1.3
     version: 3.1.3
@@ -749,6 +752,51 @@ packages:
       enabled: 2.0.0
       kuler: 2.0.0
     dev: true
+
+  /@deno/kv-darwin-arm64@0.7.0:
+    resolution: {integrity: sha512-PaTriht31Rb08TwWdAkmODrLNnGnl9l8nlF/0aae/v7dzJ5FeaoX+0RgxTD+m90quG3ynsdLsY8iCa+st+MkiA==}
+    engines: {node: '>= 18'}
+    cpu: [arm64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@deno/kv-darwin-x64@0.7.0:
+    resolution: {integrity: sha512-Yw4Gmn6opUJ6ZVuztNaGS4yt11KyJI/juTAyzNiY5H3VhHD7xVm+peG4SGkr6Hq/vXVGcQM3Lldw5b3aJJQYSg==}
+    engines: {node: '>= 18'}
+    cpu: [x64]
+    os: [darwin]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@deno/kv-linux-x64-gnu@0.7.0:
+    resolution: {integrity: sha512-D6xJcx4HSUbgomxGV2lGUgKrRmwHNMmCbu8XRxBjIgpsKrFK1W6w+KitI92wMCgEIOAFAnfeyrYxtMzh2ZdYTw==}
+    engines: {node: '>= 18'}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@deno/kv-win32-x64-msvc@0.7.0:
+    resolution: {integrity: sha512-0UWf6a+T7e/1uOcUgUKTrMupIQSnCI02856ecu9JwutajSvvbSgoi+jpmaUnYW6QqcXjY8ECI/28CQi1DvYYhw==}
+    engines: {node: '>= 18'}
+    cpu: [x64]
+    os: [win32]
+    requiresBuild: true
+    dev: false
+    optional: true
+
+  /@deno/kv@0.7.0:
+    resolution: {integrity: sha512-+vYCIWDQq+03RKwh85WDBVplwT7gimcLyLezj6C3OuMwaTWfPy9NVmA5y4Mwpoht0+H4CjknEUE7LrfZJAcQ7w==}
+    optionalDependencies:
+      '@deno/kv-darwin-arm64': 0.7.0
+      '@deno/kv-darwin-x64': 0.7.0
+      '@deno/kv-linux-x64-gnu': 0.7.0
+      '@deno/kv-win32-x64-msvc': 0.7.0
+    dev: false
 
   /@esbuild/aix-ppc64@0.19.11:
     resolution: {integrity: sha512-FnzU0LyE3ySQk7UntJO4+qIiQgI7KoODnZg5xzXIrFJlKd2P2gwHsHY4927xj9y5PJmJSzULiUCWmv7iWnNa7g==}

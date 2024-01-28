@@ -46,6 +46,7 @@ export function normalizeKey(key?: string) {
   if (!key) {
     return "";
   }
+  console.log(key);
   return key
     .split("?")[0]
     .replace(/[/\\]/g, ":")

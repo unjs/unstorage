@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { test } from "vitest";
 import { createStorage, type Storage } from "../../src";
 import kv, { DenoKVOptions } from "../../src/drivers/deno-kv";
 

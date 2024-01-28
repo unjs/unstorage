@@ -72,3 +72,13 @@ denoKVtest.skipIf(!HAS_DENO_KV_LOCAL)(
     await run(storage);
   }
 );
+
+denoKVtest("url and access token", async ({ expect, createStorage, run }) => {
+  expect(async () => {
+    const storage = createStorage({
+      path: "http://0.0.00:4512",
+      accessToken: "MYPASSWORD1234",
+    });
+    await run(storage);
+  }).rejects.toThrow();
+});

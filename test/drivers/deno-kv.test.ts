@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { createStorage, type Storage } from "../../src";
 import kv, { DenoKVOptions } from "../../src/drivers/deno-kv";
-import { it } from "vitest";
+
+const HAS_DENO_KV_LOCAL = false;
 
 const denoKVtest = test.extend<{
   createStorage: (opts: DenoKVOptions) => Storage;
@@ -20,7 +21,7 @@ const denoKVtest = test.extend<{
       const value = await storage.getItem("testKey");
       expect(value).toBe("testValue");
 
-      // Test hasIte
+      // Test hasItem
       const hasItem = await storage.hasItem("testKey");
       expect(hasItem).toBe(true);
 
@@ -60,10 +61,14 @@ denoKVtest("in memory w/ no prefix", async ({ createStorage, run }) => {
   await run(storage);
 });
 
-denoKVtest("url and access token", async ({ createStorage, run }) => {
-  const storage = createStorage({
-    path: "http://0.0.00:4512",
-    accessToken: "MYPASSWORD1234",
-  });
-  await run(storage);
-});
+// only run this test if you have a local instance of deno-kv running on 4512 with password MYPASSWORD1234
+denoKVtest.skipIf(!HAS_DENO_KV_LOCAL)(
+  "url and access token",
+  async ({ createStorage, run }) => {
+    const storage = createStorage({
+      path: "http://0.0.00:4512",
+      accessToken: "MYPASSWORD1234",
+    });
+    await run(storage);
+  }
+);

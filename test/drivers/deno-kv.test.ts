@@ -1,36 +1,69 @@
 import { describe, expect, test } from "vitest";
-import { createStorage } from "../../src";
-import kv from "../../src/drivers/deno-kv";
+import { createStorage, type Storage } from "../../src";
+import kv, { DenoKVOptions } from "../../src/drivers/deno-kv";
+import { it } from "vitest";
 
-const storage = createStorage({
-  driver: kv({
-    prefix: "unstorage",
-  }),
+const denoKVtest = test.extend<{
+  createStorage: (opts: DenoKVOptions) => Storage;
+  run: (storage: Storage) => Promise<void>;
+}>({
+  createStorage: async ({}, use) => {
+    use((opts) => {
+      return createStorage({
+        driver: kv(opts),
+      });
+    });
+  },
+  run: async ({ expect }, use) => {
+    use(async (storage: Storage) => {
+      await storage.setItem("testKey", "testValue");
+      const value = await storage.getItem("testKey");
+      expect(value).toBe("testValue");
+
+      // Test hasIte
+      const hasItem = await storage.hasItem("testKey");
+      expect(hasItem).toBe(true);
+
+      // Test removeItem
+      await storage.removeItem("testKey");
+      const removedValue = await storage.getItem("testKey");
+      expect(removedValue).toBe(null);
+
+      // Test getKeys
+      await storage.setItem("testKey1", "testValue1");
+      await storage.setItem("testKey2", "testValue2");
+      const keys = await storage.getKeys();
+      expect(keys).toEqual(expect.arrayContaining(["testKey1", "testKey2"]));
+      // Test clear
+      await storage.clear();
+      const newKeys = await storage.getKeys();
+      expect(newKeys).toHaveLength(0);
+
+      // Test dispose
+      await storage.dispose();
+      expect(async () => {
+        await storage.setItem("testKey", "testValue");
+      }).rejects.toThrowError();
+    });
+  },
 });
 
-test("deno-kv", async () => {
-  // Test setItem and getItem
-  await storage.setItem("testKey", "testValue");
-  const value = await storage.getItem("testKey");
-  expect(value).toBe("testValue");
+denoKVtest("in memory w/ prefix", async ({ createStorage, run }) => {
+  const storage = createStorage({
+    prefix: "unstorage",
+  });
+  await run(storage);
+});
 
-  // Test hasItem
-  const hasItem = await storage.hasItem("testKey");
-  expect(hasItem).toBe(true);
+denoKVtest("in memory w/ no prefix", async ({ createStorage, run }) => {
+  const storage = createStorage({});
+  await run(storage);
+});
 
-  // Test removeItem
-  await storage.removeItem("testKey");
-  const removedValue = await storage.getItem("testKey");
-  expect(removedValue).toBe(null);
-
-  // Test getKeys
-  await storage.setItem("testKey1", "testValue1");
-  await storage.setItem("testKey2", "testValue2");
-  const keys = await storage.getKeys();
-  expect(keys).toEqual(expect.arrayContaining(["testKey1", "testKey2"]));
-
-  // Test clear
-  await storage.clear();
-  const newKeys = await storage.getKeys();
-  expect(newKeys).toHaveLength(0);
+denoKVtest("url and access token", async ({ createStorage, run }) => {
+  const storage = createStorage({
+    path: "http://0.0.00:4512",
+    accessToken: "MYPASSWORD1234",
+  });
+  await run(storage);
 });

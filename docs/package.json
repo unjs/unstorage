@@ -7,6 +7,6 @@
     "dev": "unjs-docs dev"
   },
   "devDependencies": {
-    "unjs-docs": "^0.1.7"
+    "unjs-docs": "^0.1.8"
   }
 }

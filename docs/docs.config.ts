@@ -11,4 +11,5 @@ export default defineDocsConfig({
     "/http-server": "/getting-started/http-server",
     "/custom-driver": "/getting-started/custom-driver",
   },
+  themeColor: '#f98007',
 });

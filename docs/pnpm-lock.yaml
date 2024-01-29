@@ -6,8 +6,8 @@ settings:
 
 devDependencies:
   unjs-docs:
-    specifier: ^0.1.7
-    version: 0.1.7(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0)
+    specifier: ^0.1.8
+    version: 0.1.8(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0)
 
 packages:
 
@@ -8826,6 +8826,10 @@ packages:
       source-map-support: 0.5.21
     dev: true
 
+  /theme-colors@0.1.0:
+    resolution: {integrity: sha512-6gTEHQqWlQNiOEGHCSSQmU//E5SnXHJ4H7oHQOD8x77CvNYNQAmt73dqR71mzw5ULV87zaHLxK5pIBnsToFuZw==}
+    dev: true
+
   /thenify-all@1.6.0:
     resolution: {integrity: sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==}
     engines: {node: '>=0.8'}
@@ -9143,8 +9147,8 @@ packages:
     engines: {node: '>= 10.0.0'}
     dev: true
 
-  /unjs-docs@0.1.7(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0):
-    resolution: {integrity: sha512-i+ZepzsuPhizD1ms5QnWP4onhG6hsM3z04EDf1YEbBW+2UT+QFgu8jMbvW136kD0JR70ZyxZNOKcdbSoyDumsA==}
+  /unjs-docs@0.1.8(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(postcss@8.4.33)(vite@5.0.11)(webpack@5.89.0):
+    resolution: {integrity: sha512-hTlTEm0KKH5PHq/7ApFZD6Z9iI5/BbqTYTWorfc6GbGq1DjG31ckpxBZcU9XXbMHqev/uquLa00XZs5qsvNRHg==}
     hasBin: true
     dependencies:
       '@iconify/json': 2.2.172
@@ -9164,6 +9168,7 @@ packages:
       nuxt-og-image: 2.2.4(@nuxt/devtools@1.0.8)(@vue/compiler-core@3.4.15)(nuxt@3.9.3)(postcss@8.4.33)(vite@5.0.11)(vue@3.3.13)(webpack@5.89.0)
       pkg-types: 1.0.3
       tailwindcss: 3.4.1
+      theme-colors: 0.1.0
       vue: 3.3.13
       vue-router: 4.2.5(vue@3.3.13)
     transitivePeerDependencies:

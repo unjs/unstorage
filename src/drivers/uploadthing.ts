@@ -8,8 +8,6 @@ export interface UploadThingOptions {
 
 export default defineDriver<UploadThingOptions>((opts) => {
   let client: UTApi;
-  let utApiFetch: $Fetch;
-
   const getClient = () => {
     return (client ??= new UTApi({
       apiKey: opts.apiKey,
@@ -17,34 +15,17 @@ export default defineDriver<UploadThingOptions>((opts) => {
     }));
   };
 
-  // The UTApi doesn't have all methods we need right now, so use raw fetch
-  const getUTApiFetch = () => {
-    return (utApiFetch ??= ofetch.create({
-      method: "POST",
-      baseURL: "https://uploadthing.com/api",
-      headers: {
-        "x-uploadthing-api-key": opts.apiKey,
-      },
-    }));
-  };
-
-  function getKeys() {
-    return getClient()
-      .listFiles({})
-      .then((res) =>
-        res.map((file) => file.customId).filter((k): k is string => !!k)
-      );
+  async function getKeys() {
+    const res = await getClient().listFiles({});
+    return res.map((file) => file.customId).filter((k): k is string => !!k);
   }
 
   return {
-    hasItem(id) {
-      return getClient()
-        .getFileUrls(id, { keyType: "customId" })
-        .then((res) => {
-          return !!res.length;
-        });
+    hasItem: async (id) => {
+      const res = await getClient().getFileUrls(id, { keyType: "customId" });
+      return res.length > 0;
     },
-    async getItem(id) {
+    getItem: async (id) => {
       const url = await getClient()
         .getFileUrls(id, { keyType: "customId" })
         .then((res) => {
@@ -53,43 +34,35 @@ export default defineDriver<UploadThingOptions>((opts) => {
       if (!url) return null;
       return ofetch(url).then((res) => res.text());
     },
-    getKeys() {
+    getKeys: () => {
       return getKeys();
     },
-    setItem(key, value, opts) {
-      return getClient()
-        .uploadFiles(
-          Object.assign(new Blob([value]), {
-            name: key,
-            customId: key,
-          }),
-          { metadata: opts?.metadata }
-        )
-        .then(() => {});
+    setItem: async (key, value, opts) => {
+      await getClient().uploadFiles(
+        Object.assign(new Blob([value]), {
+          name: key,
+          customId: key,
+        }),
+        { metadata: opts?.metadata }
+      );
     },
-    setItems(items, opts) {
-      return getClient()
-        .uploadFiles(
-          items.map((item) =>
-            Object.assign(new Blob([item.value]), {
-              name: item.key,
-              customId: item.key,
-            })
-          ),
-          { metadata: opts?.metadata }
-        )
-        .then(() => {});
+    setItems: async (items, opts) => {
+      await getClient().uploadFiles(
+        items.map((item) =>
+          Object.assign(new Blob([item.value]), {
+            name: item.key,
+            customId: item.key,
+          })
+        ),
+        { metadata: opts?.metadata }
+      );
     },
-    removeItem(key, opts) {
-      return getClient()
-        .deleteFiles([key], { keyType: "customId" })
-        .then(() => {});
+    removeItem: async (key, opts) => {
+      await getClient().deleteFiles([key], { keyType: "customId" });
     },
-    async clear() {
+    clear: async () => {
       const keys = await getKeys();
-      return getClient()
-        .deleteFiles(keys, { keyType: "customId" })
-        .then(() => {});
+      await getClient().deleteFiles(keys, { keyType: "customId" });
     },
 
     // getMeta(key, opts) {

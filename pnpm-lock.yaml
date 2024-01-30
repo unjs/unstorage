@@ -149,8 +149,8 @@ devDependencies:
     specifier: ^2.0.0
     version: 2.0.0(typescript@5.3.3)
   uploadthing:
-    specifier: ^6.3.0
-    version: 6.3.0
+    specifier: 6.3.2-canary.a35b49f
+    version: 6.3.2-canary.a35b49f
   vite:
     specifier: ^5.0.11
     version: 5.0.11(@types/node@20.11.5)
@@ -7439,8 +7439,8 @@ packages:
       picocolors: 1.0.0
     dev: true
 
-  /uploadthing@6.3.0:
-    resolution: {integrity: sha512-Herfy6a59jFv+5pAKuyUHZrOGcDrtfo7jqKOOhfd80/5vae8LCESVauJj37ZIoUVaPQzNs6sqvF3g86O4+JNFg==}
+  /uploadthing@6.3.2-canary.a35b49f:
+    resolution: {integrity: sha512-62FAyXOsz9PGX4pzpCwXKmW0hgLrd/NgYyx5nfmKZXZMNT4ceA83PA/8MAZ0M2l3ySCbyJikbt4ZFnA+xbEZHw==}
     engines: {node: '>=18.13.0'}
     dependencies:
       '@uploadthing/mime-types': 0.2.2

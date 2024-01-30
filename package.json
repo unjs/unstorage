@@ -92,7 +92,7 @@
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "^5.3.3",
     "unbuild": "^2.0.0",
-    "uploadthing": "^6.3.0",
+    "uploadthing": "6.3.2-canary.a35b49f",
     "vite": "^5.0.11",
     "vitest": "^1.2.1",
     "vue": "^3.4.14"

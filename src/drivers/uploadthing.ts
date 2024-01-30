@@ -9,16 +9,6 @@ export interface UploadThingOptions {
 export default defineDriver<UploadThingOptions>((opts) => {
   let client: UTApi;
   let utApiFetch: $Fetch;
-  let utFsFetch: $Fetch;
-
-  const internalToUTKeyMap = new Map<string, string>();
-  const fromUTKey = (utKey: string) => {
-    for (const [key, value] of internalToUTKeyMap.entries()) {
-      if (value === utKey) {
-        return key;
-      }
-    }
-  };
 
   const getClient = () => {
     return (client ??= new UTApi({
@@ -38,76 +28,68 @@ export default defineDriver<UploadThingOptions>((opts) => {
     }));
   };
 
-  const getUTFsFetch = () => {
-    return (utFsFetch ??= ofetch.create({
-      baseURL: "https://utfs.io/f",
-    }));
-  };
+  function getKeys() {
+    return getClient()
+      .listFiles({})
+      .then((res) =>
+        res.map((file) => file.customId).filter((k): k is string => !!k)
+      );
+  }
 
   return {
-    hasItem(key) {
-      const utkey = internalToUTKeyMap.get(key);
-      if (!utkey) return false;
-      // This is the best endpoint we got currently...
-      return getUTApiFetch()("/getFileUrl", {
-        body: { fileKeys: [utkey] },
-      }).then((res) => {
-        return !!res?.data?.length;
-      });
+    hasItem(id) {
+      return getClient()
+        .getFileUrls(id, { keyType: "customId" })
+        .then((res) => {
+          return !!res.length;
+        });
     },
-    getItem(key) {
-      const utkey = internalToUTKeyMap.get(key);
-      if (!utkey) return null;
-      return getUTFsFetch()(`/${utkey}`).then((r) => r.text());
+    async getItem(id) {
+      const url = await getClient()
+        .getFileUrls(id, { keyType: "customId" })
+        .then((res) => {
+          return res[0]?.url;
+        });
+      if (!url) return null;
+      return ofetch(url).then((res) => res.text());
     },
     getKeys() {
-      return getClient()
-        .listFiles({})
-        .then((res) =>
-          res.map((file) => fromUTKey(file.key)).filter((k): k is string => !!k)
-        );
+      return getKeys();
     },
     setItem(key, value, opts) {
       return getClient()
-        .uploadFiles(Object.assign(new Blob([value]), { name: key }), {
-          metadata: opts?.metadata,
-        })
-        .then((response) => {
-          if (response.error) throw response.error;
-          internalToUTKeyMap.set(key, response.data.key);
-        });
+        .uploadFiles(
+          Object.assign(new Blob([value]), {
+            name: key,
+            customId: key,
+          }),
+          { metadata: opts?.metadata }
+        )
+        .then(() => {});
     },
     setItems(items, opts) {
       return getClient()
         .uploadFiles(
           items.map((item) =>
-            Object.assign(new Blob([item.value]), { name: item.key })
+            Object.assign(new Blob([item.value]), {
+              name: item.key,
+              customId: item.key,
+            })
           ),
           { metadata: opts?.metadata }
         )
-        .then((responses) => {
-          responses.map((response) => {
-            if (response.error) throw response.error;
-            internalToUTKeyMap.set(response.data.name, response.data.key);
-          });
-        });
+        .then(() => {});
     },
     removeItem(key, opts) {
-      const utkey = internalToUTKeyMap.get(key);
-      if (!utkey) throw new Error(`Unknown key: ${key}`);
       return getClient()
-        .deleteFiles([utkey])
-        .then(() => {
-          internalToUTKeyMap.delete(key);
-        });
+        .deleteFiles([key], { keyType: "customId" })
+        .then(() => {});
     },
     async clear() {
-      const utkeys = Array.from(internalToUTKeyMap.values());
+      const keys = await getKeys();
       return getClient()
-        .deleteFiles(utkeys)
-        .then(() => {
-          internalToUTKeyMap.clear();
-        });
+        .deleteFiles(keys, { keyType: "customId" })
+        .then(() => {});
     },
 
     // getMeta(key, opts) {

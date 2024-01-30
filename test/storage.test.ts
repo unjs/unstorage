@@ -64,6 +64,30 @@ describe("storage", () => {
     `);
   });
 
+  it("REGRESSION: setItems doeesn't upload twice", async () => {
+    const setItem = vi.fn();
+    const setItems = vi.fn();
+
+    const driver = memory();
+    const storage = createStorage({
+      driver: {
+        ...driver,
+        setItem: (...args) => {
+          setItem(...args);
+          return driver.setItem?.(...args);
+        },
+        setItems: (...args) => {
+          setItems(...args);
+          return driver.setItems?.(...args);
+        },
+      },
+    });
+
+    await storage.setItems([{ key: "foo.txt", value: "bar" }]);
+    expect(setItem).toHaveBeenCalledTimes(0);
+    expect(setItems).toHaveBeenCalledTimes(1);
+  });
+
   it("snapshot", async () => {
     const storage = createStorage();
     await restoreSnapshot(storage, data);

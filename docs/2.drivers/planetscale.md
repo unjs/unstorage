@@ -1,10 +1,14 @@
+---
+icon: simple-icons:planetscale
+---
+
 # PlanetScale
 
-Stores data in MySQL database via PlanetScale.
+> Store data in MySQL database via PlanetScale.
 
 ## Usage
 
-::note{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
+::read-more{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
 Learn more about PlanetScale.
 ::
 
@@ -20,7 +24,7 @@ To use, you will need to install `@planetscale/database` in your project:
 }
 ```
 
-Then you can create a table to store your data by running the following query in your Planetscale database, where <storage> is the name of the table you want to use:
+Then you can create a table to store your data by running the following query in your Planetscale database, where `<storage>` is the name of the table you want to use:
 
 ```
 create table <storage> (

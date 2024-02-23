@@ -1,6 +1,10 @@
+---
+icon: ic:baseline-http
+---
+
 # HTTP
 
-Use a remote HTTP/HTTPS endpoint as data storage.
+> Use a remote HTTP/HTTPS endpoint as data storage.
 
 ## Usage
 

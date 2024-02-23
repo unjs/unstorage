@@ -1,6 +1,10 @@
+---
+icon: material-symbols:cached-rounded
+---
+
 # LRU Cache
 
-Keeps cached data in memory using LRU Cache.
+> Keeps cached data in memory using LRU Cache.
 
 ## Usage
 

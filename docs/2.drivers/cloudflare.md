@@ -1,10 +1,60 @@
-# Cloudflare KV (http)
+---
+icon: devicon-plain:cloudflareworkers
+---
 
-Store data in Cloudflare KV using the Cloudflare API v4.
+# Cloudflare
 
-## Usage
+> Store data in Cloudflare KV or R2 storage.
 
-::note{to="https://developers.cloudflare.com/api/operations/workers-kv-namespace-list-namespaces"}
+## CloudFlare KV (binding)
+
+> Store data in Cloudflare KV and access from worker bindings.
+
+### Usage
+
+::read-more{to="https://developers.cloudflare.com/workers/runtime-apis/kv"}
+Learn more about Cloudflare KV.
+::
+
+**Note:** This driver only works in a cloudflare worker environment, use `cloudflare-kv-http` for other environments.
+
+You need to create and assign a KV. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
+
+```js
+import { createStorage } from "unstorage";
+import cloudflareKVBindingDriver from "unstorage/drivers/cloudflare-kv-binding";
+
+// Using binding name to be picked from globalThis
+const storage = createStorage({
+  driver: cloudflareKVBindingDriver({ binding: "STORAGE" }),
+});
+
+// Directly setting binding
+const storage = createStorage({
+  driver: cloudflareKVBindingDriver({ binding: globalThis.STORAGE }),
+});
+
+// Using from Durable Objects and Workers using Modules Syntax
+const storage = createStorage({
+  driver: cloudflareKVBindingDriver({ binding: this.env.STORAGE }),
+});
+
+// Using outside of Cloudflare Workers (like Node.js)
+// Use cloudflare-kv-http
+```
+
+**Options:**
+
+- `binding`: KV binding or name of namespace. Default is `STORAGE`.
+- `base`: Adds prefix to all stored keys
+
+## Cloudflare KV (http)
+
+> Store data in Cloudflare KV using the Cloudflare API v4.
+
+### Usage
+
+::read-more{to="https://developers.cloudflare.com/api/operations/workers-kv-namespace-list-namespaces"}
 Learn more about Cloudflare KV API.
 ::
 
@@ -64,3 +114,42 @@ const storage = createStorage({
 - `removeItem`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-key-value-pair) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
 - `getKeys`: Maps to [List a Namespace's Keys](https://api.cloudflare.com/#workers-kv-namespace-list-a-namespace-s-keys) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/keys`
 - `clear`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-multiple-key-value-pairs) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/bulk`
+
+## CloudFlare R2 (binding)
+
+> Store data in Cloudflare R2 buckets and access from worker bindings.
+
+::warning
+This is an experimental driver! This driver only works in a cloudflare worker environment and cannot be used in other runtime environments such as Node.js (r2-http driver is coming soon)
+::
+
+::read-more{to="https://developers.cloudflare.com/r2/api/workers/workers-api-reference/"}
+Learn more about Cloudflare R2 buckets.
+::
+
+You need to create and assign a R2 bucket. See [R2 Bindings](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/#create-a-binding) for more information.
+
+```js
+import { createStorage } from "unstorage";
+import cloudflareR2BindingDriver from "unstorage/drivers/cloudflare-r2-binding";
+
+// Using binding name to be picked from globalThis
+const storage = createStorage({
+  driver: cloudflareR2BindingDriver({ binding: "BUCKET" }),
+});
+
+// Directly setting binding
+const storage = createStorage({
+  driver: cloudflareR2BindingDriver({ binding: globalThis.BUCKET }),
+});
+
+// Using from Durable Objects and Workers using Modules Syntax
+const storage = createStorage({
+  driver: cloudflareR2BindingDriver({ binding: this.env.BUCKET }),
+});
+```
+
+**Options:**
+
+- `binding`: Bucket binding or name. Default is `BUCKET`.
+- `base`: Prefix all keys with base.

@@ -1,10 +1,14 @@
+---
+icon: teenyicons:mongodb-outline
+---
+
 # MongoDB
 
-Store data in MongoDB using Node.js mongodb package.
+> Store data in MongoDB using Node.js mongodb package.
 
 ## Usage
 
-::note{to="https://www.mongodb.com/"}
+::read-more{to="https://www.mongodb.com/"}
 Learn more about MongoDB.
 ::
 

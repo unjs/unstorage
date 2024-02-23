@@ -1,12 +1,16 @@
+---
+icon: nonicons:capacitor-16
+---
+
 # Capacitor Preferences
 
-Stores data via Capacitor Preferences API on mobile devices or the local storage on the web.
+> Stores data via Capacitor Preferences API on mobile devices or the local storage on the web.
 
-## Usage
-
-::note{to="https://capacitorjs.com/docs/apis/preferences"}
+::read-more{to="https://capacitorjs.com/docs/apis/preferences"}
 Learn more about Capacitor Preferences API.
 ::
+
+## Usage
 
 To use this driver, you need to install and sync `@capacitor/preferences` inside your capacitor project:
 

@@ -1,10 +1,14 @@
+---
+icon: simple-icons:redis
+---
+
 # Redis
 
-Store data in a Redis.
+> Store data in a Redis.
 
 ## Usage
 
-::note{to="https://redis.com"}
+::read-more{to="https://redis.com"}
 Learn more about Redis.
 ::
 

@@ -1,8 +1,12 @@
+---
+icon: gg:vercel
+---
+
 # Vercel KV
 
-Store data in a Vercel KV Store.
+> Store data in a Vercel KV Store.
 
-::note{to="https://vercel.com/docs/storage/vercel-kv"}
+::read-more{to="https://vercel.com/docs/storage/vercel-kv"}
 Learn more about Vercel KV.
 ::
 

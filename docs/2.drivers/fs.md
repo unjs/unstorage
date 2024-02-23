@@ -1,6 +1,10 @@
-# Node.js Filesystem
+---
+icon: ph:file-light
+---
 
-Store data in the real filesystem using Node.js API.
+# Filesystem (Node.js)
+
+> Store data in the filesystem using Node.js API.
 
 ## Usage
 

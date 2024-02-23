@@ -1,6 +1,10 @@
+---
+icon: mdi:github
+---
+
 # GitHub
 
-Map files from a remote github repository (readonly).
+> Map files from a remote github repository (readonly).
 
 ## Usage
 

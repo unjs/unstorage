@@ -1,6 +1,10 @@
+---
+icon: teenyicons:netlify-solid
+---
+
 # Netlify Blobs
 
-Store data in Netlify Blobs.
+> Store data in Netlify Blobs.
 
 ## Usage
 

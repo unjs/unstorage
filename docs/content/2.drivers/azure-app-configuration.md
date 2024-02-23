@@ -1,6 +1,12 @@
 # Azure App Configuration
 
-Store data in the key value store of [Azure App Configuration](https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview).
+Store data in the key value store of Azure App Configuration.
+
+## Usage
+
+::note{to="https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview"}
+Learn more about Azure App Configuration.
+::
 
 This driver uses the configuration store as a key value store. It uses the `key` as the name and the `value` as content. You can also use labels to differentiate between different environments (dev, prod, etc.) and use prefixes to differentiate between different applications (app01, app02, etc.).
 

@@ -1,10 +1,14 @@
 # CloudFlare R2 (binding)
 
-::alert
+Store data in Cloudflare R2 buckets and access from worker bindings.
+
+::warning
 This is an experimental driver! This driver only works in a cloudflare worker environment and cannot be used in other runtime environments such as Node.js (r2-http driver is coming soon)
 ::
 
-Store data in [Cloudflare R2](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/) buckets and access from worker bindings.
+::note{to="https://developers.cloudflare.com/r2/api/workers/workers-api-reference/"}
+Learn more about Cloudflare R2 buckets.
+::
 
 You need to create and assign a R2 bucket. See [R2 Bindings](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/#create-a-binding) for more information.
 
@@ -14,16 +18,21 @@ import cloudflareR2BindingDriver from "unstorage/drivers/cloudflare-r2-binding";
 
 // Using binding name to be picked from globalThis
 const storage = createStorage({
-  driver: cloudflareR2BindingDriver({ binding: "MY_BUCKET" }),
+  driver: cloudflareR2BindingDriver({ binding: "BUCKET" }),
 });
 
 // Directly setting binding
 const storage = createStorage({
-  driver: cloudflareR2BindingDriver({ binding: globalThis.MY_BUCKET }),
+  driver: cloudflareR2BindingDriver({ binding: globalThis.BUCKET }),
+});
+
+// Using from Durable Objects and Workers using Modules Syntax
+const storage = createStorage({
+  driver: cloudflareR2BindingDriver({ binding: this.env.BUCKET }),
 });
 ```
 
 **Options:**
 
-- `binding`: Bucket binding or name.
+- `binding`: Bucket binding or name. Default is `BUCKET`.
 - `base`: Prefix all keys with base.

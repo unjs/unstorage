@@ -1,6 +1,12 @@
 # PlanetScale
 
-Stores data in [PlanetScale](https://planetscale.com/)
+Stores data in MySQL database via PlanetScale.
+
+## Usage
+
+::note{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
+Learn more about PlanetScale.
+::
 
 This driver stores KV information in a Planetscale DB with columns of `id`, `value`, `created_at` and `updated_at`.
 
@@ -44,5 +50,5 @@ const storage = createStorage({
 **Options:**
 
 - **`url`** (required): You can find your URL in the [Planetscale dashboard](https://planetscale.com/docs/tutorials/connect-nodejs-app).
-- `storage`: The name of the table to read from. It defaults to `storage`.
+- `table`: The name of the table to read from. It defaults to `storage`.
 - `boostCache`: Whether to enable cached queries: see [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).

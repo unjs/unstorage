@@ -1,6 +1,12 @@
 # Azure Blob Storage
 
-Store data in a Azure blob storage [storage-blob](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob).
+Store data in a Azure blob storage.
+
+## Usage
+
+::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob"}
+Learn more about Azure blob storage.
+::
 
 This driver stores KV information in a Azure blob storage blob. The same container is used for all entries. Each entry is stored in a separate blob with the key as the blob name and the value as the blob content.
 

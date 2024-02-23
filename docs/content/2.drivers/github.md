@@ -1,10 +1,8 @@
----
-navigation.title: GitHub
----
-
 # GitHub
 
 Map files from a remote github repository (readonly).
+
+## Usage
 
 This driver fetches all possible keys once and keep it in cache for 10 minutes. Due to GitHub rate limit, it is highly recommanded to provide a token. It only applies to fetching keys.
 

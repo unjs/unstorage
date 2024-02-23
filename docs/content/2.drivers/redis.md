@@ -1,6 +1,16 @@
 # Redis
 
-Store data in a [Redis](https://redis.com/) storage using [ioredis](https://github.com/luin/ioredis).
+Store data in a Redis.
+
+## Usage
+
+::note{to="https://redis.com"}
+Learn more about Redis.
+::
+
+::note
+Unstorage uses [`ioredis`](https://github.com/luin/ioredis) internally to connect to Redis.
+::
 
 Usage with single Redis instance:
 

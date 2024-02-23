@@ -1,8 +1,18 @@
 # Azure Table Storage
 
-⚠️ This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
+Store data in a Azure table storage.
 
-Store data in a Azure table storage [data-tables](https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables).
+## Usage
+
+::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables"}
+Learn more about Azure table storage.
+::
+
+::warning
+This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
+::
+
+Store data in a [data-tables]().
 
 This driver stores KV information in a Azure table storage. The same partition key is used for all keys and the field `unstorageValue` is used to store the value.
 

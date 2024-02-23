@@ -1,8 +1,8 @@
----
-navigation.title: Node.js Filesystem
----
-
 # Node.js Filesystem
+
+Store data in the real filesystem using Node.js API.
+
+## Usage
 
 Maps data to the real filesystem using directory structure for nested keys. Supports watching using [chokidar](https://github.com/paulmillr/chokidar).
 

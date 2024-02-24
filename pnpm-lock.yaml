@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@noble/ciphers':
+    specifier: ^0.4.1
+    version: 0.4.1
   anymatch:
     specifier: ^3.1.3
     version: 3.1.3
@@ -38,6 +41,9 @@ dependencies:
   ufo:
     specifier: ^1.3.2
     version: 1.3.2
+  uncrypto:
+    specifier: ^0.1.3
+    version: 0.1.3
 
 devDependencies:
   '@azure/app-configuration':
@@ -1101,6 +1107,10 @@ packages:
     resolution: {integrity: sha512-MccXfC/b8vRr5FWJTvMN7L3aBgtrbhNLWQsSu802C/R2Gmlb5C9/OC0IY4i0+BEZ8rS+F4TU/8NQsVlqHHVESQ==}
     engines: {node: ^14.16.0 || >=16.0.0}
     dev: true
+
+  /@noble/ciphers@0.4.1:
+    resolution: {integrity: sha512-QCOA9cgf3Rc33owG0AYBB9wszz+Ul2kramWN8tXG44Gyciud/tbkEqvxRF/IpqQaBpRBNi9f4jdNxqB2CQCIXg==}
+    dev: false
 
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}

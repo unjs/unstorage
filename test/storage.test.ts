@@ -4,6 +4,7 @@ import {
   snapshot,
   restoreSnapshot,
   prefixStorage,
+  encryptedStorage,
 } from "../src";
 import memory from "../src/drivers/memory";
 
@@ -136,6 +137,8 @@ describe("storage", () => {
 });
 
 describe("utils", () => {
+  const encryptionKey = "e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=";
+
   it("prefixStorage", async () => {
     const storage = createStorage();
     const pStorage = prefixStorage(storage, "foo");
@@ -153,6 +156,53 @@ describe("utils", () => {
     expect(await mntStorage.getKeys()).toStrictEqual(["foo:x", "foo:y"]);
     // Get keys from sub-storage
     expect(await mntStorage.getKeys("foo")).toStrictEqual(["foo:x", "foo:y"]);
+  });
+
+  it("prefixed encryptedStorage", async () => {
+    const storage = createStorage();
+    const pStorage = prefixStorage(storage, "foo");
+    const encStorage = encryptedStorage(pStorage, encryptionKey, false);
+    await encStorage.setItem("x", "bar");
+    await encStorage.setItem("y", "baz");
+    expect(await encStorage.getItem("x")).toBe("bar");
+    expect(await encStorage.getKeys()).toStrictEqual(["x", "y"]);
+    expect(await storage.getItem("x")).toBeNull();
+    expect(await storage.getItem("foo:x")).toBeTypeOf("object");
+    expect(await storage.getItem("foo:x")).toBeTypeOf("object");
+
+    // Higher order storage
+    const secondStorage = createStorage();
+    secondStorage.mount("/mnt", storage);
+    const mntStorage = prefixStorage(secondStorage, "mnt");
+
+    expect(await mntStorage.getKeys()).toStrictEqual(["foo:x", "foo:y"]);
+    // Get keys from sub-storage
+    expect(await mntStorage.getKeys("foo")).toStrictEqual(["foo:x", "foo:y"]);
+  });
+
+  it("prefixed encryptedStorage with key encryption", async () => {
+    const storage = createStorage();
+    const pStorage = prefixStorage(storage, "foo");
+    const encStorage = encryptedStorage(pStorage, encryptionKey, true);
+    await encStorage.setItem("x", "bar");
+    await encStorage.setItem("y", "baz");
+    expect(await encStorage.getItem("x")).toBe("bar");
+    expect(await encStorage.getKeys()).toStrictEqual(["x", "y"]);
+    expect(await storage.getItem("x")).toBeNull();
+    expect(await storage.getItem("foo:x")).toBeTypeOf("object");
+    expect(await storage.getItem("foo:x")).toBeTypeOf("object");
+
+    // Higher order storage
+    const secondStorage = createStorage();
+    secondStorage.mount("/mnt", storage);
+    const mntStorage = prefixStorage(secondStorage, "mnt");
+
+    for (const key of await mntStorage.getKeys()) {
+      expect(key).toContain("foo:$enc:");
+    }
+    for (const key of await mntStorage.getKeys("foo")) {
+      expect(key).toContain("foo:$enc:");
+    }
   });
 
   it("stringify", () => {

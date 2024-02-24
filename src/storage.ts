@@ -231,7 +231,7 @@ export function createStorage<T extends StorageValue>(
     async setItems(items, commonOptions) {
       await runBatch(items, commonOptions, async (batch) => {
         if (batch.driver.setItems) {
-          await asyncCall(
+          return asyncCall(
             batch.driver.setItems,
             batch.items.map((item) => ({
               key: item.relativeKey,

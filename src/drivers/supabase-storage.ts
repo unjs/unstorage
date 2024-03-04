@@ -72,8 +72,8 @@ export default defineDriver((opts: SupabaseOptions) => {
     if (data.length === 0 || !data[0].id) return null;
     return {
       ...data[0],
-    }
-  }
+    };
+  };
 
   return {
     name: DRIVER_NAME,

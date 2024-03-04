@@ -11,7 +11,7 @@ Learn more about Supabase Storage.
 ::
 
 ::warning
-Supabase Storage is in beta.
+Supabase Storage driver is in beta.
 ::
 
 To use it, you will need to install `@supabase/supabase-js` in your project

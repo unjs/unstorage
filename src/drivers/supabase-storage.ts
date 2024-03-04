@@ -37,7 +37,7 @@ export default defineDriver((opts: SupabaseOptions) => {
     return client;
   };
 
-  const _getKeys = async (prefix: string): Promise<string[]> => {
+  const getKeys = async (prefix: string): Promise<string[]> => {
     const { data, error } = await getClient()
       .storage.from(opts.bucket!)
       .list(prefix);
@@ -48,8 +48,9 @@ export default defineDriver((opts: SupabaseOptions) => {
     const keys: string[] = [];
     for (const { name, id } of data) {
       const key = `${prefix !== "" ? prefix + "/" : ""}${name}`;
+      // If it's a folder, get the keys inside. The Supabase docs do not mention how to differentiate between a file and a folder, but it is observed that a folder has an id with a value of null.
       if (!id) {
-        keys.push(...(await _getKeys(key)));
+        keys.push(...(await getKeys(key)));
       } else {
         keys.push(key);
       }
@@ -123,11 +124,11 @@ export default defineDriver((opts: SupabaseOptions) => {
     },
     getMeta,
     async getKeys(base) {
-      const keys = await _getKeys(r(base));
+      const keys = await getKeys(r(base));
       return opts.base ? keys.map((key) => key.slice(opts.base!.length)) : keys;
     },
     async clear(base) {
-      const keys = await _getKeys(r(base));
+      const keys = await getKeys(r(base));
       await getClient().storage.from(opts.bucket!).remove(keys);
     },
   };

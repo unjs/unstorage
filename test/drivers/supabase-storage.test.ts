@@ -2,6 +2,7 @@ import { describe, vi } from "vitest";
 import driver from "../../src/drivers/supabase-storage";
 import { testDriver } from "./utils";
 import { createStorage } from "../../src";
+// The @supabase/storage-js package is included solely for the purpose of importing types.
 import { FileObject, StorageClient, StorageError } from "@supabase/storage-js";
 import { joinKeys, normalizeKey } from "../../src/drivers/utils";
 

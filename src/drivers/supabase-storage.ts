@@ -57,21 +57,28 @@ export default defineDriver((opts: SupabaseOptions) => {
     return keys;
   };
 
+  const getMeta = async (key: string) => {
+    const segments = r(key).split("/");
+    const prefix = segments.slice(0, -1).join("/");
+    const name = segments.at(-1);
+    const { data, error } = await getClient()
+      .storage.from(opts.bucket!)
+      .list(prefix, {
+        search: name,
+      });
+
+    if (error) throw error;
+    if (data.length === 0 || !data[0].id) return null;
+    return {
+      ...data[0],
+    }
+  }
+
   return {
     name: DRIVER_NAME,
     options: opts,
     async hasItem(key) {
-      const segments = r(key).split("/");
-      const prefix = segments.slice(0, -1).join("/");
-      const name = segments.at(-1);
-      const { data, error } = await getClient()
-        .storage.from(opts.bucket!)
-        .list(prefix, {
-          search: name,
-        });
-
-      if (error) throw error;
-      return data.length > 0 && !!data[0].id;
+      return getMeta(key).then(Boolean);
     },
     async getItem(key) {
       const { data, error } = await getClient()
@@ -114,6 +121,7 @@ export default defineDriver((opts: SupabaseOptions) => {
 
       if (error) throw error;
     },
+    getMeta,
     async getKeys(base) {
       const keys = await _getKeys(r(base));
       return opts.base ? keys.map((key) => key.slice(opts.base!.length)) : keys;

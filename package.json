@@ -70,6 +70,8 @@
     "@types/jsdom": "^21.1.6",
     "@types/mri": "^1.1.5",
     "@types/node": "^20.11.5",
+    "@supabase/storage-js": "2.5.5",
+    "@supabase/supabase-js": "^2.39.7",
     "@upstash/redis": "^1.28.1",
     "@vercel/kv": "^0.2.4",
     "@vitejs/plugin-vue": "^5.0.3",
@@ -106,6 +108,7 @@
     "@capacitor/preferences": "^5.0.6",
     "@netlify/blobs": "^6.4.2",
     "@planetscale/database": "^1.13.0",
+    "@supabase/supabase-js": "^2.39.7",
     "@upstash/redis": "^1.28.1",
     "@vercel/kv": "^0.2.4",
     "idb-keyval": "^6.2.1"
@@ -136,6 +139,9 @@
       "optional": true
     },
     "@planetscale/database": {
+      "optional": true
+    },
+    "@supabase/supabase-js": {
       "optional": true
     },
     "@upstash/redis": {

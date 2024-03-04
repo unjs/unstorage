@@ -99,13 +99,13 @@
     "@azure/app-configuration": "^1.5.0",
     "@azure/cosmos": "^4.0.0",
     "@azure/data-tables": "^13.2.2",
-    "@azure/identity": "^4.0.0",
-    "@azure/keyvault-secrets": "^4.7.0",
+    "@azure/identity": "^4.0.1",
+    "@azure/keyvault-secrets": "^4.8.0",
     "@azure/storage-blob": "^12.17.0",
-    "@capacitor/preferences": "^5.0.6",
-    "@netlify/blobs": "^6.4.2",
-    "@planetscale/database": "^1.13.0",
-    "@upstash/redis": "^1.28.1",
+    "@capacitor/preferences": "^5.0.7",
+    "@netlify/blobs": "^6.5.0",
+    "@planetscale/database": "^1.16.0",
+    "@upstash/redis": "^1.28.4",
     "@vercel/kv": "^0.2.4",
     "idb-keyval": "^6.2.1"
   },
@@ -147,5 +147,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@8.14.1"
+  "packageManager": "pnpm@8.15.4"
 }

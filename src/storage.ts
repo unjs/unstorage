@@ -453,6 +453,7 @@ export function createStorage<T extends StorageValue>(
     set: (key, value, opts = {}) => storage.setItem(key, value, opts),
     has: (key, opts = {}) => storage.hasItem(key, opts),
     del: (key, opts = {}) => storage.removeItem(key, opts),
+    remove: (key, opts = {}) => storage.removeItem(key, opts),
   };
 
   return storage;

@@ -131,4 +131,5 @@ export interface Storage<T extends StorageValue = StorageValue> {
   set: Storage["setItem"];
   has: Storage["hasItem"];
   del: Storage["removeItem"];
+  remove: Storage["removeItem"];
 }

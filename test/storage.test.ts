@@ -169,5 +169,8 @@ describe("utils", () => {
     expect(await storage.keys()).toEqual(["foo"]);
     await storage.del("foo");
     expect(await storage.has("foo")).toBe(false);
+    await storage.setItem("bar", "baz");
+    await storage.remove("bar");
+    expect(await storage.has("bar")).toBe(false);
   });
 });

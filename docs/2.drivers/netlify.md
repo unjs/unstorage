@@ -75,3 +75,10 @@ These are not normally needed, but are available for advanced use cases or for u
 
 - `apiURL`
 - `edgeURL`
+
+## Updating stores from Netlify Blobs beta
+There has been a change in the way global blob stores are stored in `@netlify/blobs` version `7.0.0` which means that you will not be able to access objects in global stores created by older versions until you migrate them. This does not affect deploy-scoped stores, nor does it affect objects created with the new version. You can migrate objects in your old stores by running the following command in the project directory using the latest version of the Netlify CLI:
+
+```sh
+netlify recipes blobs-migrate <name of store>
+```

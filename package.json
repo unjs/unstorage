@@ -103,7 +103,7 @@
     "@azure/keyvault-secrets": "^4.8.0",
     "@azure/storage-blob": "^12.17.0",
     "@capacitor/preferences": "^5.0.7",
-    "@netlify/blobs": "^7.0.0",
+    "@netlify/blobs": "^6.5.0 || ^7.0.0",
     "@planetscale/database": "^1.16.0",
     "@upstash/redis": "^1.28.4",
     "@vercel/kv": "^0.2.4",

@@ -21,7 +21,7 @@ const storage = createStorage({
 });
 ```
 
-You can use Unstorage in a Netlify edge function without installing any dependencies:
+When using Unstorage in a Netlify edge function you should use a URL import. This does not apply if you are compiling your code in a framework - just if you are creating your own edge functions.
 
 ```js
 import { createStorage } from "https://esm.sh/unstorage";

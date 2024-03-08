@@ -8,11 +8,7 @@ icon: teenyicons:netlify-solid
 
 ## Usage
 
-Store data in a [Netlify Blobs](https://docs.netlify.com/blobs/overview/) store. This is supported in both edge and Node.js runtimes, as well at during builds.
-
-::warning
-Netlify Blobs are in beta.
-::
+Store data in a [Netlify Blobs](https://docs.netlify.com/blobs/overview/) store. This is supported in both edge and Node.js function runtimes, as well at during builds.
 
 ```js
 import { createStorage } from "unstorage";
@@ -25,7 +21,25 @@ const storage = createStorage({
 });
 ```
 
-You can create a deploy-scoped store by settings `deployScoped` option to `true`. This will mean that the deploy only has access to its own store. The store is managed alongside the deploy, with the same deploy previews, deletes, and rollbacks.
+You can use Unstorage in a Netlify edge function without installing any dependencies:
+
+```js
+import { createStorage } from "https://esm.sh/unstorage";
+import netlifyBlobsDriver from "https://esm.sh/unstorage/drivers/netlify-blobs";
+
+export default async function handler(request: Request) {
+
+  const storage = createStorage({
+    driver: netlifyBlobsDriver({
+      name: "blob-store-name",
+    }),
+  });
+
+  // ...
+}
+```
+
+You can create a deploy-scoped store by settings `deployScoped` option to `true`. This will mean that the deploy only has access to its own store. The store is managed alongside the deploy, with the same deploy previews, deletes, and rollbacks. This is required during builds, which only have access to deploy-scoped stores.
 
 ```js
 import { createStorage } from "unstorage";
@@ -43,7 +57,7 @@ To use, you will need to install `@netlify/blobs` as dependency or devDependency
 ```json
 {
   "devDependencies": {
-    "@netlify/blobs": "*"
+    "@netlify/blobs": "latest"
   }
 }
 ```

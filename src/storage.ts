@@ -69,13 +69,15 @@ export function createStorage<T extends StorageValue>(
       }));
   };
 
-  const onChange: WatchCallback = (event, key) => {
+  const onChange: WatchCallback = (event, resource) => {
     if (!context.watching) {
       return;
     }
-    key = normalizeKey(key);
+    resource = normalizeKey(
+      typeof resource === "string" ? resource : resource.key
+    );
     for (const listener of context.watchListeners) {
-      listener(event, key);
+      listener(event, resource);
     }
   };
 

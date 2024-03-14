@@ -16,6 +16,12 @@ Learn more about Redis.
 Unstorage uses [`ioredis`](https://github.com/luin/ioredis) internally to connect to Redis.
 ::
 
+To use it, you will need to install `ioredis` in your project:
+
+```bash [Terminal]
+npm i ioredis
+```
+
 Usage with single Redis instance:
 
 ```js

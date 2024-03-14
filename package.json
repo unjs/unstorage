@@ -47,7 +47,6 @@
     "chokidar": "^3.6.0",
     "destr": "^2.0.3",
     "h3": "^1.11.1",
-    "ioredis": "^5.3.2",
     "listhen": "^1.7.2",
     "lru-cache": "^10.2.0",
     "mri": "^1.2.0",
@@ -80,6 +79,7 @@
     "eslint-config-unjs": "^0.2.1",
     "fake-indexeddb": "^5.0.2",
     "idb-keyval": "^6.2.1",
+    "ioredis": "^5.3.2",
     "ioredis-mock": "^8.9.0",
     "jiti": "^1.21.0",
     "jsdom": "^24.0.0",
@@ -107,7 +107,8 @@
     "@planetscale/database": "^1.16.0",
     "@upstash/redis": "^1.28.4",
     "@vercel/kv": "^0.2.4",
-    "idb-keyval": "^6.2.1"
+    "idb-keyval": "^6.2.1",
+    "ioredis": "^5.3.2"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {
@@ -144,6 +145,9 @@
       "optional": true
     },
     "idb-keyval": {
+      "optional": true
+    },
+    "ioredis": {
       "optional": true
     }
   },

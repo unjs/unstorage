@@ -10,9 +10,8 @@ icon: gg:vercel
 Learn more about Vercel KV.
 ::
 
-::warning
-Vercel KV driver is in beta. Please check [Vercel KV Limits](https://vercel.com/docs/storage/vercel-kv/limits) and [unjs/unstorage#218](https://github.com/unjs/unstorage/issues/218) for known issues and possible workarounds.
-::
+> [!NOTE]
+> Please check [Vercel KV Limits](https://vercel.com/docs/storage/vercel-kv/limits).
 
 ```js
 import { createStorage } from "unstorage";

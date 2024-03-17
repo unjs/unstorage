@@ -18,9 +18,7 @@ This driver uses the configuration store as a key value store. It uses the `key`
 
 To use it, you will need to install `@azure/app-configuration` and `@azure/identity` in your project:
 
-```bash
-npm i @azure/app-configuration @azure/identity
-```
+:pm-install{name="@azure/app-configuration @azure/identity"}
 
 Usage:
 
@@ -67,9 +65,7 @@ This driver stores KV information in a NoSQL API Cosmos DB collection as documen
 
 To use it, you will need to install `@azure/cosmos` and `@azure/identity` in your project:
 
-```bash
-npm i @azure/cosmos @azure/identity
-```
+:pm-install{name="@azure/cosmos @azure/identity"}
 
 Usage:
 
@@ -115,9 +111,7 @@ Please be aware that key vault secrets don't have the fastest access time and ar
 
 To use it, you will need to install `@azure/keyvault-secrets` and `@azure/identity` in your project:
 
-```bash
-npm i @azure/keyvault-secrets @azure/identity
-```
+:pm-install{name="@azure/keyvault-secrets @azure/identity"}
 
 Usage:
 
@@ -160,9 +154,7 @@ This driver stores KV information in a Azure blob storage blob. The same contain
 
 To use it, you will need to install `@azure/storage-blob` and `@azure/identity` in your project:
 
-```bash
-npm i @azure/storage-blob @azure/identity
-```
+:pm-install{name="@azure/storage-blob @azure/identity"}
 
 Please make sure that the container you want to use exists in your storage account.
 
@@ -215,9 +207,7 @@ This driver stores KV information in a Azure table storage. The same partition k
 
 To use it, you will need to install `@azure/data-table` and `@azure/identity` in your project:
 
-```bash
-npm i @azure/data-table @azure/identity
-```
+:pm-install{name="@azure/data-table @azure/identity"}
 
 Please make sure that the table you want to use exists in your storage account.
 

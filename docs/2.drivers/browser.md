@@ -66,9 +66,7 @@ Learn more about IndexedDB.
 
 To use it, you will need to install [`idb-keyval`](https://github.com/jakearchibald/idb-keyval) in your project:
 
-```bash [Terminal]
-npm i idb-keyval
-```
+:pm-install{name="idb-keyval"}
 
 Usage:
 

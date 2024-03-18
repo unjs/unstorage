@@ -18,9 +18,7 @@ Unstorage uses [`ioredis`](https://github.com/luin/ioredis) internally to connec
 
 To use it, you will need to install `ioredis` in your project:
 
-```bash [Terminal]
-npm i ioredis
-```
+:pm-install{name="ioredis"}
 
 Usage with single Redis instance:
 

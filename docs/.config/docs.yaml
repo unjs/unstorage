@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://unpkg.com/undocs/schema/config.json
 name: unstorage
-shortDescription: Universal Key-Value Storage.
-description: Unstorage is TypeScript library that provides an async key-value storage API with conventional features like multi driver mounting, watching, working with metadata and has 20+ built-in drivers.
+shortDescription: Universal Key-Value.
+description: Unified key-value storage API with conventional features and 20+ built-in drivers.
 github: unjs/unstorage
 themeColor: amber
 url: https://unstorage.unjs.io

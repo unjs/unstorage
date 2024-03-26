@@ -13,6 +13,10 @@ import anymatch from "anymatch";
 
 export interface FSStorageOptions {
   base?: string;
+  /**
+   * @default true
+   */
+  baseResolve?: boolean;
   ignore?: string[];
   readOnly?: boolean;
   noClear?: boolean;
@@ -23,7 +27,9 @@ const PATH_TRAVERSE_RE = /\.\.\:|\.\.$/;
 
 const DRIVER_NAME = "fs";
 
-export default defineDriver((opts: FSStorageOptions = {}) => {
+export default defineDriver((opts: FSStorageOptions = {
+  baseResolve: true
+}) => {
   if (!opts.base) {
     throw createRequiredError(DRIVER_NAME, "base");
   }
@@ -32,7 +38,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     opts.ignore = ["**/node_modules/**", "**/.git/**"];
   }
 
-  opts.base = resolve(opts.base);
+  opts.base = opts.baseResolve ? resolve(opts.base) : opts.base;
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(

@@ -75,7 +75,7 @@
     "@vue/compiler-sfc": "^3.4.23",
     "azurite": "^3.29.0",
     "changelogen": "^0.5.5",
-    "eslint": "^8.57.0",
+    "eslint": "^9.1.1",
     "eslint-config-unjs": "^0.2.1",
     "fake-indexeddb": "^5.0.2",
     "idb-keyval": "^6.2.1",

@@ -58,8 +58,8 @@ importers:
         specifier: ^12.17.0
         version: 12.17.0
       '@capacitor/preferences':
-        specifier: ^5.0.7
-        version: 5.0.7(@capacitor/core@5.7.2)
+        specifier: ^6.0.0
+        version: 6.0.0(@capacitor/core@5.7.2)
       '@cloudflare/workers-types':
         specifier: ^4.20240423.0
         version: 4.20240423.0
@@ -384,10 +384,10 @@ packages:
   '@capacitor/core@5.7.2':
     resolution: {integrity: sha512-/OUtfINmk7ke32VtKIHRAy8NlunbeK+aCqCHOS+fvtr7nUsOJXPkYgbgqZp/CWXET/gSK1xxMecaVBzpE98UKA==}
 
-  '@capacitor/preferences@5.0.7':
-    resolution: {integrity: sha512-JvfGP1m8nITWEFdBpKR9HXNeBjLKwO0q1pry7Z5lYrYmCrbyRBLWzaGZGll8py4KmGWL3F5+PZvhrpT4gPoeAQ==}
+  '@capacitor/preferences@6.0.0':
+    resolution: {integrity: sha512-4A49UKEc/sgf28TFNwRX4Kx6G0oMeRC9btA2voaEuL2LZd2l8IMfAEFDIrfQWi5rYE6RWenEUexUTyiEZnYFvQ==}
     peerDependencies:
-      '@capacitor/core': ^5.0.0
+      '@capacitor/core': ^6.0.0
 
   '@cloudflare/workers-types@4.20240423.0':
     resolution: {integrity: sha512-ssuccb3j+URp6mP2p0PcQE9vmS3YeKBQnALHF9P3yQfUAFozuhTsDTbqmL+zPrJvUcG7SL2xVQkNDF9QJeKDZw==}
@@ -4886,7 +4886,7 @@ snapshots:
     dependencies:
       tslib: 2.6.2
 
-  '@capacitor/preferences@5.0.7(@capacitor/core@5.7.2)':
+  '@capacitor/preferences@6.0.0(@capacitor/core@5.7.2)':
     dependencies:
       '@capacitor/core': 5.7.2
 

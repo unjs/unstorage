@@ -9,7 +9,7 @@ icon: ic:baseline-http
 ## Usage
 
 ::note
-Supports built-in [http server](/getting-started/http-server) methods.
+Supports built-in [http server](/guide/http-server) methods.
 ::
 
 This driver implements meta for each key including `mtime` (last modified time) and `status` from HTTP headers by making a `HEAD` request.

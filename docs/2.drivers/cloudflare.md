@@ -60,7 +60,7 @@ Learn more about Cloudflare KV API.
 
 You need to create a KV namespace. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
 
-**Note:** This driver uses native fetch and works universally! For using directly in a cloudflare worker environment, please use `cloudflare-kv-binding` driver for best performance!
+**Note:** This driver uses native fetch and works universally! For a direct usage in a cloudflare worker environment, please use `cloudflare-kv-binding` driver for best performance!
 
 ```js
 import { createStorage } from "unstorage";

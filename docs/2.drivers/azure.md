@@ -6,7 +6,7 @@ icon: mdi:microsoft-azure
 
 ## Azure App Configuration
 
-Store data in the key value store of Azure App Configuration.
+Store data in the key-value store of Azure App Configuration.
 
 ### Usage
 
@@ -14,7 +14,7 @@ Store data in the key value store of Azure App Configuration.
 Learn more about Azure App Configuration.
 ::
 
-This driver uses the configuration store as a key value store. It uses the `key` as the name and the `value` as content. You can also use labels to differentiate between different environments (dev, prod, etc.) and use prefixes to differentiate between different applications (app01, app02, etc.).
+This driver uses the configuration store as a key-value store. It uses the `key` as the name and the `value` as content. You can also use labels to differentiate between different environments (dev, prod, etc.) and use prefixes to differentiate between different applications (app01, app02, etc.).
 
 To use it, you will need to install `@azure/app-configuration` and `@azure/identity` in your project:
 
@@ -40,7 +40,7 @@ const storage = createStorage({
 The driver supports the following authentication methods:
 
 - **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate. <br>
-  ⚠️ Make sure that your Managed Identity or personal account has the `App Configuration Data Owner` role assigned to it, even if you already are `Contributor` or `Owner` on the app configuration resource.
+  ⚠️ Make sure that your Managed Identity or personal account has the `App Configuration Data Owner` role assigned to it, even if you already are the `Contributor` or `Owner` on the app configuration resource.
 - **`connectionString`**: The app configuration connection string. Not recommended for use in production.
 
 **Options:**
@@ -84,7 +84,7 @@ const storage = createStorage({
 **Authentication:**
 
 - **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate. <br>
-  ⚠️ Make sure that your Managed Identity or personal account has at least `Cosmos DB Built-in Data Contributor` role assigned to it. If you already are `Contributor` or `Owner` on the resource it should also be enough, but does not accomplish a model of least privilege.
+  ⚠️ Make sure that your Managed Identity or personal account has at least `Cosmos DB Built-in Data Contributor` role assigned to it. If you already are the `Contributor` or `Owner` on the resource it should also be enough, but that does not accomplish a model of least privilege.
 - **`accountKey`**: CosmosDB account key. If not provided, the driver will use the DefaultAzureCredential (recommended).
 
 **Options:**

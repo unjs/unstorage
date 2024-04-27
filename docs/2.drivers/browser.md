@@ -4,7 +4,7 @@ icon: ph:browser-thin
 
 # Browser
 
-> Browser based storages
+> Browser based storages.
 
 ## Local Storage
 
@@ -86,5 +86,5 @@ const storage = createStorage({
 - `storeName`: Custom name for store. Defaults to `keyval`
 
 ::note
-IndexedDB is a browser database. avoid using this preset on server environments.
+IndexedDB is a browser database. Avoid using this preset on server environments.
 ::

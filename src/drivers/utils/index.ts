@@ -1,4 +1,4 @@
-import type { Driver } from "../../types";
+import type { Driver } from "../..";
 
 type DriverFactory<T> = (opts: T) => Driver;
 

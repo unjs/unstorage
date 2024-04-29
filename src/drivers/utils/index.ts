@@ -1,6 +1,7 @@
 import type { Driver } from "../..";
 
 type DriverFactory<T> = (opts: T) => Driver;
+interface ErrorOptions {}
 
 export function defineDriver<T = any>(
   factory: DriverFactory<T>

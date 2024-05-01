@@ -6,7 +6,7 @@ import { afterEach } from "node:test";
 vi.mock("@capacitor/preferences", () => {
   const data = new Map<string, string>();
 
-  const keys = vi.fn(() => Promise.resolve({ keys: Array.from(data.keys()) }));
+  const keys = vi.fn(() => Promise.resolve({ keys: [...data.keys()] }));
   const get = vi.fn(({ key }) =>
     Promise.resolve({ value: data.get(key) ?? null })
   );

@@ -172,7 +172,9 @@ async function blobToString(blob: Blob) {
     fileReader.onloadend = (ev) => {
       resolve(ev.target?.result);
     };
+    // eslint-disable-next-line unicorn/prefer-add-event-listener
     fileReader.onerror = reject;
+    // eslint-disable-next-line unicorn/prefer-blob-reading-methods
     fileReader.readAsText(blob);
   });
 }

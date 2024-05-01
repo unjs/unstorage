@@ -35,7 +35,7 @@ export interface StorageServerOptions {
 
 export function createH3StorageHandler(
   storage: Storage,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   opts: StorageServerOptions = {}
 ): EventHandler {
   return eventHandler(async (event) => {

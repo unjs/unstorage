@@ -1,4 +1,4 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
+import { createRequiredError, defineDriver } from "./utils";
 
 export interface SessionStorageOptions {
   base?: string;
@@ -10,7 +10,7 @@ const DRIVER_NAME = "session-storage";
 
 export default defineDriver((opts: SessionStorageOptions = {}) => {
   if (!opts.window) {
-    opts.window = typeof window !== "undefined" ? window : undefined;
+    opts.window = typeof window === "undefined" ? undefined : window;
   }
   if (!opts.sessionStorage) {
     opts.sessionStorage = opts.window?.sessionStorage;
@@ -48,12 +48,12 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
       return Object.keys(opts.sessionStorage!);
     },
     clear() {
-      if (!opts.base) {
-        opts.sessionStorage!.clear();
-      } else {
+      if (opts.base) {
         for (const key of Object.keys(opts.sessionStorage!)) {
           opts.sessionStorage?.removeItem(key);
         }
+      } else {
+        opts.sessionStorage!.clear();
       }
       if (opts.window && _storageListener) {
         opts.window.removeEventListener("storage", _storageListener);

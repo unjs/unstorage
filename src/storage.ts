@@ -414,7 +414,7 @@ export function createStorage<T extends StorageValue>(
           .then((unwatcher) => {
             context.unwatch[base] = unwatcher;
           })
-          .catch(console.error); // eslint-disable-line no-console
+          .catch(console.error);
       }
       return storage;
     },

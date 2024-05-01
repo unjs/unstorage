@@ -340,9 +340,13 @@ export function createStorage<T extends StorageValue>(
           mount.relativeBase,
           opts
         );
-        for (const key of rawKeys) { 
-          if (!maskedMounts.some((p) => (mount.mountpoint + normalizeKey(key)).startsWith(p))) { 
-            allKeys.push(key)
+        for (const key of rawKeys) {
+          if (
+            !maskedMounts.some((p) =>
+              (mount.mountpoint + normalizeKey(key)).startsWith(p)
+            )
+          ) {
+            allKeys.push(key);
           }
         }
 

@@ -341,12 +341,9 @@ export function createStorage<T extends StorageValue>(
           opts
         );
         for (const key of rawKeys) {
-          if (
-            !maskedMounts.some((p) =>
-              (mount.mountpoint + normalizeKey(key)).startsWith(p)
-            )
-          ) {
-            allKeys.push(key);
+          const fullKey = mount.mountpoint + normalizeKey(key);
+          if (!maskedMounts.some((p) => fullKey.startsWith(p))) {
+            allKeys.push(fullKey);
           }
         }
 

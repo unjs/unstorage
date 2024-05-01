@@ -6,7 +6,7 @@ icon: teenyicons:netlify-solid
 
 > Store data in Netlify Blobs.
 
-Store data in a [Netlify Blobs](https://docs.netlify.com/blobs/overview/) store This is supported in both [edge](#using-in-netlify-edge) and Node.js function runtimes, as well at during builds.
+Store data in a [Netlify Blobs](https://docs.netlify.com/blobs/overview/) store. This is supported in both [edge](#using-in-netlify-edge) and Node.js function runtimes, as well as during builds.
 
 ::read-more{title="Netlify Blobs" to="https://docs.netlify.com/blobs/overview/"}
 ::
@@ -24,7 +24,7 @@ const storage = createStorage({
 });
 ```
 
-You can create a deploy-scoped store by settings `deployScoped` option to `true`. This will mean that the deploy only has access to its own store. The store is managed alongside the deploy, with the same deploy previews, deletes, and rollbacks. This is required during builds, which only have access to deploy-scoped stores.
+You can create a deploy-scoped store by setting `deployScoped` option to `true`. This will mean that the deploy only has access to its own store. The store is managed alongside the deploy, with the same deploy previews, deletes, and rollbacks. This is required during builds, which only have access to deploy-scoped stores.
 
 ```js
 import { createStorage } from "unstorage";

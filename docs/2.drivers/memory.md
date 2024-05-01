@@ -9,7 +9,7 @@ icon: bi:memory
 Keeps data in memory using [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map). (default storage)
 
 ::note
-By default it is mounted to top level so it is unlikely you need to mount it again.
+By default, it is mounted at the top level, so it's unlikely that you will need to mount it again.
 ::
 
 ```js

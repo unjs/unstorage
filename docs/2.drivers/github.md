@@ -8,7 +8,7 @@ icon: mdi:github
 
 ## Usage
 
-This driver fetches all possible keys once and keep it in cache for 10 minutes. Due to GitHub rate limit, it is highly recommanded to provide a token. It only applies to fetching keys.
+This driver fetches all possible keys once and keep it in cache for 10 minutes. Due to GitHub rate limit, it is highly recommended to provide a token. It only applies to fetching keys.
 
 ```js
 import { createStorage } from "unstorage";

@@ -46,7 +46,7 @@ export default defineDriver((opts: HTTPOptions) => {
           ...opts.headers,
           ...topts.headers,
         },
-        responseType: topts.responseType ?? opts.responseType
+        responseType: topts.responseType ?? opts.responseType,
       }).catch(catchFetchError);
       return value;
     },

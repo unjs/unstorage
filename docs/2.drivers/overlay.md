@@ -1,3 +1,7 @@
+---
+icon: carbon:overlay
+---
+
 # Overlay
 
 This is a special driver that creates a multi-layer overlay driver.

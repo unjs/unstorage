@@ -1,16 +1,24 @@
+---
+icon: simple-icons:redis
+---
+
 # Redis
 
-Store data in a Redis.
+> Store data in a Redis.
 
 ## Usage
 
-::note{to="https://redis.com"}
+::read-more{to="https://redis.com"}
 Learn more about Redis.
 ::
 
 ::note
 Unstorage uses [`ioredis`](https://github.com/luin/ioredis) internally to connect to Redis.
 ::
+
+To use it, you will need to install `ioredis` in your project:
+
+:pm-install{name="ioredis"}
 
 Usage with single Redis instance:
 

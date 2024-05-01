@@ -1,11 +1,15 @@
+---
+icon: ic:baseline-http
+---
+
 # HTTP
 
-Use a remote HTTP/HTTPS endpoint as data storage.
+> Use a remote HTTP/HTTPS endpoint as data storage.
 
 ## Usage
 
 ::note
-Supports built-in [http server](/getting-started/http-server) methods.
+Supports built-in [http server](/guide/http-server) methods.
 ::
 
 This driver implements meta for each key including `mtime` (last modified time) and `status` from HTTP headers by making a `HEAD` request.

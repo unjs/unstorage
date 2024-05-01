@@ -1,10 +1,14 @@
+---
+icon: simple-icons:planetscale
+---
+
 # PlanetScale
 
-Stores data in MySQL database via PlanetScale.
+> Store data in MySQL database via PlanetScale.
 
 ## Usage
 
-::note{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
+::read-more{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
 Learn more about PlanetScale.
 ::
 
@@ -20,7 +24,7 @@ To use, you will need to install `@planetscale/database` in your project:
 }
 ```
 
-Then you can create a table to store your data by running the following query in your Planetscale database, where <storage> is the name of the table you want to use:
+Then you can create a table to store your data by running the following query in your Planetscale database, where `<storage>` is the name of the table you want to use:
 
 ```
 create table <storage> (
@@ -51,4 +55,4 @@ const storage = createStorage({
 
 - **`url`** (required): You can find your URL in the [Planetscale dashboard](https://planetscale.com/docs/tutorials/connect-nodejs-app).
 - `table`: The name of the table to read from. It defaults to `storage`.
-- `boostCache`: Whether to enable cached queries: see [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).
+- `boostCache`: Whether to enable cached queries: See [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).

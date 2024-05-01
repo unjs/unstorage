@@ -231,7 +231,7 @@ export function createStorage<T extends StorageValue>(
     async setItems(items, commonOptions) {
       await runBatch(items, commonOptions, async (batch) => {
         if (batch.driver.setItems) {
-          await asyncCall(
+          return asyncCall(
             batch.driver.setItems,
             batch.items.map((item) => ({
               key: item.relativeKey,
@@ -448,6 +448,13 @@ export function createStorage<T extends StorageValue>(
         base: m.mountpoint,
       }));
     },
+    // Aliases
+    keys: (base, opts = {}) => storage.getKeys(base, opts),
+    get: (key, opts = {}) => storage.getItem(key, opts),
+    set: (key, value, opts = {}) => storage.setItem(key, value, opts),
+    has: (key, opts = {}) => storage.hasItem(key, opts),
+    del: (key, opts = {}) => storage.removeItem(key, opts),
+    remove: (key, opts = {}) => storage.removeItem(key, opts),
   };
 
   return storage;

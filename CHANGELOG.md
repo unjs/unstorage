@@ -2,6 +2,77 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.10.2
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.10.1...v1.10.2)
+
+### 🩹 Fixes
+
+- **http, server:** Handle missing resources with http 404 ([#367](https://github.com/unjs/unstorage/pull/367))
+- **pkg:** Make `ioredis` dependency optional ([#410](https://github.com/unjs/unstorage/pull/410))
+- **vercel-kv:** Add missing driver name ([#355](https://github.com/unjs/unstorage/pull/355))
+- **setItems:** Call driver native `setItems` only to avoid duplicate write ([#392](https://github.com/unjs/unstorage/pull/392))
+- `getItems`, `setItems` types ([#395](https://github.com/unjs/unstorage/pull/395))
+
+### 💅 Refactors
+
+- **cloudflare-kv, cloudflare-r2:** Move `getBindings` to utils and add default `BUCKET` for r2 ([#292](https://github.com/unjs/unstorage/pull/292))
+- **netlify-blobs:** Update to v7 ([#407](https://github.com/unjs/unstorage/pull/407))
+
+### 📖 Documentation
+
+- **planetscale:** Correct `table` option name ([#359](https://github.com/unjs/unstorage/pull/359))
+- **vercel-kv:** Fix typo ([#362](https://github.com/unjs/unstorage/pull/362))
+- Refactor with `unjs-docs` and nuxt ui pro ([#374](https://github.com/unjs/unstorage/pull/374))
+- Improvements ([a64e941](https://github.com/unjs/unstorage/commit/a64e941))
+- Fix links and add redirects ([166498f](https://github.com/unjs/unstorage/commit/166498f))
+- Update unjs-docs version and add redirects ([f2a408d](https://github.com/unjs/unstorage/commit/f2a408d))
+- Fix typo in http-server ([#385](https://github.com/unjs/unstorage/pull/385))
+- Update deps ([bfbf423](https://github.com/unjs/unstorage/commit/bfbf423))
+- Update link ([#408](https://github.com/unjs/unstorage/pull/408))
+
+### 📦 Build
+
+- Update mkdist for cjs dist hotfix ([cae8533](https://github.com/unjs/unstorage/commit/cae8533))
+
+### 🏡 Chore
+
+- **release:** V1.10.1 ([7b9a8ad](https://github.com/unjs/unstorage/commit/7b9a8ad))
+- **docs:** Update dependencies ([8a1f81c](https://github.com/unjs/unstorage/commit/8a1f81c))
+- Update lockfile ([e63f16b](https://github.com/unjs/unstorage/commit/e63f16b))
+- Update dependencies ([bb471c1](https://github.com/unjs/unstorage/commit/bb471c1))
+- **docs:** Update lockfile ([9c5fe17](https://github.com/unjs/unstorage/commit/9c5fe17))
+- Update lockfile ([fc9f6a9](https://github.com/unjs/unstorage/commit/fc9f6a9))
+- Update docs ([f85112f](https://github.com/unjs/unstorage/commit/f85112f))
+- Update docs ([f78ffc4](https://github.com/unjs/unstorage/commit/f78ffc4))
+- Update lint script ([4d61c78](https://github.com/unjs/unstorage/commit/4d61c78))
+- Update deps ([e48cb59](https://github.com/unjs/unstorage/commit/e48cb59))
+- Update undocs ([8be788f](https://github.com/unjs/unstorage/commit/8be788f))
+- Update vercel kv banner ([53d23e8](https://github.com/unjs/unstorage/commit/53d23e8))
+- Update lockfile ([57e719c](https://github.com/unjs/unstorage/commit/57e719c))
+
+### ✅ Tests
+
+- Skip netlify-blobs for now ([75b2353](https://github.com/unjs/unstorage/commit/75b2353))
+- **http:** Add tests for `null` value ([#365](https://github.com/unjs/unstorage/pull/365))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Harlan Wilton ([@harlan-zw](http://github.com/harlan-zw))
+- Matt Kane <matt.kane@netlify.com>
+- Julius Marminge <julius0216@outlook.com>
+- Connor Pearson <cjp822@gmail.com>
+- Kongmoumou ([@kongmoumou](http://github.com/kongmoumou))
+- Alex 
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+- Skosh <rasmus.gustafsson2611@gmail.com>
+- Dominik Opyd <dominik.opyd@gmail.com>
+- Arkadiusz Sygulski <aareksio@gmail.com>
+- Jan-Henrik Damaschke <jdamaschke@outlook.de>
+- Masious 
+- Boe Reh <me@justboereh.com>
+
 ## v1.10.1
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.10.0...v1.10.1)

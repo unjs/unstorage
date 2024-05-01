@@ -1,10 +1,14 @@
+---
+icon: teenyicons:mongodb-outline
+---
+
 # MongoDB
 
-Store data in MongoDB using Node.js mongodb package.
+> Store data in MongoDB using Node.js MongoDB package.
 
 ## Usage
 
-::note{to="https://www.mongodb.com/"}
+::read-more{to="https://www.mongodb.com/"}
 Learn more about MongoDB.
 ::
 
@@ -12,9 +16,7 @@ This driver stores KV information in a MongoDB collection with a separate docume
 
 To use it, you will need to install `mongodb` in your project:
 
-```bash [Terminal]
-npm i mongodb
-```
+:pm-install{name="mongodb"}
 
 Usage:
 

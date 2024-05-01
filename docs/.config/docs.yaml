@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://unpkg.com/undocs/schema/config.json
+name: unstorage
+shortDescription: Universal Key-Value.
+description: Unified key-value storage API with conventional features and 20+ built-in drivers.
+github: unjs/unstorage
+themeColor: amber
+url: https://unstorage.unjs.io
+redirects:
+  "/usage": "/getting-started/usage"
+  "/utils": "/getting-started/utils"
+  "/http-server": "/getting-started/http-server"
+  "/custom-driver": "/getting-started/custom-driver"
+  "/drivers/azure-app-configuration": "/divers/azure"
+  "/drivers/azure-cosmos": "/divers/azure"
+  "/drivers/azure-key-vault": "/divers/azure"
+  "/drivers/azure-storage-block": "/divers/azure"
+  "/drivers/azure-storage-table": "/divers/azure"
+  "/drivers/cloudflare-kv-binding": "/drivers/cloudflare"
+  "/drivers/cloudflare-kv-http": "/drivers/cloudflare"
+  "/drivers/cloudflare-r2-binding": "/drivers/cloudflare"
+  "/drivers/vercel-kv": "/drivers/vercel"
+  "/drivers/netlify-blobs": "/drivers/netlify"
+  "/drivers/localstorage": "/drivers/browser"
+  "/drivers/indexedb": "/drivers/browser"
+  "/drivers/session-storage": "/drivers/browser"
+landing:
+  contributors: true
+  featuresTitle: A simple, small, and fast key-value storage library for JavaScript.
+  features:
+    - title: "Runtime Agnostic"
+      description: "Your code will work on any JavaScript runtime including Node.js, Bun, Deno and Workers."
+      icon: "i-material-symbols-lock-open-right-outline-rounded"
+    - title: "Built-in drivers"
+      description: "Unstorage is shipped with 20+ built-in drivers for different platforms: Memory (default), FS, Redis, Memory, MongoDB, CloudFlare, GitHub, etc."
+      icon: "i-material-symbols-usb"
+    - title: "Snapshots"
+      description: "Expand your server and add capabilities. Your codebase will scale with your project."
+      icon: "i-material-symbols-add-a-photo-outline"
+    - title: "Multi Storages"
+      description: "Unix-style driver mounting to combine storages on different mounts."
+      icon: "i-material-symbols-view-list-outline"
+    - title: "JSON friendly"
+      description: "Unstorage automatically serializes and deserializes JSON values."
+      icon: "i-material-symbols-magic-button"
+    - title: "Binary Support"
+      description: "Store binary and raw data like images, videos, audio files, etc."
+      icon: "i-material-symbols-audio-file"

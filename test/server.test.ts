@@ -1,8 +1,10 @@
+import { readFile } from "node:fs/promises";
 import { describe, it, expect } from "vitest";
 import { listen } from "listhen";
 import { $fetch } from "ofetch";
 import { createStorage } from "../src";
 import { createStorageServer } from "../src/server";
+import fs from "../src/drivers/fs.ts";
 
 describe("server", () => {
   it("basic", async () => {
@@ -53,6 +55,38 @@ describe("server", () => {
       statusCode: 401,
       statusMessage: "Unauthorized Read",
     });
+
+    await close();
+  });
+
+  it("properly encodes raw items", async () => {
+    const storage = createStorage({
+      driver: fs({ base: "./test/fs-storage" }),
+    });
+    const storageServer = createStorageServer(storage);
+    const { close, url: serverURL } = await listen(storageServer.handle, {
+      port: { random: true },
+    });
+
+    const fetchStorage = (url: string, options?: any) =>
+      $fetch(url, { baseURL: serverURL, ...options });
+
+    const file = await readFile("./test/test.png");
+
+    await storage.setItemRaw("1.png", file);
+    await fetchStorage("2.png", {
+      method: "PUT",
+      body: file,
+      headers: {
+        "content-type": "application/octet-stream",
+      },
+    });
+    const storedFileNode = await readFile("./test/fs-storage/1.png");
+    const storedFileFetch = await readFile("./test/fs-storage/2.png");
+
+    expect(storedFileNode).toStrictEqual(file);
+    expect(storedFileFetch).toStrictEqual(file);
+    expect(storedFileFetch).toStrictEqual(storedFileNode);
 
     await close();
   });

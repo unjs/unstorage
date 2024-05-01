@@ -12,7 +12,7 @@ Keeps cached data in memory using [LRU Cache](https://www.npmjs.com/package/lru-
 
 See [`lru-cache`](https://www.npmjs.com/package/lru-cache) for supported options.
 
-By default [`max`](https://www.npmjs.com/package/lru-cache#max) setting is set to `1000` items.
+By default, [`max`](https://www.npmjs.com/package/lru-cache#max) setting is set to `1000` items.
 
 A default behavior for [`sizeCalculation`](https://www.npmjs.com/package/lru-cache#sizecalculation) option is implemented based on buffer size of both key and value.
 

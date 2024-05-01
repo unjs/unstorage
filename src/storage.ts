@@ -340,10 +340,12 @@ export function createStorage<T extends StorageValue>(
           mount.relativeBase,
           opts
         );
-        const keys = rawKeys
-          .map((key) => mount.mountpoint + normalizeKey(key))
-          .filter((key) => !maskedMounts.some((p) => key.startsWith(p)));
-        allKeys.push(...keys);
+        for (const key of rawKeys) {
+          const fullKey = mount.mountpoint + normalizeKey(key);
+          if (!maskedMounts.some((p) => fullKey.startsWith(p))) {
+            allKeys.push(fullKey);
+          }
+        }
 
         // When /mnt/foo is processed, any key in /mnt with /mnt/foo prefix should be masked
         // Using filter to improve performance. /mnt mask already covers /mnt/foo
@@ -447,6 +449,13 @@ export function createStorage<T extends StorageValue>(
         base: m.mountpoint,
       }));
     },
+    // Aliases
+    keys: (base, opts = {}) => storage.getKeys(base, opts),
+    get: (key, opts = {}) => storage.getItem(key, opts),
+    set: (key, value, opts = {}) => storage.setItem(key, value, opts),
+    has: (key, opts = {}) => storage.hasItem(key, opts),
+    del: (key, opts = {}) => storage.removeItem(key, opts),
+    remove: (key, opts = {}) => storage.removeItem(key, opts),
   };
 
   return storage;

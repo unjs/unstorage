@@ -447,6 +447,13 @@ export function createStorage<T extends StorageValue>(
         base: m.mountpoint,
       }));
     },
+    // Aliases
+    keys: (base, opts = {}) => storage.getKeys(base, opts),
+    get: (key, opts = {}) => storage.getItem(key, opts),
+    set: (key, value, opts = {}) => storage.setItem(key, value, opts),
+    has: (key, opts = {}) => storage.hasItem(key, opts),
+    del: (key, opts = {}) => storage.removeItem(key, opts),
+    remove: (key, opts = {}) => storage.removeItem(key, opts),
   };
 
   return storage;

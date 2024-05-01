@@ -159,6 +159,20 @@ describe("utils", () => {
     const storage = createStorage();
     expect(async () => await storage.setItem("foo", [])).not.toThrow();
   });
+
+  it("has aliases", async () => {
+    const storage = createStorage();
+
+    await storage.setItem("foo", "bar");
+    expect(await storage.has("foo")).toBe(true);
+    expect(await storage.get("foo")).toBe("bar");
+    expect(await storage.keys()).toEqual(["foo"]);
+    await storage.del("foo");
+    expect(await storage.has("foo")).toBe(false);
+    await storage.setItem("bar", "baz");
+    await storage.remove("bar");
+    expect(await storage.has("bar")).toBe(false);
+  });
 });
 
 describe("Regression", () => {

@@ -30,7 +30,7 @@ const mockBinding: KVNamespace = {
 describe("drivers: cloudflare-kv", () => {
   testDriver({
     driver: CloudflareKVBinding({ binding: mockBinding, base: "base" }),
-    async additionalTests(ctx) {
+    async additionalTests() {
       test("snapshot", async () => {
         expect(await snapshot(mockStorage, "")).toMatchInlineSnapshot(`
           {

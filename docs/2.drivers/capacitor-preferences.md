@@ -4,7 +4,7 @@ icon: nonicons:capacitor-16
 
 # Capacitor Preferences
 
-> Stores data via Capacitor Preferences API on mobile devices or the local storage on the web.
+> Store data via Capacitor Preferences API on mobile devices or local storage on the web.
 
 ::read-more{to="https://capacitorjs.com/docs/apis/preferences"}
 Learn more about Capacitor Preferences API.

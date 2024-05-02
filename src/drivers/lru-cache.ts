@@ -44,7 +44,7 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
       cache.delete(key);
     },
     getKeys() {
-      return Array.from(cache.keys());
+      return [...cache.keys()];
     },
     clear() {
       cache.clear();
@@ -56,15 +56,19 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
 });
 
 function byteLength(value: any) {
-  if (typeof Buffer !== undefined) {
+  if (typeof Buffer !== "undefined") {
     try {
       return Buffer.byteLength(value);
-    } catch {}
+    } catch {
+      // ignore
+    }
   }
   try {
     return typeof value === "string"
       ? value.length
       : JSON.stringify(value).length;
-  } catch {}
+  } catch {
+    // ignore
+  }
   return 0;
 }

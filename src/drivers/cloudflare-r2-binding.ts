@@ -30,7 +30,7 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
       const binding = getR2Binding(opts.binding);
       return (await binding.head(key)) !== null;
     },
-    async getMeta(key, topts) {
+    async getMeta(key) {
       key = r(key);
       const binding = getR2Binding(opts.binding);
       const obj = await binding.head(key);

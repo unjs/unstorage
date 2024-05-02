@@ -27,7 +27,7 @@ export default defineDriver<void>(() => {
       data.delete(key);
     },
     getKeys() {
-      return Array.from(data.keys());
+      return [...data.keys()];
     },
     clear() {
       data.clear();

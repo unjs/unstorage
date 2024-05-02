@@ -4,7 +4,7 @@ icon: teenyicons:mongodb-outline
 
 # MongoDB
 
-> Store data in MongoDB using Node.js mongodb package.
+> Store data in MongoDB using Node.js MongoDB package.
 
 ## Usage
 

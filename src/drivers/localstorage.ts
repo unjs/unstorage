@@ -10,7 +10,7 @@ const DRIVER_NAME = "localstorage";
 
 export default defineDriver((opts: LocalStorageOptions = {}) => {
   if (!opts.window) {
-    opts.window = typeof window !== "undefined" ? window : undefined;
+    opts.window = typeof window === "undefined" ? undefined : window;
   }
   if (!opts.localStorage) {
     opts.localStorage = opts.window?.localStorage;
@@ -48,12 +48,12 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
       return Object.keys(opts.localStorage!);
     },
     clear() {
-      if (!opts.base) {
-        opts.localStorage!.clear();
-      } else {
+      if (opts.base) {
         for (const key of Object.keys(opts.localStorage!)) {
           opts.localStorage?.removeItem(key);
         }
+      } else {
+        opts.localStorage!.clear();
       }
       if (opts.window && _storageListener) {
         opts.window.removeEventListener("storage", _storageListener);

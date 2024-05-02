@@ -125,4 +125,11 @@ export interface Storage<T extends StorageValue = StorageValue> {
     base?: string,
     options?: { parents?: boolean }
   ) => { base: string; driver: Driver }[];
+  // Aliases
+  keys: Storage["getKeys"];
+  get: Storage["getItem"];
+  set: Storage["setItem"];
+  has: Storage["hasItem"];
+  del: Storage["removeItem"];
+  remove: Storage["removeItem"];
 }

@@ -108,7 +108,7 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
           return blob.blobBody ? await blobToString(await blob.blobBody) : null;
         }
         return blob.readableStreamBody
-          ? (await streamToBuffer(blob.readableStreamBody))
+          ? await streamToBuffer(blob.readableStreamBody)
           : null;
       } catch {
         return null;

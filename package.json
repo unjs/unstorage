@@ -60,9 +60,9 @@
     "@azure/data-tables": "^13.2.2",
     "@azure/identity": "^4.2.0",
     "@azure/keyvault-secrets": "^4.8.0",
-    "@azure/storage-blob": "^12.17.0",
+    "@azure/storage-blob": "^12.18.0",
     "@capacitor/preferences": "^6.0.0",
-    "@cloudflare/workers-types": "^4.20240502.0",
+    "@cloudflare/workers-types": "^4.20240512.0",
     "@netlify/blobs": "^7.3.0",
     "@planetscale/database": "^1.18.0",
     "@types/ioredis-mock": "^8.2.5",
@@ -101,7 +101,7 @@
     "@azure/data-tables": "^13.2.2",
     "@azure/identity": "^4.2.0",
     "@azure/keyvault-secrets": "^4.8.0",
-    "@azure/storage-blob": "^12.17.0",
+    "@azure/storage-blob": "^12.18.0",
     "@capacitor/preferences": "^6.0.0",
     "@netlify/blobs": "^6.5.0 || ^7.0.0",
     "@planetscale/database": "^1.18.0",
@@ -151,5 +151,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@9.1.0"
+  "packageManager": "pnpm@9.1.1"
 }

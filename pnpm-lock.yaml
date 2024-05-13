@@ -55,14 +55,14 @@ importers:
         specifier: ^4.8.0
         version: 4.8.0
       '@azure/storage-blob':
-        specifier: ^12.17.0
-        version: 12.17.0
+        specifier: ^12.18.0
+        version: 12.18.0
       '@capacitor/preferences':
         specifier: ^6.0.0
         version: 6.0.0(@capacitor/core@6.0.0)
       '@cloudflare/workers-types':
-        specifier: ^4.20240502.0
-        version: 4.20240502.0
+        specifier: ^4.20240512.0
+        version: 4.20240512.0
       '@netlify/blobs':
         specifier: ^7.3.0
         version: 7.3.0
@@ -262,8 +262,8 @@ packages:
     resolution: {integrity: sha512-wXD8LkUvHICeSWZydqg6o8Yvv+grlBEcmLGu+QEI4FcwFendbTEZrlSygnAXXSOCVaGAirWLchca35qrgpO6Jw==}
     engines: {node: '>=16'}
 
-  '@azure/storage-blob@12.17.0':
-    resolution: {integrity: sha512-sM4vpsCpcCApagRW5UIjQNlNylo02my2opgp0Emi8x888hZUvJ3dN69Oq20cEGXkMUWnoCrBaB0zyS3yeB87sQ==}
+  '@azure/storage-blob@12.18.0':
+    resolution: {integrity: sha512-BzBZJobMoDyjJsPRMLNHvqHycTGrT8R/dtcTx9qUFcqwSRfGVK9A/cZ7Nx38UQydT9usZGbaDCN75QRNjezSAA==}
     engines: {node: '>=14.0.0'}
 
   '@babel/code-frame@7.24.2':
@@ -368,8 +368,8 @@ packages:
     peerDependencies:
       '@capacitor/core': ^6.0.0
 
-  '@cloudflare/workers-types@4.20240502.0':
-    resolution: {integrity: sha512-OB1jIyPOzyOcuZFHWhsQnkRLN6u8+jmU9X3T4KZlGgn3Ivw8pBiswhLOp+yFeChR3Y4/5+V0hPFRko5SReordg==}
+  '@cloudflare/workers-types@4.20240512.0':
+    resolution: {integrity: sha512-o2yTEWg+YK/I1t/Me+dA0oarO0aCbjibp6wSeaw52DSE9tDyKJ7S+Qdyw/XsMrKn4t8kF6f/YOba+9O4MJfW9w==}
 
   '@colors/colors@1.6.0':
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
@@ -4629,7 +4629,7 @@ snapshots:
       jsonwebtoken: 9.0.2
       uuid: 8.3.2
 
-  '@azure/storage-blob@12.17.0':
+  '@azure/storage-blob@12.18.0':
     dependencies:
       '@azure/abort-controller': 1.1.0
       '@azure/core-http': 3.0.4
@@ -4780,7 +4780,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 6.0.0
 
-  '@cloudflare/workers-types@4.20240502.0': {}
+  '@cloudflare/workers-types@4.20240512.0': {}
 
   '@colors/colors@1.6.0': {}
 

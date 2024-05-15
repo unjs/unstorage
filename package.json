@@ -39,6 +39,7 @@
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
+    "bench": "jiti test/server.bench.ts",
     "test:types": "tsc --noEmit --skipLibCheck",
     "unstorage": "pnpm jiti src/cli"
   },

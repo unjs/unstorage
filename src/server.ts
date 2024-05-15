@@ -125,7 +125,7 @@ export function createH3StorageHandler(
       const isRaw =
         getRequestHeader(event, "content-type") === "application/octet-stream";
       if (isRaw) {
-        const value = await readRawBody(event);
+        const value = await readRawBody(event, false);
         await storage.setItemRaw(key, value);
       } else {
         const value = await readRawBody(event, "utf8");

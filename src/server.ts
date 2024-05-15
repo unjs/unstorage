@@ -33,14 +33,20 @@ export interface StorageServerOptions {
   resolvePath?: (event: H3Event) => string;
 }
 
+/**
+ * This function creates an h3-based handler for the storage server. It can then be used as event handler in h3 or Nitro
+ * @param storage The storage which should be used for the storage server
+ * @param opts Storage options to set the authorization check or a custom path resolver
+ * @returns
+ * @see createStorageServer if a node-compatible handler is needed
+ */
 export function createH3StorageHandler(
   storage: Storage,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   opts: StorageServerOptions = {}
 ): EventHandler {
   return eventHandler(async (event) => {
     const _path = opts.resolvePath?.(event) ?? event.path;
-    const lastChar = _path[_path.length-1]
+    const lastChar = _path[_path.length - 1];
     const isBaseKey = lastChar === ":" || lastChar === "/";
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
 
@@ -120,7 +126,7 @@ export function createH3StorageHandler(
       const isRaw =
         getRequestHeader(event, "content-type") === "application/octet-stream";
       if (isRaw) {
-        const value = await readRawBody(event);
+        const value = await readRawBody(event, false);
         await storage.setItemRaw(key, value);
       } else {
         const value = await readRawBody(event, "utf8");
@@ -144,6 +150,22 @@ export function createH3StorageHandler(
   });
 }
 
+/**
+ * This function creates a node-compatible handler for your custom storage server.
+ *
+ * The storage server will handle HEAD, GET, PUT and DELETE requests.
+ * HEAD: Return if the request item exists in the storage, including a last-modified header if the storage supports it and the meta is stored
+ * GET: Return the item if it exists
+ * PUT: Sets the item
+ * DELETE: Removes the item (or clears the whole storage if the base key was used)
+ *
+ * If the request sets the `Accept` header to `application/octet-stream`, the server will handle the item as raw data.
+ *
+ * @param storage The storage which should be used for the storage server
+ * @param options Defining functions such as an authorization check and a custom path resolver
+ * @returns An object containing then `handle` function for the handler
+ * @see createH3StorageHandler For the bare h3 version which can be used with h3 or Nitro
+ */
 export function createStorageServer(
   storage: Storage,
   options: StorageServerOptions = {}

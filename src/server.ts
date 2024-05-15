@@ -122,7 +122,7 @@ export function createH3StorageHandler(
         const value = await readRawBody(event, false);
         await storage.setItemRaw(key, value);
       } else {
-        const value = await readRawBody(event);
+        const value = await readRawBody(event, "utf8");
         if (value !== undefined) {
           await storage.setItem(key, value);
         }

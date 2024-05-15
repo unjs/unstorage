@@ -1,5 +1,5 @@
-import { Dirent, existsSync, promises as fsPromises } from "fs";
-import { resolve, dirname } from "path";
+import { Dirent, existsSync, promises as fsPromises } from "node:fs";
+import { resolve, dirname } from "node:path";
 
 function ignoreNotfound(err: any) {
   return err.code === "ENOENT" || err.code === "EISDIR" ? null : err;

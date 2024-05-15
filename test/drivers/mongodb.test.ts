@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import driver from "../../src/drivers/mongodb";
 import { testDriver } from "./utils";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { promisify } from "util";
+import { promisify } from "node:util";
 
 describe.skip("drivers: mongodb", async () => {
   const sleep = promisify(setTimeout);

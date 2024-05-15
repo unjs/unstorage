@@ -19,7 +19,7 @@ export default defineConfig({
       configureServer(server) {
         const storage = createStorage();
         const storageServer = createStorageServer(storage);
-        // eslint-disable-next-line unicorn/prefer-module
+
         storage.mount("/src", fsdriver({ base: resolve(__dirname, "..") }));
         server.middlewares.use("/storage", storageServer.handle);
       },

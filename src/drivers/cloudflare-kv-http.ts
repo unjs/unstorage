@@ -157,7 +157,9 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     }
 
     const firstPage = await kvFetch("/keys", { params });
-    firstPage.result.forEach(({ name }: { name: string }) => keys.push(name));
+    for (const item of firstPage.result as { name: string }[]) {
+      keys.push(item.name);
+    }
 
     const cursor = firstPage.result_info.cursor;
     if (cursor) {
@@ -166,15 +168,11 @@ export default defineDriver<KVHTTPOptions>((opts) => {
 
     while (params.cursor) {
       const pageResult = await kvFetch("/keys", { params });
-      pageResult.result.forEach(({ name }: { name: string }) =>
-        keys.push(name)
-      );
-      const pageCursor = pageResult.result_info.cursor;
-      if (pageCursor) {
-        params.cursor = pageCursor;
-      } else {
-        params.cursor = undefined;
+      for (const item of pageResult.result as { name: string }[]) {
+        keys.push(item.name);
       }
+      const pageCursor = pageResult.result_info.cursor;
+      params.cursor = pageCursor ? pageCursor : undefined;
     }
     return keys;
   };
@@ -182,9 +180,11 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const clear = async () => {
     const keys: string[] = await getKeys();
     // Split into chunks of 10000, as the API only allows for 10,000 keys at a time
+    // TODO: Avoid reduce
+    // eslint-disable-next-line unicorn/no-array-reduce
     const chunks = keys.reduce<string[][]>(
       (acc, key, i) => {
-        if (i % 10000 === 0) {
+        if (i % 10_000 === 0) {
           acc.push([]);
         }
         acc[acc.length - 1].push(key);

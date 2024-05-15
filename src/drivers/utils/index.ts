@@ -1,6 +1,7 @@
-import type { Driver } from "../../types";
+import type { Driver } from "../..";
 
 type DriverFactory<T> = (opts: T) => Driver;
+interface ErrorOptions {}
 
 export function defineDriver<T = any>(
   factory: DriverFactory<T>
@@ -16,7 +17,10 @@ export function normalizeKey(key: string | undefined): string {
 }
 
 export function joinKeys(...keys: string[]) {
-  return keys.map(normalizeKey).filter(Boolean).join(":");
+  return keys
+    .map((key) => normalizeKey(key))
+    .filter(Boolean)
+    .join(":");
 }
 
 export function createError(

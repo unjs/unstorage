@@ -116,7 +116,7 @@ function encode(value: string): string {
   let encoded = Buffer.from(value).toString("base64");
   for (const key in base64Map) {
     encoded = encoded.replace(
-      new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
+      new RegExp(key.replace(/[$()*+.?[\\\]^{|}]/g, "\\$&"), "g"),
       base64Map[key]
     );
   }

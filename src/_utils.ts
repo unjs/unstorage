@@ -47,7 +47,7 @@ export function stringify(value: any): string {
 }
 
 function checkBufferSupport() {
-  if (typeof Buffer === undefined) {
+  if (typeof Buffer === "undefined") {
     throw new TypeError("[unstorage] Buffer is not supported!");
   }
 }

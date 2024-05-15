@@ -23,10 +23,7 @@ async function main() {
     $fetch(url, { baseURL: serverURL, ...options });
 
   bench("storage server", async () => {
-    await Promise.all([
-      await fetchStorage(`/key:`),
-      await fetchStorage(`/key:0:0`),
-    ]);
+    await Promise.all([fetchStorage(`/key:`), fetchStorage(`/key:0:0`)]);
   });
 
   await run();
@@ -34,4 +31,5 @@ async function main() {
   await close();
 }
 
+// eslint-disable-next-line unicorn/prefer-top-level-await
 main();

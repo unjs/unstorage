@@ -25,7 +25,7 @@ export default defineDriver((opts: HTTPOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    instance: undefined,
+    getInstance: undefined,
     hasItem(key, topts) {
       return _fetch(r(key), {
         method: "HEAD",

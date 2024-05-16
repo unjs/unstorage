@@ -25,7 +25,7 @@ export default defineDriver((opts: KVOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    instance: getKVBinding(opts.binding),
+    getInstance: () => getKVBinding(opts.binding),
     async hasItem(key) {
       key = r(key);
       const binding = getKVBinding(opts.binding);

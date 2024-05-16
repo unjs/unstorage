@@ -35,7 +35,7 @@ export interface RedisOptions extends _RedisOptions {
 
 const DRIVER_NAME = "redis";
 
-export default defineDriver<RedisOptions, Redis | Cluster>((opts) => {
+export default defineDriver<RedisOptions, () => Redis | Cluster>((opts) => {
   let redisClient: Redis | Cluster;
   const getRedisClient = () => {
     if (redisClient) {
@@ -58,7 +58,7 @@ export default defineDriver<RedisOptions, Redis | Cluster>((opts) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    instance: getRedisClient(),
+    getInstance: getRedisClient,
     async hasItem(key) {
       return Boolean(await getRedisClient().exists(p(key)));
     },

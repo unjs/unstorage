@@ -24,7 +24,7 @@ export default defineDriver((opts: IDBKeyvalOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    instance: IdbKeyval,
+    getInstance: () => IdbKeyval,
     async hasItem(key) {
       const item = await get(makeKey(key), customStore);
       return item === undefined ? false : true;

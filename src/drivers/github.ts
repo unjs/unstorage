@@ -84,7 +84,7 @@ export default defineDriver<GithubOptions>((_opts) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    instance: undefined,
+    getInstance: undefined,
     async getKeys() {
       await syncFiles();
       return Object.keys(files);

@@ -70,7 +70,7 @@ export default defineDriver(
     return {
       name: DRIVER_NAME,
       options: {},
-      instance: getClient(),
+      getInstance: getClient,
       async hasItem(key) {
         return getClient().getMetadata(key).then(Boolean);
       },

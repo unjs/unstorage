@@ -45,7 +45,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    instance: getKeyVaultClient(),
+    getInstance: getKeyVaultClient,
     async hasItem(key) {
       try {
         await getKeyVaultClient().getSecret(encode(key));

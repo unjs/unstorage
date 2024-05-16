@@ -25,7 +25,7 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    instance: getR2Binding(opts.binding),
+    getInstance: () => getR2Binding(opts.binding),
     async hasItem(key) {
       key = r(key);
       const binding = getR2Binding(opts.binding);

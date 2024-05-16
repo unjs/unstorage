@@ -20,13 +20,16 @@ interface StorageCTX {
   watchListeners: ((event: WatchEvent, key: string) => void)[];
 }
 
-export interface CreateStorageOptions<Instance = undefined> {
+export interface CreateStorageOptions<
+  Instance extends undefined | (() => any) = undefined,
+> {
   driver?: Driver<Instance>;
 }
 
-export function createStorage<T extends StorageValue, Instance = undefined>(
-  options: CreateStorageOptions<Instance> = {}
-): Storage<T> {
+export function createStorage<
+  T extends StorageValue,
+  Instance extends undefined | (() => any) = undefined,
+>(options: CreateStorageOptions<Instance> = {}): Storage<T> {
   const context: StorageCTX = {
     mounts: { "": options.driver || memory() },
     mountpoints: [""],

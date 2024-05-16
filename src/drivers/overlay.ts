@@ -14,7 +14,7 @@ export default defineDriver((options: OverlayStorageOptions) => {
   return {
     name: DRIVER_NAME,
     options: options,
-    instance: undefined,
+    getInstance: undefined,
     async hasItem(key, opts) {
       for (const layer of options.layers) {
         if (await layer.hasItem(key, opts)) {

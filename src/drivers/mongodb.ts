@@ -39,7 +39,7 @@ export default defineDriver((opts: MongoDbOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    instance: undefined,
+    getInstance: getMongoCollection,
     async hasItem(key) {
       const result = await getMongoCollection().findOne({ key });
       return !!result;

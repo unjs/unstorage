@@ -1,15 +1,8 @@
 import { defineDriver } from "./utils";
-import * as IdbKeyval from 'idb-keyval'
+import * as IdbKeyval from "idb-keyval";
 import type { UseStore } from "idb-keyval";
 
-const {
-  get,
-  set,
-  clear,
-  del,
-  keys,
-  createStore,
-} = IdbKeyval;
+const { get, set, clear, del, keys, createStore } = IdbKeyval;
 
 export interface IDBKeyvalOptions {
   base?: string;

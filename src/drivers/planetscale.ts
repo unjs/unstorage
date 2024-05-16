@@ -50,6 +50,7 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: getConnection,
     hasItem: async (key) => {
       const res = await getConnection().execute(
         `SELECT EXISTS (SELECT 1 FROM ${opts.table} WHERE id = :key) as value;`,

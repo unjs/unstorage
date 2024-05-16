@@ -7,7 +7,7 @@ export interface TestContext {
 }
 
 export interface TestOptions {
-  driver: Driver<any>;
+  driver: Driver;
   additionalTests?: (ctx: TestContext) => void;
 }
 

@@ -206,7 +206,6 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    getInstance: undefined,
     hasItem,
     getItem,
     setItem,

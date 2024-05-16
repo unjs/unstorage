@@ -16,10 +16,10 @@ export interface StorageMeta {
 
 export type TransactionOptions = Record<string, any>;
 
-export interface Driver<T extends undefined | (() => any) = undefined> {
+export interface Driver<T = undefined> {
   name?: string;
   options?: any;
-  getInstance: T;
+  getInstance?: T;
   hasItem: (key: string, opts: TransactionOptions) => MaybePromise<boolean>;
   getItem: (
     key: string,

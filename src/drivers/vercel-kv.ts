@@ -23,7 +23,7 @@ export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
 
 const DRIVER_NAME = "vercel-kv";
 
-export default defineDriver<VercelKVOptions, () => VercelKV>((opts) => {
+export default defineDriver<VercelKVOptions, VercelKV>((opts) => {
   const base = normalizeKey(opts?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
 
@@ -56,7 +56,9 @@ export default defineDriver<VercelKVOptions, () => VercelKV>((opts) => {
           );
         }
       }
-      _client = createClient(opts as RedisConfigNodejs);
+      _client = createClient(
+        opts as VercelKVOptions & { url: string; token: string }
+      );
     }
     return _client;
   };

@@ -1,11 +1,13 @@
 import type { Driver } from "../..";
 
-type DriverFactory<Opts, Instance> = (opts: Opts) => Driver<Instance>;
+type DriverFactory<OptionsT, InstanceT> = (
+  opts: OptionsT
+) => Driver<OptionsT, InstanceT>;
 interface ErrorOptions {}
 
-export function defineDriver<Opts = any, Instance = undefined>(
-  factory: DriverFactory<Opts, Instance>
-): DriverFactory<Opts, Instance> {
+export function defineDriver<OptionsT = any, InstanceT = any>(
+  factory: DriverFactory<OptionsT, InstanceT>
+): DriverFactory<OptionsT, InstanceT> {
   return factory;
 }
 

@@ -35,7 +35,7 @@ export interface RedisOptions extends _RedisOptions {
 
 const DRIVER_NAME = "redis";
 
-export default defineDriver<RedisOptions, () => Redis | Cluster>((opts) => {
+export default defineDriver((opts: RedisOptions) => {
   let redisClient: Redis | Cluster;
   const getRedisClient = () => {
     if (redisClient) {

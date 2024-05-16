@@ -5,7 +5,7 @@ type DriverFactory<OptionsT, InstanceT> = (
 ) => Driver<OptionsT, InstanceT>;
 interface ErrorOptions {}
 
-export function defineDriver<OptionsT = any, InstanceT = any>(
+export function defineDriver<OptionsT = any, InstanceT = never>(
   factory: DriverFactory<OptionsT, InstanceT>
 ): DriverFactory<OptionsT, InstanceT> {
   return factory;

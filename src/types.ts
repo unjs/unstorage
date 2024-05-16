@@ -16,7 +16,7 @@ export interface StorageMeta {
 
 export type TransactionOptions = Record<string, any>;
 
-export interface Driver<OptionsT = any, InstanceT = never> {
+export interface Driver<OptionsT = any, InstanceT = any> {
   name?: string;
   options?: OptionsT;
   getInstance?: () => InstanceT;

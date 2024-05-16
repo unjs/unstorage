@@ -8,7 +8,6 @@ export default defineDriver<void, Map<string, any>>(() => {
   return {
     name: DRIVER_NAME,
     getInstance: () => data,
-    options: undefined,
     hasItem(key) {
       return data.has(key);
     },

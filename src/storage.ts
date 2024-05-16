@@ -13,19 +13,19 @@ import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey, joinKeys } from "./utils";
 
 interface StorageCTX {
-  mounts: Record<string, Driver>;
+  mounts: Record<string, Driver<any>>;
   mountpoints: string[];
   watching: boolean;
   unwatch: Record<string, Unwatch>;
   watchListeners: ((event: WatchEvent, key: string) => void)[];
 }
 
-export interface CreateStorageOptions {
-  driver?: Driver;
+export interface CreateStorageOptions<Instance = undefined> {
+  driver?: Driver<Instance>;
 }
 
-export function createStorage<T extends StorageValue>(
-  options: CreateStorageOptions = {}
+export function createStorage<T extends StorageValue, Instance = undefined>(
+  options: CreateStorageOptions<Instance> = {}
 ): Storage<T> {
   const context: StorageCTX = {
     mounts: { "": options.driver || memory() },

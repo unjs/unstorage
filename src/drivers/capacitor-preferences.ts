@@ -8,13 +8,14 @@ export interface CapacitorPreferencesOptions {
   base?: string;
 }
 
-export default defineDriver<CapacitorPreferencesOptions>((opts) => {
+export default defineDriver<CapacitorPreferencesOptions, typeof Preferences>((opts) => {
   const base = normalizeKey(opts?.base || "");
   const resolveKey = (key: string) => joinKeys(base, key);
 
   return {
     name: DRIVER_NAME,
     options: opts,
+    instance: Preferences,
     hasItem(key) {
       return Preferences.keys().then((r) => r.keys.includes(resolveKey(key)));
     },

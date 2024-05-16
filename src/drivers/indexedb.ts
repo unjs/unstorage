@@ -1,13 +1,15 @@
 import { defineDriver } from "./utils";
-import {
+import * as IdbKeyval from 'idb-keyval'
+import type { UseStore } from "idb-keyval";
+
+const {
   get,
   set,
   clear,
   del,
   keys,
   createStore,
-  type UseStore,
-} from "idb-keyval";
+} = IdbKeyval;
 
 export interface IDBKeyvalOptions {
   base?: string;
@@ -29,6 +31,7 @@ export default defineDriver((opts: IDBKeyvalOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    instance: IdbKeyval,
     async hasItem(key) {
       const item = await get(makeKey(key), customStore);
       return item === undefined ? false : true;

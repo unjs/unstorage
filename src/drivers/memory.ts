@@ -2,11 +2,12 @@ import { defineDriver } from "./utils";
 
 const DRIVER_NAME = "memory";
 
-export default defineDriver<void>(() => {
+export default defineDriver<void, Map<string, any>>(() => {
   const data = new Map<string, any>();
 
   return {
     name: DRIVER_NAME,
+    instance: data,
     options: {},
     hasItem(key) {
       return data.has(key);

@@ -32,6 +32,7 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    instance: opts.sessionStorage!,
     hasItem(key) {
       return Object.prototype.hasOwnProperty.call(opts.sessionStorage, r(key));
     },

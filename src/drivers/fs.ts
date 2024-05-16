@@ -55,6 +55,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    instance: undefined,
     hasItem(key) {
       return existsSync(r(key));
     },

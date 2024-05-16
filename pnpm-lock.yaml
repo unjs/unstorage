@@ -26,6 +26,9 @@ importers:
       lru-cache:
         specifier: ^10.2.2
         version: 10.2.2
+      mongodb:
+        specifier: ^6.6.1
+        version: 6.6.1(socks@2.8.3)
       mri:
         specifier: ^1.2.0
         version: 1.2.0
@@ -129,9 +132,6 @@ importers:
       monaco-editor:
         specifier: ^0.48.0
         version: 0.48.0
-      mongodb:
-        specifier: ^6.6.1
-        version: 6.6.1(socks@2.8.3)
       mongodb-memory-server:
         specifier: ^9.2.0
         version: 9.2.0

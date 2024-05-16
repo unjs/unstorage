@@ -25,6 +25,7 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    instance: cache,
     hasItem(key) {
       return cache.has(key);
     },

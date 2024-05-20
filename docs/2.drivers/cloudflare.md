@@ -106,6 +106,10 @@ const storage = createStorage({
 - `apiURL`: Custom API URL. Default is `https://api.cloudflare.com`.
 - `base`: Adds prefix to all stored keys
 
+**Transaction options:**
+
+- `ttl`: Supported for `setItem(key, value, { ttl: number /* seconds min 60 */ })`
+
 **Supported methods:**
 
 - `getItem`: Maps to [Read key-value pair](https://api.cloudflare.com/#workers-kv-namespace-read-key-value-pair) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`

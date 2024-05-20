@@ -39,12 +39,6 @@ interface KVAuthEmailKey {
   apiKey: string;
 }
 
-interface KVItem {
-  key: string;
-  value: string;
-  ttl?: number;
-}
-
 export type KVHTTPOptions = {
   /**
    * Cloudflare account ID (required)
@@ -146,16 +140,13 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     }
   };
 
-  const setItem = async (key: string, value: any) => {
-    return await kvFetch(`/values/${r(key)}`, { method: "PUT", body: value });
-  };
-
-  const setItems = async (items: KVItem[])=> {
-    return kvFetch("/bulk", {
+  const setItem = async (key: string, value: any, opt: any) => {
+    return await kvFetch(`/values/${r(key)}`, {
       method: "PUT",
-      body: items,
+      body: value,
+      query: opt?.ttl ? { expiration_ttl: opt?.ttl } : {}
     });
-  }
+  };
 
   const removeItem = async (key: string) => {
     return await kvFetch(`/values/${r(key)}`, { method: "DELETE" });
@@ -222,7 +213,6 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     hasItem,
     getItem,
     setItem,
-    setItems,
     removeItem,
     getKeys: (base?: string) =>
       getKeys(base).then((keys) =>

@@ -144,7 +144,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     return await kvFetch(`/values/${r(key)}`, {
       method: "PUT",
       body: value,
-      query: opt?.ttl ? { expiration_ttl: opt?.ttl } : {}
+      query: opt?.ttl ? { expiration_ttl: opt?.ttl } : {},
     });
   };
 

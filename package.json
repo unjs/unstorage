@@ -1,6 +1,6 @@
 {
   "name": "unstorage",
-  "version": "1.10.2",
+  "version": "2.0.0",
   "description": "Universal Storage Layer",
   "repository": "unjs/unstorage",
   "license": "MIT",
@@ -31,14 +31,15 @@
     "server.d.ts"
   ],
   "scripts": {
+    "fetch": "pnpm install",
     "build": "unbuild",
     "demo": "vite demo",
     "dev": "vitest",
-    "lint": "eslint . && prettier -c src test demo",
+    "lint": "eslint . --fix && prettier -c src test demo",
     "lint:fix": "eslint . --fix && prettier -w src test demo",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
-    "test": "pnpm lint && pnpm test:types && vitest run --coverage",
+    "test": "pnpm lint --fix && pnpm test:types && vitest run --coverage",
     "bench": "jiti test/server.bench.ts",
     "test:types": "tsc --noEmit --skipLibCheck",
     "unstorage": "pnpm jiti src/cli"
@@ -153,5 +154,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@9.1.1"
+  "packageManager": "pnpm@9.1.2"
 }

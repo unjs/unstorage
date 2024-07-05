@@ -18,8 +18,18 @@ export default defineDriver((opts: KVOptions) => {
   async function getKeys(base: string = "") {
     base = r(base);
     const binding = getKVBinding(opts.binding);
-    const kvList = await binding.list(base ? { prefix: base } : undefined);
-    return kvList.keys.map((key) => key.name);
+    const keys = [];
+    let cursor: string | undefined = undefined;
+    do {
+      const kvList = await binding.list({ prefix: base || undefined, cursor });
+
+      keys.push(...kvList.keys.map((key) => key.name));
+      cursor = (kvList.list_complete ? undefined : kvList.cursor) as
+        | string
+        | undefined;
+    } while (cursor);
+
+    return keys;
   }
 
   return {

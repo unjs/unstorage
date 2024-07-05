@@ -23,13 +23,13 @@ export default defineDriver((opts: KVOptions) => {
     do {
       const kvList = await binding.list({ prefix: base || undefined, cursor });
 
-      keys.push(...kvList.keys.map((key) => key.name));
+      keys.push(...kvList.keys);
       cursor = (kvList.list_complete ? undefined : kvList.cursor) as
         | string
         | undefined;
     } while (cursor);
 
-    return keys;
+    return keys.map((key) => key.name);
   }
 
   return {

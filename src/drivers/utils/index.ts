@@ -1,10 +1,13 @@
-import type { Driver } from "../../types";
+import type { Driver } from "../..";
 
-type DriverFactory<T> = (opts: T) => Driver;
+type DriverFactory<OptionsT, InstanceT> = (
+  opts: OptionsT
+) => Driver<OptionsT, InstanceT>;
+interface ErrorOptions {}
 
-export function defineDriver<T = any>(
-  factory: DriverFactory<T>
-): DriverFactory<T> {
+export function defineDriver<OptionsT = any, InstanceT = never>(
+  factory: DriverFactory<OptionsT, InstanceT>
+): DriverFactory<OptionsT, InstanceT> {
   return factory;
 }
 
@@ -16,7 +19,10 @@ export function normalizeKey(key: string | undefined): string {
 }
 
 export function joinKeys(...keys: string[]) {
-  return keys.map(normalizeKey).filter(Boolean).join(":");
+  return keys
+    .map((key) => normalizeKey(key))
+    .filter(Boolean)
+    .join(":");
 }
 
 export function createError(

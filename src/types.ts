@@ -16,9 +16,10 @@ export interface StorageMeta {
 
 export type TransactionOptions = Record<string, any>;
 
-export interface Driver {
+export interface Driver<OptionsT = any, InstanceT = any> {
   name?: string;
-  options?: any;
+  options?: OptionsT;
+  getInstance?: () => InstanceT;
   hasItem: (key: string, opts: TransactionOptions) => MaybePromise<boolean>;
   getItem: (
     key: string,
@@ -66,10 +67,10 @@ export interface Storage<T extends StorageValue = StorageValue> {
     opts?: TransactionOptions
   ) => Promise<U | null>;
   /** @experimental */
-  getItems: (
+  getItems: <U extends T>(
     items: (string | { key: string; options?: TransactionOptions })[],
     commonOptions?: TransactionOptions
-  ) => Promise<{ key: string; value: StorageValue }[]>;
+  ) => Promise<{ key: string; value: U }[]>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   getItemRaw: <T = any>(
     key: string,
@@ -81,8 +82,8 @@ export interface Storage<T extends StorageValue = StorageValue> {
     opts?: TransactionOptions
   ) => Promise<void>;
   /** @experimental */
-  setItems: (
-    items: { key: string; value: string; options?: TransactionOptions }[],
+  setItems: <U extends T>(
+    items: { key: string; value: U; options?: TransactionOptions }[],
     commonOptions?: TransactionOptions
   ) => Promise<void>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
@@ -125,4 +126,11 @@ export interface Storage<T extends StorageValue = StorageValue> {
     base?: string,
     options?: { parents?: boolean }
   ) => { base: string; driver: Driver }[];
+  // Aliases
+  keys: Storage["getKeys"];
+  get: Storage["getItem"];
+  set: Storage["setItem"];
+  has: Storage["hasItem"];
+  del: Storage["removeItem"];
+  remove: Storage["removeItem"];
 }

@@ -11,7 +11,7 @@ export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
   base?: string;
 
   /**
-   * Optional flag to customzize environment variable prefix (Default is `KV`). Set to `false` to disable env inference for `url` and `token` options
+   * Optional flag to customize environment variable prefix (Default is `KV`). Set to `false` to disable env inference for `url` and `token` options
    */
   env?: false | string;
 
@@ -21,7 +21,9 @@ export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
   ttl?: number;
 }
 
-export default defineDriver<VercelKVOptions>((opts) => {
+const DRIVER_NAME = "vercel-kv";
+
+export default defineDriver<VercelKVOptions, VercelKV>((opts) => {
   const base = normalizeKey(opts?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
 
@@ -54,12 +56,16 @@ export default defineDriver<VercelKVOptions>((opts) => {
           );
         }
       }
-      _client = createClient(opts as RedisConfigNodejs);
+      _client = createClient(
+        opts as VercelKVOptions & { url: string; token: string }
+      );
     }
     return _client;
   };
 
   return {
+    name: DRIVER_NAME,
+    getInstance: getClient,
     hasItem(key) {
       return getClient().exists(r(key)).then(Boolean);
     },

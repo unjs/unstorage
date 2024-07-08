@@ -1,5 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createError, defineDriver, joinKeys } from "./utils";
+import { defineDriver, joinKeys } from "./utils";
+import { getKVBinding } from "./utils/cloudflare";
 export interface KVOptions {
   binding?: string | KVNamespace;
 
@@ -11,37 +12,48 @@ export interface KVOptions {
 
 const DRIVER_NAME = "cloudflare-kv-binding";
 
-export default defineDriver((opts: KVOptions = {}) => {
+export default defineDriver((opts: KVOptions) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   async function getKeys(base: string = "") {
     base = r(base);
-    const binding = getBinding(opts.binding);
-    const kvList = await binding.list(base ? { prefix: base } : undefined);
-    return kvList.keys.map((key) => key.name);
+    const binding = getKVBinding(opts.binding);
+    const keys = [];
+    let cursor: string | undefined = undefined;
+    do {
+      const kvList = await binding.list({ prefix: base || undefined, cursor });
+
+      keys.push(...kvList.keys);
+      cursor = (kvList.list_complete ? undefined : kvList.cursor) as
+        | string
+        | undefined;
+    } while (cursor);
+
+    return keys.map((key) => key.name);
   }
 
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: () => getKVBinding(opts.binding),
     async hasItem(key) {
       key = r(key);
-      const binding = getBinding(opts.binding);
+      const binding = getKVBinding(opts.binding);
       return (await binding.get(key)) !== null;
     },
     getItem(key) {
       key = r(key);
-      const binding = getBinding(opts.binding);
+      const binding = getKVBinding(opts.binding);
       return binding.get(key);
     },
-    setItem(key, value) {
+    setItem(key, value, topts) {
       key = r(key);
-      const binding = getBinding(opts.binding);
-      return binding.put(key, value);
+      const binding = getKVBinding(opts.binding);
+      return binding.put(key, value, topts);
     },
     removeItem(key) {
       key = r(key);
-      const binding = getBinding(opts.binding);
+      const binding = getKVBinding(opts.binding);
       return binding.delete(key);
     },
     getKeys() {
@@ -50,37 +62,9 @@ export default defineDriver((opts: KVOptions = {}) => {
       );
     },
     async clear(base) {
-      const binding = getBinding(opts.binding);
+      const binding = getKVBinding(opts.binding);
       const keys = await getKeys(base);
       await Promise.all(keys.map((key) => binding.delete(key)));
     },
   };
 });
-
-function getBinding(binding: KVNamespace | string = "STORAGE") {
-  let bindingName = "[binding]";
-
-  if (typeof binding === "string") {
-    bindingName = binding;
-    binding = ((globalThis as any)[bindingName] ||
-      (globalThis as any).__env__?.[bindingName]) as KVNamespace;
-  }
-
-  if (!binding) {
-    throw createError(
-      DRIVER_NAME,
-      `Invalid binding \`${bindingName}\`: \`${binding}\``
-    );
-  }
-
-  for (const key of ["get", "put", "delete"]) {
-    if (!(key in binding)) {
-      throw createError(
-        DRIVER_NAME,
-        `Invalid binding \`${bindingName}\`: \`${key}\` key is missing`
-      );
-    }
-  }
-
-  return binding;
-}

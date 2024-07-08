@@ -3,7 +3,7 @@ import Redis, {
   Cluster,
   ClusterNode,
   ClusterOptions,
-  RedisOptions
+  RedisOptions,
 } from "ioredis";
 
 export interface DragonflyOptions extends RedisOptions {

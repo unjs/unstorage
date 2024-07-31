@@ -48,8 +48,17 @@ export default defineDriver((opts: KVOptions) => {
     },
     setItem(key, value, topts) {
       key = r(key);
-      const binding = getKVBinding(opts.binding);
-      return binding.put(key, value, topts);
+      try {
+          const jsonValue = JSON.parse(value);
+          if ( jsonValue.expires ) {
+            topts.expirationTtl = jsonValue.expires;
+          }
+      } catch {
+        // Do nothing. Value is not valid JSON so it wouldn't contain any data for the transaction options
+      } finally {
+        const binding = getKVBinding(opts.binding);
+        return binding.put(key, value, topts);
+      }
     },
     removeItem(key) {
       key = r(key);

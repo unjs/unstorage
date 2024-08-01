@@ -1,5 +1,6 @@
 import { defineDriver, joinKeys } from "./utils";
-import Redis, {
+import {
+  Redis,
   Cluster,
   ClusterNode,
   ClusterOptions,

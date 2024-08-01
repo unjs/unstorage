@@ -140,8 +140,12 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     }
   };
 
-  const setItem = async (key: string, value: any) => {
-    return await kvFetch(`/values/${r(key)}`, { method: "PUT", body: value });
+  const setItem = async (key: string, value: any, opt: any) => {
+    return await kvFetch(`/values/${r(key)}`, {
+      method: "PUT",
+      body: value,
+      query: opt?.ttl ? { expiration_ttl: opt?.ttl } : {},
+    });
   };
 
   const removeItem = async (key: string) => {

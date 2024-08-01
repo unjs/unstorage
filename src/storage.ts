@@ -9,7 +9,7 @@ import type {
   TransactionOptions,
 } from "./types";
 import memory from "./drivers/memory";
-import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
+import { asyncCall, deserializeRaw, isPureObject, serializeRaw, stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey, joinKeys } from "./utils";
 
 interface StorageCTX {
@@ -214,7 +214,7 @@ export function createStorage<T extends StorageValue>(
         deserializeRaw(value)
       );
     },
-    async setItem(key, value, opts = {}) {
+    async setItem(key, value: any, opts = {}) {
       if (value === undefined) {
         return storage.removeItem(key);
       }
@@ -222,6 +222,9 @@ export function createStorage<T extends StorageValue>(
       const { relativeKey, driver } = getMount(key);
       if (!driver.setItem) {
         return; // Readonly
+      }
+      if (value && isPureObject(value) && value.expires) {
+        opts.ttl = value.expires;
       }
       await asyncCall(driver.setItem, relativeKey, stringify(value), opts);
       if (!driver.watch) {

@@ -24,7 +24,7 @@ function isPrimitive(value: any) {
   return value === null || (type !== "object" && type !== "function");
 }
 
-function isPureObject(value: any) {
+export function isPureObject(value: any) {
   const proto = Object.getPrototypeOf(value);
   // eslint-disable-next-line no-prototype-builtins
   return !proto || proto.isPrototypeOf(Object);

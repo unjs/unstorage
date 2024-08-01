@@ -1,6 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 import { defineDriver, joinKeys } from "./utils";
 import { getKVBinding } from "./utils/cloudflare";
+import { TransactionOptions } from "../types";
 export interface KVOptions {
   binding?: string | KVNamespace;
 
@@ -48,17 +49,12 @@ export default defineDriver((opts: KVOptions) => {
     },
     setItem(key, value, topts) {
       key = r(key);
-      try {
-          const jsonValue = JSON.parse(value);
-          if ( jsonValue.expires ) {
-            topts.expirationTtl = jsonValue.expires;
-          }
-      } catch {
-        // Do nothing. Value is not valid JSON so it wouldn't contain any data for the transaction options
-      } finally {
-        const binding = getKVBinding(opts.binding);
-        return binding.put(key, value, topts);
+      let expirationOpts: TransactionOptions = {};
+      if (topts.ttl) {
+        expirationOpts.expirationTtl = topts.ttl;
       }
+      const binding = getKVBinding(opts.binding);
+      return binding.put(key, value, expirationOpts);
     },
     removeItem(key) {
       key = r(key);

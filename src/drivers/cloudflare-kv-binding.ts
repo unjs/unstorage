@@ -1,6 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 import { defineDriver, joinKeys } from "./utils";
 import { getKVBinding } from "./utils/cloudflare";
+import { TransactionOptions } from "../types";
 export interface KVOptions {
   binding?: string | KVNamespace;
 
@@ -48,8 +49,12 @@ export default defineDriver((opts: KVOptions) => {
     },
     setItem(key, value, topts) {
       key = r(key);
+      let expirationOpts: TransactionOptions = {};
+      if (topts.ttl) {
+        expirationOpts.expirationTtl = topts.ttl;
+      }
       const binding = getKVBinding(opts.binding);
-      return binding.put(key, value, topts);
+      return binding.put(key, value, expirationOpts);
     },
     removeItem(key) {
       key = r(key);

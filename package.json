@@ -70,6 +70,7 @@
     "@types/jsdom": "^21.1.6",
     "@types/node": "^20.12.13",
     "@upstash/redis": "^1.31.3",
+    "@vercel/blob": "^0.23.4",
     "@vercel/kv": "^1.0.1",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitest/coverage-v8": "^1.6.0",
@@ -108,6 +109,7 @@
     "@netlify/blobs": "^6.5.0 || ^7.0.0",
     "@planetscale/database": "^1.18.0",
     "@upstash/redis": "^1.31.3",
+    "@vercel/blob": "^0.23.4",
     "@vercel/kv": "^1.0.1",
     "idb-keyval": "^6.2.1",
     "ioredis": "^5.4.1"
@@ -141,6 +143,9 @@
       "optional": true
     },
     "@upstash/redis": {
+      "optional": true
+    },
+    "@vercel/blob": {
       "optional": true
     },
     "@vercel/kv": {

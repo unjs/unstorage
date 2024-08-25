@@ -83,7 +83,7 @@
     "ioredis": "^5.4.1",
     "ioredis-mock": "^8.9.0",
     "jiti": "^1.21.0",
-    "jsdom": "^24.1.0",
+    "jsdom": "^25.0.0",
     "mitata": "^0.1.11",
     "monaco-editor": "^0.49.0",
     "mongodb": "^6.7.0",

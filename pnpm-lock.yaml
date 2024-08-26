@@ -64,8 +64,8 @@ importers:
         specifier: ^4.20240524.0
         version: 4.20240524.0
       '@netlify/blobs':
-        specifier: ^7.3.0
-        version: 7.3.0
+        specifier: ^8.0.1
+        version: 8.0.1
       '@planetscale/database':
         specifier: ^1.18.0
         version: 1.18.0
@@ -193,6 +193,7 @@ packages:
   '@azure/core-http@3.0.4':
     resolution: {integrity: sha512-Fok9VVhMdxAFOtqiiAtg74fL0UJkt0z3D+ouUUxcRLzZNBioPRAMJFVxiWoJljYpXsRi4GDQHzQHDc9AiYaIUQ==}
     engines: {node: '>=14.0.0'}
+    deprecated: deprecating as we migrated to core v2
 
   '@azure/core-lro@2.7.2':
     resolution: {integrity: sha512-0YIpccoX8m/k00O7mDDMdJpbr6mf1yWo2dfmxt5A8XVZVVMz2SSKaEbMCeJRvgQ0IaSlqhjT47p4hVIRRy90xw==}
@@ -686,6 +687,7 @@ packages:
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
     engines: {node: '>=10.10.0'}
+    deprecated: Use @eslint/config-array instead
 
   '@humanwhocodes/module-importer@1.0.1':
     resolution: {integrity: sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA==}
@@ -693,6 +695,7 @@ packages:
 
   '@humanwhocodes/object-schema@2.0.3':
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
+    deprecated: Use @eslint/object-schema instead
 
   '@humanwhocodes/retry@0.3.0':
     resolution: {integrity: sha512-d2CGZR2o7fS6sWB7DG/3a95bGKQyHMACZ5aW8qGkkqQpUoZV6C0X7Pc7l4ZNMZkfNBf4VWNe9E1jRsf0G146Ew==}
@@ -744,8 +747,8 @@ packages:
     resolution: {integrity: sha512-N8x7eSLGcmUFNWZRxT1vsHvypzIRgQYdG0rJey/rZCy6zT/30qDt8Joj7FxzGNLSwXbeZqJOMqDurp7ra4hgbw==}
     engines: {node: '>=14'}
 
-  '@netlify/blobs@7.3.0':
-    resolution: {integrity: sha512-wN/kNTZo4xjlUM/C0WILOkJbe8p4AFquSGkZEIoIcgnsx5ikp2GyqGiq1WMLee7QdbnqeIV2g2hn/PjT324E5w==}
+  '@netlify/blobs@8.0.1':
+    resolution: {integrity: sha512-IrZHVqillU0x12eDbsap4Ba6poi+4IdVCYjZa+tA0eD95TaSbSqfw1zNkO27MiKw0pOjPB6+RXFK4pdfOs/qUQ==}
     engines: {node: ^14.16.0 || >=16.0.0}
 
   '@nodelib/fs.scandir@2.1.5':
@@ -5045,7 +5048,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@netlify/blobs@7.3.0': {}
+  '@netlify/blobs@8.0.1': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:

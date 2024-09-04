@@ -214,7 +214,7 @@ export function createStorage<T extends StorageValue>(
         deserializeRaw(value)
       );
     },
-    async setItem(key, value: any, opts = {}) {
+    async setItem(key, value, opts = {}) {
       if (value === undefined) {
         return storage.removeItem(key);
       }
@@ -222,9 +222,6 @@ export function createStorage<T extends StorageValue>(
       const { relativeKey, driver } = getMount(key);
       if (!driver.setItem) {
         return; // Readonly
-      }
-      if (value && isPureObject(value) && value.expires) {
-        opts.ttl = value.expires;
       }
       await asyncCall(driver.setItem, relativeKey, stringify(value), opts);
       if (!driver.watch) {

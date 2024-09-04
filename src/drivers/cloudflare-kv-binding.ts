@@ -1,7 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 import { defineDriver, joinKeys } from "./utils";
 import { getKVBinding } from "./utils/cloudflare";
-
 export interface KVOptions {
   binding?: string | KVNamespace;
 

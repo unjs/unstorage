@@ -99,5 +99,5 @@ const storage = createStorage({
 **Options:**
 
 - **`database`** (required): A `db0` database instance.
-- **`dialect`** (required): The SQL dialect of your database: `sqlite`, `postgres`, or `mysql`.
+- **`dialect`** (required): The SQL dialect of your database: `sqlite`, `postgresql`, or `mysql`.
 - `table`: The name of the table to read from. It defaults to `storage`.

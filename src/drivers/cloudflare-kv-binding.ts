@@ -49,7 +49,16 @@ export default defineDriver((opts: KVOptions) => {
     setItem(key, value, topts) {
       key = r(key);
       const binding = getKVBinding(opts.binding);
-      return binding.put(key, value, topts);
+      return binding.put(
+        key,
+        value,
+        topts
+          ? {
+              expirationTtl: topts.ttl,
+              ...topts,
+            }
+          : undefined
+      );
     },
     removeItem(key) {
       key = r(key);

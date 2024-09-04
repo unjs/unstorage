@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.11.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.11.0...v1.11.1)
+
+### 🔥 Performance
+
+- **cloudflare-kv-binding:** Add missing base argument on `getKeys` ([#475](https://github.com/unjs/unstorage/pull/475))
+
+### ❤️ Contributors
+
+- Sébastien Chopin ([@atinux](http://github.com/atinux))
+
 ## v1.11.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.10.2...v1.11.0)

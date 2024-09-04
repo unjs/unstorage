@@ -15,5 +15,6 @@ export default unjs({
     "unicorn/catch-error-name": 0,
     "unicorn/prefer-logical-operator-over-ternary": 0,
     "unicorn/prefer-ternary": 0,
+    "unicorn/prefer-string-raw": 0,
   },
 });

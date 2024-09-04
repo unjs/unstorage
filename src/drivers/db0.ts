@@ -1,8 +1,5 @@
 import type { Database } from "db0";
-import { Driver } from "../types";
 import { defineDriver } from "./utils";
-
-type Dialect = "postgresql" | "mysql" | "sqlite";
 
 interface ResultSchema {
   rows: Array<{
@@ -15,7 +12,7 @@ interface ResultSchema {
 
 export interface Db0DriverOptions {
   database: Database;
-  dialect: Dialect;
+  dialect: "postgresql" | "mysql" | "sqlite";
   table?: string;
 }
 
@@ -23,15 +20,6 @@ const DRIVER_NAME = "db0";
 
 export default defineDriver((opts: Db0DriverOptions) => {
   opts.table = opts.table || "storage";
-
-  const dialects: Partial<Record<Dialect, Partial<Driver>>> = {
-    mysql: {
-      setItem: async (key, value) => {
-        await opts.database
-          .sql<ResultSchema>`INSERT INTO {${opts.table}} (id, value) VALUES (${key}, ${value}) ON DUPLICATE KEY UPDATE value = ${value}`;
-      },
-    },
-  };
 
   return {
     name: DRIVER_NAME,
@@ -50,6 +38,13 @@ export default defineDriver((opts: Db0DriverOptions) => {
       return rows?.[0]?.value ?? null;
     },
     setItem: async (key, value) => {
+      if (opts.dialect === "mysql") {
+        await opts.database
+          .sql<ResultSchema>`INSERT INTO {${opts.table}} (id, value) VALUES (${key}, ${value}) ON DUPLICATE KEY UPDATE value = ${value}`;
+
+        return;
+      }
+
       await opts.database
         .sql<ResultSchema>`INSERT INTO {${opts.table}} (id, value, updated_at) VALUES (${key}, ${value}, CURRENT_TIMESTAMP) ON CONFLICT(id) DO UPDATE SET value = ${value}, updated_at = CURRENT_TIMESTAMP`;
     },
@@ -75,7 +70,6 @@ export default defineDriver((opts: Db0DriverOptions) => {
     clear: async () => {
       await opts.database.sql<ResultSchema>`DELETE FROM {${opts.table}}`;
     },
-    ...dialects[opts.dialect],
   };
 });
 

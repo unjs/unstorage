@@ -20,59 +20,6 @@ Select and configure the appropriate connector for your database.
 Learn more about configuring connectors in the `db0` documentation.
 ::
 
-Then you can create a table to store your data by running the following query in your database, where `<storage>` is the name of the table you want to use (defaults to `storage`):
-
-::tabs
-  ::div
-  ---
-  label: SQLite
-  icon: simple-icons:sqlite
-  ---
-
-  ```sql
-  CREATE TABLE <storage> (
-    id TEXT PRIMARY KEY, 
-    value TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP, 
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-  );
-  ```
-  ::
-
-  ::div
-  ---
-  label: PostgreSQL
-  icon: simple-icons:postgresql
-  ---
-
-  ```sql
-  CREATE TABLE <storage> (
-    id VARCHAR(255) NOT NULL PRIMARY KEY, 
-    value TEXT, 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
-  ```
-  ::
-  
-  ::div
-  ---
-  label: MySQL
-  icon: simple-icons:mysql
-  ---
-
-  ```sql
-  CREATE TABLE <storage> (
-    id VARCHAR(255) NOT NULL PRIMARY KEY,
-    value LONGTEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-  );
-  ```
-  ::
-::
-
-
 You can then configure the driver like this:
 
 ```js
@@ -84,20 +31,28 @@ import sqlite from "db0/connectors/better-sqlite3";
 const database = createDatabase(
   sqlite({
     /* db0 connector options */
-  }),
+  })
 );
 
 const storage = createStorage({
   driver: db0Driver({
     database,
     dialect: "sqlite",
-    /* table: "<storage>", // defaults to "storage" */
+    table: "custom_table_name", // optional, defaults to "unstorage"
   }),
 });
 ```
+
+::note
+The database table is automatically created, no additional setup is required.
+::
 
 **Options:**
 
 - **`database`** (required): A `db0` database instance.
 - **`dialect`** (required): The SQL dialect of your database: `sqlite`, `postgresql`, or `mysql`.
-- `table`: The name of the table to read from. It defaults to `storage`.
+- `table`: The name of the table to use. It defaults to `unstorage`.
+
+::caution
+The database table will be dropped when the `dispose()` method is called on the storage instance.
+::

@@ -49,7 +49,7 @@ export default defineDriver((opts: KVOptions) => {
     },
     setItem(key, value, topts) {
       key = r(key);
-      let expirationOpts: TransactionOptions = {};
+      const expirationOpts: TransactionOptions = {};
       if (topts.ttl) {
         expirationOpts.expirationTtl = topts.ttl;
       }

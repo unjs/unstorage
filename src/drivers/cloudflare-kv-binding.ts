@@ -49,13 +49,6 @@ export default defineDriver((opts: KVOptions) => {
     },
     setItem(key, value, topts) {
       key = r(key);
-<<<<<<< HEAD
-      const expirationOpts: TransactionOptions = {};
-      if (topts.ttl) {
-        expirationOpts.expirationTtl = topts.ttl;
-      }
-=======
->>>>>>> 4fa6e3e (update)
       const binding = getKVBinding(opts.binding);
       return binding.put(key, value, topts ? {
         expirationTtl: topts.ttl,

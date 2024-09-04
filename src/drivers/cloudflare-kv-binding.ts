@@ -65,8 +65,8 @@ export default defineDriver((opts: KVOptions) => {
       const binding = getKVBinding(opts.binding);
       return binding.delete(key);
     },
-    getKeys() {
-      return getKeys().then((keys) =>
+    getKeys(base) {
+      return getKeys(base).then((keys) =>
         keys.map((key) => (opts.base ? key.slice(opts.base.length) : key))
       );
     },

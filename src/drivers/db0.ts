@@ -128,11 +128,6 @@ export default defineDriver((opts: Db0DriverOptions) => {
         DELETE FROM {${opts.table}}
       `;
     }),
-    dispose: async () => {
-      await opts.database.sql`
-        DROP TABLE IF EXISTS {${opts.table}}
-      `;
-    },
   };
 });
 

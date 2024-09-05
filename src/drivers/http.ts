@@ -6,6 +6,7 @@ import { joinURL } from "ufo";
 export interface HTTPOptions {
   base: string;
   headers?: Record<string, string>;
+  resolveMeta?: boolean;
 }
 
 const DRIVER_NAME = "http";
@@ -49,19 +50,22 @@ export default defineDriver((opts: HTTPOptions) => {
         .then(() => true)
         .catch((err) => catchFetchError(err, false));
     },
-    async getItem(key, tops) {
-      const value = await _fetch(r(key), {
-        headers: getHeaders(tops),
+    getItem(key, topts) {
+      return _fetch(r(key), {
+        headers: getHeaders(topts),
       }).catch(catchFetchError);
-      return value;
     },
-    async getItemRaw(key, topts) {
-      const value = await _fetch(r(key), {
+    getItemRaw(key, topts) {
+      return _fetch(r(key), {
         headers: getHeaders(topts, { accept: "application/octet-stream" }),
       }).catch(catchFetchError);
-      return value;
     },
     async getMeta(key, topts) {
+      if (opts.resolveMeta) {
+        return _fetch(r(key) + "$", {
+          headers: getHeaders(topts),
+        }).catch(catchFetchError);
+      }
       const res = await _fetch.raw(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),

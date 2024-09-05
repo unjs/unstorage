@@ -45,8 +45,17 @@ export function createH3StorageHandler(
   opts: StorageServerOptions = {}
 ): EventHandler {
   return eventHandler(async (event) => {
-    const _path = opts.resolvePath?.(event) ?? event.path;
-    const lastChar = _path[_path.length - 1];
+    // path:to:key
+    // path:to:key: (base)
+    // path:to:key$ (meta)
+    // path:to:key:$ (base + meta)
+    let _path = opts.resolvePath?.(event) ?? event.path;
+    let lastChar = _path[_path.length - 1];
+    const isMetaKey = lastChar === "$";
+    if (isMetaKey) {
+      _path = _path.slice(0, -1);
+      lastChar = _path[_path.length - 1];
+    }
     const isBaseKey = lastChar === ":" || lastChar === "/";
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
 
@@ -74,24 +83,42 @@ export function createH3StorageHandler(
       throw _httpError;
     }
 
-    // GET => getItem / getKeys
+    // GET => getItem / getKeys / getMeta
     if (event.method === "GET") {
       if (isBaseKey) {
         const keys = await storage.getKeys(key);
+        if (isMetaKey) {
+          // path:to:key:$ => { key, meta }[]
+          return Promise.all(
+            keys.map(async (key) => {
+              const meta = await storage.getMeta(key);
+              return { key: key.replace(/:/g, "/"), meta };
+            })
+          );
+        }
         return keys.map((key) => key.replace(/:/g, "/"));
+      }
+      if (isMetaKey) {
+        return storage.getMeta(key);
       }
       const isRaw =
         getRequestHeader(event, "accept") === "application/octet-stream";
-      const driverValue = await (isRaw
-        ? storage.getItemRaw(key)
-        : storage.getItem(key));
+      const driverValue = isMetaKey
+        ? await storage.getMeta(key)
+        : // eslint-disable-next-line unicorn/no-nested-ternary
+          isRaw
+          ? await storage.getItemRaw(key)
+          : await storage.getItem(key);
       if (driverValue === null) {
         throw createError({
           statusCode: 404,
           statusMessage: "KV value not found",
         });
       }
-      setMetaHeaders(event, await storage.getMeta(key));
+      setMetaHeaders(
+        event,
+        isMetaKey ? driverValue : await storage.getMeta(key)
+      );
       return isRaw ? driverValue : stringify(driverValue);
     }
 
@@ -107,14 +134,21 @@ export function createH3StorageHandler(
       return "";
     }
 
-    // PUT => setItem
+    // PUT => setItem / setItemRaw / setMeta
     if (event.method === "PUT") {
       const isRaw =
         getRequestHeader(event, "content-type") === "application/octet-stream";
       const topts: TransactionOptions = {
         ttl: Number(getRequestHeader(event, "x-ttl")) || undefined,
       };
-      if (isRaw) {
+      if (isMetaKey) {
+        const meta = await readRawBody(event, "utf8")
+          .then((r) => JSON.parse(r!))
+          .catch(() => undefined);
+        if (meta) {
+          await storage.setMeta(key, meta, topts);
+        }
+      } else if (isRaw) {
         const value = await readRawBody(event, false);
         await storage.setItemRaw(key, value, topts);
       } else {

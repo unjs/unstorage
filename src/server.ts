@@ -11,7 +11,7 @@ import {
   EventHandler,
   H3Event,
 } from "h3";
-import { Storage } from "./types";
+import type { Storage, TransactionOptions, StorageMeta } from "./types";
 import { stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
 
@@ -74,50 +74,36 @@ export function createH3StorageHandler(
       throw _httpError;
     }
 
-    // GET => getItem
+    // GET => getItem / getKeys
     if (event.method === "GET") {
       if (isBaseKey) {
         const keys = await storage.getKeys(key);
         return keys.map((key) => key.replace(/:/g, "/"));
       }
-
       const isRaw =
         getRequestHeader(event, "accept") === "application/octet-stream";
-
-      const checkNotFound = (value: any) => {
-        if (value === null) {
-          throw createError({
-            statusMessage: "KV value not found",
-            statusCode: 404,
-          });
-        }
-      };
-
-      if (isRaw) {
-        const value = await storage.getItemRaw(key);
-        checkNotFound(value);
-        return value;
-      } else {
-        const value = await storage.getItem(key);
-        checkNotFound(value);
-        return stringify(value);
+      const driverValue = await (isRaw
+        ? storage.getItemRaw(key)
+        : storage.getItem(key));
+      if (driverValue === null) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: "KV value not found",
+        });
       }
+      setMetaHeaders(event, await storage.getMeta(key));
+      return isRaw ? driverValue : stringify(driverValue);
     }
 
-    // HEAD => hasItem + meta (mtime)
+    // HEAD => hasItem + meta (mtime, ttl)
     if (event.method === "HEAD") {
-      const _hasItem = await storage.hasItem(key);
-      event.node.res.statusCode = _hasItem ? 200 : 404;
-      if (_hasItem) {
-        const meta = await storage.getMeta(key);
-        if (meta.mtime) {
-          setResponseHeader(
-            event,
-            "last-modified",
-            new Date(meta.mtime).toUTCString()
-          );
-        }
+      if (!(await storage.hasItem(key))) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: "KV value not found",
+        });
       }
+      setMetaHeaders(event, await storage.getMeta(key));
       return "";
     }
 
@@ -125,13 +111,16 @@ export function createH3StorageHandler(
     if (event.method === "PUT") {
       const isRaw =
         getRequestHeader(event, "content-type") === "application/octet-stream";
+      const topts: TransactionOptions = {
+        ttl: Number(getRequestHeader(event, "x-ttl")) || undefined,
+      };
       if (isRaw) {
         const value = await readRawBody(event, false);
-        await storage.setItemRaw(key, value);
+        await storage.setItemRaw(key, value, topts);
       } else {
         const value = await readRawBody(event, "utf8");
         if (value !== undefined) {
-          await storage.setItem(key, value);
+          await storage.setItem(key, value, topts);
         }
       }
       return "OK";
@@ -148,6 +137,20 @@ export function createH3StorageHandler(
       statusMessage: `Method Not Allowed: ${event.method}`,
     });
   });
+}
+
+function setMetaHeaders(event: H3Event, meta: StorageMeta) {
+  if (meta.mtime) {
+    setResponseHeader(
+      event,
+      "last-modified",
+      new Date(meta.mtime).toUTCString()
+    );
+  }
+  if (meta.ttl) {
+    setResponseHeader(event, "x-ttl", `${meta.ttl}`);
+    setResponseHeader(event, "cache-control", `max-age=${meta.ttl}`);
+  }
 }
 
 /**

@@ -52,7 +52,3 @@ The database table is automatically created, no additional setup is required.
 - **`database`** (required): A `db0` database instance.
 - **`dialect`** (required): The SQL dialect of your database: `sqlite`, `postgresql`, or `mysql`.
 - `table`: The name of the table to use. It defaults to `unstorage`.
-
-::caution
-The database table will be dropped when the `dispose()` method is called on the storage instance.
-::

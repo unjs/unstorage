@@ -4,11 +4,12 @@ import { listen } from "listhen";
 import { $fetch } from "ofetch";
 import { createStorage } from "../src";
 import { createStorageServer } from "../src/server";
-import fs from "../src/drivers/fs.ts";
+import fsDriver from "../src/drivers/fs.ts";
+import httpDriver from "../src/drivers/http.ts";
 
 describe("server", () => {
   it("basic", async () => {
-    const storage = createStorage();
+    const storage = createTestStorage();
     const storageServer = createStorageServer(storage, {
       authorize(req) {
         if (req.type === "read" && req.key.startsWith("private:")) {
@@ -22,6 +23,10 @@ describe("server", () => {
 
     const fetchStorage = (url: string, options?: any) =>
       $fetch(url, { baseURL: serverURL, ...options });
+
+    const remoteStorage = createStorage({
+      driver: httpDriver({ base: serverURL }),
+    });
 
     expect(await fetchStorage("foo/", {})).toMatchObject([]);
 
@@ -56,12 +61,17 @@ describe("server", () => {
       statusMessage: "Unauthorized Read",
     });
 
+    // TTL
+    await storage.setItem("ttl", "ttl", { ttl: 1000 });
+    expect(await storage.getMeta("ttl")).toMatchObject({ ttl: 1000 });
+    expect(await remoteStorage.getMeta("ttl")).toMatchObject({ ttl: 1000 });
+
     await close();
   });
 
   it("properly encodes raw items", async () => {
     const storage = createStorage({
-      driver: fs({ base: "./test/fs-storage" }),
+      driver: fsDriver({ base: "./test/fs-storage" }),
     });
     const storageServer = createStorageServer(storage);
     const { close, url: serverURL } = await listen(storageServer.handle, {
@@ -91,3 +101,52 @@ describe("server", () => {
     await close();
   });
 });
+
+function createTestStorage() {
+  const data = new Map<string, string>();
+  const ttl = new Map<string, number>();
+  const storage = createStorage({
+    driver: {
+      hasItem(key) {
+        return data.has(key);
+      },
+      getItem(key) {
+        return data.get(key) ?? null;
+      },
+      getItemRaw(key) {
+        return data.get(key) ?? null;
+      },
+      setItem(key, value, opts) {
+        data.set(key, value);
+        if (opts?.ttl) {
+          ttl.set(key, opts.ttl);
+        }
+      },
+      setItemRaw(key, value, opts) {
+        data.set(key, value);
+        if (opts?.ttl) {
+          ttl.set(key, opts.ttl);
+        }
+      },
+      getMeta(key) {
+        return {
+          ttl: ttl.get(key),
+        };
+      },
+      removeItem(key) {
+        data.delete(key);
+      },
+      getKeys() {
+        return [...data.keys()];
+      },
+      clear() {
+        data.clear();
+      },
+      dispose() {
+        data.clear();
+      },
+    },
+  });
+
+  return storage;
+}

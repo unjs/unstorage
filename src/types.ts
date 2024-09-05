@@ -11,10 +11,20 @@ export type Unwatch = () => MaybePromise<void>;
 export interface StorageMeta {
   atime?: Date;
   mtime?: Date;
+  ttl?: number;
   [key: string]: StorageValue | Date | undefined;
 }
 
-export type TransactionOptions = Record<string, any>;
+export interface TransactionOptions {
+  [key: string]: any;
+
+  /**
+   * Time to live in seconds
+   *
+   * **Note:** Native TTL support is not supported by all drivers
+   */
+  ttl?: number;
+}
 
 export interface Driver<OptionsT = any, InstanceT = any> {
   name?: string;

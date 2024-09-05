@@ -15,16 +15,8 @@ export interface StorageMeta {
   [key: string]: StorageValue | Date | undefined;
 }
 
-export interface TransactionOptions {
-  [key: string]: any;
-
-  /**
-   * Time to live in seconds
-   *
-   * **Note:** Native TTL support is not supported by all drivers
-   */
-  ttl?: number;
-}
+// TODO: type ttl
+export type TransactionOptions = Record<string, any>;
 
 export interface Driver<OptionsT = any, InstanceT = any> {
   name?: string;

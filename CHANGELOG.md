@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.12.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.11.1...v1.12.0)
+
+### 🚀 Enhancements
+
+- **http, server:** Support native `ttl` ([#479](https://github.com/unjs/unstorage/pull/479))
+
+### 🏡 Chore
+
+- Update undocs ([0e2ea33](https://github.com/unjs/unstorage/commit/0e2ea33))
+- Update undocs ([a711c1b](https://github.com/unjs/unstorage/commit/a711c1b))
+- Update undocs ([f27c389](https://github.com/unjs/unstorage/commit/f27c389))
+
+### 🤖 CI
+
+- Setup nightly release ([258fd4a](https://github.com/unjs/unstorage/commit/258fd4a))
+- Fetch full history to preserve nightly changelog ([329ff2b](https://github.com/unjs/unstorage/commit/329ff2b))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v1.11.1
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.11.0...v1.11.1)

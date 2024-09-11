@@ -33,7 +33,10 @@ export interface Driver<OptionsT = any, InstanceT = any> {
     commonOptions?: TransactionOptions
   ) => MaybePromise<{ key: string; value: StorageValue }[]>;
   /** @experimental */
-  getItemRaw?: (key: string, opts?: TransactionOptions) => MaybePromise<unknown>;
+  getItemRaw?: (
+    key: string,
+    opts?: TransactionOptions
+  ) => MaybePromise<unknown>;
   setItem?: (
     key: string,
     value: string,

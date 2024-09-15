@@ -39,6 +39,8 @@ describe("drivers: netlify-blobs", async () => {
       token,
       siteID,
       deployID: "test",
+      // Usually defaulted via the environment; only required in a test environment like this
+      region: "us-east-1",
     }),
   });
 

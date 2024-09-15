@@ -64,8 +64,8 @@ importers:
         specifier: ^4.20240903.0
         version: 4.20240903.0
       '@netlify/blobs':
-        specifier: ^7.4.0
-        version: 7.4.0
+        specifier: ^8.0.1
+        version: 8.0.1
       '@planetscale/database':
         specifier: ^1.19.0
         version: 1.19.0
@@ -857,8 +857,8 @@ packages:
     resolution: {integrity: sha512-N8x7eSLGcmUFNWZRxT1vsHvypzIRgQYdG0rJey/rZCy6zT/30qDt8Joj7FxzGNLSwXbeZqJOMqDurp7ra4hgbw==}
     engines: {node: '>=14'}
 
-  '@netlify/blobs@7.4.0':
-    resolution: {integrity: sha512-7rdPzo8bggt3D2CVO+U1rmEtxxs8X7cLusDbHZRJaMlxqxBD05mXgThj5DUJMFOvmfVjhEH/S/3AyiLUbDQGDg==}
+  '@netlify/blobs@8.0.1':
+    resolution: {integrity: sha512-IrZHVqillU0x12eDbsap4Ba6poi+4IdVCYjZa+tA0eD95TaSbSqfw1zNkO27MiKw0pOjPB6+RXFK4pdfOs/qUQ==}
     engines: {node: ^14.16.0 || >=16.0.0}
 
   '@nodelib/fs.scandir@2.1.5':
@@ -5110,7 +5110,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@netlify/blobs@7.4.0': {}
+  '@netlify/blobs@8.0.1': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:

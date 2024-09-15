@@ -33,6 +33,11 @@ export interface NetlifyDeployStoreOptions extends NetlifyBaseStoreOptions {
   deployID?: string;
 }
 
+export interface NetlifyDeployStoreV8Options extends NetlifyDeployStoreOptions {
+  // TODO(serhalp) Export this type from @netlify/blobs instead
+  region?: "us-east-1" | "us-east-2";
+}
+
 export interface NetlifyNamedStoreOptions extends NetlifyBaseStoreOptions {
   name: string;
   deployScoped?: false;
@@ -40,6 +45,7 @@ export interface NetlifyNamedStoreOptions extends NetlifyBaseStoreOptions {
 
 export type NetlifyStoreOptions =
   | NetlifyDeployStoreOptions
+  | NetlifyDeployStoreV8Options
   | NetlifyNamedStoreOptions;
 
 export default defineDriver((options: NetlifyStoreOptions) => {

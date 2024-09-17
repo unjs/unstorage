@@ -60,7 +60,7 @@ Learn more about Cloudflare KV API.
 
 You need to create a KV namespace. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
 
-**Note:** This driver uses native fetch and works universally! For using directly in a cloudflare worker environment, please use `cloudflare-kv-binding` driver for best performance!
+**Note:** This driver uses native fetch and works universally! For a direct usage in a cloudflare worker environment, please use `cloudflare-kv-binding` driver for best performance!
 
 ```js
 import { createStorage } from "unstorage";
@@ -105,6 +105,10 @@ const storage = createStorage({
 - `userServiceKey`: A special Cloudflare API key good for a restricted set of endpoints. Always begins with "v1.0-", may vary in length. May be used to authenticate in place of `apiToken` or `apiKey` and `email`.
 - `apiURL`: Custom API URL. Default is `https://api.cloudflare.com`.
 - `base`: Adds prefix to all stored keys
+
+**Transaction options:**
+
+- `ttl`: Supported for `setItem(key, value, { ttl: number /* seconds min 60 */ })`
 
 **Supported methods:**
 

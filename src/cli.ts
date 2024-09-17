@@ -9,7 +9,6 @@ async function main() {
   const arguments_ = mri(process.argv.splice(2));
 
   if (arguments_.help) {
-    // eslint-disable-next-line no-console
     console.log("Usage: npx unstorage [rootDir]");
     // eslint-disable-next-line unicorn/no-process-exit
     process.exit(0);
@@ -31,7 +30,6 @@ async function main() {
 
 // eslint-disable-next-line unicorn/prefer-top-level-await
 main().catch((error) => {
-  // eslint-disable-next-line no-console
   console.error(error);
   // eslint-disable-next-line unicorn/no-process-exit
   process.exit(1);

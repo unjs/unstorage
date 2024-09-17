@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://unpkg.com/undocs/schema/config.json
 name: unstorage
-shortDescription: Universal Key-Value Storage.
-description: Unstorage is TypeScript library that provides an async key-value storage API with conventional features like multi driver mounting, watching, working with metadata and has 20+ built-in drivers.
+shortDescription: Universal Key-Value.
+description: Unified key-value storage API with conventional features and 20+ built-in drivers.
 github: unjs/unstorage
 themeColor: amber
 url: https://unstorage.unjs.io
@@ -31,7 +31,7 @@ landing:
       description: "Your code will work on any JavaScript runtime including Node.js, Bun, Deno and Workers."
       icon: "i-material-symbols-lock-open-right-outline-rounded"
     - title: "Built-in drivers"
-      description: "Unstorage is shipped with 20+ built-in drivers for different platforms: Memory (default), FS, Redis, Memory, MongoDB, CloudFlare, GitHub..."
+      description: "Unstorage is shipped with 20+ built-in drivers for different platforms: Memory (default), FS, Redis, Memory, MongoDB, CloudFlare, GitHub, etc."
       icon: "i-material-symbols-usb"
     - title: "Snapshots"
       description: "Expand your server and add capabilities. Your codebase will scale with your project."
@@ -40,7 +40,7 @@ landing:
       description: "Unix-style driver mounting to combine storages on different mounts."
       icon: "i-material-symbols-view-list-outline"
     - title: "JSON friendly"
-      description: "Unstorage automatically serialization and deserialization JSON values."
+      description: "Unstorage automatically serializes and deserializes JSON values."
       icon: "i-material-symbols-magic-button"
     - title: "Binary Support"
       description: "Store binary and raw data like images, videos, audio files, etc."

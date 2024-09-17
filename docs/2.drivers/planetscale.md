@@ -55,4 +55,4 @@ const storage = createStorage({
 
 - **`url`** (required): You can find your URL in the [Planetscale dashboard](https://planetscale.com/docs/tutorials/connect-nodejs-app).
 - `table`: The name of the table to read from. It defaults to `storage`.
-- `boostCache`: Whether to enable cached queries: see [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).
+- `boostCache`: Whether to enable cached queries: See [docs](https://planetscale.com/docs/concepts/query-caching-with-planetscale-boost#using-cached-queries-in-your-application).

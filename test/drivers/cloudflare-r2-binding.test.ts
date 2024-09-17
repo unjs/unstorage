@@ -42,7 +42,7 @@ const mockBinding: R2Bucket = {
 describe("drivers: cloudflare-r2-binding", () => {
   testDriver({
     driver: CloudflareR2Binding({ binding: mockBinding, base: "base" }),
-    async additionalTests(ctx) {
+    async additionalTests() {
       test("snapshot", async () => {
         expect(await snapshot(mockStorage, "")).toMatchInlineSnapshot(`
           {

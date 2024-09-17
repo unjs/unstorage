@@ -9,7 +9,7 @@ icon: ic:baseline-http
 ## Usage
 
 ::note
-Supports built-in [http server](/getting-started/http-server) methods.
+Supports built-in [http server](/guide/http-server) methods.
 ::
 
 This driver implements meta for each key including `mtime` (last modified time) and `status` from HTTP headers by making a `HEAD` request.
@@ -32,10 +32,12 @@ const storage = createStorage({
 
 - `getItem`: Maps to http `GET`. Returns deserialized value if response is ok
 - `hasItem`: Maps to http `HEAD`. Returns `true` if response is ok (200)
-- `setItem`: Maps to http `PUT`. Sends serialized value using body
+- `getMeta`: Maps to http `HEAD` (headers: `last-modified` => `mtime`, `x-ttl` => `ttl`)
+- `setItem`: Maps to http `PUT`. Sends serialized value using body (`ttl` option will be sent as `x-ttl` header).
 - `removeItem`: Maps to `DELETE`
 - `clear`: Not supported
 
 **Transaction Options:**
 
 - `headers`: Custom headers to be sent on each operation (`getItem`, `setItem`, etc)
+- `ttl`: Custom `ttl` (in seconds) for supported drivers. Will be mapped to `x-ttl` http header.

@@ -11,14 +11,17 @@ export type Unwatch = () => MaybePromise<void>;
 export interface StorageMeta {
   atime?: Date;
   mtime?: Date;
+  ttl?: number;
   [key: string]: StorageValue | Date | undefined;
 }
 
+// TODO: type ttl
 export type TransactionOptions = Record<string, any>;
 
-export interface Driver {
+export interface Driver<OptionsT = any, InstanceT = any> {
   name?: string;
-  options?: any;
+  options?: OptionsT;
+  getInstance?: () => InstanceT;
   hasItem: (key: string, opts: TransactionOptions) => MaybePromise<boolean>;
   getItem: (
     key: string,
@@ -125,4 +128,11 @@ export interface Storage<T extends StorageValue = StorageValue> {
     base?: string,
     options?: { parents?: boolean }
   ) => { base: string; driver: Driver }[];
+  // Aliases
+  keys: Storage["getKeys"];
+  get: Storage["getItem"];
+  set: Storage["setItem"];
+  has: Storage["hasItem"];
+  del: Storage["removeItem"];
+  remove: Storage["removeItem"];
 }

@@ -124,8 +124,8 @@ importers:
         specifier: ^25.0.0
         version: 25.0.0
       mitata:
-        specifier: ^0.1.14
-        version: 0.1.14
+        specifier: ^1.0.10
+        version: 1.0.10
       monaco-editor:
         specifier: ^0.51.0
         version: 0.51.0
@@ -2972,8 +2972,8 @@ packages:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
     engines: {node: '>= 8'}
 
-  mitata@0.1.14:
-    resolution: {integrity: sha512-8kRs0l636eT4jj68PFXOR2D5xl4m56T478g16SzUPOYgkzQU+xaw62guAQxzBPm+SXb15GQi1cCpDxJfkr4CSA==}
+  mitata@1.0.10:
+    resolution: {integrity: sha512-pn21sHg5+AiTqj7z7aCeNlkEXMYhAykl1zbGqp1sbTJKRe8lhNokoyubLmvwbY5sWb8B+VDQByn3UyRmdBDQ1w==}
 
   mkdirp@1.0.4:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
@@ -7565,7 +7565,7 @@ snapshots:
       minipass: 3.3.6
       yallist: 4.0.0
 
-  mitata@0.1.14: {}
+  mitata@1.0.10: {}
 
   mkdirp@1.0.4: {}
 

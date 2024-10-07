@@ -82,7 +82,7 @@
     "idb-keyval": "^6.2.1",
     "ioredis": "^5.4.1",
     "ioredis-mock": "^8.9.0",
-    "jiti": "^1.21.6",
+    "jiti": "^2.3.3",
     "jsdom": "^25.0.0",
     "mitata": "^0.1.14",
     "monaco-editor": "^0.51.0",

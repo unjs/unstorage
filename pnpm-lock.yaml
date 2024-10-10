@@ -15,8 +15,8 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
       db0:
-        specifier: ^0.1.4
-        version: 0.1.4(@libsql/client@0.10.0)
+        specifier: ^0.2.0
+        version: 0.2.0(@libsql/client@0.10.0)(mysql2@3.11.0)
       destr:
         specifier: ^2.0.3
         version: 2.0.3
@@ -64,8 +64,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2(@capacitor/core@6.1.2)
       '@cloudflare/workers-types':
-        specifier: ^4.20240821.1
-        version: 4.20240821.1
+        specifier: ^4.20240909.0
+        version: 4.20240909.0
       '@libsql/client':
         specifier: ^0.10.0
         version: 0.10.0
@@ -82,8 +82,8 @@ importers:
         specifier: ^21.1.7
         version: 21.1.7
       '@types/node':
-        specifier: ^22.5.3
-        version: 22.5.3
+        specifier: ^22.5.5
+        version: 22.5.5
       '@types/pg':
         specifier: ^8.11.5
         version: 8.11.8
@@ -148,8 +148,8 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
       msw:
-        specifier: ^1.3.3
-        version: 1.3.3(typescript@5.5.4)
+        specifier: ^1.3.4
+        version: 1.3.4(typescript@5.6.2)
       pg:
         specifier: ^8.11.5
         version: 8.12.0
@@ -1917,18 +1917,24 @@ packages:
     resolution: {integrity: sha512-t/Ygsytq+R995EJ5PZlD4Cu56sWa8InXySaViRzw9apusqsOO2bQP+SbYzAhR0pFKoB+43lYy8rWban9JSuXnA==}
     engines: {node: '>= 0.4'}
 
-  db0@0.1.4:
-    resolution: {integrity: sha512-Ft6eCwONYxlwLjBXSJxw0t0RYtA5gW9mq8JfBXn9TtC0nDPlqePAhpv9v4g9aONBi6JI1OXHTKKkUYGd+BOrCA==}
+  db0@0.2.0:
+    resolution: {integrity: sha512-xpaHr5hJ8o7dKHvJsdDW5Kepfmtm9Y7W+z5MZwSLwPNtNhtdwCpIMjBQK+UsgLfeU+3Sr9j6ejmwSAopcslJRA==}
     peerDependencies:
-      '@libsql/client': ^0.5.2
-      better-sqlite3: ^9.4.3
-      drizzle-orm: ^0.29.4
+      '@electric-sql/pglite': '*'
+      '@libsql/client': '*'
+      better-sqlite3: '*'
+      drizzle-orm: '*'
+      mysql2: '*'
     peerDependenciesMeta:
+      '@electric-sql/pglite':
+        optional: true
       '@libsql/client':
         optional: true
       better-sqlite3:
         optional: true
       drizzle-orm:
+        optional: true
+      mysql2:
         optional: true
 
   debug@2.6.9:
@@ -3721,6 +3727,10 @@ packages:
 
   postcss@8.4.44:
     resolution: {integrity: sha512-Aweb9unOEpQ3ezu4Q00DPvvM2ZTUitJdNKeP/+uQgr1IBIqu574IaZoURId7BKtWMREwzKa9OgzPzezWGPWFQw==}
+    engines: {node: ^10 || ^12 || >=14}
+
+  postcss@8.4.47:
+    resolution: {integrity: sha512-56rxCq7G/XfB4EkXq9Egn5GCqugWvDFjafDOThIdMBsI15iqPqR5r15TfSr1YPYeEI19YeaXMCbY6u88Y76GLQ==}
     engines: {node: ^10 || ^12 || >=14}
 
   postgres-array@2.0.0:
@@ -5696,13 +5706,13 @@ snapshots:
 
   '@types/pg@8.11.8':
     dependencies:
-      '@types/node': 22.5.3
+      '@types/node': 22.5.5
       pg-protocol: 1.6.1
       pg-types: 4.0.2
 
   '@types/readable-stream@4.0.15':
     dependencies:
-      '@types/node': 22.5.3
+      '@types/node': 22.5.5
       safe-buffer: 5.1.2
 
   '@types/resolve@1.20.2': {}
@@ -5727,9 +5737,9 @@ snapshots:
 
   '@types/ws@8.5.12':
     dependencies:
-      '@types/node': 22.5.3
+      '@types/node': 22.5.5
 
-  '@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@9.9.1(jiti@1.21.6))(typescript@5.5.4))(eslint@9.9.1(jiti@1.21.6))(typescript@5.5.4)':
+  '@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)':
     dependencies:
       '@eslint-community/regexpp': 4.11.0
       '@typescript-eslint/parser': 7.18.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)
@@ -6521,9 +6531,10 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.1
 
-  db0@0.1.4(@libsql/client@0.10.0):
+  db0@0.2.0(@libsql/client@0.10.0)(mysql2@3.11.0):
     optionalDependencies:
       '@libsql/client': 0.10.0
+      mysql2: 3.11.0
 
   debug@2.6.9:
     dependencies:
@@ -8564,6 +8575,12 @@ snapshots:
       nanoid: 3.3.7
       picocolors: 1.1.0
       source-map-js: 1.2.0
+
+  postcss@8.4.47:
+    dependencies:
+      nanoid: 3.3.7
+      picocolors: 1.1.0
+      source-map-js: 1.2.1
 
   postgres-array@2.0.0: {}
 

@@ -17,7 +17,7 @@ describe("drivers: db0 - libSQL", () => {
   });
 
   testDriver({
-    driver: db0Driver({ database: db, dialect: "sqlite" }),
+    driver: db0Driver({ database: db }),
     additionalTests: async (ctx) => {
       await ctx.storage.setItem("meta:test", "test_data");
 
@@ -45,7 +45,6 @@ describe.runIf(process.env.POSTGRESQL_URL)(
     testDriver({
       driver: db0Driver({
         database: db,
-        dialect: "postgresql",
         table: "custom_unstorage_table",
       }),
       additionalTests: async (ctx) => {

@@ -10,11 +10,8 @@ interface ResultSchema {
   }>;
 }
 
-type Dialect = "postgresql" | "mysql" | "sqlite";
-
 export interface Db0DriverOptions {
   database: Database;
-  dialect: Dialect;
   table?: string;
 }
 
@@ -42,11 +39,7 @@ export default defineDriver((opts: Db0DriverOptions) => {
         try {
           return await query(...args);
         } catch {
-          createTablePromise = createTable(
-            opts.dialect,
-            opts.database,
-            opts.table
-          );
+          createTablePromise = createTable(opts.database, opts.table);
         }
       }
 
@@ -80,7 +73,7 @@ export default defineDriver((opts: Db0DriverOptions) => {
       return rows?.[0]?.value ?? null;
     }),
     setItem: withCreateTable(async (key, value) => {
-      if (opts.dialect === "mysql") {
+      if (opts.database.dialect === "mysql") {
         await opts.database.sql`
           INSERT INTO {${opts.table}} (id, value) 
           VALUES (${key}, ${value}) 
@@ -132,11 +125,10 @@ export default defineDriver((opts: Db0DriverOptions) => {
 });
 
 const createTable = async (
-  dialect: Dialect,
   database: Database,
   name: string = DEFAULT_TABLE
 ) => {
-  if (dialect === "sqlite") {
+  if (database.dialect === "sqlite" || database.dialect === "libsql") {
     await database.sql`
       CREATE TABLE IF NOT EXISTS {${name}} (
         id TEXT PRIMARY KEY, 
@@ -149,7 +141,7 @@ const createTable = async (
     return;
   }
 
-  if (dialect === "postgresql") {
+  if (database.dialect === "postgresql") {
     await database.sql`
       CREATE TABLE IF NOT EXISTS {${name}} (
         id VARCHAR(255) NOT NULL PRIMARY KEY, 
@@ -162,7 +154,7 @@ const createTable = async (
     return;
   }
 
-  if (dialect === "mysql") {
+  if (database.dialect === "mysql") {
     await database.sql`
       CREATE TABLE IF NOT EXISTS {${name}} (
         id VARCHAR(255) NOT NULL PRIMARY KEY,
@@ -175,7 +167,7 @@ const createTable = async (
     return;
   }
 
-  throw createError(DRIVER_NAME, `Unknown dialect: ${dialect}`);
+  throw createError(DRIVER_NAME, `Unknown SQL dialect: ${database.dialect}`);
 };
 
 const toDate = (timestamp: string | undefined): Date | undefined => {

@@ -12,6 +12,7 @@ export const builtinDrivers = {
   cloudflareKVBinding: "unstorage/drivers/cloudflare-kv-binding",
   cloudflareKVHTTP: "unstorage/drivers/cloudflare-kv-http",
   cloudflareR2Binding: "unstorage/drivers/cloudflare-r2-binding",
+  db0: "unstorage/drivers/db0",
   fs: "unstorage/drivers/fs",
   fsLite: "unstorage/drivers/fs-lite",
   github: "unstorage/drivers/github",
@@ -61,6 +62,7 @@ export type BuiltinDriverOptions = {
   cloudflareR2Binding: ExtractOpts<
     (typeof import("./drivers/cloudflare-r2-binding"))["default"]
   >;
+  db0: ExtractOpts<(typeof import("./drivers/db0"))["default"]>;
   fs: ExtractOpts<(typeof import("./drivers/fs"))["default"]>;
   fsLite: ExtractOpts<(typeof import("./drivers/fs-lite"))["default"]>;
   github: ExtractOpts<(typeof import("./drivers/github"))["default"]>;

@@ -16,7 +16,7 @@ importers:
         version: 3.6.0
       db0:
         specifier: ^0.2.0
-        version: 0.2.0(@libsql/client@0.10.0)(mysql2@3.11.0)
+        version: 0.2.0(@electric-sql/pglite@0.2.11)(@libsql/client@0.14.0)(mysql2@3.11.0)
       destr:
         specifier: ^2.0.3
         version: 2.0.3
@@ -66,9 +66,12 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^4.20240909.0
         version: 4.20240909.0
+      '@electric-sql/pglite':
+        specifier: ^0.2.4
+        version: 0.2.11
       '@libsql/client':
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: ^0.14.0
+        version: 0.14.0
       '@netlify/blobs':
         specifier: ^7.4.0
         version: 7.4.0
@@ -84,9 +87,6 @@ importers:
       '@types/node':
         specifier: ^22.5.5
         version: 22.5.5
-      '@types/pg':
-        specifier: ^8.11.5
-        version: 8.11.8
       '@upstash/redis':
         specifier: ^1.34.0
         version: 1.34.0
@@ -104,13 +104,10 @@ importers:
         version: 3.5.6
       azurite:
         specifier: ^3.32.0
-        version: 3.32.0(pg@8.12.0)
+        version: 3.32.0
       changelogen:
         specifier: ^0.5.5
         version: 0.5.5(magicast@0.3.5)
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
       eslint:
         specifier: ^9.10.0
         version: 9.10.0(jiti@1.21.6)
@@ -150,9 +147,6 @@ importers:
       msw:
         specifier: ^1.3.4
         version: 1.3.4(typescript@5.6.2)
-      pg:
-        specifier: ^8.11.5
-        version: 8.12.0
       prettier:
         specifier: ^3.3.3
         version: 3.3.3
@@ -371,6 +365,9 @@ packages:
 
   '@dabh/diagnostics@2.0.3':
     resolution: {integrity: sha512-hrlQOIi7hAfzsMqlGSFyVucrx38O+j6wiGOf//H2ecvIEqYN4ADBSS2iLMh5UFyDunCNniUIPk/q3riFv45xRA==}
+
+  '@electric-sql/pglite@0.2.11':
+    resolution: {integrity: sha512-CeCsbtVqccz0MDlEeT6p4xfgKMpq3GvGTKkswuZ2Vv4r40ZQlE0byl3QNpXcpiTxfye+VFt9RZ+lSL+Wq+jhLQ==}
 
   '@esbuild/aix-ppc64@0.19.12':
     resolution: {integrity: sha512-bmoCYyWdEL3wDQIVbcyzRyeKLgk2WtWLTWz1ZIAZF/EGbNOwSA6ew3PftJ1PqMiOOGu0OyFMzG53L0zqIpPeNA==}
@@ -869,89 +866,54 @@ packages:
   '@js-joda/core@5.6.3':
     resolution: {integrity: sha512-T1rRxzdqkEXcou0ZprN1q9yDRlvzCPLqmlNt5IIsGBzoEVgLCCYrKEwc84+TvsXuAc95VAZwtWD2zVsKPY4bcA==}
 
-  '@libsql/client@0.10.0':
-    resolution: {integrity: sha512-2ERn08T4XOVx34yBtUPq0RDjAdd9TJ5qNH/izugr208ml2F94mk92qC64kXyDVQINodWJvp3kAdq6P4zTtCZ7g==}
+  '@libsql/client@0.14.0':
+    resolution: {integrity: sha512-/9HEKfn6fwXB5aTEEoMeFh4CtG0ZzbncBb1e++OCdVpgKZ/xyMsIVYXm0w7Pv4RUel803vE6LwniB3PqD72R0Q==}
 
-  '@libsql/core@0.10.0':
-    resolution: {integrity: sha512-rqynAXGaiSpTsykOZdBtI1N4z4O+KZ6mt33K/aHeXAY0gSIfK/ctxuWa0Y1Bjo4FMz1idBTCXz4Ps5kITOvZZw==}
+  '@libsql/core@0.14.0':
+    resolution: {integrity: sha512-nhbuXf7GP3PSZgdCY2Ecj8vz187ptHlZQ0VRc751oB2C1W8jQUXKKklvt7t1LJiUTQBVJuadF628eUk+3cRi4Q==}
 
-  '@libsql/darwin-arm64@0.3.19':
-    resolution: {integrity: sha512-rmOqsLcDI65zzxlUOoEiPJLhqmbFsZF6p4UJQ2kMqB+Kc0Rt5/A1OAdOZ/Wo8fQfJWjR1IbkbpEINFioyKf+nQ==}
+  '@libsql/darwin-arm64@0.4.6':
+    resolution: {integrity: sha512-45i604CJ2Lubbg7NqtDodjarF6VgST8rS5R8xB++MoRqixtDns9PZ6tocT9pRJDWuTWEiy2sjthPOFWMKwYAsg==}
     cpu: [arm64]
     os: [darwin]
 
-  '@libsql/darwin-arm64@0.4.1':
-    resolution: {integrity: sha512-XICT9/OyU8Aa9Iv1xZIHgvM09n/1OQUk3VC+s5uavzdiGHrDMkOWzN47JN7/FiMa/NWrcgoEiDMk3+e7mE53Ig==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@libsql/darwin-x64@0.3.19':
-    resolution: {integrity: sha512-q9O55B646zU+644SMmOQL3FIfpmEvdWpRpzubwFc2trsa+zoBlSkHuzU9v/C+UNoPHQVRMP7KQctJ455I/h/xw==}
+  '@libsql/darwin-x64@0.4.6':
+    resolution: {integrity: sha512-dRKliflhfr5zOPSNgNJ6C2nZDd4YA8bTXF3MUNqNkcxQ8BffaH9uUwL9kMq89LkFIZQHcyP75bBgZctxfJ/H5Q==}
     cpu: [x64]
     os: [darwin]
 
-  '@libsql/darwin-x64@0.4.1':
-    resolution: {integrity: sha512-pSKxhRrhu4SsTD+IBRZXcs1SkwMdeAG1tv6Z/Ctp/sOEYrgkU8MDKLqkOr9NsmwpK4S0+JdwjkLMyhTkct/5TQ==}
-    cpu: [x64]
-    os: [darwin]
+  '@libsql/hrana-client@0.7.0':
+    resolution: {integrity: sha512-OF8fFQSkbL7vJY9rfuegK1R7sPgQ6kFMkDamiEccNUvieQ+3urzfDFI616oPl8V7T9zRmnTkSjMOImYCAVRVuw==}
 
-  '@libsql/hrana-client@0.6.2':
-    resolution: {integrity: sha512-MWxgD7mXLNf9FXXiM0bc90wCjZSpErWKr5mGza7ERy2FJNNMXd7JIOv+DepBA1FQTIfI8TFO4/QDYgaQC0goNw==}
-
-  '@libsql/isomorphic-fetch@0.2.5':
-    resolution: {integrity: sha512-8s/B2TClEHms2yb+JGpsVRTPBfy1ih/Pq6h6gvyaNcYnMVJvgQRY7wAa8U2nD0dppbCuDU5evTNMEhrQ17ZKKg==}
+  '@libsql/isomorphic-fetch@0.3.1':
+    resolution: {integrity: sha512-6kK3SUK5Uu56zPq/Las620n5aS9xJq+jMBcNSOmjhNf/MUvdyji4vrMTqD7ptY7/4/CAVEAYDeotUz60LNQHtw==}
     engines: {node: '>=18.0.0'}
 
   '@libsql/isomorphic-ws@0.1.5':
     resolution: {integrity: sha512-DtLWIH29onUYR00i0GlQ3UdcTRC6EP4u9w/h9LxpUZJWRMARk6dQwZ6Jkd+QdwVpuAOrdxt18v0K2uIYR3fwFg==}
 
-  '@libsql/linux-arm64-gnu@0.3.19':
-    resolution: {integrity: sha512-mgeAUU1oqqh57k7I3cQyU6Trpdsdt607eFyEmH5QO7dv303ti+LjUvh1pp21QWV6WX7wZyjeJV1/VzEImB+jRg==}
+  '@libsql/linux-arm64-gnu@0.4.6':
+    resolution: {integrity: sha512-DMPavVyY6vYPAYcQR1iOotHszg+5xSjHSg6F9kNecPX0KKdGq84zuPJmORfKOPtaWvzPewNFdML/e+s1fu09XQ==}
     cpu: [arm64]
     os: [linux]
 
-  '@libsql/linux-arm64-gnu@0.4.1':
-    resolution: {integrity: sha512-9lpvb24tO2qZd9nq5dlq3ESA3hSKYWBIK7lJjfiCM6f7a70AUwBY9QoPJV9q4gILIyVnR1YBGrlm50nnb+dYgw==}
+  '@libsql/linux-arm64-musl@0.4.6':
+    resolution: {integrity: sha512-whuHSYAZyclGjM3L0mKGXyWqdAy7qYvPPn+J1ve7FtGkFlM0DiIPjA5K30aWSGJSRh72sD9DBZfnu8CpfSjT6w==}
     cpu: [arm64]
     os: [linux]
 
-  '@libsql/linux-arm64-musl@0.3.19':
-    resolution: {integrity: sha512-VEZtxghyK6zwGzU9PHohvNxthruSxBEnRrX7BSL5jQ62tN4n2JNepJ6SdzXp70pdzTfwroOj/eMwiPt94gkVRg==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@libsql/linux-arm64-musl@0.4.1':
-    resolution: {integrity: sha512-lyxi+lFxE+NcBRDMQCxCtDg3c4WcKAbc9u63d5+B23Vm+UgphD9XY4seu+tGrBy1MU2tuNVix7r9S7ECpAaVrA==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@libsql/linux-x64-gnu@0.3.19':
-    resolution: {integrity: sha512-2t/J7LD5w2f63wGihEO+0GxfTyYIyLGEvTFEsMO16XI5o7IS9vcSHrxsvAJs4w2Pf907uDjmc7fUfMg6L82BrQ==}
+  '@libsql/linux-x64-gnu@0.4.6':
+    resolution: {integrity: sha512-0ggx+5RwEbYabIlDBBAvavdfIJCZ757u6nDZtBeQIhzW99EKbWG3lvkXHM3qudFb/pDWSUY4RFBm6vVtF1cJGA==}
     cpu: [x64]
     os: [linux]
 
-  '@libsql/linux-x64-gnu@0.4.1':
-    resolution: {integrity: sha512-psvuQ3UFBEmDFV8ZHG+WkUHIJiWv+elZ+zIPvOVedlIKdxG1O+8WthWUAhFHOGnbiyzc4sAZ4c3de1oCvyHxyQ==}
+  '@libsql/linux-x64-musl@0.4.6':
+    resolution: {integrity: sha512-SWNrv7Hz72QWlbM/ZsbL35MPopZavqCUmQz2HNDZ55t0F+kt8pXuP+bbI2KvmaQ7wdsoqAA4qBmjol0+bh4ndw==}
     cpu: [x64]
     os: [linux]
 
-  '@libsql/linux-x64-musl@0.3.19':
-    resolution: {integrity: sha512-BLsXyJaL8gZD8+3W2LU08lDEd9MIgGds0yPy5iNPp8tfhXx3pV/Fge2GErN0FC+nzt4DYQtjL+A9GUMglQefXQ==}
-    cpu: [x64]
-    os: [linux]
-
-  '@libsql/linux-x64-musl@0.4.1':
-    resolution: {integrity: sha512-PDidJ3AhGDqosGg3OAZzGxMFIbnuOALya4BoezJKl667AFv3x7BBQ30H81Mngsq3Fh8RkJkXSdWfL91+Txb1iA==}
-    cpu: [x64]
-    os: [linux]
-
-  '@libsql/win32-x64-msvc@0.3.19':
-    resolution: {integrity: sha512-ay1X9AobE4BpzG0XPw1gplyLZPGHIgJOovvW23gUrukRegiUP62uzhpRbKNogLlUOynyXeq//prHgPXiebUfWg==}
-    cpu: [x64]
-    os: [win32]
-
-  '@libsql/win32-x64-msvc@0.4.1':
-    resolution: {integrity: sha512-IdODVqV/PrdOnHA/004uWyorZQuRsB7U7bCRCE3vXgABj3eJLJGc6cv2C6ksEaEoVxJbD8k53H4VVAGrtYwXzQ==}
+  '@libsql/win32-x64-msvc@0.4.6':
+    resolution: {integrity: sha512-Q0axn110zDNELfkEog3Nl8p9BU4eI/UvgaHevGyOiSDN7s0KPfj0j6jwVHk4oz3o/d/Gg3DRIxomZ4ftfTOy/g==}
     cpu: [x64]
     os: [win32]
 
@@ -1245,9 +1207,6 @@ packages:
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
-
-  '@types/pg@8.11.8':
-    resolution: {integrity: sha512-IqpCf8/569txXN/HoP5i1LjXfKZWL76Yr2R77xgeIICUbAYHeoaEZFhYHo2uDftecLWrTJUq63JvQu8q3lnDyA==}
 
   '@types/readable-stream@4.0.15':
     resolution: {integrity: sha512-oAZ3kw+kJFkEqyh7xORZOku1YAKvsFTogRY8kVl4vHpEKiDkfnSA/My8haRE7fvmix5Zyy+1pwzOi7yycGLBJw==}
@@ -2921,12 +2880,8 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
-  libsql@0.3.19:
-    resolution: {integrity: sha512-Aj5cQ5uk/6fHdmeW0TiXK42FqUlwx7ytmMLPSaUQPin5HKKKuUPD62MAbN4OEweGBBI7q1BekoEN4gPUEL6MZA==}
-    os: [darwin, linux, win32]
-
-  libsql@0.4.1:
-    resolution: {integrity: sha512-qZlR9Yu1zMBeLChzkE/cKfoKV3Esp9cn9Vx5Zirn4AVhDWPcjYhKwbtJcMuHehgk3mH+fJr9qW+3vesBWbQpBg==}
+  libsql@0.4.6:
+    resolution: {integrity: sha512-F5M+ltteK6dCcpjMahrkgT96uFJvVI8aQ4r9f2AzHQjC7BkAYtvfMSTWGvRBezRgMUIU2h1Sy0pF9nOGOD5iyA==}
     os: [darwin, linux, win32]
 
   lilconfig@3.1.2:
@@ -3341,9 +3296,6 @@ packages:
     resolution: {integrity: sha512-byy+U7gp+FVwmyzKPYhW2h5l3crpmGsxl7X2s8y43IgxvG4g3QZ6CffDtsNQy1WsmZpQbO+ybo0AlW7TY6DcBQ==}
     engines: {node: '>= 0.4'}
 
-  obuf@1.1.2:
-    resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
-
   ofetch@1.3.4:
     resolution: {integrity: sha512-KLIET85ik3vhEfS+3fDlc/BAZiAp+43QEC/yCo5zkNoY2YaKvNkOaFr/6wCFgFH1kuYQM5pMNi0Tg8koiIemtw==}
 
@@ -3486,47 +3438,8 @@ packages:
   perfect-debounce@1.0.0:
     resolution: {integrity: sha512-xCy9V055GLEqoFaHoC1SoLIaLmWctgCUaBaWxDZ7/Zx4CTyX7cJQLJOok/orfjZAh9kEYpjJa4d0KcJmCbctZA==}
 
-  pg-cloudflare@1.1.1:
-    resolution: {integrity: sha512-xWPagP/4B6BgFO+EKz3JONXv3YDgvkbVrGw2mTo3D6tVDQRh1e7cqVGvyR3BE+eQgAvx1XhW/iEASj4/jCWl3Q==}
-
   pg-connection-string@2.6.4:
     resolution: {integrity: sha512-v+Z7W/0EO707aNMaAEfiGnGL9sxxumwLl2fJvCQtMn9Fxsg+lPpPkdcyBSv/KFgpGdYkMfn+EI1Or2EHjpgLCA==}
-
-  pg-int8@1.0.1:
-    resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
-    engines: {node: '>=4.0.0'}
-
-  pg-numeric@1.0.2:
-    resolution: {integrity: sha512-BM/Thnrw5jm2kKLE5uJkXqqExRUY/toLHda65XgFTBTFYZyopbKjBe29Ii3RbkvlsMoFwD+tHeGaCjjv0gHlyw==}
-    engines: {node: '>=4'}
-
-  pg-pool@3.6.2:
-    resolution: {integrity: sha512-Htjbg8BlwXqSBQ9V8Vjtc+vzf/6fVUuak/3/XXKA9oxZprwW3IMDQTGHP+KDmVL7rtd+R1QjbnCFPuTHm3G4hg==}
-    peerDependencies:
-      pg: '>=8.0'
-
-  pg-protocol@1.6.1:
-    resolution: {integrity: sha512-jPIlvgoD63hrEuihvIg+tJhoGjUsLPn6poJY9N5CnlPd91c2T18T/9zBtLxZSb1EhYxBRoZJtzScCaWlYLtktg==}
-
-  pg-types@2.2.0:
-    resolution: {integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==}
-    engines: {node: '>=4'}
-
-  pg-types@4.0.2:
-    resolution: {integrity: sha512-cRL3JpS3lKMGsKaWndugWQoLOCoP+Cic8oseVcbr0qhPzYD5DWXK+RZ9LY9wxRf7RQia4SCwQlXk0q6FCPrVng==}
-    engines: {node: '>=10'}
-
-  pg@8.12.0:
-    resolution: {integrity: sha512-A+LHUSnwnxrnL/tZ+OLfqR1SxLN3c/pgDztZ47Rpbsd4jUytsTtwQo/TLPRzPJMp/1pbhYVhH9cuSZLAajNfjQ==}
-    engines: {node: '>= 8.0.0'}
-    peerDependencies:
-      pg-native: '>=3.0.1'
-    peerDependenciesMeta:
-      pg-native:
-        optional: true
-
-  pgpass@1.0.5:
-    resolution: {integrity: sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug==}
 
   picocolors@1.1.0:
     resolution: {integrity: sha512-TQ92mBOW0l3LeMeyLV6mzy/kWr8lkd/hp3mTg7wYK7zJhuBStmGMBG0BdeDZS/dZx1IukaX6Bk11zcln25o1Aw==}
@@ -3732,41 +3645,6 @@ packages:
   postcss@8.4.47:
     resolution: {integrity: sha512-56rxCq7G/XfB4EkXq9Egn5GCqugWvDFjafDOThIdMBsI15iqPqR5r15TfSr1YPYeEI19YeaXMCbY6u88Y76GLQ==}
     engines: {node: ^10 || ^12 || >=14}
-
-  postgres-array@2.0.0:
-    resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
-    engines: {node: '>=4'}
-
-  postgres-array@3.0.2:
-    resolution: {integrity: sha512-6faShkdFugNQCLwucjPcY5ARoW1SlbnrZjmGl0IrrqewpvxvhSLHimCVzqeuULCbG0fQv7Dtk1yDbG3xv7Veog==}
-    engines: {node: '>=12'}
-
-  postgres-bytea@1.0.0:
-    resolution: {integrity: sha512-xy3pmLuQqRBZBXDULy7KbaitYqLcmxigw14Q5sj8QBVLqEwXfeybIKVWiqAXTlcvdvb0+xkOtDbfQMOf4lST1w==}
-    engines: {node: '>=0.10.0'}
-
-  postgres-bytea@3.0.0:
-    resolution: {integrity: sha512-CNd4jim9RFPkObHSjVHlVrxoVQXz7quwNFpz7RY1okNNme49+sVyiTvTRobiLV548Hx/hb1BG+iE7h9493WzFw==}
-    engines: {node: '>= 6'}
-
-  postgres-date@1.0.7:
-    resolution: {integrity: sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q==}
-    engines: {node: '>=0.10.0'}
-
-  postgres-date@2.1.0:
-    resolution: {integrity: sha512-K7Juri8gtgXVcDfZttFKVmhglp7epKb1K4pgrkLxehjqkrgPhfG6OO8LHLkfaqkbpjNRnra018XwAr1yQFWGcA==}
-    engines: {node: '>=12'}
-
-  postgres-interval@1.2.0:
-    resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
-    engines: {node: '>=0.10.0'}
-
-  postgres-interval@3.0.0:
-    resolution: {integrity: sha512-BSNDnbyZCXSxgA+1f5UU2GmwhoI0aU5yMxRGO8CdFEcY2BQF9xm/7MqKnYoM1nJDk8nONNWDk9WeSmePFhQdlw==}
-    engines: {node: '>=12'}
-
-  postgres-range@1.1.4:
-    resolution: {integrity: sha512-i/hbxIE9803Alj/6ytL7UHQxRvZkI9O4Sy+J3HGc4F4oo/2eQAjTSNJ0bfxyse3bH0nuVesCk+3IRLaMtG3H6w==}
 
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
@@ -4112,10 +3990,6 @@ packages:
 
   spdx-license-ids@3.0.20:
     resolution: {integrity: sha512-jg25NiDV/1fLtSgEgyvVyDunvaNHbuwF9lfNV17gSmPFAlYzdfNBlLtLzXTevwkPj7DhGbmN9VnmJIgLnhvaBw==}
-
-  split2@4.2.0:
-    resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
-    engines: {node: '>= 10.x'}
 
   sprintf-js@1.1.3:
     resolution: {integrity: sha512-Oo+0REFV59/rz3gfJNKQiBlwfHaSESl1pcGyABQsnnIfWOFt6JNj5gCog2U6MLZ//IGYD+nA8nI+mTShREReaA==}
@@ -4690,10 +4564,6 @@ packages:
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
 
-  xtend@4.0.2:
-    resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
-    engines: {node: '>=0.4'}
-
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
@@ -5100,6 +4970,8 @@ snapshots:
       enabled: 2.0.0
       kuler: 2.0.0
 
+  '@electric-sql/pglite@0.2.11': {}
+
   '@esbuild/aix-ppc64@0.19.12':
     optional: true
 
@@ -5387,36 +5259,30 @@ snapshots:
 
   '@js-joda/core@5.6.3': {}
 
-  '@libsql/client@0.10.0':
+  '@libsql/client@0.14.0':
     dependencies:
-      '@libsql/core': 0.10.0
-      '@libsql/hrana-client': 0.6.2
+      '@libsql/core': 0.14.0
+      '@libsql/hrana-client': 0.7.0
       js-base64: 3.7.7
-      libsql: 0.4.1
+      libsql: 0.4.6
       promise-limit: 2.7.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@libsql/core@0.10.0':
+  '@libsql/core@0.14.0':
     dependencies:
       js-base64: 3.7.7
 
-  '@libsql/darwin-arm64@0.3.19':
+  '@libsql/darwin-arm64@0.4.6':
     optional: true
 
-  '@libsql/darwin-arm64@0.4.1':
+  '@libsql/darwin-x64@0.4.6':
     optional: true
 
-  '@libsql/darwin-x64@0.3.19':
-    optional: true
-
-  '@libsql/darwin-x64@0.4.1':
-    optional: true
-
-  '@libsql/hrana-client@0.6.2':
+  '@libsql/hrana-client@0.7.0':
     dependencies:
-      '@libsql/isomorphic-fetch': 0.2.5
+      '@libsql/isomorphic-fetch': 0.3.1
       '@libsql/isomorphic-ws': 0.1.5
       js-base64: 3.7.7
       node-fetch: 3.3.2
@@ -5424,7 +5290,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@libsql/isomorphic-fetch@0.2.5': {}
+  '@libsql/isomorphic-fetch@0.3.1': {}
 
   '@libsql/isomorphic-ws@0.1.5':
     dependencies:
@@ -5434,34 +5300,19 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@libsql/linux-arm64-gnu@0.3.19':
+  '@libsql/linux-arm64-gnu@0.4.6':
     optional: true
 
-  '@libsql/linux-arm64-gnu@0.4.1':
+  '@libsql/linux-arm64-musl@0.4.6':
     optional: true
 
-  '@libsql/linux-arm64-musl@0.3.19':
+  '@libsql/linux-x64-gnu@0.4.6':
     optional: true
 
-  '@libsql/linux-arm64-musl@0.4.1':
+  '@libsql/linux-x64-musl@0.4.6':
     optional: true
 
-  '@libsql/linux-x64-gnu@0.3.19':
-    optional: true
-
-  '@libsql/linux-x64-gnu@0.4.1':
-    optional: true
-
-  '@libsql/linux-x64-musl@0.3.19':
-    optional: true
-
-  '@libsql/linux-x64-musl@0.4.1':
-    optional: true
-
-  '@libsql/win32-x64-msvc@0.3.19':
-    optional: true
-
-  '@libsql/win32-x64-msvc@0.4.1':
+  '@libsql/win32-x64-msvc@0.4.6':
     optional: true
 
   '@mongodb-js/saslprep@1.1.9':
@@ -5703,12 +5554,6 @@ snapshots:
       undici-types: 6.19.8
 
   '@types/normalize-package-data@2.4.4': {}
-
-  '@types/pg@8.11.8':
-    dependencies:
-      '@types/node': 22.5.5
-      pg-protocol: 1.6.1
-      pg-types: 4.0.2
 
   '@types/readable-stream@4.0.15':
     dependencies:
@@ -6074,7 +5919,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  azurite@3.32.0(pg@8.12.0):
+  azurite@3.32.0:
     dependencies:
       '@azure/ms-rest-js': 1.11.2
       args: 5.0.3
@@ -6089,7 +5934,7 @@ snapshots:
       multistream: 2.1.1
       mysql2: 3.11.0
       rimraf: 3.0.2
-      sequelize: 6.37.3(mysql2@3.11.0)(pg@8.12.0)(tedious@16.7.1)
+      sequelize: 6.37.3(mysql2@3.11.0)(tedious@16.7.1)
       stoppable: 1.1.0
       tedious: 16.7.1
       to-readable-stream: 2.1.0
@@ -6531,9 +6376,10 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.1
 
-  db0@0.2.0(@libsql/client@0.10.0)(mysql2@3.11.0):
+  db0@0.2.0(@electric-sql/pglite@0.2.11)(@libsql/client@0.14.0)(mysql2@3.11.0):
     optionalDependencies:
-      '@libsql/client': 0.10.0
+      '@electric-sql/pglite': 0.2.11
+      '@libsql/client': 0.14.0
       mysql2: 3.11.0
 
   debug@2.6.9:
@@ -7739,32 +7585,18 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  libsql@0.3.19:
+  libsql@0.4.6:
     dependencies:
       '@neon-rs/load': 0.0.4
       detect-libc: 2.0.2
     optionalDependencies:
-      '@libsql/darwin-arm64': 0.3.19
-      '@libsql/darwin-x64': 0.3.19
-      '@libsql/linux-arm64-gnu': 0.3.19
-      '@libsql/linux-arm64-musl': 0.3.19
-      '@libsql/linux-x64-gnu': 0.3.19
-      '@libsql/linux-x64-musl': 0.3.19
-      '@libsql/win32-x64-msvc': 0.3.19
-
-  libsql@0.4.1:
-    dependencies:
-      '@neon-rs/load': 0.0.4
-      detect-libc: 2.0.2
-      libsql: 0.3.19
-    optionalDependencies:
-      '@libsql/darwin-arm64': 0.4.1
-      '@libsql/darwin-x64': 0.4.1
-      '@libsql/linux-arm64-gnu': 0.4.1
-      '@libsql/linux-arm64-musl': 0.4.1
-      '@libsql/linux-x64-gnu': 0.4.1
-      '@libsql/linux-x64-musl': 0.4.1
-      '@libsql/win32-x64-msvc': 0.4.1
+      '@libsql/darwin-arm64': 0.4.6
+      '@libsql/darwin-x64': 0.4.6
+      '@libsql/linux-arm64-gnu': 0.4.6
+      '@libsql/linux-arm64-musl': 0.4.6
+      '@libsql/linux-x64-gnu': 0.4.6
+      '@libsql/linux-x64-musl': 0.4.6
+      '@libsql/win32-x64-msvc': 0.4.6
 
   lilconfig@3.1.2: {}
 
@@ -8195,8 +8027,6 @@ snapshots:
       has-symbols: 1.0.3
       object-keys: 1.1.1
 
-  obuf@1.1.2: {}
-
   ofetch@1.3.4:
     dependencies:
       destr: 2.0.3
@@ -8344,52 +8174,7 @@ snapshots:
 
   perfect-debounce@1.0.0: {}
 
-  pg-cloudflare@1.1.1:
-    optional: true
-
   pg-connection-string@2.6.4: {}
-
-  pg-int8@1.0.1: {}
-
-  pg-numeric@1.0.2: {}
-
-  pg-pool@3.6.2(pg@8.12.0):
-    dependencies:
-      pg: 8.12.0
-
-  pg-protocol@1.6.1: {}
-
-  pg-types@2.2.0:
-    dependencies:
-      pg-int8: 1.0.1
-      postgres-array: 2.0.0
-      postgres-bytea: 1.0.0
-      postgres-date: 1.0.7
-      postgres-interval: 1.2.0
-
-  pg-types@4.0.2:
-    dependencies:
-      pg-int8: 1.0.1
-      pg-numeric: 1.0.2
-      postgres-array: 3.0.2
-      postgres-bytea: 3.0.0
-      postgres-date: 2.1.0
-      postgres-interval: 3.0.0
-      postgres-range: 1.1.4
-
-  pg@8.12.0:
-    dependencies:
-      pg-connection-string: 2.6.4
-      pg-pool: 3.6.2(pg@8.12.0)
-      pg-protocol: 1.6.1
-      pg-types: 2.2.0
-      pgpass: 1.0.5
-    optionalDependencies:
-      pg-cloudflare: 1.1.1
-
-  pgpass@1.0.5:
-    dependencies:
-      split2: 4.2.0
 
   picocolors@1.1.0: {}
 
@@ -8581,28 +8366,6 @@ snapshots:
       nanoid: 3.3.7
       picocolors: 1.1.0
       source-map-js: 1.2.1
-
-  postgres-array@2.0.0: {}
-
-  postgres-array@3.0.2: {}
-
-  postgres-bytea@1.0.0: {}
-
-  postgres-bytea@3.0.0:
-    dependencies:
-      obuf: 1.1.2
-
-  postgres-date@1.0.7: {}
-
-  postgres-date@2.1.0: {}
-
-  postgres-interval@1.2.0:
-    dependencies:
-      xtend: 4.0.2
-
-  postgres-interval@3.0.0: {}
-
-  postgres-range@1.1.4: {}
 
   prelude-ls@1.2.1: {}
 
@@ -8851,7 +8614,7 @@ snapshots:
 
   sequelize-pool@7.1.0: {}
 
-  sequelize@6.37.3(mysql2@3.11.0)(pg@8.12.0)(tedious@16.7.1):
+  sequelize@6.37.3(mysql2@3.11.0)(tedious@16.7.1):
     dependencies:
       '@types/debug': 4.1.12
       '@types/validator': 13.12.1
@@ -8871,7 +8634,6 @@ snapshots:
       wkx: 0.5.0
     optionalDependencies:
       mysql2: 3.11.0
-      pg: 8.12.0
       tedious: 16.7.1
     transitivePeerDependencies:
       - supports-color
@@ -8953,8 +8715,6 @@ snapshots:
       spdx-license-ids: 3.0.20
 
   spdx-license-ids@3.0.20: {}
-
-  split2@4.2.0: {}
 
   sprintf-js@1.1.3: {}
 
@@ -9576,8 +9336,6 @@ snapshots:
   xmlbuilder@11.0.1: {}
 
   xmlchars@2.2.0: {}
-
-  xtend@4.0.2: {}
 
   y18n@5.0.8: {}
 

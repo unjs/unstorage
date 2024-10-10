@@ -37,7 +37,6 @@ const database = createDatabase(
 const storage = createStorage({
   driver: db0Driver({
     database,
-    dialect: "sqlite",
     table: "custom_table_name", // optional, defaults to "unstorage"
   }),
 });
@@ -50,5 +49,4 @@ The database table is automatically created, no additional setup is required.
 **Options:**
 
 - **`database`** (required): A `db0` database instance.
-- **`dialect`** (required): The SQL dialect of your database: `sqlite`, `postgresql`, or `mysql`.
 - `table`: The name of the table to use. It defaults to `unstorage`.

@@ -5,6 +5,8 @@ import type {
   BlobResponseType,
   SetOptions,
   ListOptions,
+  GetStoreOptions,
+  GetDeployStoreOptions,
 } from "@netlify/blobs";
 import { fetch } from "ofetch";
 
@@ -12,40 +14,34 @@ const DRIVER_NAME = "netlify-blobs";
 
 type GetOptions = { type?: BlobResponseType };
 
-export interface NetlifyBaseStoreOptions {
-  /** The name of the store to use. It is created if needed. This is required except for deploy-scoped stores. */
-  name?: string;
+export interface ExtraOptions {
   /** If set to `true`, the store is scoped to the deploy. This means that it is only available from that deploy, and will be deleted or rolled-back alongside it. */
   deployScoped?: boolean;
-  /** Required during builds, where it is available as `constants.SITE_ID`. At runtime this is set automatically. */
-  siteID?: string;
-  /** Required during builds, where it is available as `constants.NETLIFY_API_TOKEN`. At runtime this is set automatically. */
-  token?: string;
-  /** Used for advanced use cases and unit tests */
-  apiURL?: string;
-  /** Used for advanced use cases and unit tests */
-  edgeURL?: string;
 }
 
-export interface NetlifyDeployStoreOptions extends NetlifyBaseStoreOptions {
+export interface NetlifyDeployStoreOptions
+  extends GetDeployStoreOptions,
+    ExtraOptions {
   name?: never;
   deployScoped: true;
-  deployID?: string;
 }
 
-export interface NetlifyDeployStoreV8Options extends NetlifyDeployStoreOptions {
-  // TODO(serhalp) Export this type from @netlify/blobs instead
-  region?: "us-east-1" | "us-east-2";
+export interface NetlifyDeployStoreLegacyOptions
+  extends NetlifyDeployStoreOptions {
+  // Added in v8.0.0. This ensures TS compatibility for older versions.
+  region?: never;
 }
 
-export interface NetlifyNamedStoreOptions extends NetlifyBaseStoreOptions {
+export interface NetlifyNamedStoreOptions
+  extends GetStoreOptions,
+    ExtraOptions {
   name: string;
   deployScoped?: false;
 }
 
 export type NetlifyStoreOptions =
+  | NetlifyDeployStoreLegacyOptions
   | NetlifyDeployStoreOptions
-  | NetlifyDeployStoreV8Options
   | NetlifyNamedStoreOptions;
 
 export default defineDriver((options: NetlifyStoreOptions) => {

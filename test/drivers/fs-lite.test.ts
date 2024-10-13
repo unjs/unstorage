@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolve } from "path";
+import { resolve } from "node:path";
 import { readFile } from "../../src/drivers/utils/node-fs";
 import { testDriver } from "./utils";
 import driver from "../../src/drivers/fs-lite";

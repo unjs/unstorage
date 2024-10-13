@@ -3,7 +3,6 @@ import driver, { KVHTTPOptions } from "../../src/drivers/cloudflare-kv-http";
 import { testDriver } from "./utils";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
-import { snapshot } from "../../src";
 
 const baseURL =
   "https://api.cloudflare.com/client/v4/accounts/:accountId/storage/kv/namespaces/:namespaceId";
@@ -66,7 +65,7 @@ const server = setupServer(
   }),
 
   rest.delete(`${baseURL}/bulk`, (_req, res, ctx) => {
-    Object.keys(store).forEach((key) => delete store[key]);
+    for (const key of Object.keys(store)) delete store[key];
     return res(ctx.status(204));
   })
 );
@@ -79,7 +78,7 @@ const mockOptions: KVHTTPOptions = {
 };
 
 // TODO: Fix msw compatibility with Node 18
-const isNode18 = parseInt(process.version.substring(1).split(".")[0]) >= 18;
+const isNode18 = Number.parseInt(process.version.slice(1).split(".")[0]) >= 18;
 describe.skipIf(isNode18)("drivers: cloudflare-kv-http", () => {
   beforeAll(() => {
     // Establish requests interception layer before all tests.
@@ -93,7 +92,7 @@ describe.skipIf(isNode18)("drivers: cloudflare-kv-http", () => {
 
   testDriver({
     driver: driver(mockOptions),
-    async additionalTests(ctx) {
+    async additionalTests() {
       test("snapshot", async () => {
         expect(store).toMatchInlineSnapshot(`
           {

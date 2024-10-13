@@ -1,5 +1,5 @@
-import { existsSync, promises as fsp, Stats } from "fs";
-import { resolve, join } from "path";
+import { existsSync, promises as fsp, Stats } from "node:fs";
+import { resolve, join } from "node:path";
 import { createError, createRequiredError, defineDriver } from "./utils";
 import {
   readFile,
@@ -8,7 +8,6 @@ import {
   rmRecursive,
   unlink,
 } from "./utils/node-fs";
-import anymatch from "anymatch";
 
 export interface FSStorageOptions {
   base?: string;
@@ -17,7 +16,7 @@ export interface FSStorageOptions {
   noClear?: boolean;
 }
 
-const PATH_TRAVERSE_RE = /\.\.\:|\.\.$/;
+const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
 
 const DRIVER_NAME = "fs-lite";
 

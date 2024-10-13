@@ -24,7 +24,7 @@ Unstorage provides an async Key-Value storage API with conventional features lik
 - Binary and raw value support
 - State [snapshots](https://unstorage.unjs.io/getting-started/utils#snapshots) and hydration
 - Storage watcher
-- HTTP Storage with [built-in server](https://unstorage.unjs.io/getting-started/http-server)
+- HTTP Storage with [built-in server](https://unstorage.unjs.io/guide/http-server)
 
 ## Usage
 

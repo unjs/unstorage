@@ -1,6 +1,6 @@
-import { existsSync, promises as fsp, Stats } from "fs";
-import { resolve, relative, join } from "path";
-import { FSWatcher, WatchOptions, watch } from "chokidar";
+import { existsSync, promises as fsp, Stats } from "node:fs";
+import { resolve, relative, join } from "node:path";
+import { FSWatcher, ChokidarOptions, watch } from "chokidar";
 import { createError, createRequiredError, defineDriver } from "./utils";
 import {
   readFile,
@@ -16,10 +16,10 @@ export interface FSStorageOptions {
   ignore?: string[];
   readOnly?: boolean;
   noClear?: boolean;
-  watchOptions?: WatchOptions;
+  watchOptions?: ChokidarOptions;
 }
 
-const PATH_TRAVERSE_RE = /\.\.\:|\.\.$/;
+const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
 
 const DRIVER_NAME = "fs";
 

@@ -108,7 +108,7 @@
     "@netlify/blobs": "^6.5.0 || ^7.0.0",
     "@planetscale/database": "^1.19.0",
     "@upstash/redis": "^1.34.0",
-    "@vercel/kv": "^1.0.1",
+    "@vercel/kv": "^3.0.0",
     "idb-keyval": "^6.2.1",
     "ioredis": "^5.4.1"
   },

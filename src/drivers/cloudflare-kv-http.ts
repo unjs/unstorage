@@ -59,7 +59,7 @@ export type KVHTTPOptions = {
   base?: string;
   /**
    * The minimum time-to-live (ttl) for setItem in seconds.
-   * The default is 60 seconds as per Cloudflare's documentation.
+   * The default is 60 seconds as per Cloudflare's [documentation](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
    */
   minTTL?: number;
 } & (KVAuthServiceKey | KVAuthAPIToken | KVAuthEmailKey);

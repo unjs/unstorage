@@ -7,7 +7,7 @@ icon: bi:trash3-fill
 > Discards all data.
 
 ::warning
-This driver does NOT store any data. It will discard any data written to it and will always return null!
+This driver does NOT store any data. It will discard any data written to it and will always return null similar to [`/dev/null`](https://en.wikipedia.org/wiki/Null_device)
 ::
 
 ```js

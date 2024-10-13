@@ -57,6 +57,14 @@ export default defineDriver((opts: DB0DriverOptions) => {
       `;
       return rows?.[0]?.value ?? null;
     },
+    getItemRaw: async (key) => {
+      await ensureTable();
+      const { rows } = await opts.database.sql<ResultSchema>/* sql */ `
+        SELECT blob as value FROM {${opts.tableName}} WHERE key = ${key}
+      `;
+      console.log(rows);
+      return rows?.[0]?.value ?? null;
+    },
     setItem: async (key, value) => {
       await ensureTable();
       if (opts.database.dialect === "mysql") {
@@ -71,6 +79,23 @@ export default defineDriver((opts: DB0DriverOptions) => {
         VALUES (${key}, ${value})
         ON CONFLICT(key) DO UPDATE
         SET value = ${value}, updated_at = CURRENT_TIMESTAMP
+      `;
+      }
+    },
+    async setItemRaw(key, value) {
+      await ensureTable();
+      if (opts.database.dialect === "mysql") {
+        await opts.database.sql/* sql */ `
+          INSERT INTO {${opts.tableName}} (key, blob)
+          VALUES (${key}, ${value})
+          ON DUPLICATE KEY UPDATE value = ${value}
+        `;
+      } else {
+        await opts.database.sql/* sql */ `
+        INSERT INTO {${opts.tableName}} (key, blob)
+        VALUES (${key}, ${value})
+        ON CONFLICT(key) DO UPDATE
+        SET blob = ${value}, updated_at = CURRENT_TIMESTAMP
       `;
       }
     },
@@ -121,6 +146,7 @@ async function setupTable(opts: DB0DriverOptions) {
       CREATE TABLE IF NOT EXISTS {${opts.tableName}} (
         key TEXT PRIMARY KEY,
         value TEXT,
+        blob BLOB,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       );
@@ -132,6 +158,7 @@ async function setupTable(opts: DB0DriverOptions) {
       CREATE TABLE IF NOT EXISTS {${opts.tableName}} (
         key VARCHAR(255) NOT NULL PRIMARY KEY,
         value TEXT,
+        blob BYTEA,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -143,6 +170,7 @@ async function setupTable(opts: DB0DriverOptions) {
       CREATE TABLE IF NOT EXISTS {${opts.tableName}} (
         key VARCHAR(255) NOT NULL PRIMARY KEY,
         value LONGTEXT,
+        blob BLOB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       );

@@ -151,7 +151,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
       body: value,
       query: topts?.ttl
         ? { expiration_ttl: Math.max(topts?.ttl, opts.minTTL || 60) }
-        : {},
+        : undefined,
     });
   };
 

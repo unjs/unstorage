@@ -31,6 +31,7 @@
     "server.d.ts"
   ],
   "scripts": {
+    "bench": "jiti test/server.bench.ts",
     "build": "unbuild",
     "demo": "vite demo",
     "dev": "vitest",
@@ -39,7 +40,6 @@
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
-    "bench": "jiti test/server.bench.ts",
     "test:types": "tsc --noEmit --skipLibCheck",
     "unstorage": "pnpm jiti src/cli"
   },
@@ -64,7 +64,7 @@
     "@azure/storage-blob": "^12.25.0",
     "@capacitor/preferences": "^6.0.2",
     "@cloudflare/workers-types": "^4.20241011.0",
-    "@netlify/blobs": "^7.4.0",
+    "@netlify/blobs": "^8.1.0",
     "@planetscale/database": "^1.19.0",
     "@types/ioredis-mock": "^8.2.5",
     "@types/jsdom": "^21.1.7",
@@ -105,7 +105,7 @@
     "@azure/keyvault-secrets": "^4.8.0",
     "@azure/storage-blob": "^12.24.0",
     "@capacitor/preferences": "^6.0.2",
-    "@netlify/blobs": "^6.5.0 || ^7.0.0",
+    "@netlify/blobs": "^6.5.0 || ^7.0.0 || ^8.1.0",
     "@planetscale/database": "^1.19.0",
     "@upstash/redis": "^1.34.0",
     "@vercel/kv": "^1.0.1",

@@ -60,7 +60,9 @@ export default defineDriver((opts: KVOptions) => {
         value,
         topts
           ? {
-              expirationTtl: Math.max(topts.ttl, opts.minTTL ?? 60),
+              expirationTtl: topts?.ttl
+                ? Math.max(topts.ttl, opts.minTTL ?? 60)
+                : undefined,
               ...topts,
             }
           : undefined

@@ -8,7 +8,7 @@ export interface KVOptions {
   base?: string;
 
   /**
-   * The minimum time-to-live (TTL) for a key-value pair in seconds.
+   * The minimum time-to-live (ttl) for setItem in seconds.
    * The default is 60 seconds as per Cloudflare's documentation.
    */
   minTTL?: number;

@@ -14,9 +14,6 @@ importers:
       chokidar:
         specifier: ^4.0.1
         version: 4.0.1
-      db0:
-        specifier: ^0.2.0
-        version: 0.2.0(@electric-sql/pglite@0.2.12)(@libsql/client@0.14.0)(mysql2@3.11.3)
       destr:
         specifier: ^2.0.3
         version: 2.0.3
@@ -108,6 +105,9 @@ importers:
       changelogen:
         specifier: ^0.5.7
         version: 0.5.7(magicast@0.3.5)
+      db0:
+        specifier: ^0.2.0
+        version: 0.2.0(@electric-sql/pglite@0.2.12)(@libsql/client@0.14.0)(mysql2@3.11.3)
       eslint:
         specifier: ^9.12.0
         version: 9.12.0(jiti@2.3.3)

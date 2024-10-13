@@ -62,7 +62,6 @@ export default defineDriver((opts: DB0DriverOptions) => {
       const { rows } = await opts.database.sql<ResultSchema>/* sql */ `
         SELECT blob as value FROM {${opts.tableName}} WHERE key = ${key}
       `;
-      console.log(rows);
       return rows?.[0]?.value ?? null;
     },
     setItem: async (key, value) => {

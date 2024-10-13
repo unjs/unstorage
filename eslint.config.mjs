@@ -1,11 +1,7 @@
 import unjs from "eslint-config-unjs";
 
 export default unjs({
-  ignores: [
-    "drivers",
-    "/server*",
-    "docs/.*"
-  ],
+  ignores: ["drivers", "/server*", "docs/.*"],
   rules: {
     "unicorn/no-null": 0,
     "unicorn/prevent-abbreviations": 0,
@@ -16,5 +12,6 @@ export default unjs({
     "unicorn/prefer-logical-operator-over-ternary": 0,
     "unicorn/prefer-ternary": 0,
     "unicorn/prefer-string-raw": 0,
+    "@typescript-eslint/no-empty-object-type": 0,
   },
 });

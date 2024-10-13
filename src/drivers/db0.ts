@@ -12,14 +12,14 @@ interface ResultSchema {
 
 export interface DB0DriverOptions {
   database: Database;
-  table?: string;
+  tableName?: string;
 }
 
 const DRIVER_NAME = "db0";
-const DEFAULT_TABLE = "unstorage";
+const DEFAULT_TABLE_NAME = "unstorage";
 
 export default defineDriver((opts: DB0DriverOptions) => {
-  opts.table = opts.table || DEFAULT_TABLE;
+  opts.tableName = opts.tableName || DEFAULT_TABLE_NAME;
 
   /**
    * This promise is used to ensure that only one table creation is attempted
@@ -39,7 +39,7 @@ export default defineDriver((opts: DB0DriverOptions) => {
         try {
           return await query(...args);
         } catch {
-          createTablePromise = createTable(opts.database, opts.table);
+          createTablePromise = createTable(opts);
         }
       }
 
@@ -56,7 +56,7 @@ export default defineDriver((opts: DB0DriverOptions) => {
     hasItem: withCreateTable(async (key) => {
       const { rows } = await opts.database.sql<ResultSchema>/* sql */ `
         SELECT EXISTS (
-          SELECT 1 FROM {${opts.table}}
+          SELECT 1 FROM {${opts.tableName}}
           WHERE key = ${key}
         ) AS value
       `;
@@ -66,7 +66,7 @@ export default defineDriver((opts: DB0DriverOptions) => {
     getItem: withCreateTable(async (key) => {
       const { rows } = await opts.database.sql<ResultSchema>/* sql */ `
         SELECT value
-        FROM {${opts.table}}
+        FROM {${opts.tableName}}
         WHERE key = ${key}
       `;
 
@@ -75,7 +75,7 @@ export default defineDriver((opts: DB0DriverOptions) => {
     setItem: withCreateTable(async (key, value) => {
       if (opts.database.dialect === "mysql") {
         await opts.database.sql/* sql */ `
-          INSERT INTO {${opts.table}} (key, value)
+          INSERT INTO {${opts.tableName}} (key, value)
           VALUES (${key}, ${value})
           ON DUPLICATE KEY UPDATE value = ${value}
         `;
@@ -84,7 +84,7 @@ export default defineDriver((opts: DB0DriverOptions) => {
       }
 
       await opts.database.sql/* sql */ `
-        INSERT INTO {${opts.table}} (key, value)
+        INSERT INTO {${opts.tableName}} (key, value)
         VALUES (${key}, ${value})
         ON CONFLICT(key) DO UPDATE
         SET value = ${value}, updated_at = CURRENT_TIMESTAMP
@@ -92,13 +92,13 @@ export default defineDriver((opts: DB0DriverOptions) => {
     }),
     removeItem: withCreateTable(async (key) => {
       await opts.database.sql/* sql */ `
-        DELETE FROM {${opts.table}} WHERE key=${key}
+        DELETE FROM {${opts.tableName}} WHERE key=${key}
       `;
     }),
     getMeta: withCreateTable(async (key) => {
       const { rows } = await opts.database.sql<ResultSchema>/* sql */ `
         SELECT created_at, updated_at
-        FROM {${opts.table}}
+        FROM {${opts.tableName}}
         WHERE key = ${key}
       `;
 
@@ -110,7 +110,7 @@ export default defineDriver((opts: DB0DriverOptions) => {
     getKeys: withCreateTable(async (base = "") => {
       const { rows } = await opts.database.sql<ResultSchema>/* sql */ `
         SELECT key
-        FROM {${opts.table}}
+        FROM {${opts.tableName}}
         WHERE key LIKE ${base + "%"}
       `;
 
@@ -118,18 +118,18 @@ export default defineDriver((opts: DB0DriverOptions) => {
     }),
     clear: withCreateTable(async () => {
       await opts.database.sql/* sql */ `
-        DELETE FROM {${opts.table}}
+        DELETE FROM {${opts.tableName}}
       `;
     }),
   };
 });
 
-async function createTable(database: Database, name: string = DEFAULT_TABLE) {
-  switch (database.dialect) {
+async function createTable(opts: DB0DriverOptions) {
+  switch (opts.database.dialect) {
     case "sqlite":
     case "libsql": {
-      await database.sql/* sql */ `
-      CREATE TABLE IF NOT EXISTS {${name}} (
+      await opts.database.sql/* sql */ `
+      CREATE TABLE IF NOT EXISTS {${opts.tableName}} (
         key TEXT PRIMARY KEY,
         value TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -139,8 +139,8 @@ async function createTable(database: Database, name: string = DEFAULT_TABLE) {
       return;
     }
     case "postgresql": {
-      await database.sql/* sql */ `
-      CREATE TABLE IF NOT EXISTS {${name}} (
+      await opts.database.sql/* sql */ `
+      CREATE TABLE IF NOT EXISTS {${opts.tableName}} (
         key VARCHAR(255) NOT NULL PRIMARY KEY,
         value TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -150,8 +150,8 @@ async function createTable(database: Database, name: string = DEFAULT_TABLE) {
       return;
     }
     case "mysql": {
-      await database.sql/* sql */ `
-      CREATE TABLE IF NOT EXISTS {${name}} (
+      await opts.database.sql/* sql */ `
+      CREATE TABLE IF NOT EXISTS {${opts.tableName}} (
         key VARCHAR(255) NOT NULL PRIMARY KEY,
         value LONGTEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -163,7 +163,7 @@ async function createTable(database: Database, name: string = DEFAULT_TABLE) {
     default: {
       throw createError(
         DRIVER_NAME,
-        `unsuppoted SQL dialect: ${database.dialect}`
+        `unsuppoted SQL dialect: ${opts.database.dialect}`
       );
     }
   }

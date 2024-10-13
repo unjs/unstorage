@@ -57,6 +57,11 @@ export type KVHTTPOptions = {
    * Adds prefix to all stored keys
    */
   base?: string;
+  /**
+   * The minimum time-to-live (ttl) for setItem in seconds.
+   * The default is 60 seconds as per Cloudflare's documentation.
+   */
+  minTTL?: number;
 } & (KVAuthServiceKey | KVAuthAPIToken | KVAuthEmailKey);
 
 type CloudflareAuthorizationHeaders =
@@ -140,11 +145,13 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     }
   };
 
-  const setItem = async (key: string, value: any, opt: any) => {
+  const setItem = async (key: string, value: any, topts: any) => {
     return await kvFetch(`/values/${r(key)}`, {
       method: "PUT",
       body: value,
-      query: opt?.ttl ? { expiration_ttl: opt?.ttl } : {},
+      query: topts?.ttl
+        ? { expiration_ttl: Math.max(topts?.ttl, opts.minTTL || 60) }
+        : {},
     });
   };
 

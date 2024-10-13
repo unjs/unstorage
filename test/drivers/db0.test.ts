@@ -5,6 +5,15 @@ import { testDriver } from "./utils";
 
 const drivers = [
   {
+    name: "sqlite",
+    async getDB() {
+      const sqlite = await import("db0/connectors/better-sqlite3").then(
+        (m) => m.default
+      );
+      return createDatabase(sqlite({ name: ":memory:" }));
+    },
+  },
+  {
     name: "libsql",
     async getDB() {
       const libSQL = await import("db0/connectors/libsql/node").then(

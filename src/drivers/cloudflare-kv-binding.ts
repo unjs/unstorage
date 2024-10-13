@@ -6,6 +6,12 @@ export interface KVOptions {
 
   /** Adds prefix to all stored keys */
   base?: string;
+
+  /**
+   * The minimum time-to-live (ttl) for setItem in seconds.
+   * The default is 60 seconds as per Cloudflare's [documentation](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
+   */
+  minTTL?: number;
 }
 
 // https://developers.cloudflare.com/workers/runtime-apis/kv
@@ -54,7 +60,9 @@ export default defineDriver((opts: KVOptions) => {
         value,
         topts
           ? {
-              expirationTtl: topts.ttl,
+              expirationTtl: topts?.ttl
+                ? Math.max(topts.ttl, opts.minTTL ?? 60)
+                : undefined,
               ...topts,
             }
           : undefined

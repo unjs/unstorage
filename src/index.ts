@@ -23,6 +23,7 @@ export const builtinDrivers = {
   memory: "unstorage/drivers/memory",
   mongodb: "unstorage/drivers/mongodb",
   netlifyBlobs: "unstorage/drivers/netlify-blobs",
+  null: "unstorage/drivers/null",
   overlay: "unstorage/drivers/overlay",
   planetscale: "unstorage/drivers/planetscale",
   redis: "unstorage/drivers/redis",

@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.13.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.12.0...v1.13.0)
+
+### 🚀 Enhancements
+
+- Bump chokidar v4 ([#489](https://github.com/unjs/unstorage/pull/489))
+- Add `null` driver ([#495](https://github.com/unjs/unstorage/pull/495))
+
+### 🩹 Fixes
+
+- **cloudflare-kv:** Use min ttl of 60 seconds ([#496](https://github.com/unjs/unstorage/pull/496))
+
+### 💅 Refactors
+
+- **netlify:** Support @netlify/blobs v8 and improve options types ([#486](https://github.com/unjs/unstorage/pull/486))
+- **cli:** Migrate to `citty` ([#498](https://github.com/unjs/unstorage/pull/498))
+
+### 📖 Documentation
+
+- Missing values return null, not undefined ([#487](https://github.com/unjs/unstorage/pull/487))
+
+### 🏡 Chore
+
+- Update eslint config ([3dddf6c](https://github.com/unjs/unstorage/commit/3dddf6c))
+- Update deps ([ee70d15](https://github.com/unjs/unstorage/commit/ee70d15))
+- Update lockfile ([dca8dc9](https://github.com/unjs/unstorage/commit/dca8dc9))
+- Revert msw back to 1.x ([cf7f3ce](https://github.com/unjs/unstorage/commit/cf7f3ce))
+
+### ❤️ Contributors
+
+- Alexander <a.hywax@gmail.com>
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- ToBinio ([@ToBinio](http://github.com/ToBinio))
+- V1rtl ([@talentlessguy](http://github.com/talentlessguy))
+- Philippe Serhal ([@serhalp](http://github.com/serhalp))
+- Renato Lacerda <renato.ac.lacerda@gmail.com>
+
 ## v1.12.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.11.1...v1.12.0)

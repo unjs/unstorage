@@ -31,7 +31,7 @@ const main = defineCommand({
     const storageServer = createStorageServer(storage);
 
     await listen(storageServer.handle, {
-      name: "Storage server",
+      name: "unstorage server",
       port: 8080,
     });
   },

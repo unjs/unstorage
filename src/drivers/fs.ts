@@ -1,6 +1,6 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, relative, join } from "node:path";
-import { FSWatcher, ChokidarOptions, watch } from "chokidar";
+import { FSWatcher, WatchOptions as ChokidarOptions, watch } from "chokidar";
 import { createError, createRequiredError, defineDriver } from "./utils";
 import {
   readFile,

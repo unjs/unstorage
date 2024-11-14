@@ -56,14 +56,14 @@
     "ufo": "^1.5.4"
   },
   "devDependencies": {
-    "@azure/app-configuration": "^1.7.0",
+    "@azure/app-configuration": "^1.8.0",
     "@azure/cosmos": "^4.1.1",
     "@azure/data-tables": "^13.2.2",
     "@azure/identity": "^4.5.0",
     "@azure/keyvault-secrets": "^4.9.0",
     "@azure/storage-blob": "^12.25.0",
     "@capacitor/preferences": "^6.0.2",
-    "@cloudflare/workers-types": "^4.20241022.0",
+    "@cloudflare/workers-types": "^4.20241112.0",
     "@netlify/blobs": "^8.1.0",
     "@planetscale/database": "^1.19.0",
     "@types/ioredis-mock": "^8.2.5",
@@ -71,8 +71,8 @@
     "@types/node": "^22.9.0",
     "@upstash/redis": "^1.34.3",
     "@vercel/kv": "^3.0.0",
-    "@vitejs/plugin-vue": "^5.1.4",
-    "@vitest/coverage-v8": "^2.1.4",
+    "@vitejs/plugin-vue": "^5.2.0",
+    "@vitest/coverage-v8": "^2.1.5",
     "@vue/compiler-sfc": "^3.5.12",
     "azurite": "^3.33.0",
     "changelogen": "^0.5.7",
@@ -93,12 +93,12 @@
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "^5.6.3",
     "unbuild": "^2.0.0",
-    "vite": "^5.4.10",
-    "vitest": "^2.1.4",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.5",
     "vue": "^3.5.12"
   },
   "peerDependencies": {
-    "@azure/app-configuration": "^1.7.0",
+    "@azure/app-configuration": "^1.8.0",
     "@azure/cosmos": "^4.1.1",
     "@azure/data-tables": "^13.2.2",
     "@azure/identity": "^4.5.0",
@@ -153,5 +153,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@9.12.3"
+  "packageManager": "pnpm@9.13.0"
 }

@@ -38,6 +38,9 @@ export default defineDriver((opts: IDBKeyvalOptions = {}) => {
       return item ?? null;
     },
     setItem(key, value) {
+      try {
+        value = JSON.parse(value)
+      } catch { /* use string value */ }
       return set(makeKey(key), value, customStore);
     },
     removeItem(key) {

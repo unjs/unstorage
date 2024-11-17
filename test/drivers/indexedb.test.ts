@@ -18,8 +18,11 @@ describe("drivers: indexeddb", () => {
   it("can use a customStore", async () => {
     await customStorage.setItem("first", "foo");
     await customStorage.setItem("second", "bar");
+    await customStorage.setItem("third", { foo: "bar" });
     expect(await customStorage.getItem("first")).toBe("foo");
+    expect(await customStorage.getItem("third")).toStrictEqual({ foo: "bar" });
     await customStorage.removeItem("first");
+    await customStorage.removeItem("third");
     expect(await customStorage.getKeys()).toMatchObject(["unstorage:second"]);
     await customStorage.clear();
     expect(await customStorage.hasItem("second")).toBe(false);

@@ -2,15 +2,15 @@ import { createRequiredError, defineDriver } from "./utils";
 
 export interface SessionStorageOptions {
   base?: string;
-  window?: typeof window;
-  sessionStorage?: typeof window.sessionStorage;
+  window?: typeof globalThis;
+  sessionStorage?: typeof globalThis.sessionStorage;
 }
 
 const DRIVER_NAME = "session-storage";
 
 export default defineDriver((opts: SessionStorageOptions = {}) => {
   if (!opts.window) {
-    opts.window = typeof window === "undefined" ? undefined : window;
+    opts.window = typeof globalThis === "undefined" ? undefined : globalThis;
   }
   if (!opts.sessionStorage) {
     opts.sessionStorage = opts.window?.sessionStorage;

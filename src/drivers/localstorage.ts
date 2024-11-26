@@ -2,15 +2,15 @@ import { createRequiredError, defineDriver } from "./utils";
 
 export interface LocalStorageOptions {
   base?: string;
-  window?: typeof window;
-  localStorage?: typeof window.localStorage;
+  window?: typeof globalThis;
+  localStorage?: typeof globalThis.localStorage;
 }
 
 const DRIVER_NAME = "localstorage";
 
 export default defineDriver((opts: LocalStorageOptions = {}) => {
   if (!opts.window) {
-    opts.window = typeof window === "undefined" ? undefined : window;
+    opts.window = typeof globalThis === "undefined" ? undefined : globalThis;
   }
   if (!opts.localStorage) {
     opts.localStorage = opts.window?.localStorage;

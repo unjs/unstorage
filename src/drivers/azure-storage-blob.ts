@@ -148,7 +148,7 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
   };
 });
 
-const isBrowser = typeof window !== "undefined";
+const isBrowser = typeof globalThis !== "undefined";
 
 // Helper function to read a Node.js readable stream into a Buffer. (https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob)
 async function streamToBuffer(

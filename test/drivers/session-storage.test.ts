@@ -10,7 +10,7 @@ describe("drivers: session-storage", () => {
   jsdom.virtualConsole.sendTo(console);
 
   testDriver({
-    driver: driver({ window: jsdom.window as unknown as typeof window }),
+    driver: driver({ window: jsdom.window as unknown as typeof globalThis }),
     additionalTests: (ctx) => {
       it("check session storage", () => {
         expect(jsdom.window.sessionStorage.getItem("s1:a")).toBe("test_data");

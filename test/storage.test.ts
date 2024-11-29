@@ -181,10 +181,10 @@ describe("utils", () => {
     };
     type MyStorage = {
       data: {
-      foo: string;
-      bar: number;
-      baz: TestObjType;
-      }
+        foo: string;
+        bar: number;
+        baz: TestObjType;
+      };
     };
     const storage = createStorage<MyStorage>();
 

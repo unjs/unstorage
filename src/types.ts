@@ -62,11 +62,11 @@ export interface Driver<OptionsT = any, InstanceT = any> {
 }
 
 type NsStorageValue = {
-  data: object
-  [key: string]: any
-}
+  data: object;
+  [key: string]: any;
+};
 
-type NsDataType<T extends NsStorageValue> = T["data"]
+type NsDataType<T extends NsStorageValue> = T["data"];
 
 export interface Storage<T extends StorageValue = StorageValue> {
   // Item
@@ -119,7 +119,10 @@ export interface Storage<T extends StorageValue = StorageValue> {
     opts?: TransactionOptions
   ) => Promise<void>;
 
-  removeItem<U extends Extract<T, NsStorageValue>, K extends keyof NsDataType<U>>(
+  removeItem<
+    U extends Extract<T, NsStorageValue>,
+    K extends keyof NsDataType<U>,
+  >(
     key: K,
     opts?:
       | (TransactionOptions & { removeMeta?: boolean })

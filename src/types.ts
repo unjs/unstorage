@@ -61,18 +61,25 @@ export interface Driver<OptionsT = any, InstanceT = any> {
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }
 
+type NsStorageValue = {
+  data: object
+  [key: string]: any
+}
+
+type NsDataType<T extends NsStorageValue> = T["data"]
+
 export interface Storage<T extends StorageValue = StorageValue> {
   // Item
-  hasItem<U extends Extract<T, object>, K extends keyof U>(
+  hasItem<U extends Extract<T, NsStorageValue>, K extends keyof NsDataType<U>>(
     key: K,
     opts?: TransactionOptions
   ): Promise<boolean>;
   hasItem(key: string, opts?: TransactionOptions): Promise<boolean>;
 
-  getItem<U extends Extract<T, object>, K extends keyof U>(
+  getItem<U extends Extract<T, NsStorageValue>, K extends keyof NsDataType<U>>(
     key: K,
     ops?: TransactionOptions
-  ): Promise<U[K] | null>;
+  ): Promise<NsDataType<U>[K] | null>;
   getItem<U extends T>(
     key: string,
     opts?: TransactionOptions
@@ -89,9 +96,9 @@ export interface Storage<T extends StorageValue = StorageValue> {
     opts?: TransactionOptions
   ) => Promise<MaybeDefined<T> | null>;
 
-  setItem<U extends Extract<T, object>, K extends keyof U>(
+  setItem<U extends Extract<T, NsStorageValue>, K extends keyof NsDataType<U>>(
     key: K,
-    value: U[K],
+    value: NsDataType<U>[K],
     opts?: TransactionOptions
   ): Promise<void>;
   setItem<U extends T>(
@@ -112,7 +119,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
     opts?: TransactionOptions
   ) => Promise<void>;
 
-  removeItem<U extends Extract<T, object>, K extends keyof U>(
+  removeItem<U extends Extract<T, NsStorageValue>, K extends keyof NsDataType<U>>(
     key: K,
     opts?:
       | (TransactionOptions & { removeMeta?: boolean })

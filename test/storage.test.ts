@@ -180,9 +180,11 @@ describe("utils", () => {
       b: boolean;
     };
     type MyStorage = {
+      data: {
       foo: string;
       bar: number;
       baz: TestObjType;
+      }
     };
     const storage = createStorage<MyStorage>();
 

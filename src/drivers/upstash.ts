@@ -16,7 +16,7 @@ export interface UpstashOptions extends Partial<RedisConfigNodejs> {
 const DRIVER_NAME = "upstash";
 
 export default defineDriver<UpstashOptions, Redis>(
-  (options: UpstashOptions) => {
+  (options: UpstashOptions = {}) => {
     const base = normalizeKey(options?.base);
     const r = (...keys: string[]) => joinKeys(base, ...keys);
 
@@ -25,8 +25,10 @@ export default defineDriver<UpstashOptions, Redis>(
       if (redisClient) {
         return redisClient;
       }
-      const url = options.url || process.env.UPSTASH_REDIS_REST_URL;
-      const token = options.token || process.env.UPSTASH_REDIS_REST_TOKEN;
+      const url =
+        options.url || globalThis.process?.env?.UPSTASH_REDIS_REST_URL;
+      const token =
+        options.token || globalThis.process?.env?.UPSTASH_REDIS_REST_TOKEN;
       redisClient = new Redis({ url, token, ...options });
       return redisClient;
     };

@@ -2,14 +2,13 @@ import { describe } from "vitest";
 import { testDriver } from "./utils";
 import driver from "../../src/drivers/upstash";
 
-const hasEnv =
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN;
+const url = process.env.VITE_UPSTASH_REDIS_REST_URL;
+const token = process.env.VITE_UPSTASH_REDIS_REST_TOKEN;
 
-describe.skipIf(!hasEnv)("drivers: upstash", async () => {
+describe.skipIf(!url || !token)("drivers: upstash", async () => {
+  process.env.UPSTASH_REDIS_REST_URL = url;
+  process.env.UPSTASH_REDIS_REST_TOKEN = token;
   testDriver({
-    driver: driver({
-      url: process.env.VITE_UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    }),
+    driver: driver({}),
   });
 });

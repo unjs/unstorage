@@ -1,6 +1,5 @@
 import { RedisConfigNodejs, Redis } from "@upstash/redis";
-import { defineDriver, joinKeys } from "..";
-import { normalizeKey } from "./utils";
+import { normalizeKey, defineDriver, joinKeys } from "./utils";
 
 export interface UpstashOptions extends RedisConfigNodejs {
   /**

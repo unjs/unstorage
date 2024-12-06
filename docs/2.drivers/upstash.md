@@ -29,8 +29,8 @@ import upstashDriver from "unstorage/drivers/upstash";
 const storage = createStorage({
   driver: upstashDriver({
     base: "unstorage",
-    url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    // url: "", // or set UPSTASH_REDIS_REST_URL env
+    // token: "", // or set UPSTASH_REDIS_REST_TOKEN env
   }),
 });
 ```
@@ -38,8 +38,8 @@ const storage = createStorage({
 **Options:**
 
 - `base`: Optional prefix to use for all keys. Can be used for namespacing.
-- `url`: The REST URL for your Upstash Redis database. Find it in [the Upstash Redis console](https://console.upstash.com/redis/).
-- `token`: The REST token for authentication with your Upstash Redis database. Find it in [the Upstash Redis console](https://console.upstash.com/redis/).
+- `url`: The REST URL for your Upstash Redis database. Find it in [the Upstash Redis console](https://console.upstash.com/redis/). Driver uses `UPSTASH_REDIS_REST_URL` environment by default.
+- `token`: The REST token for authentication with your Upstash Redis database. Find it in [the Upstash Redis console](https://console.upstash.com/redis/). Driver uses `UPSTASH_REDIS_REST_TOKEN` environment by default.
 - `ttl`: Default TTL for all items in **seconds**.
 
 See [@upstash/redis documentation](https://upstash.com/docs/redis/sdks/ts/overview) for all available options.

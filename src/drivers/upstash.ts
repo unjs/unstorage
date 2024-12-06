@@ -1,7 +1,7 @@
-import { RedisConfigNodejs, Redis } from "@upstash/redis";
-import { normalizeKey, defineDriver, joinKeys } from "./utils";
+import { type RedisConfigNodejs, Redis } from "@upstash/redis";
+import { defineDriver, normalizeKey, joinKeys } from "./utils";
 
-export interface UpstashOptions extends RedisConfigNodejs {
+export interface UpstashOptions extends Partial<RedisConfigNodejs> {
   /**
    * Optional prefix to use for all keys. Can be used for namespacing.
    */
@@ -13,7 +13,7 @@ export interface UpstashOptions extends RedisConfigNodejs {
   ttl?: number;
 }
 
-const DRIVER_NAME = "upstash-redis";
+const DRIVER_NAME = "upstash";
 
 export default defineDriver<UpstashOptions, Redis>(
   (options: UpstashOptions) => {
@@ -25,8 +25,9 @@ export default defineDriver<UpstashOptions, Redis>(
       if (redisClient) {
         return redisClient;
       }
-      redisClient = new Redis(options);
-
+      const url = options.url || process.env.UPSTASH_REDIS_REST_URL;
+      const token = options.token || process.env.UPSTASH_REDIS_REST_TOKEN;
+      redisClient = new Redis({ url, token, ...options });
       return redisClient;
     };
     return {

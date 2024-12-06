@@ -61,13 +61,30 @@ export interface Driver<OptionsT = any, InstanceT = any> {
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }
 
+type NsStorageValue = {
+  data: object;
+  [key: string]: any;
+};
+
+type NsDataType<T extends NsStorageValue> = T["data"];
+
 export interface Storage<T extends StorageValue = StorageValue> {
   // Item
-  hasItem: (key: string, opts?: TransactionOptions) => Promise<boolean>;
-  getItem: <U extends T>(
+  hasItem<U extends Extract<T, NsStorageValue>, K extends keyof NsDataType<U>>(
+    key: K,
+    opts?: TransactionOptions
+  ): Promise<boolean>;
+  hasItem(key: string, opts?: TransactionOptions): Promise<boolean>;
+
+  getItem<U extends Extract<T, NsStorageValue>, K extends keyof NsDataType<U>>(
+    key: K,
+    ops?: TransactionOptions
+  ): Promise<NsDataType<U>[K] | null>;
+  getItem<U extends T>(
     key: string,
     opts?: TransactionOptions
-  ) => Promise<U | null>;
+  ): Promise<U | null>;
+
   /** @experimental */
   getItems: <U extends T>(
     items: (string | { key: string; options?: TransactionOptions })[],
@@ -78,11 +95,18 @@ export interface Storage<T extends StorageValue = StorageValue> {
     key: string,
     opts?: TransactionOptions
   ) => Promise<MaybeDefined<T> | null>;
-  setItem: <U extends T>(
+
+  setItem<U extends Extract<T, NsStorageValue>, K extends keyof NsDataType<U>>(
+    key: K,
+    value: NsDataType<U>[K],
+    opts?: TransactionOptions
+  ): Promise<void>;
+  setItem<U extends T>(
     key: string,
     value: U,
     opts?: TransactionOptions
-  ) => Promise<void>;
+  ): Promise<void>;
+
   /** @experimental */
   setItems: <U extends T>(
     items: { key: string; value: U; options?: TransactionOptions }[],
@@ -94,12 +118,23 @@ export interface Storage<T extends StorageValue = StorageValue> {
     value: MaybeDefined<T>,
     opts?: TransactionOptions
   ) => Promise<void>;
-  removeItem: (
+
+  removeItem<
+    U extends Extract<T, NsStorageValue>,
+    K extends keyof NsDataType<U>,
+  >(
+    key: K,
+    opts?:
+      | (TransactionOptions & { removeMeta?: boolean })
+      | boolean /* legacy: removeMeta */
+  ): Promise<void>;
+  removeItem(
     key: string,
     opts?:
       | (TransactionOptions & { removeMeta?: boolean })
       | boolean /* legacy: removeMeta */
-  ) => Promise<void>;
+  ): Promise<void>;
+
   // Meta
   getMeta: (
     key: string,
@@ -130,9 +165,9 @@ export interface Storage<T extends StorageValue = StorageValue> {
   ) => { base: string; driver: Driver }[];
   // Aliases
   keys: Storage["getKeys"];
-  get: Storage["getItem"];
-  set: Storage["setItem"];
-  has: Storage["hasItem"];
-  del: Storage["removeItem"];
-  remove: Storage["removeItem"];
+  get: Storage<T>["getItem"];
+  set: Storage<T>["setItem"];
+  has: Storage<T>["hasItem"];
+  del: Storage<T>["removeItem"];
+  remove: Storage<T>["removeItem"];
 }

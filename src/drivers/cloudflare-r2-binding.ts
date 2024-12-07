@@ -50,7 +50,7 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
     getItemRaw(key, topts) {
       key = r(key);
       const binding = getR2Binding(opts.binding);
-      return binding.get(key, topts).then((r) => r?.arrayBuffer());
+      return binding.get(key, topts).then((r) => r?.body);
     },
     async setItem(key, value, topts) {
       key = r(key);

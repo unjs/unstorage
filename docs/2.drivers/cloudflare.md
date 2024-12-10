@@ -163,6 +163,6 @@ const storage = createStorage({
 - `getItemRaw(key, { type: "..." })`
   - `type: "object"`: Return the [R2 object body](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/#r2objectbody-definition).
   - `type: "stream"`: Return body stream.
-  - `type: "blob"`: Return data blobl.
+  - `type: "blob"`: Return a `Blob`.
   - `type: "bytes"`: Return an `Uint8Array`.
   - `type: "arrayBuffer"`: Return an `ArrayBuffer` (default)

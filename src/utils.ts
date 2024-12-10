@@ -5,8 +5,10 @@ type StorageKeys = Array<keyof Storage>;
 const storageKeyProperties: StorageKeys = [
   "hasItem",
   "getItem",
+  "getItems",
   "getItemRaw",
   "setItem",
+  "setItems",
   "setItemRaw",
   "removeItem",
   "getMeta",
@@ -27,11 +29,22 @@ export function prefixStorage<T extends StorageValue>(
     return storage;
   }
   const nsStorage: Storage = { ...storage };
+  const keysPropertyRegexp = new RegExp(/(set|get)\w+s/);
   for (const property of storageKeyProperties) {
-    // @ts-ignore
-    nsStorage[property] = (key = "", ...args) =>
+    if (keysPropertyRegexp.test(property)) {
       // @ts-ignore
-      storage[property](base + key, ...args);
+      nsStorage[property] = (keys = [], ...args) =>
+        // @ts-ignore
+        storage[property](
+          keys.map((key) => base + key),
+          ...args
+        );
+    } else {
+      // @ts-ignore
+      nsStorage[property] = (key = "", ...args) =>
+        // @ts-ignore
+        storage[property](base + key, ...args);
+    }
   }
   nsStorage.getKeys = (key = "", ...arguments_) =>
     storage

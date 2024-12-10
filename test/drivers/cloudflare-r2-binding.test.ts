@@ -5,7 +5,7 @@ import CloudflareR2Binding from "../../src/drivers/cloudflare-r2-binding";
 import { testDriver } from "./utils";
 import { getPlatformProxy } from "wrangler";
 
-describe.skip("drivers: cloudflare-r2-binding", async () => {
+describe("drivers: cloudflare-r2-binding", async () => {
   const cfProxy = await getPlatformProxy();
   globalThis.__env__ = cfProxy.env;
   afterAll(async () => {
@@ -20,9 +20,16 @@ describe.skip("drivers: cloudflare-r2-binding", async () => {
         const storage = createStorage({
           driver: CloudflareR2Binding({}),
         });
-        expect(await snapshot(storage, "")).toMatchInlineSnapshot(`
+
+        const storageSnapshot = await snapshot(storage, "");
+
+        storageSnapshot["base:data:raw.bin"] = (await storage.getItemRaw(
+          "base:data:raw.bin"
+        )) as any;
+
+        expect(storageSnapshot).toMatchInlineSnapshot(`
           {
-            "base:data:raw.bin": Uint8Array [
+            "base:data:raw.bin": ArrayBuffer [
               1,
               2,
               3,

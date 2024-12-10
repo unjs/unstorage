@@ -76,14 +76,14 @@ export default defineDriver((opts: DB0DriverOptions) => {
       await ensureTable();
       if (opts.database.dialect === "mysql") {
         await opts.database.sql/* sql */ `
-          INSERT INTO {${opts.tableName}} (key, value)
-          VALUES (${key}, ${value})
-          ON DUPLICATE KEY UPDATE value = ${value}
+          INSERT INTO {${opts.tableName}} (key, value, created_at, updated_at)
+          VALUES (${key}, ${value}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          ON DUPLICATE KEY UPDATE value = ${value}, updated_at = CURRENT_TIMESTAMP
         `;
       } else {
         await opts.database.sql/* sql */ `
-        INSERT INTO {${opts.tableName}} (key, value)
-        VALUES (${key}, ${value})
+        INSERT INTO {${opts.tableName}} (key, value, created_at, updated_at)
+        VALUES (${key}, ${value}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ON CONFLICT(key) DO UPDATE
         SET value = ${value}, updated_at = CURRENT_TIMESTAMP
       `;
@@ -93,14 +93,14 @@ export default defineDriver((opts: DB0DriverOptions) => {
       await ensureTable();
       if (opts.database.dialect === "mysql") {
         await opts.database.sql/* sql */ `
-          INSERT INTO {${opts.tableName}} (key, blob)
-          VALUES (${key}, ${value})
-          ON DUPLICATE KEY UPDATE value = ${value}
+          INSERT INTO {${opts.tableName}} (key, blob, created_at, updated_at)
+          VALUES (${key}, ${value}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          ON DUPLICATE KEY UPDATE blob = ${value}, updated_at = CURRENT_TIMESTAMP
         `;
       } else {
         await opts.database.sql/* sql */ `
-        INSERT INTO {${opts.tableName}} (key, blob)
-        VALUES (${key}, ${value})
+        INSERT INTO {${opts.tableName}} (key, blob, created_at, updated_at)
+        VALUES (${key}, ${value}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ON CONFLICT(key) DO UPDATE
         SET blob = ${value}, updated_at = CURRENT_TIMESTAMP
       `;

@@ -8,7 +8,7 @@ import {
   getRequestHeader,
   setResponseHeader,
   readRawBody,
-  EventHandler,
+  type EventHandler,
   H3Event,
 } from "h3";
 import type { Storage, TransactionOptions, StorageMeta } from "./types";

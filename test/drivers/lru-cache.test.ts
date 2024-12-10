@@ -4,7 +4,7 @@ import { testDriver } from "./utils";
 
 describe("drivers: lru-cache", () => {
   testDriver({
-    driver: driver(),
+    driver: driver({}),
   });
 });
 

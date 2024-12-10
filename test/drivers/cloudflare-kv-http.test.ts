@@ -1,5 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import driver, { KVHTTPOptions } from "../../src/drivers/cloudflare-kv-http";
+import driver, {
+  type KVHTTPOptions,
+} from "../../src/drivers/cloudflare-kv-http";
 import { testDriver } from "./utils";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
@@ -78,7 +80,8 @@ const mockOptions: KVHTTPOptions = {
 };
 
 // TODO: Fix msw compatibility with Node 18
-const isNode18 = Number.parseInt(process.version.slice(1).split(".")[0]) >= 18;
+const isNode18 =
+  Number.parseInt(process.version.slice(1).split(".")[0] || "") >= 18;
 describe.skipIf(isNode18)("drivers: cloudflare-kv-http", () => {
   beforeAll(() => {
     // Establish requests interception layer before all tests.

@@ -45,7 +45,7 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
     getItem(key, topts) {
       key = r(key);
       const binding = getR2Binding(opts.binding);
-      return binding.get(key, topts).then((r) => r?.text());
+      return binding.get(key, topts).then((r) => r?.text() ?? null);
     },
     getItemRaw(key, topts) {
       key = r(key);

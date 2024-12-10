@@ -1,5 +1,10 @@
 import { it, expect } from "vitest";
-import { Storage, Driver, createStorage, restoreSnapshot } from "../../src";
+import {
+  type Storage,
+  type Driver,
+  createStorage,
+  restoreSnapshot,
+} from "../../src";
 
 export interface TestContext {
   storage: Storage;

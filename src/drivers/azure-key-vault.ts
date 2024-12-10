@@ -1,5 +1,8 @@
 import { createError, createRequiredError, defineDriver } from "./utils";
-import { SecretClient, SecretClientOptions } from "@azure/keyvault-secrets";
+import {
+  SecretClient,
+  type SecretClientOptions,
+} from "@azure/keyvault-secrets";
 import { DefaultAzureCredential } from "@azure/identity";
 
 export interface AzureKeyVaultOptions {
@@ -118,7 +121,7 @@ function encode(value: string): string {
   for (const key in base64Map) {
     encoded = encoded.replace(
       new RegExp(key.replace(/[$()*+.?[\\\]^{|}]/g, "\\$&"), "g"),
-      base64Map[key]
+      base64Map[key]!
     );
   }
   return encoded;

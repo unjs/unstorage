@@ -7,9 +7,9 @@ import { getPlatformProxy } from "wrangler";
 
 describe("drivers: cloudflare-r2-binding", async () => {
   const cfProxy = await getPlatformProxy();
-  globalThis.__env__ = cfProxy.env;
+  (globalThis as any).__env__ = cfProxy.env;
   afterAll(async () => {
-    globalThis.__env__ = undefined;
+    (globalThis as any).__env__ = undefined;
     await cfProxy.dispose();
   });
 

@@ -42,7 +42,7 @@ describe("drivers: redis", () => {
       });
 
       it("exposes instance", () => {
-        expect(driver.getInstance()).toBeInstanceOf(ioredis.default);
+        expect(driver.getInstance?.()).toBeInstanceOf(ioredis.default);
       });
     },
   });

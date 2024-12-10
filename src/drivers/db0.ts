@@ -18,6 +18,8 @@ export interface DB0DriverOptions {
 const DRIVER_NAME = "db0";
 const DEFAULT_TABLE_NAME = "unstorage";
 
+const kExperimentalWarning = "__unstorage_db0_experimental_warning__";
+
 export default defineDriver((opts: DB0DriverOptions) => {
   opts.tableName = opts.tableName || DEFAULT_TABLE_NAME;
 
@@ -28,6 +30,12 @@ export default defineDriver((opts: DB0DriverOptions) => {
       return;
     }
     if (!setupPromise) {
+      if (!(globalThis as any)[kExperimentalWarning]) {
+        console.warn(
+          "[unstorage]: Database driver is experimental! Please report any issues via https://github.com/unjs/unstorage/issues/400"
+        );
+        (globalThis as any)[kExperimentalWarning] = true;
+      }
       setupPromise = setupTable(opts).then(() => {
         setupDone = true;
         setupPromise = undefined;

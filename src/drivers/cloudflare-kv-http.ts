@@ -198,7 +198,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
         if (i % 10_000 === 0) {
           acc.push([]);
         }
-        acc[acc.length - 1].push(key);
+        acc[acc.length - 1]!.push(key);
         return acc;
       },
       [[]]

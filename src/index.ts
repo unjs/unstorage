@@ -28,6 +28,7 @@ export const builtinDrivers = {
   planetscale: "unstorage/drivers/planetscale",
   redis: "unstorage/drivers/redis",
   sessionStorage: "unstorage/drivers/session-storage",
+  upstash: "unstorage/drivers/upstash",
   vercelKV: "unstorage/drivers/vercel-kv",
 
   /** @deprecated */

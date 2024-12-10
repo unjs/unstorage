@@ -15,5 +15,6 @@
     "noImplicitOverride": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
+    "skipLibCheck": true
   }
 }

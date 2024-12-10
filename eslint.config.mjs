@@ -13,5 +13,6 @@ export default unjs({
     "unicorn/prefer-ternary": 0,
     "unicorn/prefer-string-raw": 0,
     "@typescript-eslint/no-empty-object-type": 0,
+    "unicorn/prefer-global-this": 0, // window. usage
   },
 });

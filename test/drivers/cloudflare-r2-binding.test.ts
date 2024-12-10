@@ -24,12 +24,13 @@ describe("drivers: cloudflare-r2-binding", async () => {
         const storageSnapshot = await snapshot(storage, "");
 
         storageSnapshot["base:data:raw.bin"] = (await storage.getItemRaw(
-          "base:data:raw.bin"
+          "base:data:raw.bin",
+          { type: "bytes" }
         )) as any;
 
         expect(storageSnapshot).toMatchInlineSnapshot(`
           {
-            "base:data:raw.bin": ArrayBuffer [
+            "base:data:raw.bin": Uint8Array [
               1,
               2,
               3,

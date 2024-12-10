@@ -161,19 +161,22 @@ export function createStorage<T extends StorageValue>(
 
   const storage: Storage = {
     // Item
-    hasItem(key, opts = {}) {
+    hasItem(key: string, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem(key, opts = {}) {
+    getItem(key: string, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
         destr(value)
       );
     },
-    getItems(items, commonOptions) {
+    getItems(
+      items: (string | { key: string; options?: TransactionOptions })[],
+      commonOptions = {}
+    ) {
       return runBatch(items, commonOptions, (batch) => {
         if (batch.driver.getItems) {
           return asyncCall(
@@ -214,7 +217,7 @@ export function createStorage<T extends StorageValue>(
         deserializeRaw(value)
       );
     },
-    async setItem(key, value, opts = {}) {
+    async setItem(key: string, value: T, opts = {}) {
       if (value === undefined) {
         return storage.removeItem(key);
       }
@@ -273,7 +276,12 @@ export function createStorage<T extends StorageValue>(
         onChange("update", key);
       }
     },
-    async removeItem(key, opts = {}) {
+    async removeItem(
+      key: string,
+      opts:
+        | (TransactionOptions & { removeMeta?: boolean })
+        | boolean /* legacy: removeMeta */ = {}
+    ) {
       // TODO: Remove in next major version
       if (typeof opts === "boolean") {
         opts = { removeMeta: opts };
@@ -453,11 +461,12 @@ export function createStorage<T extends StorageValue>(
     },
     // Aliases
     keys: (base, opts = {}) => storage.getKeys(base, opts),
-    get: (key, opts = {}) => storage.getItem(key, opts),
-    set: (key, value, opts = {}) => storage.setItem(key, value, opts),
-    has: (key, opts = {}) => storage.hasItem(key, opts),
-    del: (key, opts = {}) => storage.removeItem(key, opts),
-    remove: (key, opts = {}) => storage.removeItem(key, opts),
+    get: (key: string, opts = {}) => storage.getItem(key, opts),
+    set: (key: string, value: T, opts = {}) =>
+      storage.setItem(key, value, opts),
+    has: (key: string, opts = {}) => storage.hasItem(key, opts),
+    del: (key: string, opts = {}) => storage.removeItem(key, opts),
+    remove: (key: string, opts = {}) => storage.removeItem(key, opts),
   };
 
   return storage;

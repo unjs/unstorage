@@ -2,13 +2,17 @@
 icon: ph:database
 ---
 
-# SQL Database (db0)
+# SQL Database
 
-> Store data in a relational database with db0.
+> Store data in any SQL database.
 
 ## Usage
 
-This driver stores KV information in an SQL database with columns of `id`, `value`, `created_at` and `updated_at`.
+This driver stores KV data in any SQL database using [db0](https://db0.unjs.io).
+
+::warning
+Database driver is experimental, please report any issues [here](https://github.com/unjs/unstorage/issues/400).
+::
 
 To use, you will need to install `db0` in your project:
 
@@ -25,9 +29,10 @@ You can then configure the driver like this:
 ```js
 import { createDatabase } from "db0";
 import { createStorage } from "unstorage";
-import db0Driver from "unstorage/drivers/db0";
+import dbDriver from "unstorage/drivers/db0";
 import sqlite from "db0/connectors/better-sqlite3";
 
+// Learn more: https://db0.unjs.io
 const database = createDatabase(
   sqlite({
     /* db0 connector options */
@@ -35,15 +40,16 @@ const database = createDatabase(
 );
 
 const storage = createStorage({
-  driver: db0Driver({
+  driver: dbDriver({
     database,
-    table: "custom_table_name", // optional, defaults to "unstorage"
+    table: "custom_table_name", // Default is "unstorage"
   }),
 });
 ```
 
-::note
-The database table is automatically created, no additional setup is required.
+::tip
+The database table is automatically created, no additional setup is required! <br>
+Before first operation, driver ensures a table with columns of `id`, `value`, `blob`, `created_at` and `updated_at` exist.
 ::
 
 **Options:**

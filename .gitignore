@@ -12,3 +12,4 @@ __*
 .netlify
 test/fs-storage/**
 .env
+.wrangler

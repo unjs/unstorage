@@ -161,7 +161,7 @@ const storage = createStorage({
 **Transaction options:**
 
 - `getItemRaw(key, { type: "..." })`
-  - `type: "object"`: Return the [R2 object](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/#r2objectbody-definition).
+  - `type: "object"`: Return the [R2 object body](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/#r2objectbody-definition).
   - `type: "stream"`: Return body stream.
   - `type: "blob"`: Return data blobl.
   - `type: "bytes"`: Return an `Uint8Array`.

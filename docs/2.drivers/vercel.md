@@ -2,7 +2,9 @@
 icon: gg:vercel
 ---
 
-# Vercel KV
+# Vercel
+
+## Vercel KV
 
 > Store data in a Vercel KV Store.
 
@@ -48,3 +50,45 @@ To use, you will need to install `@vercel/kv` dependency in your project:
 - `env`: [optional] Flag to customize environment variable prefix (Default is `KV`). Set to `false` to disable env inference for `url` and `token` options.
 
 See [@upstash/redis](https://docs.upstash.com/redis/sdks/javascriptsdk/advanced) for all available options.
+
+## Vercel Blob
+
+> Store data in a Vercel Blob Store.
+
+::read-more{to="https://vercel.com/docs/storage/vercel-blob"}
+Learn more about Vercel Blob.
+::
+
+::warning
+The Vercel Blob driver is **experimental**. <br>
+Note that, by default, it adds all values **publicly** and **without** a random suffix!
+::
+
+```js
+import { createStorage } from "unstorage";
+import vercelBlobDriver from "unstorage/drivers/vercel-blob";
+
+const storage = createStorage({
+  driver: vercelBlobDriver({
+    // token: "<your secret token>", // BLOB_REST_API_TOKEN
+    // base: "test",
+    // env: "BLOB",
+  }),
+});
+```
+
+To use, you will need to install `@vercel/blob` dependency in your project:
+
+```json
+{
+  "dependencies": {
+    "@vercel/blob": "latest"
+  }
+}
+```
+
+**Options:**
+
+- `base`: Prefix to prepend to all keys. Can be used for namespacing.
+- `token`: Rest API token to use for connecting to your Vercel Blob store. If not provided, it will be read from the environment variable `BLOB_READ_WRITE_TOKEN`.
+- `envPrefix`: Prefix to use for token environment variable name. Default is `BLOB` (env name = `BLOB_READ_WRITE_TOKEN`).

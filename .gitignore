@@ -11,3 +11,5 @@ __*
 .vercel
 .netlify
 test/fs-storage/**
+.env
+.wrangler

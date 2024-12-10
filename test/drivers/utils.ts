@@ -82,7 +82,7 @@ export function testDriver(opts: TestOptions) {
 
   it("serialize (error for non primitives)", async () => {
     class Test {}
-    expect(
+    await expect(
       ctx.storage.setItem("/data/badvalue.json", new Test())
     ).rejects.toThrow("[unstorage] Cannot stringify value!");
   });

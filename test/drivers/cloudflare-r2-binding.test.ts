@@ -1,52 +1,35 @@
 /// <reference types="@cloudflare/workers-types" />
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, afterAll } from "vitest";
 import { createStorage, snapshot } from "../../src";
 import CloudflareR2Binding from "../../src/drivers/cloudflare-r2-binding";
 import { testDriver } from "./utils";
+import { getPlatformProxy } from "wrangler";
 
-const mockStorage = createStorage();
+describe("drivers: cloudflare-r2-binding", async () => {
+  const cfProxy = await getPlatformProxy();
+  globalThis.__env__ = cfProxy.env;
+  afterAll(async () => {
+    globalThis.__env__ = undefined;
+    await cfProxy.dispose();
+  });
 
-// https://developers.cloudflare.com/workers/runtime-apis/kv/
-const mockBinding: R2Bucket = {
-  async head(key) {
-    return (await mockStorage.hasItem(key)) ? ({ key } as any) : null;
-  },
-  async get(key) {
-    return {
-      text: () => mockStorage.getItem(key),
-      arrayBuffer: () => mockStorage.getItemRaw(key),
-    } as any;
-  },
-  put(key, value) {
-    return mockStorage.setItemRaw(key, value) as any;
-  },
-  delete(key) {
-    if (Array.isArray(key)) {
-      return Promise.all(key.map((k) => mockStorage.removeItem(k))) as any;
-    }
-    return mockStorage.removeItem(key as string) as any;
-  },
-  list(opts) {
-    return mockStorage
-      .getKeys(opts?.prefix || undefined)
-      .then((keys) => ({ objects: keys.map((key) => ({ key })) })) as any;
-  },
-  createMultipartUpload() {
-    throw new Error("Not implemented");
-  },
-  resumeMultipartUpload() {
-    throw new Error("Not implemented");
-  },
-};
-
-describe("drivers: cloudflare-r2-binding", () => {
   testDriver({
-    driver: CloudflareR2Binding({ binding: mockBinding, base: "base" }),
+    driver: CloudflareR2Binding({ base: "base" }),
     async additionalTests() {
       test("snapshot", async () => {
-        expect(await snapshot(mockStorage, "")).toMatchInlineSnapshot(`
+        const storage = createStorage({
+          driver: CloudflareR2Binding({}),
+        });
+
+        const storageSnapshot = await snapshot(storage, "");
+
+        storageSnapshot["base:data:raw.bin"] = (await storage.getItemRaw(
+          "base:data:raw.bin"
+        )) as any;
+
+        expect(storageSnapshot).toMatchInlineSnapshot(`
           {
-            "base:data:raw.bin": Uint8Array [
+            "base:data:raw.bin": ArrayBuffer [
               1,
               2,
               3,

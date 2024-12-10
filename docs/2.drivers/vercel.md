@@ -59,6 +59,11 @@ See [@upstash/redis](https://docs.upstash.com/redis/sdks/javascriptsdk/advanced)
 Learn more about Vercel Blob.
 ::
 
+::warning
+The Vercel Blob driver is **experimental**. <br>
+Note that, by default, it adds all values **publicly** and **without** a random suffix!
+::
+
 ```js
 import { createStorage } from "unstorage";
 import vercelBlobDriver from "unstorage/drivers/vercel-blob";

@@ -22,6 +22,8 @@ export interface VercelBlobOptions {
 
 const DRIVER_NAME = "vercel-blob";
 
+const kExperimentalWarning = "__unstorage_vercel_blob_experimental_warning__";
+
 export default defineDriver<VercelBlobOptions>((opts) => {
   const optsBase = normalizeKey(opts?.base);
 
@@ -29,11 +31,21 @@ export default defineDriver<VercelBlobOptions>((opts) => {
     joinKeys(optsBase, ...keys).replace(/:/g, "/");
 
   const envName = `${opts.envPrefix || "BLOB"}_READ_WRITE_TOKEN`;
-  const token = opts.token || globalThis.process?.env?.[envName];
+
+  const getToken = () => {
+    if (!(globalThis as any)[kExperimentalWarning]) {
+      console.warn(
+        `[unstorage] ${DRIVER_NAME} is experimental. Note that, by default, it adds all values **publicly** and **without** a random suffix!`
+      );
+      (globalThis as any)[kExperimentalWarning] = true;
+    }
+    const token = opts.token || globalThis.process?.env?.[envName];
+    return token;
+  };
 
   const get = async (key: string) => {
     const { blobs } = await list({
-      token,
+      token: getToken(),
       prefix: r(key),
     });
     const blob = blobs.find((item) => item.pathname === r(key));
@@ -58,7 +70,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       const blob = await get(key);
       if (!blob) return null;
       const blobHead = await head(blob.url, {
-        token,
+        token: getToken(),
       });
       if (!blobHead) return null;
       return {
@@ -70,7 +82,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       await put(r(key), value, {
         access: "public",
         addRandomSuffix: false,
-        token,
+        token: getToken(),
         ...opts,
       });
     },
@@ -78,20 +90,20 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       await put(r(key), value, {
         access: "public",
         addRandomSuffix: false,
-        token,
+        token: getToken(),
         ...opts,
       });
     },
     async removeItem(key: string) {
       const blob = await get(key);
-      if (blob) await del(blob.url, { token });
+      if (blob) await del(blob.url, { token: getToken() });
     },
     async getKeys(base: string) {
       const blobs = [];
       let cursor: string | undefined = undefined;
       do {
         const listBlobResult: Awaited<ReturnType<typeof list>> = await list({
-          token,
+          token: getToken(),
           cursor,
           prefix: r(base),
         });
@@ -112,7 +124,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       const blobs = [];
       do {
         const listBlobResult: Awaited<ReturnType<typeof list>> = await list({
-          token,
+          token: getToken(),
           cursor,
           prefix: r(base),
         });
@@ -124,7 +136,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
         await del(
           blobs.map((blob) => blob.url),
           {
-            token,
+            token: getToken(),
           }
         );
       }

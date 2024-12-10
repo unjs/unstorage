@@ -1,9 +1,10 @@
 import { defineDriver, joinKeys } from "./utils";
+// TODO: use named import in v2
 import Redis, {
   Cluster,
-  ClusterNode,
-  ClusterOptions,
-  RedisOptions as _RedisOptions,
+  type ClusterNode,
+  type ClusterOptions,
+  type RedisOptions as _RedisOptions,
 } from "ioredis";
 
 export interface RedisOptions extends _RedisOptions {

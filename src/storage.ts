@@ -41,14 +41,14 @@ export function createStorage<T extends StorageValue>(
         return {
           base,
           relativeKey: key.slice(base.length),
-          driver: context.mounts[base],
+          driver: context.mounts[base]!,
         };
       }
     }
     return {
       base: "",
       relativeKey: key,
-      driver: context.mounts[""],
+      driver: context.mounts[""]!,
     };
   };
 
@@ -65,7 +65,7 @@ export function createStorage<T extends StorageValue>(
             ? base!.slice(mountpoint.length)
             : undefined,
         mountpoint,
-        driver: context.mounts[mountpoint],
+        driver: context.mounts[mountpoint]!,
       }));
   };
 
@@ -86,7 +86,7 @@ export function createStorage<T extends StorageValue>(
     context.watching = true;
     for (const mountpoint in context.mounts) {
       context.unwatch[mountpoint] = await watch(
-        context.mounts[mountpoint],
+        context.mounts[mountpoint]!,
         onChange,
         mountpoint
       );
@@ -98,7 +98,7 @@ export function createStorage<T extends StorageValue>(
       return;
     }
     for (const mountpoint in context.unwatch) {
-      await context.unwatch[mountpoint]();
+      await context.unwatch[mountpoint]!();
     }
     context.unwatch = {};
     context.watching = false;
@@ -426,11 +426,11 @@ export function createStorage<T extends StorageValue>(
         return;
       }
       if (context.watching && base in context.unwatch) {
-        context.unwatch[base]();
+        context.unwatch[base]?.();
         delete context.unwatch[base];
       }
       if (_dispose) {
-        await dispose(context.mounts[base]);
+        await dispose(context.mounts[base]!);
       }
       context.mountpoints = context.mountpoints.filter((key) => key !== base);
       delete context.mounts[base];

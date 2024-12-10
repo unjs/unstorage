@@ -11,9 +11,11 @@ export type Unwatch = () => MaybePromise<void>;
 export interface StorageMeta {
   atime?: Date;
   mtime?: Date;
+  ttl?: number;
   [key: string]: StorageValue | Date | undefined;
 }
 
+// TODO: type ttl
 export type TransactionOptions = Record<string, any>;
 
 export interface Driver<OptionsT = any, InstanceT = any> {

@@ -3,7 +3,7 @@ import {
   TableClient,
   AzureNamedKeyCredential,
   AzureSASCredential,
-  TableEntity,
+  type TableEntity,
 } from "@azure/data-tables";
 import { DefaultAzureCredential } from "@azure/identity";
 

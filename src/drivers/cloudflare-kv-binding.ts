@@ -6,6 +6,12 @@ export interface KVOptions {
 
   /** Adds prefix to all stored keys */
   base?: string;
+
+  /**
+   * The minimum time-to-live (ttl) for setItem in seconds.
+   * The default is 60 seconds as per Cloudflare's [documentation](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
+   */
+  minTTL?: number;
 }
 
 // https://developers.cloudflare.com/workers/runtime-apis/kv
@@ -49,15 +55,26 @@ export default defineDriver((opts: KVOptions) => {
     setItem(key, value, topts) {
       key = r(key);
       const binding = getKVBinding(opts.binding);
-      return binding.put(key, value, topts);
+      return binding.put(
+        key,
+        value,
+        topts
+          ? {
+              expirationTtl: topts?.ttl
+                ? Math.max(topts.ttl, opts.minTTL ?? 60)
+                : undefined,
+              ...topts,
+            }
+          : undefined
+      );
     },
     removeItem(key) {
       key = r(key);
       const binding = getKVBinding(opts.binding);
       return binding.delete(key);
     },
-    getKeys() {
-      return getKeys().then((keys) =>
+    getKeys(base) {
+      return getKeys(base).then((keys) =>
         keys.map((key) => (opts.base ? key.slice(opts.base.length) : key))
       );
     },

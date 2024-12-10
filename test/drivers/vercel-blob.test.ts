@@ -7,11 +7,6 @@ const token = process.env.VITE_VERCEL_BLOB_READ_WRITE_TOKEN;
 describe.skipIf(!token)("drivers: vercel-blob", async () => {
   process.env.VERCEL_TEST_READ_WRITE_TOKEN = token;
   testDriver({
-    driver: driver({ envPrefix: "VERCEL_TEST" }),
-  });
-  testDriver({
-    driver: driver({
-      base: "test",
-    }),
+    driver: driver({ base: "test", envPrefix: "VERCEL_TEST" }),
   });
 });

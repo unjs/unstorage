@@ -206,10 +206,12 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     // Call bulk delete endpoint with each chunk
     await Promise.all(
       chunks.map((chunk) => {
-        return kvFetch("/bulk", {
-          method: "DELETE",
-          body: { keys: chunk },
-        });
+        if (chunk.length > 0) {
+          return kvFetch("/bulk/delete", {
+            method: "POST",
+            body: chunk,
+          });
+        }
       })
     );
   };

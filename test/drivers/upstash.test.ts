@@ -9,6 +9,8 @@ describe.skipIf(!url || !token)("drivers: upstash", async () => {
   process.env.UPSTASH_REDIS_REST_URL = url;
   process.env.UPSTASH_REDIS_REST_TOKEN = token;
   testDriver({
-    driver: driver({}),
+    driver: driver({
+      base: Math.round(Math.random() * 1_000_000).toString(16),
+    }),
   });
 });

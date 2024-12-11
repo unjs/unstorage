@@ -70,13 +70,19 @@ type StorageItemMap<T extends StorageDefinition> = T["items"];
 
 export interface Storage<T extends StorageValue = StorageValue> {
   // Item
-  hasItem<U extends Extract<T, StorageDefinition>, K extends keyof StorageItemMap<U>>(
+  hasItem<
+    U extends Extract<T, StorageDefinition>,
+    K extends keyof StorageItemMap<U>,
+  >(
     key: K,
     opts?: TransactionOptions
   ): Promise<boolean>;
   hasItem(key: string, opts?: TransactionOptions): Promise<boolean>;
 
-  getItem<U extends Extract<T, StorageDefinition>, K extends keyof StorageItemMap<U>>(
+  getItem<
+    U extends Extract<T, StorageDefinition>,
+    K extends keyof StorageItemMap<U>,
+  >(
     key: K,
     ops?: TransactionOptions
   ): Promise<StorageItemMap<U>[K] | null>;
@@ -96,7 +102,10 @@ export interface Storage<T extends StorageValue = StorageValue> {
     opts?: TransactionOptions
   ) => Promise<MaybeDefined<T> | null>;
 
-  setItem<U extends Extract<T, StorageDefinition>, K extends keyof StorageItemMap<U>>(
+  setItem<
+    U extends Extract<T, StorageDefinition>,
+    K extends keyof StorageItemMap<U>,
+  >(
     key: K,
     value: StorageItemMap<U>[K],
     opts?: TransactionOptions

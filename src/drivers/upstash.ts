@@ -52,8 +52,12 @@ export default defineDriver<UpstashOptions, Redis>(
           .del(r(key))
           .then(() => {});
       },
-      getKeys(base) {
-        return getClient().keys(r(base, "*"));
+      getKeys(_base) {
+        return getClient()
+          .keys(r(_base, "*"))
+          .then((keys) =>
+            base ? keys.map((key) => key.slice(base.length + 1)) : keys
+          );
       },
       async clear(base) {
         const keys = await getClient().keys(r(base, "*"));

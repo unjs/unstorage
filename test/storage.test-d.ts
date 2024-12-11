@@ -9,7 +9,7 @@ describe("types", () => {
       b: boolean;
     };
     type MyStorage = {
-      data: {
+      items: {
         foo: string;
         bar: number;
         baz: TestObjType;

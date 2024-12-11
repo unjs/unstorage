@@ -62,11 +62,11 @@ export interface Driver<OptionsT = any, InstanceT = any> {
 }
 
 type StorageDefinition = {
-  data: unknown;
+  items: unknown;
   [key: string]: unknown;
 };
 
-type StorageItemMap<T extends StorageDefinition> = T["data"];
+type StorageItemMap<T extends StorageDefinition> = T["items"];
 
 export interface Storage<T extends StorageValue = StorageValue> {
   // Item

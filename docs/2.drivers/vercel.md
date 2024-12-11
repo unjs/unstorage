@@ -60,9 +60,12 @@ Learn more about Vercel Blob.
 ::
 
 ::warning
-The Vercel Blob driver is **experimental**. <br>
-Note that, by default, it adds all values **publicly** and **without** a random suffix!
+Currently Vercel Blob stores all data with public access.
 ::
+
+To use, you will need to install [`@vercel/blob`](https://www.npmjs.com/package/@vercel/blob) dependency in your project:
+
+:pm-install{name="@vercel/blob"}
 
 ```js
 import { createStorage } from "unstorage";
@@ -70,25 +73,17 @@ import vercelBlobDriver from "unstorage/drivers/vercel-blob";
 
 const storage = createStorage({
   driver: vercelBlobDriver({
-    // token: "<your secret token>", // BLOB_REST_API_TOKEN
-    // base: "test",
-    // env: "BLOB",
+    access: "public", // Required! Beware that stored data is publicly accessible.
+    // token: "<your secret token>", // or set BLOB_READ_WRITE_TOKEN
+    // base: "unstorage",
+    // envPrefix: "BLOB",
   }),
 });
 ```
 
-To use, you will need to install `@vercel/blob` dependency in your project:
-
-```json
-{
-  "dependencies": {
-    "@vercel/blob": "latest"
-  }
-}
-```
-
 **Options:**
 
+- `access`: Whether the blob should be publicly accessible. (required, must be `public`)
 - `base`: Prefix to prepend to all keys. Can be used for namespacing.
 - `token`: Rest API token to use for connecting to your Vercel Blob store. If not provided, it will be read from the environment variable `BLOB_READ_WRITE_TOKEN`.
 - `envPrefix`: Prefix to use for token environment variable name. Default is `BLOB` (env name = `BLOB_READ_WRITE_TOKEN`).

@@ -1,7 +1,12 @@
 import { del, head, list, put } from "@vercel/blob";
-import { defineDriver, normalizeKey, joinKeys } from "./utils";
+import { defineDriver, normalizeKey, joinKeys, createError } from "./utils";
 
 export interface VercelBlobOptions {
+  /**
+   * Whether the blob should be publicly accessible. (required, must be "public")
+   */
+  access: "public";
+
   /**
    * Prefix to prepend to all keys. Can be used for namespacing.
    */
@@ -22,8 +27,6 @@ export interface VercelBlobOptions {
 
 const DRIVER_NAME = "vercel-blob";
 
-const kExperimentalWarning = "__unstorage_vercel_blob_experimental_warning__";
-
 export default defineDriver<VercelBlobOptions>((opts) => {
   const optsBase = normalizeKey(opts?.base);
 
@@ -33,13 +36,16 @@ export default defineDriver<VercelBlobOptions>((opts) => {
   const envName = `${opts.envPrefix || "BLOB"}_READ_WRITE_TOKEN`;
 
   const getToken = () => {
-    if (!(globalThis as any)[kExperimentalWarning]) {
-      console.warn(
-        `[unstorage] ${DRIVER_NAME} is experimental. Note that, by default, it adds all values **publicly** and **without** a random suffix!`
-      );
-      (globalThis as any)[kExperimentalWarning] = true;
+    if (opts.access !== "public") {
+      throw createError(DRIVER_NAME, `You must set { access: "public" }`);
     }
     const token = opts.token || globalThis.process?.env?.[envName];
+    if (!token) {
+      throw createError(
+        DRIVER_NAME,
+        `Missing token. Set ${envName} env or token config.`
+      );
+    }
     return token;
   };
 
@@ -60,6 +66,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
     },
     async getItem(key) {
       const blob = await get(key);
+      console.log(blob);
       return blob ? fetch(blob.url).then((res) => res.text()) : null;
     },
     async getItemRaw(key) {

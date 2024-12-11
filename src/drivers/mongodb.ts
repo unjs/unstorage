@@ -39,13 +39,14 @@ export default defineDriver((opts: MongoDbOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: getMongoCollection,
     async hasItem(key) {
       const result = await getMongoCollection().findOne({ key });
       return !!result;
     },
     async getItem(key) {
       const document = await getMongoCollection().findOne({ key });
-      return document?.value ? document.value : null;
+      return document?.value ?? null;
     },
     async setItem(key, value) {
       const currentDateTime = new Date();

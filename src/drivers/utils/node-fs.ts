@@ -1,5 +1,5 @@
-import { Dirent, existsSync, promises as fsPromises } from "fs";
-import { resolve, dirname } from "path";
+import { Dirent, existsSync, promises as fsPromises } from "node:fs";
+import { resolve, dirname } from "node:path";
 
 function ignoreNotfound(err: any) {
   return err.code === "ENOENT" || err.code === "EISDIR" ? null : err;
@@ -62,7 +62,7 @@ export async function readdirRecursive(
         const dirFiles = await readdirRecursive(entryPath, ignore);
         files.push(...dirFiles.map((f) => entry.name + "/" + f));
       } else {
-        if (ignore && !ignore(entry.name)) {
+        if (!(ignore && ignore(entry.name))) {
           files.push(entry.name);
         }
       }

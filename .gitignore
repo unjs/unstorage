@@ -9,3 +9,7 @@ tmp
 /test.*
 __*
 .vercel
+.netlify
+test/fs-storage/**
+.env
+.wrangler

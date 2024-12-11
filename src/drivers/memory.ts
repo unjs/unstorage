@@ -2,20 +2,20 @@ import { defineDriver } from "./utils";
 
 const DRIVER_NAME = "memory";
 
-export default defineDriver<void>(() => {
+export default defineDriver<void, Map<string, any>>(() => {
   const data = new Map<string, any>();
 
   return {
     name: DRIVER_NAME,
-    options: {},
+    getInstance: () => data,
     hasItem(key) {
       return data.has(key);
     },
     getItem(key) {
-      return data.get(key) || null;
+      return data.get(key) ?? null;
     },
     getItemRaw(key) {
-      return data.get(key) || null;
+      return data.get(key) ?? null;
     },
     setItem(key, value) {
       data.set(key, value);
@@ -27,7 +27,7 @@ export default defineDriver<void>(() => {
       data.delete(key);
     },
     getKeys() {
-      return Array.from(data.keys());
+      return [...data.keys()];
     },
     clear() {
       data.clear();

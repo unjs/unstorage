@@ -1,5 +1,10 @@
 import { it, expect } from "vitest";
-import { Storage, Driver, createStorage, restoreSnapshot } from "../../src";
+import {
+  type Storage,
+  type Driver,
+  createStorage,
+  restoreSnapshot,
+} from "../../src";
 
 export interface TestContext {
   storage: Storage;
@@ -82,7 +87,7 @@ export function testDriver(opts: TestOptions) {
 
   it("serialize (error for non primitives)", async () => {
     class Test {}
-    expect(
+    await expect(
       ctx.storage.setItem("/data/badvalue.json", new Test())
     ).rejects.toThrow("[unstorage] Cannot stringify value!");
   });
@@ -91,10 +96,11 @@ export function testDriver(opts: TestOptions) {
     const value = new Uint8Array([1, 2, 3]);
     await ctx.storage.setItemRaw("/data/raw.bin", value);
     const rValue = await ctx.storage.getItemRaw("/data/raw.bin");
-    if (rValue?.length !== value.length) {
-      console.log(rValue);
+    const rValueLen = rValue?.length || rValue?.byteLength;
+    if (rValueLen !== value.length) {
+      console.log("Invalid raw value length:", rValue, "Length:", rValueLen);
     }
-    expect(rValue?.length).toBe(value.length);
+    expect(rValueLen).toBe(value.length);
     expect(Buffer.from(rValue).toString("base64")).toBe(
       Buffer.from(value).toString("base64")
     );
@@ -133,6 +139,14 @@ export function testDriver(opts: TestOptions) {
         value: "test_data_v3:a?q=1",
       },
     ]);
+  });
+
+  it("getItem - return falsy values when set in storage", async () => {
+    await ctx.storage.setItem("zero", 0);
+    expect(await ctx.storage.getItem("zero")).toBe(0);
+
+    await ctx.storage.setItem("my-false-flag", false);
+    expect(await ctx.storage.getItem("my-false-flag")).toBe(false);
   });
 
   // TODO: Refactor to move after cleanup

@@ -1,14 +1,19 @@
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import driver from "../../src/drivers/mongodb";
 import { testDriver } from "./utils";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { promisify } from "util";
+import { promisify } from "node:util";
 
-const sleep = promisify(setTimeout);
-const mongoServer = await MongoMemoryServer.create();
+describe.skip("drivers: mongodb", async () => {
+  const sleep = promisify(setTimeout);
 
-describe("drivers: mongodb", () => {
-  const connectionString = mongoServer.getUri();
+  let mongoServer: MongoMemoryServer;
+  let connectionString: string | undefined;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    connectionString = mongoServer.getUri();
+  });
 
   afterAll(async () => {
     if (mongoServer) {
@@ -18,7 +23,7 @@ describe("drivers: mongodb", () => {
 
   testDriver({
     driver: driver({
-      connectionString,
+      connectionString: connectionString as string,
       databaseName: "test",
       collectionName: "test",
     }),

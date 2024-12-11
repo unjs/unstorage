@@ -1,17 +1,19 @@
 import { describe, vi, it, expect } from "vitest";
 import * as ioredis from "ioredis-mock";
-import driver from "../../src/drivers/redis";
+import redisDriver from "../../src/drivers/redis";
 import { testDriver } from "./utils";
 
 vi.mock("ioredis", () => ioredis);
 
 describe("drivers: redis", () => {
+  const driver = redisDriver({
+    base: "test:",
+    url: "ioredis://localhost:6379/0",
+    lazyConnect: false,
+  });
+
   testDriver({
-    driver: driver({
-      base: "test:",
-      url: "ioredis://localhost:6379/0",
-      lazyConnect: false,
-    }),
+    driver,
     additionalTests() {
       it("verify stored keys", async () => {
         const client = new ioredis.default("ioredis://localhost:6379/0");
@@ -32,9 +34,15 @@ describe("drivers: redis", () => {
             "test:v1:a",
             "test:v2:a",
             "test:v3:a",
+            "test:zero",
+            "test:my-false-flag",
           ]
         `);
         await client.disconnect();
+      });
+
+      it("exposes instance", () => {
+        expect(driver.getInstance?.()).toBeInstanceOf(ioredis.default);
       });
     },
   });

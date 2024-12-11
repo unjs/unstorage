@@ -1,38 +1,25 @@
 /// <reference types="@cloudflare/workers-types" />
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, afterAll } from "vitest";
 import { createStorage, snapshot } from "../../src";
 import CloudflareKVBinding from "../../src/drivers/cloudflare-kv-binding";
 import { testDriver } from "./utils";
+import { getPlatformProxy } from "wrangler";
 
-const mockStorage = createStorage();
-
-// https://developers.cloudflare.com/workers/runtime-apis/kv/
-const mockBinding: KVNamespace = {
-  get(key) {
-    return mockStorage.getItem(key) as any;
-  },
-  getWithMetadata(key: string) {
-    return mockStorage.getItem(key) as any;
-  },
-  put(key, value) {
-    return mockStorage.setItem(key, value) as any;
-  },
-  delete(key) {
-    return mockStorage.removeItem(key) as any;
-  },
-  list(opts) {
-    return mockStorage
-      .getKeys(opts?.prefix || undefined)
-      .then((keys) => ({ keys: keys.map((name) => ({ name })) })) as any;
-  },
-};
-
-describe("drivers: cloudflare-kv", () => {
+describe("drivers: cloudflare-kv", async () => {
+  const cfProxy = await getPlatformProxy();
+  (globalThis as any).__env__ = cfProxy.env;
+  afterAll(async () => {
+    (globalThis as any).__env__ = undefined;
+    await cfProxy.dispose();
+  });
   testDriver({
-    driver: CloudflareKVBinding({ binding: mockBinding, base: "base" }),
-    async additionalTests(ctx) {
+    driver: CloudflareKVBinding({ base: "base" }),
+    async additionalTests() {
       test("snapshot", async () => {
-        expect(await snapshot(mockStorage, "")).toMatchInlineSnapshot(`
+        const storage = createStorage({
+          driver: CloudflareKVBinding({}),
+        });
+        expect(await snapshot(storage, "")).toMatchInlineSnapshot(`
           {
             "base:data:raw.bin": "base64:AQID",
             "base:data:serialized1.json": "SERIALIZED",
@@ -43,6 +30,7 @@ describe("drivers: cloudflare-kv", () => {
               "json": "works",
             },
             "base:data:true.json": true,
+            "base:my-false-flag": false,
             "base:s1:a": "test_data",
             "base:s2:a": "test_data",
             "base:s3:a": "test_data",
@@ -52,6 +40,7 @@ describe("drivers: cloudflare-kv", () => {
             "base:v1:a": "test_data_v1:a",
             "base:v2:a": "test_data_v2:a",
             "base:v3:a": "test_data_v3:a?q=1",
+            "base:zero": 0,
           }
         `);
       });

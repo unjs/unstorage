@@ -1,5 +1,8 @@
 import { createError, createRequiredError, defineDriver } from "./utils";
-import { SecretClient, SecretClientOptions } from "@azure/keyvault-secrets";
+import {
+  SecretClient,
+  type SecretClientOptions,
+} from "@azure/keyvault-secrets";
 import { DefaultAzureCredential } from "@azure/identity";
 
 export interface AzureKeyVaultOptions {
@@ -45,6 +48,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: getKeyVaultClient,
     async hasItem(key) {
       try {
         await getKeyVaultClient().getSecret(encode(key));
@@ -107,17 +111,17 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
 });
 
 const base64Map: { [key: string]: string } = {
-  "=": "e",
-  "+": "p",
-  "/": "s",
+  "=": "-e-",
+  "+": "-p-",
+  "/": "-s-",
 };
 
 function encode(value: string): string {
   let encoded = Buffer.from(value).toString("base64");
   for (const key in base64Map) {
     encoded = encoded.replace(
-      new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
-      base64Map[key]
+      new RegExp(key.replace(/[$()*+.?[\\\]^{|}]/g, "\\$&"), "g"),
+      base64Map[key]!
     );
   }
   return encoded;

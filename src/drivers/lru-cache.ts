@@ -25,14 +25,15 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: () => cache,
     hasItem(key) {
       return cache.has(key);
     },
     getItem(key) {
-      return cache.get(key) || null;
+      return cache.get(key) ?? null;
     },
     getItemRaw(key) {
-      return cache.get(key) || null;
+      return cache.get(key) ?? null;
     },
     setItem(key, value) {
       cache.set(key, value);
@@ -44,7 +45,7 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
       cache.delete(key);
     },
     getKeys() {
-      return Array.from(cache.keys());
+      return [...cache.keys()];
     },
     clear() {
       cache.clear();
@@ -56,15 +57,19 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
 });
 
 function byteLength(value: any) {
-  if (typeof Buffer !== undefined) {
+  if (typeof Buffer !== "undefined") {
     try {
       return Buffer.byteLength(value);
-    } catch {}
+    } catch {
+      // ignore
+    }
   }
   try {
     return typeof value === "string"
       ? value.length
       : JSON.stringify(value).length;
-  } catch {}
+  } catch {
+    // ignore
+  }
   return 0;
 }

@@ -1,8 +1,9 @@
 /// <reference types="@cloudflare/workers-types" />
-import { createError, defineDriver, joinKeys } from "./utils";
+import { defineDriver, joinKeys } from "./utils";
+import { getR2Binding } from "./utils/cloudflare";
 
 export interface CloudflareR2Options {
-  binding: string | R2Bucket;
+  binding?: string | R2Bucket;
   base?: string;
 }
 
@@ -10,11 +11,11 @@ export interface CloudflareR2Options {
 
 const DRIVER_NAME = "cloudflare-r2-binding";
 
-export default defineDriver((opts: CloudflareR2Options) => {
+export default defineDriver((opts: CloudflareR2Options = {}) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   const getKeys = async (base?: string) => {
-    const binding = getBinding(opts.binding);
+    const binding = getR2Binding(opts.binding);
     const kvList = await binding.list(
       base || opts.base ? { prefix: r(base) } : undefined
     );
@@ -24,14 +25,15 @@ export default defineDriver((opts: CloudflareR2Options) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: () => getR2Binding(opts.binding),
     async hasItem(key) {
       key = r(key);
-      const binding = getBinding(opts.binding);
+      const binding = getR2Binding(opts.binding);
       return (await binding.head(key)) !== null;
     },
-    async getMeta(key, topts) {
+    async getMeta(key) {
       key = r(key);
-      const binding = getBinding(opts.binding);
+      const binding = getR2Binding(opts.binding);
       const obj = await binding.head(key);
       if (!obj) return null;
       return {
@@ -42,27 +44,28 @@ export default defineDriver((opts: CloudflareR2Options) => {
     },
     getItem(key, topts) {
       key = r(key);
-      const binding = getBinding(opts.binding);
-      return binding.get(key, topts).then((r) => r?.text());
+      const binding = getR2Binding(opts.binding);
+      return binding.get(key, topts).then((r) => r?.text() ?? null);
     },
-    getItemRaw(key, topts) {
+    async getItemRaw(key, topts) {
       key = r(key);
-      const binding = getBinding(opts.binding);
-      return binding.get(key, topts).then((r) => r?.arrayBuffer());
+      const binding = getR2Binding(opts.binding);
+      const object = await binding.get(key, topts);
+      return object ? getObjBody(object, topts?.type) : null;
     },
     async setItem(key, value, topts) {
       key = r(key);
-      const binding = getBinding(opts.binding);
+      const binding = getR2Binding(opts.binding);
       await binding.put(key, value, topts);
     },
     async setItemRaw(key, value, topts) {
       key = r(key);
-      const binding = getBinding(opts.binding);
+      const binding = getR2Binding(opts.binding);
       await binding.put(key, value, topts);
     },
     async removeItem(key) {
       key = r(key);
-      const binding = getBinding(opts.binding);
+      const binding = getR2Binding(opts.binding);
       await binding.delete(key);
     },
     getKeys(base) {
@@ -71,37 +74,36 @@ export default defineDriver((opts: CloudflareR2Options) => {
       );
     },
     async clear(base) {
-      const binding = getBinding(opts.binding);
+      const binding = getR2Binding(opts.binding);
       const keys = await getKeys(base);
       await binding.delete(keys);
     },
   };
 });
 
-function getBinding(binding: R2Bucket | string) {
-  let bindingName = "[binding]";
-
-  if (typeof binding === "string") {
-    bindingName = binding;
-    binding = ((globalThis as any)[bindingName] ||
-      (globalThis as any).__env__?.[bindingName]) as R2Bucket;
-  }
-
-  if (!binding) {
-    throw createError(
-      DRIVER_NAME,
-      `Invalid binding \`${bindingName}\`: \`${binding}\``
-    );
-  }
-
-  for (const key of ["get", "put", "delete"]) {
-    if (!(key in binding)) {
-      throw createError(
-        DRIVER_NAME,
-        `Invalid binding \`${bindingName}\`: \`${key}\` key is missing`
-      );
+function getObjBody(
+  object: R2ObjectBody,
+  type: "object" | "stream" | "blob" | "arrayBuffer" | "bytes"
+) {
+  switch (type) {
+    case "object": {
+      return object;
+    }
+    case "stream": {
+      return object.body;
+    }
+    case "blob": {
+      return object.blob();
+    }
+    case "arrayBuffer": {
+      return object.arrayBuffer();
+    }
+    case "bytes": {
+      return object.arrayBuffer().then((buffer) => new Uint8Array(buffer));
+    }
+    // TODO: Default to bytes in v2
+    default: {
+      return object.arrayBuffer();
     }
   }
-
-  return binding;
 }

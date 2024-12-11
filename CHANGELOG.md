@@ -2,6 +2,337 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.13.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.13.0...v1.13.1)
+
+### 🩹 Fixes
+
+- Revert chokidar to v3 ([#502](https://github.com/unjs/unstorage/pull/502))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
+## v1.13.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.12.0...v1.13.0)
+
+### 🚀 Enhancements
+
+- Bump chokidar v4 ([#489](https://github.com/unjs/unstorage/pull/489))
+- Add `null` driver ([#495](https://github.com/unjs/unstorage/pull/495))
+
+### 🩹 Fixes
+
+- **cloudflare-kv:** Use min ttl of 60 seconds ([#496](https://github.com/unjs/unstorage/pull/496))
+
+### 💅 Refactors
+
+- **netlify:** Support @netlify/blobs v8 and improve options types ([#486](https://github.com/unjs/unstorage/pull/486))
+- **cli:** Migrate to `citty` ([#498](https://github.com/unjs/unstorage/pull/498))
+
+### 📖 Documentation
+
+- Missing values return null, not undefined ([#487](https://github.com/unjs/unstorage/pull/487))
+
+### 🏡 Chore
+
+- Update eslint config ([3dddf6c](https://github.com/unjs/unstorage/commit/3dddf6c))
+- Update deps ([ee70d15](https://github.com/unjs/unstorage/commit/ee70d15))
+- Update lockfile ([dca8dc9](https://github.com/unjs/unstorage/commit/dca8dc9))
+- Revert msw back to 1.x ([cf7f3ce](https://github.com/unjs/unstorage/commit/cf7f3ce))
+
+### ❤️ Contributors
+
+- Alexander <a.hywax@gmail.com>
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- ToBinio ([@ToBinio](http://github.com/ToBinio))
+- V1rtl ([@talentlessguy](http://github.com/talentlessguy))
+- Philippe Serhal ([@serhalp](http://github.com/serhalp))
+- Renato Lacerda <renato.ac.lacerda@gmail.com>
+
+## v1.12.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.11.1...v1.12.0)
+
+### 🚀 Enhancements
+
+- **http, server:** Support native `ttl` ([#479](https://github.com/unjs/unstorage/pull/479))
+
+### 🏡 Chore
+
+- Update undocs ([0e2ea33](https://github.com/unjs/unstorage/commit/0e2ea33))
+- Update undocs ([a711c1b](https://github.com/unjs/unstorage/commit/a711c1b))
+- Update undocs ([f27c389](https://github.com/unjs/unstorage/commit/f27c389))
+
+### 🤖 CI
+
+- Setup nightly release ([258fd4a](https://github.com/unjs/unstorage/commit/258fd4a))
+- Fetch full history to preserve nightly changelog ([329ff2b](https://github.com/unjs/unstorage/commit/329ff2b))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
+## v1.11.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.11.0...v1.11.1)
+
+### 🔥 Performance
+
+- **cloudflare-kv-binding:** Add missing base argument on `getKeys` ([#475](https://github.com/unjs/unstorage/pull/475))
+
+### ❤️ Contributors
+
+- Sébastien Chopin ([@atinux](http://github.com/atinux))
+
+## v1.11.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.10.2...v1.11.0)
+
+### 🚀 Enhancements
+
+- Add `keys`, `get`, `set`, `has` and `del` aliases ([#402](https://github.com/unjs/unstorage/pull/402))
+- Expose underlying client instance ([#446](https://github.com/unjs/unstorage/pull/446))
+- **cloudflare-kv-binding:** Support `ttl` for `setItem` ([#470](https://github.com/unjs/unstorage/pull/470))
+- **cloudflare-kv-http:** Support `ttl` for `setItem` ([#448](https://github.com/unjs/unstorage/pull/448))
+
+### 🔥 Performance
+
+- **getKeys:** Avoid duplicate iteration ([#386](https://github.com/unjs/unstorage/pull/386))
+- Use direct array access instead of `endsWIth` ([#387](https://github.com/unjs/unstorage/pull/387))
+
+### 🩹 Fixes
+
+- **cloudflare-kv-binding:** Allow passing transaction options for `setItem` to `binding.put` ([#423](https://github.com/unjs/unstorage/pull/423))
+- Fix driver types ([#433](https://github.com/unjs/unstorage/pull/433))
+- **server:** Avoid decoding raw request body ([#434](https://github.com/unjs/unstorage/pull/434))
+- **cloudflare-kv-binding:** Go through all pages to list the keys ([#459](https://github.com/unjs/unstorage/pull/459))
+
+### 📖 Documentation
+
+- Using undocs package manager component ([#414](https://github.com/unjs/unstorage/pull/414))
+- Fix link ([#429](https://github.com/unjs/unstorage/pull/429))
+- Fix typographical errors ([#432](https://github.com/unjs/unstorage/pull/432))
+- Jsdocs for the server functions ([#438](https://github.com/unjs/unstorage/pull/438))
+- Improve drivers ([f6f547e](https://github.com/unjs/unstorage/commit/f6f547e))
+
+### 🏡 Chore
+
+- **release:** V1.10.2 ([5e40ef4](https://github.com/unjs/unstorage/commit/5e40ef4))
+- **docs:** Update lock ([7350385](https://github.com/unjs/unstorage/commit/7350385))
+- Update undocs ([83c6696](https://github.com/unjs/unstorage/commit/83c6696))
+- Update docs ([26e9d73](https://github.com/unjs/unstorage/commit/26e9d73))
+- Update dependencies ([0b1aa9c](https://github.com/unjs/unstorage/commit/0b1aa9c))
+- Update to eslint v9 ([7b8c51e](https://github.com/unjs/unstorage/commit/7b8c51e))
+- Apply new lint rules ([be542fc](https://github.com/unjs/unstorage/commit/be542fc))
+- Add benchmark script ([d84bcc6](https://github.com/unjs/unstorage/commit/d84bcc6))
+- Add bench script ([d40c206](https://github.com/unjs/unstorage/commit/d40c206))
+- Lint ([922ada9](https://github.com/unjs/unstorage/commit/922ada9))
+- Update deps ([5eb2d7e](https://github.com/unjs/unstorage/commit/5eb2d7e))
+- Update eslintrc ([60885f8](https://github.com/unjs/unstorage/commit/60885f8))
+
+### 🤖 CI
+
+- Update node to 20 ([5673278](https://github.com/unjs/unstorage/commit/5673278))
+
+### ❤️ Contributors
+
+- SolarisUp ([@SolarisUp](http://github.com/SolarisUp))
+- Justin Barber ([@barberj](http://github.com/barberj))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Sébastien Chopin ([@atinux](http://github.com/atinux))
+- Farnabaz <farnabaz@gmail.com>
+- Hash Brown ([@xuzuodong](http://github.com/xuzuodong))
+- Michael Brevard <yonshi29@gmail.com>
+- Alexander Lichter ([@manniL](http://github.com/manniL))
+- Rgehbt ([@Gehbt](http://github.com/Gehbt))
+- Selemondev ([@selemondev](http://github.com/selemondev))
+- Renato Lacerda <renato.ac.lacerda@gmail.com>
+
+## v1.10.2
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.10.1...v1.10.2)
+
+### 🩹 Fixes
+
+- **http, server:** Handle missing resources with http 404 ([#367](https://github.com/unjs/unstorage/pull/367))
+- **pkg:** Make `ioredis` dependency optional ([#410](https://github.com/unjs/unstorage/pull/410))
+- **vercel-kv:** Add missing driver name ([#355](https://github.com/unjs/unstorage/pull/355))
+- **setItems:** Call driver native `setItems` only to avoid duplicate write ([#392](https://github.com/unjs/unstorage/pull/392))
+- `getItems`, `setItems` types ([#395](https://github.com/unjs/unstorage/pull/395))
+
+### 💅 Refactors
+
+- **cloudflare-kv, cloudflare-r2:** Move `getBindings` to utils and add default `BUCKET` for r2 ([#292](https://github.com/unjs/unstorage/pull/292))
+- **netlify-blobs:** Update to v7 ([#407](https://github.com/unjs/unstorage/pull/407))
+
+### 📖 Documentation
+
+- **planetscale:** Correct `table` option name ([#359](https://github.com/unjs/unstorage/pull/359))
+- **vercel-kv:** Fix typo ([#362](https://github.com/unjs/unstorage/pull/362))
+- Refactor with `unjs-docs` and nuxt ui pro ([#374](https://github.com/unjs/unstorage/pull/374))
+- Improvements ([a64e941](https://github.com/unjs/unstorage/commit/a64e941))
+- Fix links and add redirects ([166498f](https://github.com/unjs/unstorage/commit/166498f))
+- Update unjs-docs version and add redirects ([f2a408d](https://github.com/unjs/unstorage/commit/f2a408d))
+- Fix typo in http-server ([#385](https://github.com/unjs/unstorage/pull/385))
+- Update deps ([bfbf423](https://github.com/unjs/unstorage/commit/bfbf423))
+- Update link ([#408](https://github.com/unjs/unstorage/pull/408))
+
+### 📦 Build
+
+- Update mkdist for cjs dist hotfix ([cae8533](https://github.com/unjs/unstorage/commit/cae8533))
+
+### 🏡 Chore
+
+- **release:** V1.10.1 ([7b9a8ad](https://github.com/unjs/unstorage/commit/7b9a8ad))
+- **docs:** Update dependencies ([8a1f81c](https://github.com/unjs/unstorage/commit/8a1f81c))
+- Update lockfile ([e63f16b](https://github.com/unjs/unstorage/commit/e63f16b))
+- Update dependencies ([bb471c1](https://github.com/unjs/unstorage/commit/bb471c1))
+- **docs:** Update lockfile ([9c5fe17](https://github.com/unjs/unstorage/commit/9c5fe17))
+- Update lockfile ([fc9f6a9](https://github.com/unjs/unstorage/commit/fc9f6a9))
+- Update docs ([f85112f](https://github.com/unjs/unstorage/commit/f85112f))
+- Update docs ([f78ffc4](https://github.com/unjs/unstorage/commit/f78ffc4))
+- Update lint script ([4d61c78](https://github.com/unjs/unstorage/commit/4d61c78))
+- Update deps ([e48cb59](https://github.com/unjs/unstorage/commit/e48cb59))
+- Update undocs ([8be788f](https://github.com/unjs/unstorage/commit/8be788f))
+- Update vercel kv banner ([53d23e8](https://github.com/unjs/unstorage/commit/53d23e8))
+- Update lockfile ([57e719c](https://github.com/unjs/unstorage/commit/57e719c))
+
+### ✅ Tests
+
+- Skip netlify-blobs for now ([75b2353](https://github.com/unjs/unstorage/commit/75b2353))
+- **http:** Add tests for `null` value ([#365](https://github.com/unjs/unstorage/pull/365))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Harlan Wilton ([@harlan-zw](http://github.com/harlan-zw))
+- Matt Kane <matt.kane@netlify.com>
+- Julius Marminge <julius0216@outlook.com>
+- Connor Pearson <cjp822@gmail.com>
+- Kongmoumou ([@kongmoumou](http://github.com/kongmoumou))
+- Alex 
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+- Skosh <rasmus.gustafsson2611@gmail.com>
+- Dominik Opyd <dominik.opyd@gmail.com>
+- Arkadiusz Sygulski <aareksio@gmail.com>
+- Jan-Henrik Damaschke <jdamaschke@outlook.de>
+- Masious 
+- Boe Reh <me@justboereh.com>
+
+## v1.10.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.10.0...v1.10.1)
+
+### 📦 Build
+
+- Update mkdist for cjs dist hotfix ([cae8533](https://github.com/unjs/unstorage/commit/cae8533))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
+## v1.10.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.9.0...v1.10.0)
+
+### 🚀 Enhancements
+
+- Add `netlify-blobs` driver ([#337](https://github.com/unjs/unstorage/pull/337))
+
+### 🩹 Fixes
+
+- **server:** Read body as string ([dfda25f](https://github.com/unjs/unstorage/commit/dfda25f))
+- **azure-key-vault-driver:** Fix character encoding ([#308](https://github.com/unjs/unstorage/pull/308))
+- **lru-cache, memory, mongodb, redis:** Return falsy values when set in storage ([#320](https://github.com/unjs/unstorage/pull/320))
+
+### 📖 Documentation
+
+- Fix memory driver description ([#286](https://github.com/unjs/unstorage/pull/286))
+- **fs:** Fix typo ([#290](https://github.com/unjs/unstorage/pull/290))
+- Fix typo in `getMount` usage ([#297](https://github.com/unjs/unstorage/pull/297))
+- Update deps ([#310](https://github.com/unjs/unstorage/pull/310))
+- **indexedb:** Fix typo in import ([#327](https://github.com/unjs/unstorage/pull/327))
+
+### 🏡 Chore
+
+- **release:** V1.9.0 ([b0faff7](https://github.com/unjs/unstorage/commit/b0faff7))
+- Update dependencies ([2644320](https://github.com/unjs/unstorage/commit/2644320))
+- Update dependencies and lockfile ([061f74c](https://github.com/unjs/unstorage/commit/061f74c))
+- Remove unused imports ([9e975d9](https://github.com/unjs/unstorage/commit/9e975d9))
+- **docs:** Update dependencies ([db6c5b7](https://github.com/unjs/unstorage/commit/db6c5b7))
+
+### ✅ Tests
+
+- **mongo:** Update and disable tests ([44ffe1d](https://github.com/unjs/unstorage/commit/44ffe1d))
+
+### 🤖 CI
+
+- Test against node 18 ([ad09e94](https://github.com/unjs/unstorage/commit/ad09e94))
+
+### ❤️ Contributors
+
+- Matt Kane <m@mk.gg>
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Patryk Tomczyk 
+- Lsh 
+- Jan-Henrik Damaschke <jdamaschke@outlook.de>
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+- Mehdi 
+- Gustavo Conte 
+- Brian Evans
+
+## v1.9.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.8.0...v1.9.0)
+
+### 🚀 Enhancements
+
+- Expose `BuiltinDriverOptions`  type ([#273](https://github.com/unjs/unstorage/pull/273))
+- **vercel-kv:** Support `ttl` for `setItem` ([#269](https://github.com/unjs/unstorage/pull/269))
+- Add `indexedb` driver ([#221](https://github.com/unjs/unstorage/pull/221))
+- Add `capacitor-preferences` driver ([#283](https://github.com/unjs/unstorage/pull/283))
+- `fs-lite` driver ([#284](https://github.com/unjs/unstorage/pull/284))
+
+### 🩹 Fixes
+
+- **cloudflare-r2-binding:** Get binding for r2 `getMeta` ([#272](https://github.com/unjs/unstorage/pull/272))
+
+### 💅 Refactors
+
+- Fix typo in `removeMeta` option for `removeItem` ([#281](https://github.com/unjs/unstorage/pull/281))
+
+### 📖 Documentation
+
+- Upgrade Docus ([cc9cb6e](https://github.com/unjs/unstorage/commit/cc9cb6e))
+- Fix 404 link ([1e37246](https://github.com/unjs/unstorage/commit/1e37246))
+- Update ([b43e0d4](https://github.com/unjs/unstorage/commit/b43e0d4))
+- Typo for the option dir in github driver ([#278](https://github.com/unjs/unstorage/pull/278))
+
+### 🏡 Chore
+
+- Update docus ([bc0be1b](https://github.com/unjs/unstorage/commit/bc0be1b))
+- Update dependencies ([1d0395d](https://github.com/unjs/unstorage/commit/1d0395d))
+- Add autofix ci ([a0a1cdd](https://github.com/unjs/unstorage/commit/a0a1cdd))
+
+### 🎨 Styles
+
+- Format with prettier v3 ([22b797e](https://github.com/unjs/unstorage/commit/22b797e))
+
+### ❤️  Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Marco 
+- João Pedro Antunes Silva <github@joaopedroas.com>
+- Abdurrahman Shofy Adianto <azophy@gmail.com>
+- Timbological 
+- Daniel Roe <daniel@roe.dev>
+- Estéban ([@Barbapapazes](http://github.com/Barbapapazes))
+- Heb ([@Hebilicious](http://github.com/Hebilicious))
+- Sébastien Chopin ([@Atinux](http://github.com/Atinux))
+
 ## v1.8.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.7.0...v1.8.0)

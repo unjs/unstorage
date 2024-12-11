@@ -19,7 +19,9 @@ describe("types", () => {
 
     expectTypeOf(await storage.getItem("foo")).toMatchTypeOf<string | null>();
     expectTypeOf(await storage.getItem("bar")).toMatchTypeOf<number | null>();
-    expectTypeOf(await storage.getItem("unknown")).toMatchTypeOf<StorageValue | null>();
+    expectTypeOf(
+      await storage.getItem("unknown")
+    ).toMatchTypeOf<StorageValue | null>();
     expectTypeOf(await storage.get("baz")).toMatchTypeOf<TestObjType | null>();
     expectTypeOf(
       await storage.getItem("aaaaa")

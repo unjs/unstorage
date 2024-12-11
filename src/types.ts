@@ -62,8 +62,8 @@ export interface Driver<OptionsT = any, InstanceT = any> {
 }
 
 type NsStorageValue = {
-  data: object;
-  [key: string]: any;
+  data: unknown;
+  [key: string]: unknown;
 };
 
 type NsDataType<T extends NsStorageValue> = T["data"];

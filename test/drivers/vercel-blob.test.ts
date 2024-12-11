@@ -9,7 +9,7 @@ describe.skipIf(!token)("drivers: vercel-blob", async () => {
   testDriver({
     driver: driver({
       access: "public",
-      base: "test",
+      base: Math.round(Math.random() * 1_000_000).toString(16),
       envPrefix: "VERCEL_TEST",
     }),
   });

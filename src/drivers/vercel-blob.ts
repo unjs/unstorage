@@ -66,7 +66,6 @@ export default defineDriver<VercelBlobOptions>((opts) => {
     },
     async getItem(key) {
       const blob = await get(key);
-      console.log(blob);
       return blob ? fetch(blob.url).then((res) => res.text()) : null;
     },
     async getItemRaw(key) {

@@ -1,5 +1,5 @@
 import { describe } from "vitest";
-import driver from "../../src/drivers/cloudflare-kv-http";
+import cfKvHttpDriver from "../../src/drivers/cloudflare-kv-http";
 import { testDriver } from "./utils";
 
 const accountId = process.env.VITE_CLOUDFLARE_ACC_ID;
@@ -10,12 +10,13 @@ describe.skipIf(!accountId || !namespaceId || !apiToken)(
   "drivers: cloudflare-kv-http",
   () => {
     testDriver({
-      driver: driver({
-        accountId: accountId!,
-        namespaceId: namespaceId!,
-        apiToken: apiToken!,
-        base: Math.round(Math.random() * 1_000_000).toString(16),
-      }),
+      driver: () =>
+        cfKvHttpDriver({
+          accountId: accountId!,
+          namespaceId: namespaceId!,
+          apiToken: apiToken!,
+          base: Math.round(Math.random() * 1_000_000).toString(16),
+        }),
     });
   }
 );

@@ -1,4 +1,4 @@
-import { afterAll, describe, expect } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import { createDatabase } from "db0";
 import db0Driver from "../../src/drivers/db0";
 import { testDriver } from "./utils";
@@ -42,13 +42,15 @@ for (const driver of drivers) {
     });
 
     testDriver({
-      driver: db0Driver({ database: db }),
-      additionalTests: async (ctx) => {
-        await ctx.storage.setItem("meta:test", "test_data");
+      driver: () => db0Driver({ database: db }),
+      additionalTests: (ctx) => {
+        it("meta", async () => {
+          await ctx.storage.setItem("meta:test", "test_data");
 
-        expect(await ctx.storage.getMeta("meta:test")).toMatchObject({
-          birthtime: expect.any(Date),
-          mtime: expect.any(Date),
+          expect(await ctx.storage.getMeta("meta:test")).toMatchObject({
+            birthtime: expect.any(Date),
+            mtime: expect.any(Date),
+          });
         });
       },
     });

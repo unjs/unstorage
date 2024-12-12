@@ -88,6 +88,14 @@ export default defineDriver<DenoKvOptions, Promise<Deno.Kv>>(
         }
         await Promise.all(promisePool);
       },
+      dispose() {
+        if (_client) {
+          return _client.then((kv) => {
+            kv.close();
+            _client = undefined;
+          });
+        }
+      },
     };
   }
 );

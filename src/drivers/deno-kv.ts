@@ -76,7 +76,12 @@ export default defineDriver<DenoKvOptions, Promise<Deno.Kv>>(
         const kv = await getKv();
         const keys: string[] = [];
         for await (const entry of kv.list({ prefix: r(base) })) {
-          keys.push(entry.key.join(":"));
+          keys.push(
+            (basePrefix.length > 0
+              ? entry.key.slice(basePrefix.length)
+              : entry.key
+            ).join(":")
+          );
         }
         return keys;
       },

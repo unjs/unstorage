@@ -15,5 +15,9 @@
     "noImplicitOverride": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
+    "types": [
+      "node",
+      "deno"
+    ],
   }
 }

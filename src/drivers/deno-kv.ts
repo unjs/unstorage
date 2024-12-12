@@ -1,74 +1,91 @@
+import { normalizeKey } from "../utils";
 import { defineDriver, createError } from "./utils/index";
-import type { DenoKv, DenoGlobal } from "./utils/deno-kv";
-import { flattenAsyncIterable } from "./utils/deno-kv";
+
+// https://docs.deno.com/deploy/kv/manual/
 
 export interface DenoKvOptions {
+  base?: string;
   path?: string;
-  prefix?: string[];
 }
 
-declare global {
-  const Deno: DenoGlobal;
-}
+const DRIVER_NAME = "deno-kv";
 
-export default defineDriver<DenoKvOptions>(
-  ({ path, prefix }: DenoKvOptions) => {
-    const r = (key: string) => [...(prefix ? prefix : []), key];
+export default defineDriver<DenoKvOptions, Promise<Deno.Kv>>(
+  (opts: DenoKvOptions = {}) => {
+    const basePrefix: Deno.KvKey = opts.base
+      ? normalizeKey(opts.base).split(":")
+      : [];
 
-    let _client: DenoKv;
+    const r = (key: string = ""): Deno.KvKey =>
+      [...basePrefix, ...key.split(":")].filter(Boolean);
 
-    const getClient = async () => {
-      if (typeof Deno === "undefined") {
+    let _client: Promise<Deno.Kv> | undefined;
+    const getKv = async () => {
+      if (_client) {
+        return _client;
+      }
+      if (!globalThis.Deno) {
         throw createError(
-          "deno-kv",
-          "missing required `Deno` global object. Are you running in Deno?"
+          DRIVER_NAME,
+          "Missing global `Deno`. Are you running in Deno?"
         );
       }
-      if (!_client) {
-        _client = await Deno.openKv(path);
+      if (!Deno.openKv) {
+        throw createError(
+          DRIVER_NAME,
+          "Missing `Deno.openKv`. Are you running Deno with --unstable-kv?"
+        );
       }
+      _client = Deno.openKv(opts.path);
       return _client;
     };
 
-    const removeItem = (key: string) =>
-      getClient()
-        .then((client) => client.delete(r(key)))
-        .then(() => {});
-
-    const getKeys = () =>
-      getClient()
-        .then((client) => client.list({ prefix }))
-        .then(flattenAsyncIterable)
-        .then((keys) => keys.map(({ key }) => (key as string[]).at(-1)));
-
     return {
-      hasItem(key) {
-        return getClient()
-          .then((client) => client.get(r(key)))
-          .then((value) => !!value.value);
+      name: DRIVER_NAME,
+      getInstance() {
+        return getKv();
       },
-      getItem(key) {
-        return getClient()
-          .then((client) => client.get(r(key)))
-          .then((value) => value.value);
+      async hasItem(key) {
+        const kv = await getKv();
+        const value = await kv.get(r(key));
+        return !!value.value;
       },
-      setItem(key, value) {
-        return getClient()
-          .then((client) => client.set(r(key), value))
-          .then(() => {});
+      async getItem(key) {
+        const kv = await getKv();
+        const value = await kv.get(r(key));
+        return value.value;
       },
-      removeItem(key) {
-        return removeItem(key);
+      async getItemRaw(key) {
+        const kv = await getKv();
+        const value = await kv.get(r(key));
+        return value.value;
       },
-      getKeys() {
-        return getKeys();
+      async setItem(key, value) {
+        const kv = await getKv();
+        await kv.set(r(key), value);
       },
-      async clear() {
-        const keys = await getKeys();
-        if (keys.length === 0) {
-          return;
+      async setItemRaw(key, value) {
+        const kv = await getKv();
+        await kv.set(r(key), value);
+      },
+      async removeItem(key) {
+        const kv = await getKv();
+        await kv.delete(r(key));
+      },
+      async getKeys(base) {
+        const kv = await getKv();
+        const keys: string[] = [];
+        for await (const entry of kv.list({ prefix: r(base) })) {
+          keys.push(entry.key.join(":"));
         }
-        const promisePool = keys.map((key) => removeItem(key));
+        return keys;
+      },
+      async clear(base) {
+        const kv = await getKv();
+        const promisePool: Promise<void>[] = [];
+        for await (const entry of kv.list({ prefix: r(base) })) {
+          promisePool.push(kv.delete(entry.key));
+        }
         await Promise.all(promisePool);
       },
     };

@@ -1,48 +1,34 @@
-import { describe, it, expect, vi } from "vitest";
-import { execa, execaCommandSync } from "execa";
-import { readFile, mkdir, writeFile } from "fs/promises";
-import crypto from "crypto";
+import { fileURLToPath } from "node:url";
+import { exec, execSync, type ChildProcess } from "node:child_process";
+import { describe, beforeAll, afterAll } from "vitest";
+import { waitForPort } from "get-port-please";
+import httpDriver from "../../src/drivers/http.ts";
+import { testDriver } from "./utils";
 
-const hasDeno =
-  execaCommandSync("deno --version", { stdio: "ignore", reject: false })
-    .exitCode === 0;
+let hasDeno: boolean;
+// prettier-ignore
+try { execSync("deno --version"); hasDeno = true } catch { hasDeno = false; }
 
-try {
-  await mkdir("./tmp"); // Make tmp dir
-} catch (_e) {} // Dir exists
+describe.skipIf(!hasDeno)("drivers: deno-kv", () => {
+  let denoProcess: ChildProcess;
 
-describe.runIf(hasDeno)("drivers: deno-kv", async () => {
-  const driverModuleCode = (await readFile("./src/drivers/deno-kv.ts"))
-    .toString()
-    .replace(/(?<=from ")\.\/utils\/.*?(?=")/g, (str) => {
-      return "../src/drivers/" + str + ".ts";
-    });
-  await writeFile("./tmp/deno-kv-for-deno.ts", driverModuleCode);
-
-  const driverInitCode = `
-  import driver from './tmp/deno-kv-for-deno.ts';
-  import { createStorage } from "npm:unstorage";
-  const storage = createStorage({
-    driver: driver({}),
+  beforeAll(async () => {
+    const fixtureFile = fileURLToPath(
+      new URL("deno-kv.fixture.ts", import.meta.url)
+    );
+    denoProcess = exec(
+      `deno run --unstable-kv --unstable-sloppy-imports -A ${fixtureFile}`
+    );
+    await waitForPort(3000, { host: "0.0.0.0" });
   });
-  `;
-  it("can set and get items", async () => {
-    const key = crypto.randomUUID(); // Create random key
-    const value = crypto.randomUUID(); // Create random value
 
-    const code = `${driverInitCode}
-    await storage.setItem("${key}","${value}");
-    console.log(await storage.getItem("${key}"));
-    `;
-    expect(
-      (
-        await execa("deno", [
-          "eval",
+  afterAll(() => {
+    denoProcess.kill(9);
+  });
 
-          code,
-          "--unstable", // If Deno use Kv, we must give "--unstable" flag to Deno.
-        ])
-      ).stdout
-    ).toBe(value);
-  }, 100000);
+  testDriver({
+    driver: httpDriver({
+      base: "http://localhost:3000",
+    }),
+  });
 });

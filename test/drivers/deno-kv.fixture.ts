@@ -4,7 +4,7 @@ import denoKV from "../../src/drivers/deno-kv.ts";
 import { createStorageServer } from "../../src/server";
 
 const storage = createStorage({
-  driver: denoKV({ path: "./tmp/deno-kv" }),
+  driver: denoKV({ path: ":memory:" }),
 });
 
 const port = Number(process.env.PORT) || 3000;

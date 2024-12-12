@@ -7,6 +7,8 @@ const storage = createStorage({
   driver: denoKV({ path: "./tmp/deno-kv" }),
 });
 
-createServer(createStorageServer(storage).handle).listen(3000, () => {
-  console.log("Server running at http://localhost:3000/");
+const port = Number(process.env.PORT) || 3000;
+
+createServer(createStorageServer(storage).handle).listen(port, () => {
+  console.log(`Server running at http://localhost:${port}/`);
 });

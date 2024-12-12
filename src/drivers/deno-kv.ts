@@ -1,43 +1,49 @@
 import { normalizeKey } from "../utils";
 import { defineDriver, createError } from "./utils/index";
+import type { Kv, KvKey } from "@deno/kv";
 
 // https://docs.deno.com/deploy/kv/manual/
 
 export interface DenoKvOptions {
   base?: string;
   path?: string;
+  openKv?: () => Promise<Deno.Kv | Kv>;
 }
 
 const DRIVER_NAME = "deno-kv";
 
-export default defineDriver<DenoKvOptions, Promise<Deno.Kv>>(
+export default defineDriver<DenoKvOptions, Promise<Deno.Kv | Kv>>(
   (opts: DenoKvOptions = {}) => {
-    const basePrefix: Deno.KvKey = opts.base
+    const basePrefix: KvKey = opts.base
       ? normalizeKey(opts.base).split(":")
       : [];
 
-    const r = (key: string = ""): Deno.KvKey =>
+    const r = (key: string = ""): KvKey =>
       [...basePrefix, ...key.split(":")].filter(Boolean);
 
-    let _client: Promise<Deno.Kv> | undefined;
-    const getKv = async () => {
-      if (_client) {
-        return _client;
+    let _kv: Promise<Kv | Deno.Kv> | undefined;
+    const getKv = () => {
+      if (_kv) {
+        return _kv;
       }
-      if (!globalThis.Deno) {
-        throw createError(
-          DRIVER_NAME,
-          "Missing global `Deno`. Are you running in Deno?"
-        );
+      if (opts.openKv) {
+        _kv = opts.openKv();
+      } else {
+        if (!globalThis.Deno) {
+          throw createError(
+            DRIVER_NAME,
+            "Missing global `Deno`. Are you running in Deno? (hint: use `deno-kv-node` driver for Node.js)"
+          );
+        }
+        if (!Deno.openKv) {
+          throw createError(
+            DRIVER_NAME,
+            "Missing `Deno.openKv`. Are you running Deno with --unstable-kv?"
+          );
+        }
+        _kv = Deno.openKv(opts.path);
       }
-      if (!Deno.openKv) {
-        throw createError(
-          DRIVER_NAME,
-          "Missing `Deno.openKv`. Are you running Deno with --unstable-kv?"
-        );
-      }
-      _client = Deno.openKv(opts.path);
-      return _client;
+      return _kv;
     };
 
     return {
@@ -89,16 +95,15 @@ export default defineDriver<DenoKvOptions, Promise<Deno.Kv>>(
         const kv = await getKv();
         const batch = kv.atomic();
         for await (const entry of kv.list({ prefix: r(base) })) {
-          batch.delete(entry.key);
+          batch.delete(entry.key as KvKey);
         }
         await batch.commit();
       },
-      dispose() {
-        if (_client) {
-          return _client.then((kv) => {
-            kv.close();
-            _client = undefined;
-          });
+      async dispose() {
+        if (_kv) {
+          const kv = await _kv;
+          await kv.close();
+          _kv = undefined;
         }
       },
     };

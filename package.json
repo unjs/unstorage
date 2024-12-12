@@ -63,6 +63,7 @@
     "@azure/storage-blob": "^12.26.0",
     "@capacitor/preferences": "^6.0.3",
     "@cloudflare/workers-types": "^4.20241205.0",
+    "@deno/kv": "^0.8.4",
     "@electric-sql/pglite": "^0.2.15",
     "@libsql/client": "^0.14.0",
     "@netlify/blobs": "^8.1.0",
@@ -114,7 +115,8 @@
     "@vercel/kv": "^1.0.1",
     "db0": ">=0.1",
     "idb-keyval": "^6.2.1",
-    "ioredis": "^5.4.1"
+    "ioredis": "^5.4.1",
+    "@deno/kv": ">=0.8.4"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {
@@ -160,6 +162,9 @@
       "optional": true
     },
     "ioredis": {
+      "optional": true
+    },
+    "@deno/kv": {
       "optional": true
     }
   },

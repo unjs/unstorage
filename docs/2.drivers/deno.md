@@ -36,3 +36,4 @@ const storage = createStorage({
 
 - `path`: (optional) File system path to where you'd like to store your database, otherwise one will be created for you based on the current working directory of your script by Deno. You can pass `:memory:` for testing.
 - `base`: (optional) Prefix key added to all operations.
+- `getKV`: (advanced) Custom method that returns a Deno KV instance.

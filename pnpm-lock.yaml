@@ -63,6 +63,9 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^4.20241205.0
         version: 4.20241205.0
+      '@deno/kv':
+        specifier: ^0.8.4
+        version: 0.8.4
       '@electric-sql/pglite':
         specifier: ^0.2.15
         version: 0.2.15
@@ -403,6 +406,33 @@ packages:
 
   '@dabh/diagnostics@2.0.3':
     resolution: {integrity: sha512-hrlQOIi7hAfzsMqlGSFyVucrx38O+j6wiGOf//H2ecvIEqYN4ADBSS2iLMh5UFyDunCNniUIPk/q3riFv45xRA==}
+
+  '@deno/kv-darwin-arm64@0.8.4':
+    resolution: {integrity: sha512-j86nnE1QdLw20OrUs/6Iw6ZYzC8pmfU1+K4hNSVHO9K0bfy3VBd4JSHkHLmYCiHDkgIm+wTxct33thl6HxXz0Q==}
+    engines: {node: '>= 18'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@deno/kv-darwin-x64@0.8.4':
+    resolution: {integrity: sha512-qdczxcqkN2fbDX/nIzUetI6i8usNu8kpN3sDV0rXcSWlg9E5huWWjGp6PbOS4w1xarUWbqFAZvy4VSmGTVN1Zw==}
+    engines: {node: '>= 18'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@deno/kv-linux-x64-gnu@0.8.4':
+    resolution: {integrity: sha512-xv2rM6wrVHVOM4Nswl8iyfdZZiEp5r85jwLajj0NGTiLMAQLBtDsBE/kpH4Ap3K6yiqJX3nTb44Z8AJ+IyzO4Q==}
+    engines: {node: '>= 18'}
+    cpu: [x64]
+    os: [linux]
+
+  '@deno/kv-win32-x64-msvc@0.8.4':
+    resolution: {integrity: sha512-xTEByTpC1DWw4A1F9isD8B16v1+CQFHFvi/Mm2bqlO9iD5HfIGgalWJbL3EvgYeybQ9yA27KGqaGnKxXdaX5Rg==}
+    engines: {node: '>= 18'}
+    cpu: [x64]
+    os: [win32]
+
+  '@deno/kv@0.8.4':
+    resolution: {integrity: sha512-5q2izU1tp6wv8rDIwMb6GXe/B+aO/sjAjRAOIigEtX+qOiTLsPE++ibJbfafVb0LmjEdlA18Kpfo23fln73OtQ==}
 
   '@electric-sql/pglite@0.2.15':
     resolution: {integrity: sha512-Jiq31Dnk+rg8rMhcSxs4lQvHTyizNo5b269c1gCC3ldQ0sCLrNVPGzy+KnmonKy1ZArTUuXZf23/UamzFMKVaA==}
@@ -5187,6 +5217,25 @@ snapshots:
       colorspace: 1.1.4
       enabled: 2.0.0
       kuler: 2.0.0
+
+  '@deno/kv-darwin-arm64@0.8.4':
+    optional: true
+
+  '@deno/kv-darwin-x64@0.8.4':
+    optional: true
+
+  '@deno/kv-linux-x64-gnu@0.8.4':
+    optional: true
+
+  '@deno/kv-win32-x64-msvc@0.8.4':
+    optional: true
+
+  '@deno/kv@0.8.4':
+    optionalDependencies:
+      '@deno/kv-darwin-arm64': 0.8.4
+      '@deno/kv-darwin-x64': 0.8.4
+      '@deno/kv-linux-x64-gnu': 0.8.4
+      '@deno/kv-win32-x64-msvc': 0.8.4
 
   '@electric-sql/pglite@0.2.15': {}
 

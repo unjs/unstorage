@@ -1,4 +1,4 @@
-import { it, expect } from "vitest";
+import { it, expect, beforeAll, afterAll } from "vitest";
 import {
   type Storage,
   type Driver,
@@ -12,15 +12,26 @@ export interface TestContext {
 }
 
 export interface TestOptions {
-  driver: Driver;
+  driver: Driver | (() => Driver);
   additionalTests?: (ctx: TestContext) => void;
 }
 
 export function testDriver(opts: TestOptions) {
-  const ctx: TestContext = {
-    storage: createStorage({ driver: opts.driver }),
-    driver: opts.driver,
-  };
+  const ctx = {} as TestContext;
+
+  beforeAll(() => {
+    ctx.driver =
+      typeof opts.driver === "function" ? opts.driver() : opts.driver;
+
+    ctx.storage = createStorage({
+      driver: ctx.driver,
+    });
+  });
+
+  afterAll(async () => {
+    await ctx.driver?.dispose?.();
+    await ctx.storage?.dispose?.();
+  });
 
   it("init", async () => {
     await restoreSnapshot(ctx.storage, { initial: "works" });
@@ -166,9 +177,5 @@ export function testDriver(opts: TestOptions) {
     // ensure we can clear empty storage as well: #162
     await ctx.storage.clear();
     expect(await ctx.storage.getKeys()).toMatchObject([]);
-  });
-
-  it("dispose", async () => {
-    await ctx.storage.dispose();
   });
 }

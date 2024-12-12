@@ -13,16 +13,16 @@ describe("drivers: lru-cache with size", () => {
     driver: driver({
       maxEntrySize: 50,
     }),
-    additionalTests({ storage }) {
+    additionalTests(ctx) {
       it("should not store large items", async () => {
-        await storage.setItem(
+        await ctx.storage.setItem(
           "big",
           "0123456789012345678901234567890123456789012345678901234567890123456789"
         );
-        expect(await storage.getItem("big")).toBe(null);
+        expect(await ctx.storage.getItem("big")).toBe(null);
 
-        await storage.setItemRaw("bigBuff", Buffer.alloc(100));
-        expect(await storage.getItemRaw("bigBuff")).toBe(null);
+        await ctx.storage.setItemRaw("bigBuff", Buffer.alloc(100));
+        expect(await ctx.storage.getItemRaw("bigBuff")).toBe(null);
       });
     },
   });

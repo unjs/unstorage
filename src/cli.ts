@@ -1,38 +1,40 @@
 import { resolve } from "node:path";
-import mri from "mri";
+import { defineCommand, runMain } from "citty";
 import { listen } from "listhen";
 import { createStorage } from "./storage";
 import { createStorageServer } from "./server";
 import fsDriver from "./drivers/fs";
 
-async function main() {
-  const arguments_ = mri(process.argv.splice(2));
+const main = defineCommand({
+  meta: {
+    name: "unstorage",
+    description: "Unstorage CLI",
+  },
+  args: {
+    dir: {
+      type: "string",
+      description: "project root directory",
+    },
+    _dir: {
+      type: "positional",
+      default: ".",
+      description: "project root directory (prefer using `--dir`)",
+    },
+  },
+  async run(args) {
+    const rootDir = resolve(args.args.dir || args.args._dir);
 
-  if (arguments_.help) {
-    // eslint-disable-next-line no-console
-    console.log("Usage: npx unstorage [rootDir]");
-    // eslint-disable-next-line unicorn/no-process-exit
-    process.exit(0);
-  }
+    const storage = createStorage({
+      driver: fsDriver({ base: rootDir }),
+    });
 
-  const rootDir = resolve(arguments_._[0] || ".");
+    const storageServer = createStorageServer(storage);
 
-  const storage = createStorage({
-    driver: fsDriver({ base: rootDir }),
-  });
-
-  const storageServer = createStorageServer(storage);
-
-  await listen(storageServer.handle, {
-    name: "Storage server",
-    port: 8080,
-  });
-}
-
-// eslint-disable-next-line unicorn/prefer-top-level-await
-main().catch((error) => {
-  // eslint-disable-next-line no-console
-  console.error(error);
-  // eslint-disable-next-line unicorn/no-process-exit
-  process.exit(1);
+    await listen(storageServer.handle, {
+      name: "unstorage server",
+      port: 8080,
+    });
+  },
 });
+
+runMain(main);

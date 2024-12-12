@@ -86,6 +86,7 @@ export default defineDriver((opts: AzureCosmosOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: getCosmosClient,
     async hasItem(key) {
       const item = await (await getCosmosClient())
         .item(key)

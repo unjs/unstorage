@@ -46,11 +46,13 @@ export function normalizeKey(key?: string) {
   if (!key) {
     return "";
   }
-  return key
-    .split("?")[0]
-    .replace(/[/\\]/g, ":")
-    .replace(/:+/g, ":")
-    .replace(/^:|:$/g, "");
+  return (
+    key
+      .split("?")[0]
+      ?.replace(/[/\\]/g, ":")
+      .replace(/:+/g, ":")
+      .replace(/^:|:$/g, "") || ""
+  );
 }
 
 export function joinKeys(...keys: string[]) {

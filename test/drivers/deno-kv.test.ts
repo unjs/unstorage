@@ -7,7 +7,7 @@ import { testDriver } from "./utils";
 
 let hasDeno: boolean;
 // prettier-ignore
-try { execSync("deno --version"); hasDeno = true } catch { hasDeno = false; }
+try { execSync("deno --version", { stdio: "ignore" }); hasDeno = true } catch { hasDeno = false; }
 
 describe.skipIf(!hasDeno)("drivers: deno-kv", async () => {
   let denoProcess: ChildProcess;
@@ -17,7 +17,6 @@ describe.skipIf(!hasDeno)("drivers: deno-kv", async () => {
     const fixtureFile = fileURLToPath(
       new URL("deno-kv.fixture.ts", import.meta.url)
     );
-    console.log(process.env);
     denoProcess = exec(
       `deno run --unstable-kv --unstable-sloppy-imports -A ${fixtureFile}`,
       {

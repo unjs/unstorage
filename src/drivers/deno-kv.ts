@@ -82,11 +82,11 @@ export default defineDriver<DenoKvOptions, Promise<Deno.Kv>>(
       },
       async clear(base) {
         const kv = await getKv();
-        const promisePool: Promise<void>[] = [];
+        const batch = kv.atomic();
         for await (const entry of kv.list({ prefix: r(base) })) {
-          promisePool.push(kv.delete(entry.key));
+          batch.delete(entry.key);
         }
-        await Promise.all(promisePool);
+        await batch.commit();
       },
       dispose() {
         if (_client) {

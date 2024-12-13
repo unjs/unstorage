@@ -13,6 +13,8 @@ export const builtinDrivers = {
   cloudflareKVHTTP: "unstorage/drivers/cloudflare-kv-http",
   cloudflareR2Binding: "unstorage/drivers/cloudflare-r2-binding",
   db0: "unstorage/drivers/db0",
+  denoKv: "unstorage/drivers/deno-kv",
+  denoKvNode: "unstorage/drivers/deno-kv-node",
   fs: "unstorage/drivers/fs",
   fsLite: "unstorage/drivers/fs-lite",
   github: "unstorage/drivers/github",

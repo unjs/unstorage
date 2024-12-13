@@ -70,7 +70,7 @@
     "@types/deno": "^2.0.0",
     "@types/ioredis-mock": "^8.2.5",
     "@types/jsdom": "^21.1.7",
-    "@types/node": "^22.10.1",
+    "@types/node": "^22.10.2",
     "@upstash/redis": "^1.34.3",
     "@vercel/blob": "^0.27.0",
     "@vercel/kv": "^3.0.0",
@@ -88,8 +88,8 @@
     "ioredis-mock": "^8.9.0",
     "jiti": "^2.4.1",
     "jsdom": "^25.0.1",
-    "mitata": "^1.0.20",
-    "mongodb": "^6.11.0",
+    "mitata": "^1.0.21",
+    "mongodb": "^6.12.0",
     "mongodb-memory-server": "^10.1.2",
     "prettier": "^3.4.2",
     "types-cloudflare-worker": "^1.2.0",
@@ -97,22 +97,22 @@
     "unbuild": "^2.0.0",
     "vite": "^6.0.3",
     "vitest": "^2.1.8",
-    "wrangler": "^3.94.0"
+    "wrangler": "^3.95.0"
   },
   "peerDependencies": {
     "@azure/app-configuration": "^1.8.0",
-    "@azure/cosmos": "^4.1.1",
-    "@azure/data-tables": "^13.2.2",
+    "@azure/cosmos": "^4.2.0",
+    "@azure/data-tables": "^13.3.0",
     "@azure/identity": "^4.5.0",
     "@azure/keyvault-secrets": "^4.9.0",
-    "@azure/storage-blob": "^12.25.0",
-    "@capacitor/preferences": "^6.0.2",
+    "@azure/storage-blob": "^12.26.0",
+    "@capacitor/preferences": "^6.0.3",
     "@netlify/blobs": "^6.5.0 || ^7.0.0 || ^8.1.0",
     "@planetscale/database": "^1.19.0",
     "@upstash/redis": "^1.34.3",
     "@vercel/blob": ">=0.27.0",
     "@vercel/kv": "^1.0.1",
-    "db0": ">=0.1",
+    "db0": ">=0.2.1",
     "idb-keyval": "^6.2.1",
     "ioredis": "^5.4.1"
   },
@@ -163,5 +163,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@9.14.4"
+  "packageManager": "pnpm@9.15.0"
 }

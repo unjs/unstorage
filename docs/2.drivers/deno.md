@@ -68,3 +68,9 @@ const storage = createStorage({
   }),
 });
 ```
+
+**Options:**
+
+- `path`: (same as `deno-kv`)
+- `base`: (same as `deno-kv`)
+- `openKvOptions`: Check [docs](https://www.npmjs.com/package/@deno/kv#api) for available options.

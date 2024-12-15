@@ -1,70 +1,102 @@
-import { defineDriver } from "./utils";
-import { ofetch, $Fetch } from "ofetch";
+import { defineDriver, normalizeKey } from "./utils";
 import { UTApi } from "uploadthing/server";
 
-export interface UploadThingOptions {
-  apiKey: string;
+// Reference: https://docs.uploadthing.com
+
+type UTApiOptions = Omit<
+  Exclude<ConstructorParameters<typeof UTApi>[0], undefined>,
+  "defaultKeyType"
+>;
+
+type FileEsque = Parameters<UTApi["uploadFiles"]>[0][0];
+
+export interface UploadThingOptions extends UTApiOptions {
+  /** base key to add to keys */
+  base?: string;
 }
 
-export default defineDriver<UploadThingOptions>((opts) => {
+const DRIVER_NAME = "uploadthing";
+
+export default defineDriver<UploadThingOptions, UTApi>((opts = {}) => {
   let client: UTApi;
+
+  const base = opts.base ? normalizeKey(opts.base) : "";
+  const r = (key: string) => (base ? `${base}:${key}` : key);
+
   const getClient = () => {
     return (client ??= new UTApi({
-      apiKey: opts.apiKey,
-      fetch: ofetch.native,
+      ...opts,
+      defaultKeyType: "customId",
     }));
   };
 
-  async function getKeys() {
-    const res = await getClient().listFiles({});
-    return res.map((file) => file.customId).filter((k): k is string => !!k);
-  }
+  const getKeys = async (base: string) => {
+    const client = getClient();
+    const { files } = await client.listFiles({});
+    return files
+      .map((file) => file.customId)
+      .filter((k) => k && k.startsWith(base)) as string[];
+  };
+
+  const toFile = (key: string, value: BlobPart) => {
+    return Object.assign(new Blob([value]), <FileEsque>{
+      name: key,
+      customId: key,
+    }) satisfies FileEsque;
+  };
 
   return {
-    hasItem: async (id) => {
-      const res = await getClient().getFileUrls(id, { keyType: "customId" });
-      return res.length > 0;
+    name: DRIVER_NAME,
+    getInstance() {
+      return getClient();
     },
-    getItem: async (id) => {
-      const url = await getClient()
-        .getFileUrls(id, { keyType: "customId" })
-        .then((res) => {
-          return res[0]?.url;
-        });
+    getKeys(base) {
+      return getKeys(r(base));
+    },
+    async hasItem(key) {
+      const client = getClient();
+      const res = await client.getFileUrls(r(key));
+      return res.data.length > 0;
+    },
+    async getItem(key) {
+      const client = getClient();
+      const url = await client
+        .getFileUrls(r(key))
+        .then((res) => res.data[0]?.url);
       if (!url) return null;
-      return ofetch(url).then((res) => res.text());
+      return fetch(url).then((res) => res.text());
     },
-    getKeys: () => {
-      return getKeys();
+    async getItemRaw(key) {
+      const client = getClient();
+      const url = await client
+        .getFileUrls(r(key))
+        .then((res) => res.data[0]?.url);
+      if (!url) return null;
+      return fetch(url).then((res) => res.arrayBuffer());
     },
-    setItem: async (key, value, opts) => {
-      await getClient().uploadFiles(
-        Object.assign(new Blob([value]), {
-          name: key,
-          customId: key,
-        }),
-        { metadata: opts?.metadata }
+    async setItem(key, value) {
+      const client = getClient();
+      await client.uploadFiles(toFile(r(key), value));
+    },
+    async setItemRaw(key, value) {
+      const client = getClient();
+      await client.uploadFiles(toFile(r(key), value));
+    },
+    async setItems(items) {
+      const client = getClient();
+      await client.uploadFiles(
+        items.map((item) => toFile(r(item.key), item.value))
       );
     },
-    setItems: async (items, opts) => {
-      await getClient().uploadFiles(
-        items.map((item) =>
-          Object.assign(new Blob([item.value]), {
-            name: item.key,
-            customId: item.key,
-          })
-        ),
-        { metadata: opts?.metadata }
-      );
+    async removeItem(key) {
+      const client = getClient();
+      await client.deleteFiles([r(key)]);
     },
-    removeItem: async (key, opts) => {
-      await getClient().deleteFiles([key], { keyType: "customId" });
+    async clear(base) {
+      const client = getClient();
+      const keys = await getKeys(r(base));
+      await client.deleteFiles(keys);
     },
-    clear: async () => {
-      const keys = await getKeys();
-      await getClient().deleteFiles(keys, { keyType: "customId" });
-    },
-
     // getMeta(key, opts) {
     //   // TODO: We don't currently have an endpoint to fetch metadata, but it does exist
     // },

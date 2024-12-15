@@ -35,18 +35,18 @@ describe("drivers: http", async () => {
       base: listener!.url,
       headers: { "x-global-header": "1" },
     }),
-    async additionalTests({ storage }) {
+    async additionalTests(ctx) {
       it("custom headers", async () => {
-        await storage.setItem("authorized", "test", {
+        await ctx.storage.setItem("authorized", "test", {
           headers: { "x-auth-header": "1" },
         });
       });
       it("null item", async () => {
-        await storage.setItem("nullItem", null);
-        await storage.setItem("nullStringItem", "null");
-        expect(await storage.getItem("nullItem")).toBeNull();
-        expect(await storage.getItem("nanItem")).toBeNull();
-        expect(await storage.getItem("nullStringItem")).toBeNull();
+        await ctx.storage.setItem("nullItem", null);
+        await ctx.storage.setItem("nullStringItem", "null");
+        expect(await ctx.storage.getItem("nullItem")).toBeNull();
+        expect(await ctx.storage.getItem("nanItem")).toBeNull();
+        expect(await ctx.storage.getItem("nullStringItem")).toBeNull();
       });
     },
   });

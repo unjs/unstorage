@@ -1,4 +1,4 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
+import { createRequiredError, defineDriver } from "./utils";
 import type { ExecutedQuery, Connection } from "@planetscale/database";
 import { connect } from "@planetscale/database";
 import { fetch } from "node-fetch-native";
@@ -50,6 +50,7 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: getConnection,
     hasItem: async (key) => {
       const res = await getConnection().execute(
         `SELECT EXISTS (SELECT 1 FROM ${opts.table} WHERE id = :key) as value;`,

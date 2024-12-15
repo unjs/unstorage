@@ -149,9 +149,7 @@ async function fetchFiles(opts: GithubOptions) {
       if (node.type !== "blob" || !node.path.startsWith(prefix)) {
         continue;
       }
-      const key: string = node.path
-        .substring(prefix.length)
-        .replace(/\//g, ":");
+      const key: string = node.path.slice(prefix.length).replace(/\//g, ":");
       files[key] = {
         meta: {
           sha: node.sha,

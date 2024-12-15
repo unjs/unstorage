@@ -12,7 +12,7 @@ import uploadthingDriver from "unstorage/drivers/uploadthing";
 
 const storage = createStorage({
   driver: uploadthingDriver({
-    // apiKey: "<your api key>",
+    // token: "<your token>",
   }),
 });
 ```

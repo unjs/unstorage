@@ -23,6 +23,9 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
       - run: pnpm install
       - run: pnpm lint
       - run: pnpm test:types

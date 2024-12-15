@@ -80,7 +80,7 @@
     "better-sqlite3": "^11.7.0",
     "changelogen": "^0.5.7",
     "db0": "^0.2.1",
-    "eslint": "^9.16.0",
+    "eslint": "^9.17.0",
     "eslint-config-unjs": "^0.4.2",
     "fake-indexeddb": "^6.0.0",
     "get-port-please": "^3.1.2",
@@ -95,7 +95,7 @@
     "prettier": "^3.4.2",
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "^5.7.2",
-    "unbuild": "^2.0.0",
+    "unbuild": "^3.0.1",
     "vite": "^6.0.3",
     "vitest": "^2.1.8",
     "wrangler": "^3.95.0"

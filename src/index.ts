@@ -12,6 +12,9 @@ export const builtinDrivers = {
   cloudflareKVBinding: "unstorage/drivers/cloudflare-kv-binding",
   cloudflareKVHTTP: "unstorage/drivers/cloudflare-kv-http",
   cloudflareR2Binding: "unstorage/drivers/cloudflare-r2-binding",
+  db0: "unstorage/drivers/db0",
+  denoKv: "unstorage/drivers/deno-kv",
+  denoKvNode: "unstorage/drivers/deno-kv-node",
   fs: "unstorage/drivers/fs",
   fsLite: "unstorage/drivers/fs-lite",
   github: "unstorage/drivers/github",
@@ -23,10 +26,12 @@ export const builtinDrivers = {
   mongodb: "unstorage/drivers/mongodb",
   myjson: "unstorage/drivers/myjson",
   netlifyBlobs: "unstorage/drivers/netlify-blobs",
+  null: "unstorage/drivers/null",
   overlay: "unstorage/drivers/overlay",
   planetscale: "unstorage/drivers/planetscale",
   redis: "unstorage/drivers/redis",
   sessionStorage: "unstorage/drivers/session-storage",
+  upstash: "unstorage/drivers/upstash",
   vercelKV: "unstorage/drivers/vercel-kv",
 
   /** @deprecated */
@@ -62,6 +67,7 @@ export type BuiltinDriverOptions = {
   cloudflareR2Binding: ExtractOpts<
     (typeof import("./drivers/cloudflare-r2-binding"))["default"]
   >;
+  db0: ExtractOpts<(typeof import("./drivers/db0"))["default"]>;
   fs: ExtractOpts<(typeof import("./drivers/fs"))["default"]>;
   fsLite: ExtractOpts<(typeof import("./drivers/fs-lite"))["default"]>;
   github: ExtractOpts<(typeof import("./drivers/github"))["default"]>;

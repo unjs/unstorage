@@ -8,10 +8,10 @@ import {
   getRequestHeader,
   setResponseHeader,
   readRawBody,
-  EventHandler,
+  type EventHandler,
   H3Event,
 } from "h3";
-import { Storage } from "./types";
+import type { Storage, TransactionOptions, StorageMeta } from "./types";
 import { stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
 
@@ -33,14 +33,21 @@ export interface StorageServerOptions {
   resolvePath?: (event: H3Event) => string;
 }
 
+/**
+ * This function creates an h3-based handler for the storage server. It can then be used as event handler in h3 or Nitro
+ * @param storage The storage which should be used for the storage server
+ * @param opts Storage options to set the authorization check or a custom path resolver
+ * @returns
+ * @see createStorageServer if a node-compatible handler is needed
+ */
 export function createH3StorageHandler(
   storage: Storage,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   opts: StorageServerOptions = {}
 ): EventHandler {
   return eventHandler(async (event) => {
     const _path = opts.resolvePath?.(event) ?? event.path;
-    const isBaseKey = _path.endsWith(":") || _path.endsWith("/");
+    const lastChar = _path[_path.length - 1];
+    const isBaseKey = lastChar === ":" || lastChar === "/";
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
 
     // Authorize Request
@@ -67,38 +74,36 @@ export function createH3StorageHandler(
       throw _httpError;
     }
 
-    // GET => getItem
+    // GET => getItem / getKeys
     if (event.method === "GET") {
       if (isBaseKey) {
         const keys = await storage.getKeys(key);
         return keys.map((key) => key.replace(/:/g, "/"));
       }
-
       const isRaw =
         getRequestHeader(event, "accept") === "application/octet-stream";
-      if (isRaw) {
-        const value = await storage.getItemRaw(key);
-        return value;
-      } else {
-        const value = await storage.getItem(key);
-        return stringify(value);
+      const driverValue = await (isRaw
+        ? storage.getItemRaw(key)
+        : storage.getItem(key));
+      if (driverValue === null) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: "KV value not found",
+        });
       }
+      setMetaHeaders(event, await storage.getMeta(key));
+      return isRaw ? driverValue : stringify(driverValue);
     }
 
-    // HEAD => hasItem + meta (mtime)
+    // HEAD => hasItem + meta (mtime, ttl)
     if (event.method === "HEAD") {
-      const _hasItem = await storage.hasItem(key);
-      event.node.res.statusCode = _hasItem ? 200 : 404;
-      if (_hasItem) {
-        const meta = await storage.getMeta(key);
-        if (meta.mtime) {
-          setResponseHeader(
-            event,
-            "last-modified",
-            new Date(meta.mtime).toUTCString()
-          );
-        }
+      if (!(await storage.hasItem(key))) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: "KV value not found",
+        });
       }
+      setMetaHeaders(event, await storage.getMeta(key));
       return "";
     }
 
@@ -106,13 +111,16 @@ export function createH3StorageHandler(
     if (event.method === "PUT") {
       const isRaw =
         getRequestHeader(event, "content-type") === "application/octet-stream";
+      const topts: TransactionOptions = {
+        ttl: Number(getRequestHeader(event, "x-ttl")) || undefined,
+      };
       if (isRaw) {
-        const value = await readRawBody(event);
-        await storage.setItemRaw(key, value);
+        const value = await readRawBody(event, false);
+        await storage.setItemRaw(key, value, topts);
       } else {
         const value = await readRawBody(event, "utf8");
         if (value !== undefined) {
-          await storage.setItem(key, value);
+          await storage.setItem(key, value, topts);
         }
       }
       return "OK";
@@ -131,6 +139,36 @@ export function createH3StorageHandler(
   });
 }
 
+function setMetaHeaders(event: H3Event, meta: StorageMeta) {
+  if (meta.mtime) {
+    setResponseHeader(
+      event,
+      "last-modified",
+      new Date(meta.mtime).toUTCString()
+    );
+  }
+  if (meta.ttl) {
+    setResponseHeader(event, "x-ttl", `${meta.ttl}`);
+    setResponseHeader(event, "cache-control", `max-age=${meta.ttl}`);
+  }
+}
+
+/**
+ * This function creates a node-compatible handler for your custom storage server.
+ *
+ * The storage server will handle HEAD, GET, PUT and DELETE requests.
+ * HEAD: Return if the request item exists in the storage, including a last-modified header if the storage supports it and the meta is stored
+ * GET: Return the item if it exists
+ * PUT: Sets the item
+ * DELETE: Removes the item (or clears the whole storage if the base key was used)
+ *
+ * If the request sets the `Accept` header to `application/octet-stream`, the server will handle the item as raw data.
+ *
+ * @param storage The storage which should be used for the storage server
+ * @param options Defining functions such as an authorization check and a custom path resolver
+ * @returns An object containing then `handle` function for the handler
+ * @see createH3StorageHandler For the bare h3 version which can be used with h3 or Nitro
+ */
 export function createStorageServer(
   storage: Storage,
   options: StorageServerOptions = {}

@@ -1,12 +1,14 @@
-import { describe, afterAll } from "vitest";
+import { describe } from "vitest";
 import driver from "../../src/drivers/myjson";
 import { testDriver } from "./utils";
 
-describe("drivers: myjson", async () => {
+const accessToken = process.env.VITE_MYJSON_ACCESS_TOKEN;
+const collectionId = process.env.VITE_MYJSON_COLLECTION_ID;
+
+describe.skipIf(!accessToken || !collectionId)("drivers: myjson", async () => {
+  process.env.MYJSON_ACCESS_TOKEN = accessToken;
+  process.env.MYJSON_COLLECTION_ID = collectionId;
   testDriver({
-    driver: driver({
-      accessToken: "YOUR ACCESS_TOKEN",
-      collectionId: "YOUR COLLECTION_ID",
-    }),
+    driver: () => driver({}),
   });
 });

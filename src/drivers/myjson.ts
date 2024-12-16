@@ -1,109 +1,123 @@
-import { defineDriver } from "./utils";
-import { $fetch as _fetch } from "ofetch";
-import { joinURL } from "ufo";
+import { defineDriver, createError } from "./utils";
 
-export interface myJsonOptions {
-  collectionId: string;
-  accessToken: string;
-  headers?: Record<string, string>;
+// Docs: https://docs.myjson.online/endpoints/records
+
+export interface MyJsonOptions {
+  /**
+   * The access token to use for all operations.
+   *
+   * `MYJSON_ACCESS_TOKEN` environment variable will be used if not provided.
+   */
+  accessToken?: string;
+
+  /**
+   * The collection ID to use for all operations.
+   *
+   * `MYJSON_COLLECTION_ID` environment variable will be used if not provided.
+   *
+   */
+  collectionId?: string;
 }
 
-const RECORDS_BASE_URL = "https://api.myjson.online/v1/records";
-const DRIVER_NAME = "http";
+const DRIVER_NAME = "myjson";
 
-export default defineDriver((opts: myJsonOptions) => {
-  const r = (key: string = "") =>
-    joinURL(RECORDS_BASE_URL, key.replace(/:/g, "/"));
+const RECORDS_BASE_URL = "https://api.myjson.online/v1/records/";
+const COLLECTIONS_BASE_URL = "https://api.myjson.online/v1/collections/";
 
-  opts.headers ??= {};
-  opts.headers["x-collection-access-token"] = opts.accessToken;
+export default defineDriver((opts: MyJsonOptions) => {
+  const r = (key: string = "", collections?: boolean) =>
+    (collections ? COLLECTIONS_BASE_URL : RECORDS_BASE_URL) +
+    key.replace(/:/g, "/");
+
+  const accessToken =
+    opts.accessToken || globalThis.process?.env?.MYJSON_ACCESS_TOKEN;
+
+  const collectionId =
+    opts.collectionId || globalThis.process?.env?.MYJSON_COLLECTION_ID;
+
+  if (!accessToken || !collectionId) {
+    throw createError(
+      DRIVER_NAME,
+      "Missing required options: `accessToken`, `collectionId`"
+    );
+  }
+
+  const myjsonFetch = (url: string, init: RequestInit) => {
+    console.log("fetching", url);
+    return fetch(url, {
+      ...init,
+      headers: {
+        "x-collection-access-token": accessToken,
+        ...init.headers,
+      },
+    });
+  };
+
+  const getKeys = (base: string) => {
+    return myjsonFetch(r(base, true /* collections */), {
+      redirect: "follow",
+    }).then((res) => res.json() as Promise<string[]>);
+  };
 
   return {
     name: DRIVER_NAME,
     options: opts,
-    async hasItem(key, topts) {
-      return _fetch(r(key), {
-        method: "HEAD",
-        headers: { ...opts.headers, ...topts.headers },
-        redirect: "follow",
-      })
-        .then(() => true)
-        .catch(() => false);
+    async getKeys(base) {
+      return getKeys(base);
     },
-    async getItem(key, tops = {}) {
-      return await _fetch(r(key), {
+    async hasItem(key) {
+      const response = await myjsonFetch(r(key), {
+        method: "HEAD",
+        redirect: "follow",
+      });
+      return response.ok;
+    },
+    async getItem(key) {
+      const response = await myjsonFetch(r(key), {
+        method: "GET",
         headers: {
-          ...opts.headers,
-          ...tops.headers,
           "Content-Type": "application/json",
         },
         redirect: "follow",
       });
+      return response.text();
     },
-    async getItemRaw(key, topts) {
-      return await _fetch(r(key), {
+    async getItemRaw(key) {
+      const response = await myjsonFetch(r(key), {
+        method: "GET",
         headers: {
-          accept: "application/octet-stream",
-          ...opts.headers,
-          ...topts.headers,
+          "Content-Type": "application/json",
         },
         redirect: "follow",
       });
+      return response.arrayBuffer();
     },
-    async setItem(key, value, topts: { patch?: true }) {
-      let method = "POST";
+    async setItem(key, value) {
       const urlencoded = new URLSearchParams();
-
       urlencoded.append("jsonData", value);
-      urlencoded.append("collectionId", opts.collectionId);
-
-      if (topts.patch) {
-        method = "PATCH";
-        urlencoded.append("jsonData", value);
-      } else if (this.hasItem(key, opts)) {
-        method = "PUT";
-        urlencoded.append("jsonData", value);
-      }
-
-      return await _fetch(r(key), {
-        method,
-        headers: { ...opts.headers, "Content-Type": "x-www-form-urlencoded" },
+      urlencoded.append("collectionId", collectionId);
+      await myjsonFetch(r(key), {
+        method: "POST",
+        headers: { "Content-Type": "x-www-form-urlencoded" },
         body: urlencoded,
         redirect: "follow",
       });
     },
-    async setItems(items, topts) {
-      await Promise.all(
-        items.map(
-          (item) =>
-            this.setItem && this.setItem(item.key, item.value, topts || {})
-        )
-      );
-    },
-    async removeItem(key, topts) {
-      await _fetch(r(key), {
+    async removeItem(key) {
+      await myjsonFetch(r(key), {
         method: "DELETE",
-        headers: { ...opts.headers, ...topts.headers },
         redirect: "follow",
       });
     },
-    async getKeys(collectionId, topts) {
-      const url = `https://api.myjson.online/v1/collections/${
-        collectionId || opts.collectionId
-      }/records`;
-
-      const value = await _fetch(url, {
-        headers: { ...opts.headers, ...topts.headers },
-        redirect: "follow",
-      });
-
-      return Array.isArray(value) ? value : [];
-    },
-    async clear(base, topts) {
-      const keys = await this.getKeys(base || opts.collectionId, topts);
-
+    async clear(base) {
+      const keys = await getKeys(base);
       await Promise.all(
-        keys.map((key) => this.removeItem && this.removeItem(key, topts))
+        keys.map((key) =>
+          myjsonFetch(r(key), {
+            method: "DELETE",
+            redirect: "follow",
+          })
+        )
       );
     },
   };

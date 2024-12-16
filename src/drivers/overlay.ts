@@ -1,5 +1,5 @@
 import { defineDriver } from "./utils";
-import type { Driver } from "../types";
+import type { Driver } from "..";
 import { normalizeKey } from "./utils";
 
 export interface OverlayStorageOptions {
@@ -17,10 +17,11 @@ export default defineDriver((options: OverlayStorageOptions) => {
     async hasItem(key, opts) {
       for (const layer of options.layers) {
         if (await layer.hasItem(key, opts)) {
-          if (layer === options.layers[0]) {
-            if ((await options.layers[0]?.getItem(key)) === OVERLAY_REMOVED) {
-              return false;
-            }
+          if (
+            layer === options.layers[0] &&
+            (await options.layers[0]?.getItem(key)) === OVERLAY_REMOVED
+          ) {
+            return false;
           }
           return true;
         }
@@ -54,7 +55,7 @@ export default defineDriver((options: OverlayStorageOptions) => {
           return keys.map((key) => normalizeKey(key));
         })
       );
-      const uniqueKeys = Array.from(new Set(allKeys.flat()));
+      const uniqueKeys = [...new Set(allKeys.flat())];
       const existingKeys = await Promise.all(
         uniqueKeys.map(async (key) => {
           if ((await options.layers[0]?.getItem(key)) === OVERLAY_REMOVED) {

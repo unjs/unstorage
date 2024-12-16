@@ -10,5 +10,6 @@ tmp
 __*
 .vercel
 .netlify
-playground
+test/fs-storage/**
 .env
+.wrangler

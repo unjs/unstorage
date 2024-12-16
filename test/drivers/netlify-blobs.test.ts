@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe } from "vitest";
 import driver from "../../src/drivers/netlify-blobs";
 import { testDriver } from "./utils";
-import { BlobsServer } from "@netlify/blobs";
-import { resolve } from "path";
+import { BlobsServer } from "@netlify/blobs/server";
+import { resolve } from "node:path";
 import { rm, mkdir } from "node:fs/promises";
 
 describe("drivers: netlify-blobs", async () => {
@@ -39,6 +39,8 @@ describe("drivers: netlify-blobs", async () => {
       token,
       siteID,
       deployID: "test",
+      // Usually defaulted via the environment; only required in a test environment like this
+      region: "us-east-1",
     }),
   });
 

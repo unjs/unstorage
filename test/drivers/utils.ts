@@ -1,5 +1,10 @@
-import { it, expect } from "vitest";
-import { Storage, Driver, createStorage, restoreSnapshot } from "../../src";
+import { it, expect, beforeAll, afterAll } from "vitest";
+import {
+  type Storage,
+  type Driver,
+  createStorage,
+  restoreSnapshot,
+} from "../../src";
 
 export interface TestContext {
   storage: Storage;
@@ -7,15 +12,26 @@ export interface TestContext {
 }
 
 export interface TestOptions {
-  driver: Driver;
+  driver: Driver | (() => Driver);
   additionalTests?: (ctx: TestContext) => void;
 }
 
 export function testDriver(opts: TestOptions) {
-  const ctx: TestContext = {
-    storage: createStorage({ driver: opts.driver }),
-    driver: opts.driver,
-  };
+  const ctx = {} as TestContext;
+
+  beforeAll(() => {
+    ctx.driver =
+      typeof opts.driver === "function" ? opts.driver() : opts.driver;
+
+    ctx.storage = createStorage({
+      driver: ctx.driver,
+    });
+  });
+
+  afterAll(async () => {
+    await ctx.driver?.dispose?.();
+    await ctx.storage?.dispose?.();
+  });
 
   it("init", async () => {
     await restoreSnapshot(ctx.storage, { initial: "works" });
@@ -82,7 +98,7 @@ export function testDriver(opts: TestOptions) {
 
   it("serialize (error for non primitives)", async () => {
     class Test {}
-    expect(
+    await expect(
       ctx.storage.setItem("/data/badvalue.json", new Test())
     ).rejects.toThrow("[unstorage] Cannot stringify value!");
   });
@@ -161,9 +177,5 @@ export function testDriver(opts: TestOptions) {
     // ensure we can clear empty storage as well: #162
     await ctx.storage.clear();
     expect(await ctx.storage.getKeys()).toMatchObject([]);
-  });
-
-  it("dispose", async () => {
-    await ctx.storage.dispose();
   });
 }

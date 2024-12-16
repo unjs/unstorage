@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import driver from "../../src/drivers/github";
 import { createStorage } from "../../src";
 
@@ -18,7 +18,7 @@ describe("drivers: github", () => {
   });
 
   it("can read a json file content", async () => {
-    const pkg = (await storage.getItem("package.json")) as Record<
+    const pkg = (await storage.getItem("package.json"))! as Record<
       string,
       unknown
     >;

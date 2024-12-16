@@ -11,14 +11,17 @@ export type Unwatch = () => MaybePromise<void>;
 export interface StorageMeta {
   atime?: Date;
   mtime?: Date;
+  ttl?: number;
   [key: string]: StorageValue | Date | undefined;
 }
 
+// TODO: type ttl
 export type TransactionOptions = Record<string, any>;
 
-export interface Driver {
+export interface Driver<OptionsT = any, InstanceT = any> {
   name?: string;
-  options?: any;
+  options?: OptionsT;
+  getInstance?: () => InstanceT;
   hasItem: (key: string, opts: TransactionOptions) => MaybePromise<boolean>;
   getItem: (
     key: string,
@@ -58,31 +61,64 @@ export interface Driver {
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }
 
+type StorageDefinition = {
+  items: unknown;
+  [key: string]: unknown;
+};
+
+type StorageItemMap<T extends StorageDefinition> = T["items"];
+
 export interface Storage<T extends StorageValue = StorageValue> {
   // Item
-  hasItem: (key: string, opts?: TransactionOptions) => Promise<boolean>;
-  getItem: <U extends T>(
+  hasItem<
+    U extends Extract<T, StorageDefinition>,
+    K extends keyof StorageItemMap<U>,
+  >(
+    key: K,
+    opts?: TransactionOptions
+  ): Promise<boolean>;
+  hasItem(key: string, opts?: TransactionOptions): Promise<boolean>;
+
+  getItem<
+    U extends Extract<T, StorageDefinition>,
+    K extends keyof StorageItemMap<U>,
+  >(
+    key: K,
+    ops?: TransactionOptions
+  ): Promise<StorageItemMap<U>[K] | null>;
+  getItem<U extends T>(
     key: string,
     opts?: TransactionOptions
-  ) => Promise<U | null>;
+  ): Promise<U | null>;
+
   /** @experimental */
-  getItems: (
+  getItems: <U extends T>(
     items: (string | { key: string; options?: TransactionOptions })[],
     commonOptions?: TransactionOptions
-  ) => Promise<{ key: string; value: StorageValue }[]>;
+  ) => Promise<{ key: string; value: U }[]>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   getItemRaw: <T = any>(
     key: string,
     opts?: TransactionOptions
   ) => Promise<MaybeDefined<T> | null>;
-  setItem: <U extends T>(
+
+  setItem<
+    U extends Extract<T, StorageDefinition>,
+    K extends keyof StorageItemMap<U>,
+  >(
+    key: K,
+    value: StorageItemMap<U>[K],
+    opts?: TransactionOptions
+  ): Promise<void>;
+  setItem<U extends T>(
     key: string,
     value: U,
     opts?: TransactionOptions
-  ) => Promise<void>;
+  ): Promise<void>;
+
   /** @experimental */
-  setItems: (
-    items: { key: string; value: string; options?: TransactionOptions }[],
+  setItems: <U extends T>(
+    items: { key: string; value: U; options?: TransactionOptions }[],
     commonOptions?: TransactionOptions
   ) => Promise<void>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
@@ -91,12 +127,23 @@ export interface Storage<T extends StorageValue = StorageValue> {
     value: MaybeDefined<T>,
     opts?: TransactionOptions
   ) => Promise<void>;
-  removeItem: (
+
+  removeItem<
+    U extends Extract<T, StorageDefinition>,
+    K extends keyof StorageItemMap<U>,
+  >(
+    key: K,
+    opts?:
+      | (TransactionOptions & { removeMeta?: boolean })
+      | boolean /* legacy: removeMeta */
+  ): Promise<void>;
+  removeItem(
     key: string,
     opts?:
       | (TransactionOptions & { removeMeta?: boolean })
       | boolean /* legacy: removeMeta */
-  ) => Promise<void>;
+  ): Promise<void>;
+
   // Meta
   getMeta: (
     key: string,
@@ -125,4 +172,11 @@ export interface Storage<T extends StorageValue = StorageValue> {
     base?: string,
     options?: { parents?: boolean }
   ) => { base: string; driver: Driver }[];
+  // Aliases
+  keys: Storage["getKeys"];
+  get: Storage<T>["getItem"];
+  set: Storage<T>["setItem"];
+  has: Storage<T>["hasItem"];
+  del: Storage<T>["removeItem"];
+  remove: Storage<T>["removeItem"];
 }

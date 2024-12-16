@@ -1,4 +1,4 @@
-import { describe, afterAll } from "vitest";
+import { describe, afterAll, expect, it } from "vitest";
 import driver from "../../src/drivers/http";
 import { createStorage } from "../../src";
 import { createStorageServer } from "../../src/server";
@@ -35,9 +35,18 @@ describe("drivers: http", async () => {
       base: listener!.url,
       headers: { "x-global-header": "1" },
     }),
-    async additionalTests({ storage }) {
-      await storage.setItem("authorized", "test", {
-        headers: { "x-auth-header": "1" },
+    async additionalTests(ctx) {
+      it("custom headers", async () => {
+        await ctx.storage.setItem("authorized", "test", {
+          headers: { "x-auth-header": "1" },
+        });
+      });
+      it("null item", async () => {
+        await ctx.storage.setItem("nullItem", null);
+        await ctx.storage.setItem("nullStringItem", "null");
+        expect(await ctx.storage.getItem("nullItem")).toBeNull();
+        expect(await ctx.storage.getItem("nanItem")).toBeNull();
+        expect(await ctx.storage.getItem("nullStringItem")).toBeNull();
       });
     },
   });

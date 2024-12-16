@@ -1,16 +1,10 @@
 {
-  "name": "docus-starter",
-  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nuxi dev",
-    "build": "nuxi build",
-    "generate": "nuxi generate",
-    "preview": "nuxi preview"
+    "build": "undocs build",
+    "dev": "undocs dev"
   },
   "devDependencies": {
-    "@nuxt-themes/docus": "^1.15.0",
-    "@nuxtjs/plausible": "^0.2.4",
-    "nuxt": "^3.8.2"
+    "undocs": "^0.2.30"
   }
 }

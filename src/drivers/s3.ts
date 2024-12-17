@@ -132,7 +132,7 @@ export default defineDriver((options: S3DriverOptions) => {
       await awsFetch(`${baseURL}?delete`, {
         method: "POST",
         headers: {
-          "x-amz-checksum-crc32": crc32ToBase64(body),
+          "x-amz-checksum-sha256": await sha256Base64(body),
         },
         body,
       });
@@ -186,27 +186,10 @@ function deleteKeysReq(keys: string[]) {
     .join("")}</Delete>`;
 }
 
-function crc32(str: string) {
-  let c = 0xff_ff_ff_ff;
-  for (let i = 0; i < str.length; i++) {
-    c ^= str.charCodeAt(i); // eslint-disable-line unicorn/prefer-code-point
-    for (let j = 0; j < 8; j++) {
-      c = c & 1 ? 0xed_b8_83_20 ^ (c >>> 1) : c >>> 1;
-    }
-  }
-  return (c ^ 0xff_ff_ff_ff) >>> 0;
-}
-
-function crc32ToBase64(str: string) {
-  const val = crc32(str);
-  const bytes = new Uint8Array(4);
-  bytes[0] = (val >>> 24) & 0xff;
-  bytes[1] = (val >>> 16) & 0xff;
-  bytes[2] = (val >>> 8) & 0xff;
-  bytes[3] = val & 0xff;
-  let bin = "";
-  for (const byte of bytes) {
-    bin += String.fromCharCode(byte); // eslint-disable-line unicorn/prefer-code-point
-  }
-  return btoa(bin);
+async function sha256Base64(str: string) {
+  const buffer = new TextEncoder().encode(str);
+  const hash = await crypto.subtle.digest("SHA-256", buffer);
+  const bytes = new Uint8Array(hash);
+  const binaryString = String.fromCharCode(...bytes); // eslint-disable-line unicorn/prefer-code-point
+  return btoa(binaryString);
 }

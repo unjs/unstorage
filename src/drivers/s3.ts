@@ -6,7 +6,6 @@ import {
 } from "./utils";
 import { AwsClient } from "aws4fetch";
 import xml2js from "xml2js";
-import js2xml from "jstoxml";
 
 export interface S3DriverOptions {
   accessKeyId: string;
@@ -14,16 +13,15 @@ export interface S3DriverOptions {
   endpoint: string;
   region: string;
   bucket: string;
-  accountId?: string;
+  bulkDelete?: boolean;
 }
 
 const DRIVER_NAME = "s3";
 
 export default defineDriver((options: S3DriverOptions) => {
-  let awsClient: AwsClient;
-
+  let _awsClient: AwsClient;
   const getAwsClient = () => {
-    if (!awsClient) {
+    if (!_awsClient) {
       if (!options.accessKeyId) {
         throw createRequiredError(DRIVER_NAME, "accessKeyId");
       }
@@ -39,14 +37,14 @@ export default defineDriver((options: S3DriverOptions) => {
       if (!options.region) {
         throw createRequiredError(DRIVER_NAME, "region");
       }
-      awsClient = new AwsClient({
+      _awsClient = new AwsClient({
         service: "s3",
         accessKeyId: options.accessKeyId,
         secretAccessKey: options.secretAccessKey,
         region: options.region,
       });
     }
-    return awsClient;
+    return _awsClient;
   };
 
   const baseURL = `${options.endpoint.replace(/\/$/, "")}/${options.bucket}`;
@@ -62,7 +60,7 @@ export default defineDriver((options: S3DriverOptions) => {
       }
       throw createError(
         DRIVER_NAME,
-        `[${request.method}] ${url}: ${res.status} ${res.statusText}`
+        `[${request.method}] ${url}: ${res.status} ${res.statusText} ${await res.text()}`
       );
     }
     return res;
@@ -129,19 +127,18 @@ export default defineDriver((options: S3DriverOptions) => {
     if (!keys) {
       return null;
     }
-    if (!options.accountId) {
-      return Promise.all(keys.map((key) => deleteObject(key)));
+    if (options.bulkDelete) {
+      const body = deleteKeysReq(keys);
+      await awsFetch(`${baseURL}?delete`, {
+        method: "POST",
+        headers: {
+          "x-amz-checksum-crc32": crc32ToBase64(body),
+        },
+        body,
+      });
+    } else {
+      await Promise.all(keys.map((key) => deleteObject(key)));
     }
-    const body = js2xml.toXML({
-      Delete: keys.map((key) => ({ Object: { Key: key } })),
-    });
-    await awsFetch(baseURL, {
-      method: "DELETE",
-      body,
-      headers: {
-        "x-amz-expected-bucket-owner": options.accountId,
-      },
-    });
   };
 
   return {
@@ -176,3 +173,40 @@ export default defineDriver((options: S3DriverOptions) => {
     },
   };
 });
+
+// --- utils ---
+
+function deleteKeysReq(keys: string[]) {
+  return `<Delete>${keys
+    .map((key) => {
+      // prettier-ignore
+      key = key.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      return /* xml */ `<Object><Key>${key}</Key></Object>`;
+    })
+    .join("")}</Delete>`;
+}
+
+function crc32(str: string) {
+  let c = 0xff_ff_ff_ff;
+  for (let i = 0; i < str.length; i++) {
+    c ^= str.charCodeAt(i); // eslint-disable-line unicorn/prefer-code-point
+    for (let j = 0; j < 8; j++) {
+      c = c & 1 ? 0xed_b8_83_20 ^ (c >>> 1) : c >>> 1;
+    }
+  }
+  return (c ^ 0xff_ff_ff_ff) >>> 0;
+}
+
+function crc32ToBase64(str: string) {
+  const val = crc32(str);
+  const bytes = new Uint8Array(4);
+  bytes[0] = (val >>> 24) & 0xff;
+  bytes[1] = (val >>> 16) & 0xff;
+  bytes[2] = (val >>> 8) & 0xff;
+  bytes[3] = val & 0xff;
+  let bin = "";
+  for (const byte of bytes) {
+    bin += String.fromCharCode(byte); // eslint-disable-line unicorn/prefer-code-point
+  }
+  return btoa(bin);
+}

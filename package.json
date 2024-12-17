@@ -62,7 +62,7 @@
     "@azure/keyvault-secrets": "^4.9.0",
     "@azure/storage-blob": "^12.26.0",
     "@capacitor/preferences": "^6.0.3",
-    "@cloudflare/workers-types": "^4.20241205.0",
+    "@cloudflare/workers-types": "^4.20241216.0",
     "@deno/kv": "^0.8.4",
     "@electric-sql/pglite": "^0.2.15",
     "@libsql/client": "^0.14.0",
@@ -98,7 +98,7 @@
     "unbuild": "^3.0.1",
     "vite": "^6.0.3",
     "vitest": "^2.1.8",
-    "wrangler": "^3.95.0"
+    "wrangler": "^3.97.0"
   },
   "peerDependencies": {
     "@azure/app-configuration": "^1.8.0",

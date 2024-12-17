@@ -1,220 +1,178 @@
-import { $fetch } from "ofetch";
-import { defineDriver, createRequiredError } from "./utils";
+import {
+  defineDriver,
+  createRequiredError,
+  normalizeKey,
+  createError,
+} from "./utils";
 import { AwsClient } from "aws4fetch";
-import crypto from "crypto";
-import xml2js from 'xml2js'
-import js2xml from 'jstoxml'
-import { joinURL, withQuery } from 'ufo'
-
-if (!globalThis.crypto) {
-    // @ts-ignore
-    globalThis.crypto = crypto;
-}
+import xml2js from "xml2js";
+import js2xml from "jstoxml";
 
 export interface S3DriverOptions {
-    accessKeyId: string;
-    secretAccessKey: string;
-    endpoint: string;
-    region: string;
-    bucket: string;
-    accountId?: string;
-}
-
-type GetItemOptions = undefined | {
-    headers?: Record<string, string>;
-}
-
-type SetItemOptions = undefined | {
-    headers?: Record<string, string>;
-    meta?: Record<string, string>;
+  accessKeyId: string;
+  secretAccessKey: string;
+  endpoint: string;
+  region: string;
+  bucket: string;
+  accountId?: string;
 }
 
 const DRIVER_NAME = "s3";
 
 export default defineDriver((options: S3DriverOptions) => {
-    if (!options.accessKeyId) {
+  let awsClient: AwsClient;
+
+  const getAwsClient = () => {
+    if (!awsClient) {
+      if (!options.accessKeyId) {
         throw createRequiredError(DRIVER_NAME, "accessKeyId");
-    }
-    if (!options.secretAccessKey) {
+      }
+      if (!options.secretAccessKey) {
         throw createRequiredError(DRIVER_NAME, "secretAccessKey");
-    }
-    if (!options.bucket) {
+      }
+      if (!options.bucket) {
         throw createRequiredError(DRIVER_NAME, "bucket");
-    }
-    if (!options.endpoint) {
+      }
+      if (!options.endpoint) {
         throw createRequiredError(DRIVER_NAME, "endpoint");
-    }
-    if (!options.region) {
+      }
+      if (!options.region) {
         throw createRequiredError(DRIVER_NAME, "region");
+      }
+      awsClient = new AwsClient({
+        service: "s3",
+        accessKeyId: options.accessKeyId,
+        secretAccessKey: options.secretAccessKey,
+        region: options.region,
+      });
     }
+    return awsClient;
+  };
 
-    let awsClient: AwsClient
+  const baseURL = `${options.endpoint.replace(/\/$/, "")}/${options.bucket}`;
 
-    function getAwsClient() {
-        if (!awsClient) {
-            awsClient = new AwsClient({
-                accessKeyId: options.accessKeyId,
-                secretAccessKey: options.secretAccessKey,
-                region: options.region,
-                service: DRIVER_NAME,
-            })
-        }
-        return awsClient
+  const url = (key: string = "") => `${baseURL}/${normalizeKey(key)}`;
+
+  const awsFetch = async (url: string, opts?: RequestInit) => {
+    const request = await getAwsClient().sign(url, opts);
+    const res = await fetch(request);
+    if (!res.ok) {
+      if (res.status === 404) {
+        return null;
+      }
+      throw createError(
+        DRIVER_NAME,
+        `[${request.method}] ${url}: ${res.status} ${res.statusText}`
+      );
     }
+    return res;
+  };
 
-    const normalizedKey = (key: string) => key.replace(/:/g, "/").replace(/\/+$/, '')
-
-    const awsUrlWithoutKey = joinURL(options.endpoint, options.bucket);
-
-    const awsUrlWithKey = (key: string) => joinURL(options.endpoint, options.bucket, normalizedKey(key));
-
-    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html
-    async function _getMeta(key: string) {
-        const request = await getAwsClient().sign(awsUrlWithKey(key), {
-            method: "HEAD",
-        });
-
-        return $fetch.raw(request)
-            .then((res) => {
-                const metaHeaders: HeadersInit = {};
-                for (const [key, value] of res.headers.entries()) {
-                    const match = /x-amz-meta-(.*)/.exec(key);
-                    if (match) {
-                        metaHeaders[match[1]] = value;
-                    }
-                }
-                return metaHeaders
-            })
+  // https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html
+  const headObject = async (key: string) => {
+    const res = await awsFetch(url(key), { method: "HEAD" });
+    if (!res) {
+      return null;
     }
-
-    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
-    async function _getKeys(base?: string) {
-        const url = withQuery(awsUrlWithoutKey, { prefix: base && normalizedKey(base) })
-
-        const request = await getAwsClient().sign(url, {
-            method: "GET",
-        });
-
-        return $fetch(request)
-            .then((res) => {
-                let keys: Array<string> = []
-                xml2js.parseString(res, (error, result) => {
-                    if (error === null) {
-                        const contents = result['ListBucketResult']['Contents'] as Array<any>
-                        keys = contents.map(item => item['Key'][0])
-                    }
-                })
-                return keys
-            }).catch(() => [])
-    };
-
-    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
-    async function _getItemRaw(key: string, opts: GetItemOptions = {}) {
-        const request = await getAwsClient().sign(awsUrlWithKey(key), {
-            method: "GET",
-        });
-
-        return $fetch.raw(request)
-            .then((res) => {
-                opts.headers ||= {}
-
-                for (const [key, value] of res.headers.entries()) {
-                    opts.headers[key] = value
-                }
-
-                return res._data
-            })
-            .catch(() => null)
+    const metaHeaders: HeadersInit = {};
+    for (const [key, value] of res.headers.entries()) {
+      const match = /x-amz-meta-(.*)/.exec(key);
+      if (match?.[1]) {
+        metaHeaders[match[1]] = value;
+      }
     }
+    return metaHeaders;
+  };
 
-    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
-    async function _setItemRaw(key: string, value: any, opts: SetItemOptions = {}) {
-        const metaHeaders: HeadersInit = {};
-
-        if (typeof opts.meta === "object") {
-            for (const [key, value] of Object.entries(opts.meta)) {
-                metaHeaders[`x-amz-meta-${key}`] = value;
-            }
-        }
-
-        const request = await getAwsClient().sign(awsUrlWithKey(key), {
-            method: "PUT",
-            body: value,
-            headers: {
-                ...opts.headers,
-                ...metaHeaders,
-            },
-        });
-
-        return $fetch(request);
+  // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
+  const listObjects = async (prefix?: string) => {
+    const res = await awsFetch(baseURL).then((r) => r?.text());
+    if (!res) {
+      console.log("no list", prefix ? `${baseURL}?prefix=${prefix}` : baseURL);
+      return null;
     }
+    let keys: string[] = [];
+    xml2js.parseString(res, (error, result) => {
+      if (error === null) {
+        const contents = result["ListBucketResult"]["Contents"] as any[];
+        keys = contents?.map((item) => item["Key"][0]);
+      }
+    });
+    return keys;
+  };
 
-    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
-    async function _removeItem(key: string) {
-        const request = await getAwsClient().sign(awsUrlWithKey(key), {
-            method: "DELETE",
-        });
+  // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
+  const getObject = (key: string) => {
+    return awsFetch(url(key));
+  };
 
-        return $fetch(request);
+  // https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
+  const putObject = async (key: string, value: string) => {
+    return awsFetch(url(key), {
+      method: "PUT",
+      body: value,
+    });
+  };
+
+  // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
+  const deleteObject = async (key: string) => {
+    return awsFetch(url(key), { method: "DELETE" }).then((r) => {
+      if (r?.status !== 204) {
+        throw createError(DRIVER_NAME, `Failed to delete ${key}`);
+      }
+    });
+  };
+
+  // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
+  const deleteObjects = async (base: string) => {
+    const keys = await listObjects(base);
+    if (!keys) {
+      return null;
     }
+    if (!options.accountId) {
+      return Promise.all(keys.map((key) => deleteObject(key)));
+    }
+    const body = js2xml.toXML({
+      Delete: keys.map((key) => ({ Object: { Key: key } })),
+    });
+    await awsFetch(baseURL, {
+      method: "DELETE",
+      body,
+      headers: {
+        "x-amz-expected-bucket-owner": options.accountId,
+      },
+    });
+  };
 
-    return {
-        name: DRIVER_NAME,
-        options,
-
-        getItemRaw: _getItemRaw,
-        setItemRaw: _setItemRaw,
-        getKeys: _getKeys,
-        removeItem: _removeItem,
-
-        getMeta: (key) => _getMeta(key).catch(() => ({})),
-
-        getItem(key, opts: GetItemOptions) {
-            return _getItemRaw(key, opts)
-        },
-
-        setItem(key, value, opts: SetItemOptions = {}) {
-            let contentType = 'text/plain'
-
-            try {
-                JSON.parse(value)
-                contentType = 'application/json'
-            } catch { }
-
-            opts.headers = {
-                'Content-Type': contentType,
-                'Content-Length': value.length.toString(),
-                ...opts.headers
-            }
-
-            return _setItemRaw(key, value, opts)
-        },
-
-        // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
-        async clear(base) {
-            const keys = await _getKeys(base)
-
-            if (options.accountId) {
-                const body = js2xml.toXML({
-                    'Delete': keys.map((key) => ({ 'Object': { 'Key': key } }))
-                })
-
-                const request = await getAwsClient().sign(awsUrlWithoutKey, {
-                    method: "DELETE",
-                    body,
-                    headers: {
-                        'x-amz-expected-bucket-owner': options.accountId
-                    }
-                });
-
-                await $fetch(request)
-            }
-
-            await Promise.all(keys.map(key => _removeItem(key)))
-        },
-
-        async hasItem(key) {
-            return _getMeta(key).then(() => true).catch(() => false);
-        },
-    };
+  return {
+    name: DRIVER_NAME,
+    options,
+    getItem(key) {
+      return getObject(key).then((res) => (res ? res.text() : null));
+    },
+    getItemRaw(key) {
+      return getObject(key).then((res) => (res ? res.arrayBuffer() : null));
+    },
+    async setItem(key, value) {
+      await putObject(key, value);
+    },
+    async setItemRaw(key, value) {
+      await putObject(key, value);
+    },
+    getMeta(key) {
+      return headObject(key);
+    },
+    hasItem(key) {
+      return headObject(key).then((meta) => !!meta);
+    },
+    getKeys(base) {
+      return listObjects(base).then((keys) => keys || []);
+    },
+    async removeItem(key) {
+      await deleteObject(key);
+    },
+    async clear(base) {
+      await deleteObjects(base);
+    },
+  };
 });

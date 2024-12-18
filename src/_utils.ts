@@ -52,10 +52,7 @@ export function serializeRaw(value: any) {
   if (typeof value === "string") {
     return value;
   }
-  const base64 = globalThis.Buffer
-    ? Buffer.from(value).toString("base64")
-    : base64Encode(value);
-  return BASE64_PREFIX + base64;
+  return BASE64_PREFIX + base64Encode(value);
 }
 
 export function deserializeRaw(value: any) {
@@ -67,21 +64,12 @@ export function deserializeRaw(value: any) {
     // Return unknown strings as-is
     return value;
   }
-
-  return globalThis.Buffer
-    ? Buffer.from(value.slice(BASE64_PREFIX.length), "base64")
-    : base64Decode(value.slice(BASE64_PREFIX.length));
+  return base64Decode(value.slice(BASE64_PREFIX.length));
 }
 
-function base64Decode(input: string, urlSafe?: boolean) {
-  if (urlSafe) {
-    input = input.replace(/-/g, "+").replace(/_/g, "/");
-    const paddingLength = input.length % 4;
-    if (paddingLength === 2) {
-      input += "==";
-    } else if (paddingLength === 3) {
-      input += "=";
-    }
+function base64Decode(input: string) {
+  if (globalThis.Buffer) {
+    return Buffer.from(input, "base64");
   }
   return Uint8Array.from(
     globalThis.atob(input),
@@ -89,13 +77,9 @@ function base64Decode(input: string, urlSafe?: boolean) {
   );
 }
 
-export function base64Encode(input: Uint8Array, urlSafe?: boolean) {
-  if (urlSafe) {
-    return globalThis
-      .btoa(String.fromCodePoint(...input))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
+function base64Encode(input: Uint8Array) {
+  if (globalThis.Buffer) {
+    return Buffer.from(input).toString("base64");
   }
   return globalThis.btoa(String.fromCodePoint(...input));
 }

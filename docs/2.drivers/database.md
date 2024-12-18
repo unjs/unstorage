@@ -11,7 +11,7 @@ icon: ph:database
 This driver stores KV data in any SQL database using [db0](https://db0.unjs.io).
 
 ::warning
-Database driver is experimental, please report any issues [here](https://github.com/unjs/unstorage/issues/400).
+Database driver is experimental and behavior may change in the future.
 ::
 
 To use, you will need to install `db0` in your project:

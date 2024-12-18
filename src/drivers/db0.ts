@@ -32,7 +32,7 @@ export default defineDriver((opts: DB0DriverOptions) => {
     if (!setupPromise) {
       if (!(globalThis as any)[kExperimentalWarning]) {
         console.warn(
-          "[unstorage]: Database driver is experimental! Please report any issues via https://github.com/unjs/unstorage/issues/400"
+          "[unstorage]: Database driver is experimental and behavior may change in the future."
         );
         (globalThis as any)[kExperimentalWarning] = true;
       }

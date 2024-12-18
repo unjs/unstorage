@@ -46,21 +46,13 @@ export function stringify(value: any): string {
   throw new Error("[unstorage] Cannot stringify value!");
 }
 
-function checkBufferSupport() {
-  if (typeof Buffer === "undefined") {
-    throw new TypeError("[unstorage] Buffer is not supported!");
-  }
-}
-
 export const BASE64_PREFIX = "base64:";
 
 export function serializeRaw(value: any) {
   if (typeof value === "string") {
     return value;
   }
-  checkBufferSupport();
-  const base64 = Buffer.from(value).toString("base64");
-  return BASE64_PREFIX + base64;
+  return BASE64_PREFIX + base64Encode(value);
 }
 
 export function deserializeRaw(value: any) {
@@ -72,6 +64,22 @@ export function deserializeRaw(value: any) {
     // Return unknown strings as-is
     return value;
   }
-  checkBufferSupport();
-  return Buffer.from(value.slice(BASE64_PREFIX.length), "base64");
+  return base64Decode(value.slice(BASE64_PREFIX.length));
+}
+
+function base64Decode(input: string) {
+  if (globalThis.Buffer) {
+    return Buffer.from(input, "base64");
+  }
+  return Uint8Array.from(
+    globalThis.atob(input),
+    (c) => c.codePointAt(0) as number
+  );
+}
+
+function base64Encode(input: Uint8Array) {
+  if (globalThis.Buffer) {
+    return Buffer.from(input).toString("base64");
+  }
+  return globalThis.btoa(String.fromCodePoint(...input));
 }

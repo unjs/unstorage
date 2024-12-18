@@ -166,3 +166,10 @@ const storage = createStorage({
   - `type: "blob"`: Return a `Blob`.
   - `type: "bytes"`: Return an `Uint8Array`.
   - `type: "arrayBuffer"`: Return an `ArrayBuffer` (default)
+
+## Cloudflare R2 (http)
+
+To use Cloudflare R2 over HTTP, you can use [s3 driver](/drivers/s3).
+
+> [!NOTE]
+> Make sure to set `region` to `auto`

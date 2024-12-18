@@ -25,12 +25,13 @@ import type { ExtraOptions as NetlifyBlobsOptions } from "unstorage/drivers/netl
 import type { OverlayStorageOptions as OverlayOptions } from "unstorage/drivers/overlay";
 import type { PlanetscaleDriverOptions as PlanetscaleOptions } from "unstorage/drivers/planetscale";
 import type { RedisOptions as RedisOptions } from "unstorage/drivers/redis";
+import type { S3DriverOptions as S3Options } from "unstorage/drivers/s3";
 import type { SessionStorageOptions as SessionStorageOptions } from "unstorage/drivers/session-storage";
 import type { UpstashOptions as UpstashOptions } from "unstorage/drivers/upstash";
 import type { VercelBlobOptions as VercelBlobOptions } from "unstorage/drivers/vercel-blob";
 import type { VercelKVOptions as VercelKVOptions } from "unstorage/drivers/vercel-kv";
 
-export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "session-storage" | "sessionStorage" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-kv" | "vercelKV";
+export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-kv" | "vercelKV";
 
 export type BuiltinDriverOptions = {
   "azure-app-configuration": AzureAppConfigurationOptions;
@@ -71,6 +72,7 @@ export type BuiltinDriverOptions = {
   "overlay": OverlayOptions;
   "planetscale": PlanetscaleOptions;
   "redis": RedisOptions;
+  "s3": S3Options;
   "session-storage": SessionStorageOptions;
   "sessionStorage": SessionStorageOptions;
   "upstash": UpstashOptions;
@@ -121,6 +123,7 @@ export const builtinDrivers = {
   "overlay": "unstorage/drivers/overlay",
   "planetscale": "unstorage/drivers/planetscale",
   "redis": "unstorage/drivers/redis",
+  "s3": "unstorage/drivers/s3",
   "session-storage": "unstorage/drivers/session-storage",
   "sessionStorage": "unstorage/drivers/session-storage",
   "upstash": "unstorage/drivers/upstash",

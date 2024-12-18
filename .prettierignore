@@ -1,4 +1,5 @@
 test/drivers/tmp
+src/_drivers.ts
 dist
 node_modules
 .output

@@ -53,8 +53,7 @@ for (const entry of driverEntries) {
   });
 }
 
-const genCode = /* ts */ `
-// Auto-generated using scripts/gen-drivers.
+const genCode = /* ts */ `// Auto-generated using scripts/gen-drivers.
 // Do not manually edit!
 
 ${drivers

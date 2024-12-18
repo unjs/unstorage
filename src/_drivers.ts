@@ -1,6 +1,6 @@
-
 // Auto-generated using scripts/gen-drivers.
 // Do not manually edit!
+
 import type { AzureAppConfigurationOptions as AzureAppConfigurationOptions } from "unstorage/drivers/azure-app-configuration";
 import type { AzureCosmosOptions as AzureCosmosOptions } from "unstorage/drivers/azure-cosmos";
 import type { AzureKeyVaultOptions as AzureKeyVaultOptions } from "unstorage/drivers/azure-key-vault";

@@ -35,8 +35,8 @@
     "build": "pnpm gen-drivers && unbuild",
     "gen-drivers": "jiti scripts/gen-drivers.ts",
     "dev": "vitest",
-    "lint": "eslint . && prettier -c src test",
-    "lint:fix": "eslint . --fix && prettier -w src test",
+    "lint": "eslint . && prettier -c .",
+    "lint:fix": "eslint . --fix && prettier -w .",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
@@ -144,6 +144,9 @@
     "@capacitor/preferences": {
       "optional": true
     },
+    "@deno/kv": {
+      "optional": true
+    },
     "@netlify/blobs": {
       "optional": true
     },
@@ -166,9 +169,6 @@
       "optional": true
     },
     "ioredis": {
-      "optional": true
-    },
-    "@deno/kv": {
       "optional": true
     }
   },

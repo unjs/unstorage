@@ -28,11 +28,11 @@ import uploadthingDriver from "unstorage/drivers/uploadthing";
 
 const storage = createStorage({
   driver: uploadthingDriver({
-    // token: "<your token>",
+    // token: "<your token>", // UPLOADTHING_SECRET environment variable will be used if not provided.
   }),
 });
 ```
 
 **Options:**
 
-- `apiKey`: Your UploadThing API key. Will be automatically inferred from the `UPLOADTHING_SECRET` environment variable if not provided.
+- `token`: Your UploadThing API key. Will be automatically inferred from the `UPLOADTHING_SECRET` environment variable if not provided.

@@ -56,10 +56,13 @@ export default defineDriver((opts: HTTPOptions) => {
       return value;
     },
     async getItemRaw(key, topts) {
-      const value = await _fetch(r(key), {
-        headers: getHeaders(topts, { accept: "application/octet-stream" }),
-      }).catch(catchFetchError);
-      return value;
+      const response = await _fetch
+        .raw(r(key), {
+          responseType: "arrayBuffer",
+          headers: getHeaders(topts, { accept: "application/octet-stream" }),
+        })
+        .catch(catchFetchError);
+      return response._data;
     },
     async getMeta(key, topts) {
       const res = await _fetch.raw(r(key), {

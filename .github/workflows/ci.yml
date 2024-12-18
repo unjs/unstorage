@@ -38,6 +38,7 @@ jobs:
           VITE_CLOUDFLARE_ACC_ID: ${{ secrets.VITE_CLOUDFLARE_ACC_ID }}
           VITE_CLOUDFLARE_KV_NS_ID: ${{ secrets.VITE_CLOUDFLARE_KV_NS_ID }}
           VITE_CLOUDFLARE_TOKEN: ${{ secrets.VITE_CLOUDFLARE_TOKEN }}
+          VITE_UPLOADTHING_TOKEN: ${{ secrets.VITE_UPLOADTHING_TOKEN }}
       - uses: codecov/codecov-action@v5
       - name: nightly release
         if: |

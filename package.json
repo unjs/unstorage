@@ -100,6 +100,7 @@
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "^5.7.2",
     "unbuild": "^3.0.1",
+    "uploadthing": "^7.4.1",
     "vite": "^6.0.3",
     "vitest": "^2.1.8",
     "wrangler": "^3.97.0"
@@ -121,7 +122,8 @@
     "aws4fetch": "^1.0.20",
     "db0": ">=0.2.1",
     "idb-keyval": "^6.2.1",
-    "ioredis": "^5.4.1"
+    "ioredis": "^5.4.1",
+    "uploadthing": "^7.4.1"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {
@@ -173,6 +175,9 @@
       "optional": true
     },
     "ioredis": {
+      "optional": true
+    },
+    "uploadthing": {
       "optional": true
     }
   },

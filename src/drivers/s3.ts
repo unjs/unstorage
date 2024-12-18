@@ -39,9 +39,7 @@ export interface S3DriverOptions {
   bucket: string;
 
   /**
-   * Whether to use bulk delete for clearing the storage.
-   *
-   * **Note:** [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html) support is required from provider
+   * Enabled by default to speedup `clear()` operation. Set to `false` if provider is not implementing [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html).
    */
   bulkDelete?: boolean;
 }
@@ -147,7 +145,9 @@ export default defineDriver((options: S3DriverOptions) => {
     if (!keys?.length) {
       return null;
     }
-    if (options.bulkDelete) {
+    if (options.bulkDelete === false) {
+      await Promise.all(keys.map((key) => deleteObject(key)));
+    } else {
       const body = deleteKeysReq(keys);
       await awsFetch(`${baseURL}?delete`, {
         method: "POST",
@@ -156,8 +156,6 @@ export default defineDriver((options: S3DriverOptions) => {
         },
         body,
       });
-    } else {
-      await Promise.all(keys.map((key) => deleteObject(key)));
     }
   };
 

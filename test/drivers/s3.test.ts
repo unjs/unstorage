@@ -5,11 +5,8 @@ import { testDriver } from "./utils";
 describe("drivers: s3", () => {
   testDriver({
     driver: s3Driver({
-      bulkDelete: true,
-
       accessKeyId: process.env.VITE_S3_ACCESS_KEY_ID!,
       secretAccessKey: process.env.VITE_S3_SECRET_ACCESS_KEY!,
-
       bucket: process.env.VITE_S3_BUCKET!,
       endpoint: process.env.VITE_S3_ENDPOINT!,
       region: process.env.VITE_S3_REGION!,

@@ -1,10 +1,26 @@
+---
+icon: qlementine-icons:cloud-16
+---
+
 # UploadThing
 
-Store data using UploadThing.
+> Store data using UploadThing.
 
 ::note{to="https://uploadthing.com/"}
 Learn more about UploadThing.
 ::
+
+::warning
+UploadThing support is currently experimental!
+<br>
+There is a known issue that same key, if deleted cannot be used again [tracker issue](https://github.com/pingdotgg/uploadthing/issues/948).
+::
+
+## Usage
+
+To use, you will need to install `uploadthing` dependency in your project:
+
+:pm-install{name="uploadthing"}
 
 ```js
 import { createStorage } from "unstorage";
@@ -15,16 +31,6 @@ const storage = createStorage({
     // token: "<your token>",
   }),
 });
-```
-
-To use, you will need to install `uploadthing` dependency in your project:
-
-```json
-{
-  "dependencies": {
-    "uploadthing": "latest"
-  }
-}
 ```
 
 **Options:**

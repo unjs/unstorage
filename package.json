@@ -34,8 +34,8 @@
     "bench": "jiti test/server.bench.ts",
     "build": "unbuild",
     "dev": "vitest",
-    "lint": "eslint . && prettier -c src test",
-    "lint:fix": "eslint . --fix && prettier -w src test",
+    "lint": "eslint . && prettier -c .",
+    "lint:fix": "eslint . --fix && prettier -w .",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
@@ -62,7 +62,7 @@
     "@azure/keyvault-secrets": "^4.9.0",
     "@azure/storage-blob": "^12.26.0",
     "@capacitor/preferences": "^6.0.3",
-    "@cloudflare/workers-types": "^4.20241205.0",
+    "@cloudflare/workers-types": "^4.20241216.0",
     "@deno/kv": "^0.8.4",
     "@electric-sql/pglite": "^0.2.15",
     "@libsql/client": "^0.14.0",
@@ -100,7 +100,7 @@
     "unbuild": "^3.0.1",
     "vite": "^6.0.3",
     "vitest": "^2.1.8",
-    "wrangler": "^3.95.0",
+    "wrangler": "^3.97.0",
     "xml2js": "^0.6.2"
   },
   "peerDependencies": {
@@ -143,6 +143,9 @@
     "@capacitor/preferences": {
       "optional": true
     },
+    "@deno/kv": {
+      "optional": true
+    },
     "@netlify/blobs": {
       "optional": true
     },
@@ -165,9 +168,6 @@
       "optional": true
     },
     "ioredis": {
-      "optional": true
-    },
-    "@deno/kv": {
       "optional": true
     }
   },

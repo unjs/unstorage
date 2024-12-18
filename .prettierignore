@@ -1,1 +1,8 @@
 test/drivers/tmp
+dist
+node_modules
+.output
+.nuxt
+CHANGELOG.md
+pnpm-lock.yaml
+docs/2.drivers/0.index.md

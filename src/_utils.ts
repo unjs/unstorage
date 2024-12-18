@@ -52,7 +52,9 @@ export function serializeRaw(value: any) {
   if (typeof value === "string") {
     return value;
   }
-  const base64 = genBase64FromBytes(value);
+  const base64 = globalThis.Buffer
+    ? Buffer.from(value).toString("base64")
+    : base64Encode(value);
   return BASE64_PREFIX + base64;
 }
 
@@ -65,12 +67,13 @@ export function deserializeRaw(value: any) {
     // Return unknown strings as-is
     return value;
   }
-  return genBytesFromBase64(value.slice(BASE64_PREFIX.length));
+
+  return globalThis.Buffer
+    ? Buffer.from(value.slice(BASE64_PREFIX.length), "base64")
+    : base64Decode(value.slice(BASE64_PREFIX.length));
 }
 
-// Base64 utilities - Waiting for https://github.com/unjs/knitwork/pull/83 // TODO: Replace with knitwork imports as soon as PR is merged
-
-export function genBytesFromBase64(input: string, urlSafe?: boolean) {
+function base64Decode(input: string, urlSafe?: boolean) {
   if (urlSafe) {
     input = input.replace(/-/g, "+").replace(/_/g, "/");
     const paddingLength = input.length % 4;
@@ -86,7 +89,7 @@ export function genBytesFromBase64(input: string, urlSafe?: boolean) {
   );
 }
 
-export function genBase64FromBytes(input: Uint8Array, urlSafe?: boolean) {
+export function base64Encode(input: Uint8Array, urlSafe?: boolean) {
   if (urlSafe) {
     return globalThis
       .btoa(String.fromCodePoint(...input))

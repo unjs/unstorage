@@ -34,8 +34,8 @@
     "bench": "jiti test/server.bench.ts",
     "build": "unbuild",
     "dev": "vitest",
-    "lint": "eslint . && prettier -c src test",
-    "lint:fix": "eslint . --fix && prettier -w src test",
+    "lint": "eslint . && prettier -c .",
+    "lint:fix": "eslint . --fix && prettier -w .",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
@@ -108,6 +108,7 @@
     "@azure/keyvault-secrets": "^4.9.0",
     "@azure/storage-blob": "^12.26.0",
     "@capacitor/preferences": "^6.0.3",
+    "@deno/kv": ">=0.8.4",
     "@netlify/blobs": "^6.5.0 || ^7.0.0 || ^8.1.0",
     "@planetscale/database": "^1.19.0",
     "@upstash/redis": "^1.34.3",
@@ -115,8 +116,7 @@
     "@vercel/kv": "^1.0.1",
     "db0": ">=0.2.1",
     "idb-keyval": "^6.2.1",
-    "ioredis": "^5.4.1",
-    "@deno/kv": ">=0.8.4"
+    "ioredis": "^5.4.1"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {
@@ -138,6 +138,9 @@
       "optional": true
     },
     "@capacitor/preferences": {
+      "optional": true
+    },
+    "@deno/kv": {
       "optional": true
     },
     "@netlify/blobs": {
@@ -162,9 +165,6 @@
       "optional": true
     },
     "ioredis": {
-      "optional": true
-    },
-    "@deno/kv": {
       "optional": true
     }
   },

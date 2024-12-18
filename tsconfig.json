@@ -16,9 +16,9 @@
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "skipLibCheck": true,
-    "types": [
-      "node",
-      "deno"
-    ],
+    "types": ["node", "deno"],
+    "paths": {
+      "unstorage/drivers/*": ["./src/drivers/*"]
+    }
   }
 }

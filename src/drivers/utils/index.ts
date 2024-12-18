@@ -1,11 +1,13 @@
 import type { Driver } from "../..";
 
-type DriverFactory<T> = (opts: T) => Driver;
+type DriverFactory<OptionsT, InstanceT> = (
+  opts: OptionsT
+) => Driver<OptionsT, InstanceT>;
 interface ErrorOptions {}
 
-export function defineDriver<T = any>(
-  factory: DriverFactory<T>
-): DriverFactory<T> {
+export function defineDriver<OptionsT = any, InstanceT = never>(
+  factory: DriverFactory<OptionsT, InstanceT>
+): DriverFactory<OptionsT, InstanceT> {
   return factory;
 }
 
@@ -29,6 +31,9 @@ export function createError(
   opts?: ErrorOptions
 ) {
   const err = new Error(`[unstorage] [${driver}] ${message}`, opts);
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(err, createError);
+  }
   return err;
 }
 

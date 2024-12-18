@@ -24,4 +24,21 @@ describe("drivers: indexeddb", () => {
     await customStorage.clear();
     expect(await customStorage.hasItem("second")).toBe(false);
   });
+
+  it("properly handle raw items", async () => {
+    await customStorage.setItem("object", { item: "foo" });
+    await customStorage.setItemRaw("rawObject", { item: "foo" });
+    expect(await customStorage.getItemRaw("object")).toBe('{"item":"foo"}');
+    expect(await customStorage.getItemRaw("rawObject")).toStrictEqual({
+      item: "foo",
+    });
+    await customStorage.setItem("number", 1234);
+    await customStorage.setItemRaw("rawNumber", 1234);
+    expect(await customStorage.getItemRaw("number")).toBe("1234");
+    expect(await customStorage.getItemRaw("rawNumber")).toBe(1234);
+    await customStorage.setItem("boolean", true);
+    await customStorage.setItemRaw("rawBoolean", true);
+    expect(await customStorage.getItemRaw("boolean")).toBe("true");
+    expect(await customStorage.getItemRaw("rawBoolean")).toBe(true);
+  });
 });

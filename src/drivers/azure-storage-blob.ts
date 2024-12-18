@@ -81,6 +81,7 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: getContainerClient,
     async hasItem(key) {
       return await getContainerClient().getBlockBlobClient(key).exists();
     },

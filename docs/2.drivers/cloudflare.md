@@ -106,6 +106,10 @@ const storage = createStorage({
 - `apiURL`: Custom API URL. Default is `https://api.cloudflare.com`.
 - `base`: Adds prefix to all stored keys
 
+**Transaction options:**
+
+- `ttl`: Supported for `setItem(key, value, { ttl: number /* seconds min 60 */ })`
+
 **Supported methods:**
 
 - `getItem`: Maps to [Read key-value pair](https://api.cloudflare.com/#workers-kv-namespace-read-key-value-pair) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
@@ -153,3 +157,12 @@ const storage = createStorage({
 
 - `binding`: Bucket binding or name. Default is `BUCKET`.
 - `base`: Prefix all keys with base.
+
+**Transaction options:**
+
+- `getItemRaw(key, { type: "..." })`
+  - `type: "object"`: Return the [R2 object body](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/#r2objectbody-definition).
+  - `type: "stream"`: Return body stream.
+  - `type: "blob"`: Return a `Blob`.
+  - `type: "bytes"`: Return an `Uint8Array`.
+  - `type: "arrayBuffer"`: Return an `ArrayBuffer` (default)

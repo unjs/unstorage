@@ -1,6 +1,6 @@
 {
   "name": "unstorage",
-  "version": "1.10.1",
+  "version": "1.13.1",
   "description": "Universal Storage Layer",
   "repository": "unjs/unstorage",
   "license": "MIT",
@@ -31,11 +31,12 @@
     "server.d.ts"
   ],
   "scripts": {
-    "build": "unbuild",
-    "demo": "vite demo",
+    "bench": "jiti test/server.bench.ts",
+    "build": "pnpm gen-drivers && unbuild",
+    "gen-drivers": "jiti scripts/gen-drivers.ts",
     "dev": "vitest",
-    "lint": "eslint --ext .ts . && prettier -c src test demo docs/content",
-    "lint:fix": "eslint --ext .ts . --fix && prettier -w src test demo docs/content",
+    "lint": "eslint . && prettier -c .",
+    "lint:fix": "eslint . --fix && prettier -w .",
     "prepack": "pnpm build",
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
@@ -44,71 +45,85 @@
   },
   "dependencies": {
     "anymatch": "^3.1.3",
-    "chokidar": "^3.5.3",
-    "destr": "^2.0.2",
-    "h3": "^1.9.0",
-    "ioredis": "^5.3.2",
-    "listhen": "^1.5.5",
-    "lru-cache": "^10.1.0",
-    "mri": "^1.2.0",
-    "node-fetch-native": "^1.4.1",
-    "ofetch": "^1.3.3",
-    "ufo": "^1.3.2"
+    "chokidar": "^3.6.0",
+    "citty": "^0.1.6",
+    "destr": "^2.0.3",
+    "h3": "^1.13.0",
+    "listhen": "^1.9.0",
+    "lru-cache": "^10.4.3",
+    "node-fetch-native": "^1.6.4",
+    "ofetch": "^1.4.1",
+    "ufo": "^1.5.4"
   },
   "devDependencies": {
-    "@azure/app-configuration": "^1.5.0",
-    "@azure/cosmos": "^4.0.0",
-    "@azure/data-tables": "^13.2.2",
-    "@azure/identity": "^3.4.1",
-    "@azure/keyvault-secrets": "^4.7.0",
-    "@azure/storage-blob": "^12.17.0",
-    "@capacitor/preferences": "^5.0.6",
-    "@cloudflare/workers-types": "^4.20231121.0",
-    "@netlify/blobs": "^6.3.1",
-    "@planetscale/database": "^1.13.0",
+    "@azure/app-configuration": "^1.8.0",
+    "@azure/cosmos": "^4.2.0",
+    "@azure/data-tables": "^13.3.0",
+    "@azure/identity": "^4.5.0",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "@azure/storage-blob": "^12.26.0",
+    "@capacitor/preferences": "^6.0.3",
+    "@cloudflare/workers-types": "^4.20241216.0",
+    "@deno/kv": "^0.8.4",
+    "@electric-sql/pglite": "^0.2.15",
+    "@libsql/client": "^0.14.0",
+    "@netlify/blobs": "^8.1.0",
+    "@planetscale/database": "^1.19.0",
+    "@types/deno": "^2.0.0",
     "@types/ioredis-mock": "^8.2.5",
-    "@types/jsdom": "^21.1.6",
-    "@types/mri": "^1.1.5",
-    "@types/node": "^20.10.5",
-    "@upstash/redis": "^1.25.2",
-    "@vercel/kv": "^0.2.4",
-    "@vitejs/plugin-vue": "^4.5.2",
-    "@vitest/coverage-v8": "^0.34.6",
-    "@vue/compiler-sfc": "^3.3.12",
-    "azurite": "^3.29.0",
-    "changelogen": "^0.5.5",
-    "eslint": "^8.56.0",
-    "eslint-config-unjs": "^0.2.1",
-    "fake-indexeddb": "^5.0.1",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.10.2",
+    "@upstash/redis": "^1.34.3",
+    "@vercel/blob": "^0.27.0",
+    "@vercel/kv": "^3.0.0",
+    "@vitest/coverage-v8": "^2.1.8",
+    "aws4fetch": "^1.0.20",
+    "azurite": "^3.33.0",
+    "better-sqlite3": "^11.7.0",
+    "changelogen": "^0.5.7",
+    "db0": "^0.2.1",
+    "eslint": "^9.17.0",
+    "eslint-config-unjs": "^0.4.2",
+    "fake-indexeddb": "^6.0.0",
+    "get-port-please": "^3.1.2",
     "idb-keyval": "^6.2.1",
+    "ioredis": "^5.4.1",
     "ioredis-mock": "^8.9.0",
-    "jiti": "^1.21.0",
-    "jsdom": "^23.0.1",
-    "monaco-editor": "^0.45.0",
-    "mongodb": "^6.3.0",
-    "mongodb-memory-server": "^9.1.3",
-    "msw": "^1.3.2",
-    "prettier": "^3.1.1",
+    "jiti": "^2.4.1",
+    "jsdom": "^25.0.1",
+    "mitata": "^1.0.21",
+    "mlly": "^1.7.3",
+    "mongodb": "^6.12.0",
+    "mongodb-memory-server": "^10.1.2",
+    "prettier": "^3.4.2",
+    "scule": "^1.3.0",
     "types-cloudflare-worker": "^1.2.0",
-    "typescript": "^5.3.3",
-    "unbuild": "^2.0.0",
-    "vite": "^4.5.0",
-    "vitest": "^0.34.6",
-    "vue": "^3.3.12"
+    "typescript": "^5.7.2",
+    "unbuild": "^3.0.1",
+    "uploadthing": "^7.4.1",
+    "vite": "^6.0.3",
+    "vitest": "^2.1.8",
+    "wrangler": "^3.97.0"
   },
   "peerDependencies": {
-    "@azure/app-configuration": "^1.5.0",
-    "@azure/cosmos": "^4.0.0",
-    "@azure/data-tables": "^13.2.2",
-    "@azure/identity": "^3.4.1",
-    "@azure/keyvault-secrets": "^4.7.0",
-    "@azure/storage-blob": "^12.17.0",
-    "@capacitor/preferences": "^5.0.6",
-    "@netlify/blobs": "^6.3.1",
-    "@planetscale/database": "^1.13.0",
-    "@upstash/redis": "^1.25.2",
-    "@vercel/kv": "^0.2.4",
-    "idb-keyval": "^6.2.1"
+    "@azure/app-configuration": "^1.8.0",
+    "@azure/cosmos": "^4.2.0",
+    "@azure/data-tables": "^13.3.0",
+    "@azure/identity": "^4.5.0",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "@azure/storage-blob": "^12.26.0",
+    "@capacitor/preferences": "^6.0.3",
+    "@deno/kv": ">=0.8.4",
+    "@netlify/blobs": "^6.5.0 || ^7.0.0 || ^8.1.0",
+    "@planetscale/database": "^1.19.0",
+    "@upstash/redis": "^1.34.3",
+    "@vercel/blob": ">=0.27.0",
+    "@vercel/kv": "^1.0.1",
+    "aws4fetch": "^1.0.20",
+    "db0": ">=0.2.1",
+    "idb-keyval": "^6.2.1",
+    "ioredis": "^5.4.1",
+    "uploadthing": "^7.4.1"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {
@@ -132,6 +147,9 @@
     "@capacitor/preferences": {
       "optional": true
     },
+    "@deno/kv": {
+      "optional": true
+    },
     "@netlify/blobs": {
       "optional": true
     },
@@ -141,12 +159,27 @@
     "@upstash/redis": {
       "optional": true
     },
+    "@vercel/blob": {
+      "optional": true
+    },
     "@vercel/kv": {
+      "optional": true
+    },
+    "aws4fetch": {
+      "optional": true
+    },
+    "db0": {
       "optional": true
     },
     "idb-keyval": {
       "optional": true
+    },
+    "ioredis": {
+      "optional": true
+    },
+    "uploadthing": {
+      "optional": true
     }
   },
-  "packageManager": "pnpm@8.12.1"
+  "packageManager": "pnpm@9.15.0"
 }

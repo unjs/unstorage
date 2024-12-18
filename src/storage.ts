@@ -41,14 +41,14 @@ export function createStorage<T extends StorageValue>(
         return {
           base,
           relativeKey: key.slice(base.length),
-          driver: context.mounts[base],
+          driver: context.mounts[base]!,
         };
       }
     }
     return {
       base: "",
       relativeKey: key,
-      driver: context.mounts[""],
+      driver: context.mounts[""]!,
     };
   };
 
@@ -65,7 +65,7 @@ export function createStorage<T extends StorageValue>(
             ? base!.slice(mountpoint.length)
             : undefined,
         mountpoint,
-        driver: context.mounts[mountpoint],
+        driver: context.mounts[mountpoint]!,
       }));
   };
 
@@ -86,7 +86,7 @@ export function createStorage<T extends StorageValue>(
     context.watching = true;
     for (const mountpoint in context.mounts) {
       context.unwatch[mountpoint] = await watch(
-        context.mounts[mountpoint],
+        context.mounts[mountpoint]!,
         onChange,
         mountpoint
       );
@@ -98,7 +98,7 @@ export function createStorage<T extends StorageValue>(
       return;
     }
     for (const mountpoint in context.unwatch) {
-      await context.unwatch[mountpoint]();
+      await context.unwatch[mountpoint]!();
     }
     context.unwatch = {};
     context.watching = false;
@@ -161,19 +161,22 @@ export function createStorage<T extends StorageValue>(
 
   const storage: Storage = {
     // Item
-    hasItem(key, opts = {}) {
+    hasItem(key: string, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem(key, opts = {}) {
+    getItem(key: string, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
         destr(value)
       );
     },
-    getItems(items, commonOptions) {
+    getItems(
+      items: (string | { key: string; options?: TransactionOptions })[],
+      commonOptions = {}
+    ) {
       return runBatch(items, commonOptions, (batch) => {
         if (batch.driver.getItems) {
           return asyncCall(
@@ -214,7 +217,7 @@ export function createStorage<T extends StorageValue>(
         deserializeRaw(value)
       );
     },
-    async setItem(key, value, opts = {}) {
+    async setItem(key: string, value: T, opts = {}) {
       if (value === undefined) {
         return storage.removeItem(key);
       }
@@ -231,7 +234,7 @@ export function createStorage<T extends StorageValue>(
     async setItems(items, commonOptions) {
       await runBatch(items, commonOptions, async (batch) => {
         if (batch.driver.setItems) {
-          await asyncCall(
+          return asyncCall(
             batch.driver.setItems,
             batch.items.map((item) => ({
               key: item.relativeKey,
@@ -273,7 +276,12 @@ export function createStorage<T extends StorageValue>(
         onChange("update", key);
       }
     },
-    async removeItem(key, opts = {}) {
+    async removeItem(
+      key: string,
+      opts:
+        | (TransactionOptions & { removeMeta?: boolean })
+        | boolean /* legacy: removeMeta */ = {}
+    ) {
       // TODO: Remove in next major version
       if (typeof opts === "boolean") {
         opts = { removeMeta: opts };
@@ -340,10 +348,12 @@ export function createStorage<T extends StorageValue>(
           mount.relativeBase,
           opts
         );
-        const keys = rawKeys
-          .map((key) => mount.mountpoint + normalizeKey(key))
-          .filter((key) => !maskedMounts.some((p) => key.startsWith(p)));
-        allKeys.push(...keys);
+        for (const key of rawKeys) {
+          const fullKey = mount.mountpoint + normalizeKey(key);
+          if (!maskedMounts.some((p) => fullKey.startsWith(p))) {
+            allKeys.push(fullKey);
+          }
+        }
 
         // When /mnt/foo is processed, any key in /mnt with /mnt/foo prefix should be masked
         // Using filter to improve performance. /mnt mask already covers /mnt/foo
@@ -353,8 +363,10 @@ export function createStorage<T extends StorageValue>(
         ];
       }
       return base
-        ? allKeys.filter((key) => key.startsWith(base!) && !key.endsWith("$"))
-        : allKeys.filter((key) => !key.endsWith("$"));
+        ? allKeys.filter(
+            (key) => key.startsWith(base!) && key[key.length - 1] !== "$"
+          )
+        : allKeys.filter((key) => key[key.length - 1] !== "$");
     },
     // Utils
     async clear(base, opts = {}) {
@@ -412,7 +424,7 @@ export function createStorage<T extends StorageValue>(
           .then((unwatcher) => {
             context.unwatch[base] = unwatcher;
           })
-          .catch(console.error); // eslint-disable-line no-console
+          .catch(console.error);
       }
       return storage;
     },
@@ -422,11 +434,11 @@ export function createStorage<T extends StorageValue>(
         return;
       }
       if (context.watching && base in context.unwatch) {
-        context.unwatch[base]();
+        context.unwatch[base]?.();
         delete context.unwatch[base];
       }
       if (_dispose) {
-        await dispose(context.mounts[base]);
+        await dispose(context.mounts[base]!);
       }
       context.mountpoints = context.mountpoints.filter((key) => key !== base);
       delete context.mounts[base];
@@ -447,6 +459,14 @@ export function createStorage<T extends StorageValue>(
         base: m.mountpoint,
       }));
     },
+    // Aliases
+    keys: (base, opts = {}) => storage.getKeys(base, opts),
+    get: (key: string, opts = {}) => storage.getItem(key, opts),
+    set: (key: string, value: T, opts = {}) =>
+      storage.setItem(key, value, opts),
+    has: (key: string, opts = {}) => storage.hasItem(key, opts),
+    del: (key: string, opts = {}) => storage.removeItem(key, opts),
+    remove: (key: string, opts = {}) => storage.removeItem(key, opts),
   };
 
   return storage;

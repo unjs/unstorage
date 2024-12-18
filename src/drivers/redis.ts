@@ -1,9 +1,10 @@
 import { defineDriver, joinKeys } from "./utils";
+// TODO: use named import in v2
 import Redis, {
   Cluster,
-  ClusterNode,
-  ClusterOptions,
-  RedisOptions as _RedisOptions,
+  type ClusterNode,
+  type ClusterOptions,
+  type RedisOptions as _RedisOptions,
 } from "ioredis";
 
 export interface RedisOptions extends _RedisOptions {
@@ -35,7 +36,7 @@ export interface RedisOptions extends _RedisOptions {
 
 const DRIVER_NAME = "redis";
 
-export default defineDriver((opts: RedisOptions = {}) => {
+export default defineDriver((opts: RedisOptions) => {
   let redisClient: Redis | Cluster;
   const getRedisClient = () => {
     if (redisClient) {
@@ -58,6 +59,7 @@ export default defineDriver((opts: RedisOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: getRedisClient,
     async hasItem(key) {
       return Boolean(await getRedisClient().exists(p(key)));
     },
@@ -66,7 +68,7 @@ export default defineDriver((opts: RedisOptions = {}) => {
       return value ?? null;
     },
     async setItem(key, value, tOptions) {
-      let ttl = tOptions?.ttl ?? opts.ttl;
+      const ttl = tOptions?.ttl ?? opts.ttl;
       if (ttl) {
         await getRedisClient().set(p(key), value, "EX", ttl);
       } else {

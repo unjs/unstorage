@@ -118,6 +118,7 @@
     "@upstash/redis": "^1.34.3",
     "@vercel/blob": ">=0.27.0",
     "@vercel/kv": "^1.0.1",
+    "aws4fetch": "^1.0.20",
     "db0": ">=0.2.1",
     "idb-keyval": "^6.2.1",
     "ioredis": "^5.4.1"
@@ -160,6 +161,9 @@
       "optional": true
     },
     "@vercel/kv": {
+      "optional": true
+    },
+    "aws4fetch": {
       "optional": true
     },
     "db0": {

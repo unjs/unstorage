@@ -31,6 +31,9 @@ export function createError(
   opts?: ErrorOptions
 ) {
   const err = new Error(`[unstorage] [${driver}] ${message}`, opts);
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(err, createError);
+  }
   return err;
 }
 

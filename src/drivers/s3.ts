@@ -5,7 +5,6 @@ import {
   createError,
 } from "./utils";
 import { AwsClient } from "aws4fetch";
-import xml2js from "xml2js";
 
 export interface S3DriverOptions {
   /**
@@ -117,14 +116,7 @@ export default defineDriver((options: S3DriverOptions) => {
       console.log("no list", prefix ? `${baseURL}?prefix=${prefix}` : baseURL);
       return null;
     }
-    let keys: string[] = [];
-    xml2js.parseString(res, (error, result) => {
-      if (error === null) {
-        const contents = result["ListBucketResult"]["Contents"] as any[];
-        keys = contents?.map((item) => item["Key"][0]);
-      }
-    });
-    return keys;
+    return parseList(res);
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
@@ -152,7 +144,7 @@ export default defineDriver((options: S3DriverOptions) => {
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
   const deleteObjects = async (base: string) => {
     const keys = await listObjects(base);
-    if (!keys) {
+    if (!keys?.length) {
       return null;
     }
     if (options.bulkDelete) {
@@ -220,4 +212,28 @@ async function sha256Base64(str: string) {
   const bytes = new Uint8Array(hash);
   const binaryString = String.fromCharCode(...bytes); // eslint-disable-line unicorn/prefer-code-point
   return btoa(binaryString);
+}
+
+function parseList(xml: string) {
+  if (!xml.startsWith("<?xml")) {
+    throw new Error("Invalid XML");
+  }
+  const listBucketResult = xml.match(
+    /<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/
+  )?.[1];
+  if (!listBucketResult) {
+    throw new Error("Missing <ListBucketResult>");
+  }
+  const contents = listBucketResult.match(
+    /<Contents[^>]*>([\s\S]*?)<\/Contents>/g
+  );
+  if (!contents?.length) {
+    return [];
+  }
+  return contents
+    .map((content) => {
+      const key = content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1];
+      return key;
+    })
+    .filter(Boolean) as string[];
 }

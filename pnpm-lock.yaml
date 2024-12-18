@@ -90,9 +90,6 @@ importers:
       '@types/node':
         specifier: ^22.10.2
         version: 22.10.2
-      '@types/xml2js':
-        specifier: ^0.4.14
-        version: 0.4.14
       '@upstash/redis':
         specifier: ^1.34.3
         version: 1.34.3
@@ -183,9 +180,6 @@ importers:
       wrangler:
         specifier: ^3.97.0
         version: 3.97.0(@cloudflare/workers-types@4.20241216.0)
-      xml2js:
-        specifier: ^0.6.2
-        version: 0.6.2
 
 packages:
 
@@ -1349,9 +1343,6 @@ packages:
 
   '@types/ws@8.5.13':
     resolution: {integrity: sha512-osM/gWBTPKgHV8XkTunnegTRIsvF6owmf5w+JtAfOw472dptdm0dlGv4xCt6GwQRcC2XVOvvRE/0bAoQcL2QkA==}
-
-  '@types/xml2js@0.4.14':
-    resolution: {integrity: sha512-4YnrRemBShWRO2QjvUin8ESA41rH+9nQGLUGZV/1IDhi3SL9OhdpNC/MrulTWuptXKwhx/aDxE7toV0f/ypIXQ==}
 
   '@typescript-eslint/eslint-plugin@8.18.0':
     resolution: {integrity: sha512-NR2yS7qUqCL7AIxdJUQf2MKKNDVNaig/dEB0GBLU7D+ZdHgK1NoH/3wsgO3OnPVipn51tG3MAwaODEGil70WEw==}
@@ -5732,10 +5723,6 @@ snapshots:
       '@types/webidl-conversions': 7.0.3
 
   '@types/ws@8.5.13':
-    dependencies:
-      '@types/node': 22.10.2
-
-  '@types/xml2js@0.4.14':
     dependencies:
       '@types/node': 22.10.2
 

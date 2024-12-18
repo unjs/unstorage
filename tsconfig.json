@@ -20,5 +20,10 @@
       "node",
       "deno"
     ],
+    "paths": {
+      "unstorage/drivers/*": [
+        "./src/drivers/*"
+      ],
+    }
   }
 }

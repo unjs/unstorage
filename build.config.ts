@@ -21,5 +21,5 @@ export default defineBuildConfig({
       declaration: false,
     },
   ],
-  externals: ["mongodb"],
+  externals: ["mongodb", "unstorage", /unstorage\/drivers\//],
 });

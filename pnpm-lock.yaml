@@ -111,9 +111,6 @@ importers:
       changelogen:
         specifier: ^0.5.7
         version: 0.5.7(magicast@0.3.5)
-      consola:
-        specifier: ^3.2.3
-        version: 3.2.3
       db0:
         specifier: ^0.2.1
         version: 0.2.1(@electric-sql/pglite@0.2.15)(@libsql/client@0.14.0)(better-sqlite3@11.7.0)(mysql2@3.11.5)

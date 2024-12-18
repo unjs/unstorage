@@ -53,10 +53,9 @@ for (const entry of driverEntries) {
   });
 }
 
-const genCode = /* ts */ `/**
- * Auto-generated using scripts/gen-drivers.
- * Do not manually edit!
- */
+const genCode = /* ts */ `
+// Auto-generated using scripts/gen-drivers.
+// Do not manually edit!
 
 ${drivers
   .filter((d) => d.optionsTExport)

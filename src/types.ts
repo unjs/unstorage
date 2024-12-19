@@ -66,14 +66,14 @@ type StorageDefinition = {
   [key: string]: unknown;
 };
 
-export type DefaultStorageDefinition = {
-  items: { [key: string]: StorageValue };
-  [key: string]: unknown;
-};
+type StorageItemMap<T> = T extends StorageDefinition ? T["items"] : T;
+type StorageItemType<T, K> = K extends keyof StorageItemMap<T>
+  ? StorageItemMap<T>[K]
+  : T extends StorageDefinition
+    ? StorageValue
+    : T;
 
-type StorageItemMap<T extends StorageDefinition> = T["items"];
-
-export interface Storage<T extends StorageValue = DefaultStorageDefinition> {
+export interface Storage<T extends StorageValue = StorageValue> {
   // Item
   hasItem<
     U extends Extract<T, StorageDefinition>,
@@ -86,15 +86,15 @@ export interface Storage<T extends StorageValue = DefaultStorageDefinition> {
 
   getItem<
     U extends Extract<T, StorageDefinition>,
-    K extends keyof StorageItemMap<U>,
+    K extends string & keyof StorageItemMap<U>,
   >(
     key: K,
     ops?: TransactionOptions
-  ): Promise<StorageItemMap<U>[K] | null>;
-  getItem<_U extends T>(
+  ): Promise<StorageItemType<T, K> | null>;
+  getItem(
     key: string,
     opts?: TransactionOptions
-  ): Promise<StorageValue | null>;
+  ): Promise<StorageItemType<T, string> | null>;
 
   /** @experimental */
   getItems: <U extends T>(
@@ -112,7 +112,7 @@ export interface Storage<T extends StorageValue = DefaultStorageDefinition> {
     K extends keyof StorageItemMap<U>,
   >(
     key: K,
-    value: StorageItemMap<U>[K],
+    value: StorageItemType<T, K>,
     opts?: TransactionOptions
   ): Promise<void>;
   setItem<U extends T>(

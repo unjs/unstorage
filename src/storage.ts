@@ -7,7 +7,6 @@ import type {
   StorageValue,
   WatchEvent,
   TransactionOptions,
-  DefaultStorageDefinition,
 } from "./types";
 import memory from "./drivers/memory";
 import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
@@ -25,9 +24,9 @@ export interface CreateStorageOptions {
   driver?: Driver;
 }
 
-export function createStorage<
-  T extends StorageValue = DefaultStorageDefinition,
->(options: CreateStorageOptions = {}): Storage<T> {
+export function createStorage<T extends StorageValue>(
+  options: CreateStorageOptions = {}
+): Storage<T> {
   const context: StorageCTX = {
     mounts: { "": options.driver || memory() },
     mountpoints: [""],
@@ -470,7 +469,7 @@ export function createStorage<
     remove: (key: string, opts = {}) => storage.removeItem(key, opts),
   };
 
-  return storage;
+  return storage as unknown as Storage<T>;
 }
 
 export type Snapshot<T = string> = Record<string, T>;

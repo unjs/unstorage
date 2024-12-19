@@ -26,7 +26,7 @@ export function prefixStorage<T extends StorageValue>(
   if (!base) {
     return storage;
   }
-  const nsStorage: Storage = { ...storage };
+  const nsStorage: Storage<T> = { ...storage };
   for (const property of storageKeyProperties) {
     // @ts-ignore
     nsStorage[property] = (key = "", ...args) =>

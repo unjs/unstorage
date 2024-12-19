@@ -9,9 +9,21 @@ describe("types", () => {
     expectTypeOf(
       await storage.getItem("foo")
     ).toEqualTypeOf<StorageValue | null>();
-    expectTypeOf(await storage.get("baz")).toEqualTypeOf<StorageValue | null>();
 
     await storage.setItem("foo", "str");
+    await storage.set("bar", 1);
+    await storage.removeItem("foo");
+    await storage.remove("bar");
+    await storage.del("baz");
+  });
+
+  it("indexed types for storage", async () => {
+    const storage = createStorage<string>();
+
+    expectTypeOf(await storage.getItem("foo")).toEqualTypeOf<string | null>();
+
+    await storage.setItem("foo", "str");
+    // @ts-expect-error should be a string
     await storage.set("bar", 1);
 
     await storage.removeItem("foo");

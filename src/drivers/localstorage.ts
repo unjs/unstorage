@@ -3,19 +3,24 @@ import { createRequiredError, defineDriver, normalizeKey } from "./utils";
 export interface LocalStorageOptions {
   base?: string;
   window?: typeof window;
+  windowKey?: "localStorage" | "sessionStorage";
+  storage?: typeof window.localStorage | typeof window.sessionStorage;
+  /** @deprecated use `storage` option */
+  sessionStorage?: typeof window.sessionStorage;
+  /** @deprecated use `storage` option */
   localStorage?: typeof window.localStorage;
 }
 
 const DRIVER_NAME = "localstorage";
 
 export default defineDriver((opts: LocalStorageOptions = {}) => {
-  if (!opts.window) {
-    opts.window = typeof window === "undefined" ? undefined : window;
-  }
-  if (!opts.localStorage) {
-    opts.localStorage = opts.window?.localStorage;
-  }
-  if (!opts.localStorage) {
+  const storage: typeof window.localStorage | typeof window.sessionStorage =
+    opts.storage ||
+    opts.localStorage ||
+    opts.sessionStorage ||
+    (opts.window || globalThis.window)?.[opts.windowKey || "localStorage"];
+
+  if (!storage) {
     throw createRequiredError(DRIVER_NAME, "localStorage");
   }
 
@@ -33,21 +38,21 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    getInstance: () => opts.localStorage!,
+    getInstance: () => storage!,
     hasItem(key) {
-      return Object.prototype.hasOwnProperty.call(opts.localStorage!, r(key));
+      return Object.prototype.hasOwnProperty.call(storage!, r(key));
     },
     getItem(key) {
-      return opts.localStorage!.getItem(r(key));
+      return storage!.getItem(r(key));
     },
     setItem(key, value) {
-      return opts.localStorage!.setItem(r(key), value);
+      return storage!.setItem(r(key), value);
     },
     removeItem(key) {
-      return opts.localStorage!.removeItem(r(key));
+      return storage!.removeItem(r(key));
     },
     getKeys() {
-      const allKeys = Object.keys(opts.localStorage!);
+      const allKeys = Object.keys(storage!);
       return base
         ? allKeys
             .filter((key) => key.startsWith(`${base}:`))
@@ -57,13 +62,13 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
     clear(prefix) {
       const _base = [base, prefix].filter(Boolean).join(":");
       if (_base) {
-        for (const key of Object.keys(opts.localStorage!)) {
+        for (const key of Object.keys(storage!)) {
           if (key.startsWith(`${_base}:`)) {
-            opts.localStorage?.removeItem(key);
+            storage?.removeItem(key);
           }
         }
       } else {
-        opts.localStorage!.clear();
+        storage!.clear();
       }
     },
     dispose() {

@@ -4,17 +4,13 @@ icon: ph:browser-thin
 
 # Browser
 
-> Browser based storages.
+> Store data in `localStorage`, `sessionStorage` or `IndexedDB`
 
-## Local Storage
-
-Store data in localStorage.
+## LocalStorage / SessionStorage
 
 ### Usage
 
-::read-more{to="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage"}
-Learn more about localStorage.
-::
+Store data in [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) or [sessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage.)
 
 ```js
 import { createStorage } from "unstorage";
@@ -27,32 +23,10 @@ const storage = createStorage({
 
 **Options:**
 
-- `base`: Add `${base}:` to all keys to avoid collision
-- `localStorage`: Optionally provide `localStorage` object
-- `window`: Optionally provide `window` object
-
-## Session Storage
-
-> Store data in sessionStorage.
-
-::read-more{to="https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage"}
-Learn more about sessionStorage.
-::
-
-```js
-import { createStorage } from "unstorage";
-import sessionStorageDriver from "unstorage/drivers/session-storage";
-
-const storage = createStorage({
-  driver: sessionStorageDriver({ base: "app:" }),
-});
-```
-
-**Options:**
-
-- `base`: Add `${base}:` to all keys to avoid collision
-- `sessionStorage`: Optionally provide `sessionStorage` object
-- `window`: Optionally provide `window` object
+- `base`: Add base to all keys to avoid collision
+- `storage`: (optional) provide `localStorage` or `sessionStorage` compatible object.
+- `windowKey`: (optional) Can be `"localStorage"` (default) or `"sessionStorage"`
+- `window`: (optional) provide `window` object
 
 ## IndexedDB
 

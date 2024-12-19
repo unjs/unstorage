@@ -8,6 +8,8 @@ icon: teenyicons:mongodb-outline
 
 ## Usage
 
+**Driver name:** `mongodb`
+
 ::read-more{to="https://www.mongodb.com/"}
 Learn more about MongoDB.
 ::

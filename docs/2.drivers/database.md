@@ -8,6 +8,8 @@ icon: ph:database
 
 ## Usage
 
+**Driver name:** `db0`
+
 This driver stores KV data in any SQL database using [db0](https://db0.unjs.io).
 
 ::warning

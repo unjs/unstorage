@@ -8,6 +8,8 @@ icon: simple-icons:upstash
 
 ## Usage
 
+**Driver name:** `upstash`
+
 ::read-more{to="https://upstash.com/"}
 Learn more about Upstash.
 ::

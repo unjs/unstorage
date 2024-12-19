@@ -8,6 +8,8 @@ icon: simple-icons:planetscale
 
 ## Usage
 
+**Driver name:** `planetscale`
+
 ::read-more{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
 Learn more about PlanetScale.
 ::

@@ -12,6 +12,8 @@ Learn more about Deno KV.
 
 ## Usage (Deno)
 
+**Driver name:** `deno-kv`
+
 ::important
 `deno-kv` driver requires [Deno deploy](https://docs.deno.com/deploy/kv/manual/on_deploy/) or [Deno runtime](https://docs.deno.com/runtime/) with `--unstable-kv` CLI flag. See [Node.js](#usage-nodejs) section for other runtimes.
 ::
@@ -39,6 +41,8 @@ const storage = createStorage({
 - `openKV`: (advanced) Custom method that returns a Deno KV instance.
 
 ## Usage (Node.js)
+
+**Driver name:** `deno-kv-node`
 
 Deno provides [`@deno/kv`](https://www.npmjs.com/package/@deno/kv) npm package, A Deno KV client library optimized for Node.js.
 

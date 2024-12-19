@@ -12,6 +12,10 @@ icon: gg:vercel
 Learn more about Vercel KV.
 ::
 
+### Usage
+
+**Driver name:** `vercel-kv`
+
 > [!NOTE]
 > Please check [Vercel KV Limits](https://vercel.com/docs/storage/vercel-kv/limits).
 
@@ -62,6 +66,10 @@ Learn more about Vercel Blob.
 ::warning
 Currently Vercel Blob stores all data with public access.
 ::
+
+### Usage
+
+**Driver name:** `vercel-blob`
 
 To use, you will need to install [`@vercel/blob`](https://www.npmjs.com/package/@vercel/blob) dependency in your project:
 

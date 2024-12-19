@@ -9,11 +9,22 @@ describe("drivers: localstorage", () => {
   });
   jsdom.virtualConsole.sendTo(console);
 
+  jsdom.window.localStorage.setItem("__external_key__", "unrelated_data");
+
   testDriver({
-    driver: driver({ window: jsdom.window as unknown as typeof window }),
+    driver: driver({
+      window: jsdom.window as unknown as typeof window,
+      base: "test",
+    }),
     additionalTests: (ctx) => {
-      it("check localstorage", () => {
-        expect(jsdom.window.localStorage.getItem("s1:a")).toBe("test_data");
+      it("check localstorage", async () => {
+        expect(jsdom.window.localStorage.getItem("test:s1:a")).toBe(
+          "test_data"
+        );
+        await ctx.driver.clear!("", {});
+        expect(jsdom.window.localStorage.getItem("__external_key__")).toBe(
+          "unrelated_data"
+        );
       });
       it("watch localstorage", async () => {
         const watcher = vi.fn();

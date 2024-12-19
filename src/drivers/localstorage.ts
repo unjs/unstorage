@@ -1,4 +1,4 @@
-import { createRequiredError, defineDriver } from "./utils";
+import { createRequiredError, defineDriver, normalizeKey } from "./utils";
 
 export interface LocalStorageOptions {
   base?: string;
@@ -19,7 +19,8 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
     throw createRequiredError(DRIVER_NAME, "localStorage");
   }
 
-  const r = (key: string) => (opts.base ? opts.base + ":" : "") + key;
+  const base = opts.base ? normalizeKey(opts.base) : "";
+  const r = (key: string) => (base ? `${base}:` : "") + key;
 
   let _storageListener: undefined | ((ev: StorageEvent) => void);
   const _unwatch = () => {
@@ -46,16 +47,26 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
       return opts.localStorage!.removeItem(r(key));
     },
     getKeys() {
-      return Object.keys(opts.localStorage!);
+      const allKeys = Object.keys(opts.localStorage!);
+      return base
+        ? allKeys
+            .filter((key) => key.startsWith(`${base}:`))
+            .map((key) => key.slice(base.length + 1))
+        : allKeys;
     },
-    clear() {
-      if (opts.base) {
+    clear(prefix) {
+      const _base = [base, prefix].filter(Boolean).join(":");
+      if (_base) {
         for (const key of Object.keys(opts.localStorage!)) {
-          opts.localStorage?.removeItem(key);
+          if (key.startsWith(`${_base}:`)) {
+            opts.localStorage?.removeItem(key);
+          }
         }
       } else {
         opts.localStorage!.clear();
       }
+    },
+    dispose() {
       if (opts.window && _storageListener) {
         opts.window.removeEventListener("storage", _storageListener);
       }

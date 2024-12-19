@@ -169,8 +169,8 @@ export function createStorage<T extends StorageValue>(
     getItem(key: string, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
-      return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
-        destr(value)
+      return asyncCall(driver.getItem, relativeKey, opts).then(
+        (value) => destr(value) as StorageValue
       );
     },
     getItems(
@@ -469,7 +469,7 @@ export function createStorage<T extends StorageValue>(
     remove: (key: string, opts = {}) => storage.removeItem(key, opts),
   };
 
-  return storage;
+  return storage as unknown as Storage<T>;
 }
 
 export type Snapshot<T = string> = Record<string, T>;

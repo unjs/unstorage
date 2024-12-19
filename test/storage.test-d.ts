@@ -3,7 +3,35 @@ import { createStorage } from "../src";
 import type { StorageValue } from "../src";
 
 describe("types", () => {
-  it("check types", async () => {
+  it("default types for storage", async () => {
+    const storage = createStorage();
+
+    expectTypeOf(
+      await storage.getItem("foo")
+    ).toEqualTypeOf<StorageValue | null>();
+
+    await storage.setItem("foo", "str");
+    await storage.set("bar", 1);
+    await storage.removeItem("foo");
+    await storage.remove("bar");
+    await storage.del("baz");
+  });
+
+  it("indexed types for storage", async () => {
+    const storage = createStorage<string>();
+
+    expectTypeOf(await storage.getItem("foo")).toEqualTypeOf<string | null>();
+
+    await storage.setItem("foo", "str");
+    // @ts-expect-error should be a string
+    await storage.set("bar", 1);
+
+    await storage.removeItem("foo");
+    await storage.remove("bar");
+    await storage.del("baz");
+  });
+
+  it("namespaced types for storage", async () => {
     type TestObjType = {
       a: number;
       b: boolean;
@@ -17,15 +45,12 @@ describe("types", () => {
     };
     const storage = createStorage<MyStorage>();
 
-    expectTypeOf(await storage.getItem("foo")).toMatchTypeOf<string | null>();
-    expectTypeOf(await storage.getItem("bar")).toMatchTypeOf<number | null>();
+    expectTypeOf(await storage.getItem("foo")).toEqualTypeOf<string | null>();
+    expectTypeOf(await storage.getItem("bar")).toEqualTypeOf<number | null>();
     expectTypeOf(
       await storage.getItem("unknown")
-    ).toMatchTypeOf<StorageValue | null>();
-    expectTypeOf(await storage.get("baz")).toMatchTypeOf<TestObjType | null>();
-    expectTypeOf(
-      await storage.getItem("aaaaa")
-    ).toMatchTypeOf<MyStorage | null>();
+    ).toEqualTypeOf<StorageValue | null>();
+    expectTypeOf(await storage.get("baz")).toEqualTypeOf<TestObjType | null>();
 
     // @ts-expect-error
     await storage.setItem("foo", 1); // ts err: Argument of type 'number' is not assignable to parameter of type 'string'

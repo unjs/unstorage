@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.14.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.14.0...v1.14.1)
+
+### 🩹 Fixes
+
+- **types:** Fallback to `StorageValue` for un-typed stores ([#532](https://github.com/unjs/unstorage/pull/532))
+
+### 📖 Documentation
+
+- Add driver name to each usage section ([#533](https://github.com/unjs/unstorage/pull/533))
+
+### 📦 Build
+
+- Fix netlify options type ([756fee4](https://github.com/unjs/unstorage/commit/756fee4))
+
+### ❤️ Contributors
+
+- Matt Kane <m@mk.gg>
+- Daniel Roe ([@danielroe](http://github.com/danielroe))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v1.14.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.13.1...v1.14.0)

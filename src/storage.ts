@@ -170,8 +170,8 @@ export function createStorage<
     getItem(key: string, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
-      return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
-        destr(value)
+      return asyncCall(driver.getItem, relativeKey, opts).then(
+        (value) => destr(value) as StorageValue
       );
     },
     getItems(

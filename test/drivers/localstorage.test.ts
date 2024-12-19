@@ -17,11 +17,11 @@ describe("drivers: localstorage", () => {
       base: "test",
     }),
     additionalTests: (ctx) => {
-      it("check localstorage", () => {
+      it("check localstorage", async () => {
         expect(jsdom.window.localStorage.getItem("test:s1:a")).toBe(
           "test_data"
         );
-        ctx.driver.clear!("", {});
+        await ctx.driver.clear!("", {});
         expect(jsdom.window.localStorage.getItem("__external_key__")).toBe(
           "unrelated_data"
         );

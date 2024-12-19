@@ -8,6 +8,8 @@ icon: material-symbols:cached-rounded
 
 ## Usage
 
+**Driver name:** `lru-cache`
+
 Keeps cached data in memory using [LRU Cache](https://www.npmjs.com/package/lru-cache).
 
 See [`lru-cache`](https://www.npmjs.com/package/lru-cache) for supported options.

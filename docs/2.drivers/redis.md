@@ -8,6 +8,8 @@ icon: simple-icons:redis
 
 ## Usage
 
+**Driver name:** `redis`
+
 ::read-more{to="https://redis.com"}
 Learn more about Redis.
 ::

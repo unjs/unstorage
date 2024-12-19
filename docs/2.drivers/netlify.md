@@ -13,6 +13,8 @@ Store data in a [Netlify Blobs](https://docs.netlify.com/blobs/overview/) store.
 
 ## Usage
 
+**Driver name:** `netlify-blobs`
+
 ```js
 import { createStorage } from "unstorage";
 import netlifyBlobsDriver from "unstorage/drivers/netlify-blobs";

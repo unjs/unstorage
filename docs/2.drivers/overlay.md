@@ -10,6 +10,10 @@ All write operations happen on the top level layer while values are read from al
 
 When removing a key, a special value `__OVERLAY_REMOVED__` will be set on the top level layer internally.
 
+## Usage
+
+**Driver name:** `overlay`
+
 In the example below, we create an in-memory overlay on top of fs. No changes will be actually written to the disk when setting new keys.
 
 ```js

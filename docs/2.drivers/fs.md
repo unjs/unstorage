@@ -8,6 +8,8 @@ icon: ph:file-light
 
 ## Usage
 
+**Driver name:** `fs` or `fs-lite`
+
 Maps data to the real filesystem using directory structure for nested keys. Supports watching using [chokidar](https://github.com/paulmillr/chokidar).
 
 This driver implements meta for each key including `mtime` (last modified time), `atime` (last access time), and `size` (file size) using `fs.stat`.

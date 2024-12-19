@@ -10,6 +10,8 @@ Store data in the key-value store of Azure App Configuration.
 
 ### Usage
 
+**Driver name:** `azure`
+
 ::note{to="https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview"}
 Learn more about Azure App Configuration.
 ::

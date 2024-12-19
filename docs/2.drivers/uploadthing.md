@@ -18,6 +18,8 @@ There is a known issue that same key, if deleted cannot be used again [tracker i
 
 ## Usage
 
+**Driver name:** `uploadthing`
+
 To use, you will need to install `uploadthing` dependency in your project:
 
 :pm-install{name="uploadthing"}

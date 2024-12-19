@@ -8,6 +8,8 @@ icon: mdi:github
 
 ## Usage
 
+**Driver name:** `github`
+
 This driver fetches all possible keys once and keep it in cache for 10 minutes. Due to GitHub rate limit, it is highly recommended to provide a token. It only applies to fetching keys.
 
 ```js

@@ -10,7 +10,7 @@ Store data in the key-value store of Azure App Configuration.
 
 ### Usage
 
-**Driver name:** `azure`
+**Driver name:** `azure-app-configuration`
 
 ::note{to="https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview"}
 Learn more about Azure App Configuration.
@@ -59,6 +59,8 @@ Store data in Azure Cosmos DB NoSQL API documents.
 
 ### Usage
 
+**Driver name:** `azure-cosmos`
+
 ::note{to="https://azure.microsoft.com/en-us/services/cosmos-db/"}
 Learn more about Azure Cosmos DB.
 ::
@@ -101,6 +103,8 @@ const storage = createStorage({
 Store data in a Azure Key Vault secrets.
 
 ### Usage
+
+**Driver name:** `azure-key-vault`
 
 ::note{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
 Learn more about Azure Key Vault secrets.
@@ -148,6 +152,8 @@ Store data in a Azure blob storage.
 
 ### Usage
 
+**Driver name:** `azure-storage-blob`
+
 ::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob"}
 Learn more about Azure blob storage.
 ::
@@ -194,6 +200,8 @@ The driver supports the following authentication methods:
 Store data in a Azure table storage.
 
 ### Usage
+
+**Driver name:** `azure-storage-table`
 
 ::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables"}
 Learn more about Azure table storage.

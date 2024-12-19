@@ -21,7 +21,7 @@ import type { IDBKeyvalOptions as IndexedbOptions } from "unstorage/drivers/inde
 import type { LocalStorageOptions as LocalstorageOptions } from "unstorage/drivers/localstorage";
 import type { LRUDriverOptions as LruCacheOptions } from "unstorage/drivers/lru-cache";
 import type { MongoDbOptions as MongodbOptions } from "unstorage/drivers/mongodb";
-import type { ExtraOptions as NetlifyBlobsOptions } from "unstorage/drivers/netlify-blobs";
+import type { NetlifyStoreOptions as NetlifyBlobsOptions } from "unstorage/drivers/netlify-blobs";
 import type { OverlayStorageOptions as OverlayOptions } from "unstorage/drivers/overlay";
 import type { PlanetscaleDriverOptions as PlanetscaleOptions } from "unstorage/drivers/planetscale";
 import type { RedisOptions as RedisOptions } from "unstorage/drivers/redis";

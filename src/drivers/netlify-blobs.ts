@@ -14,6 +14,11 @@ const DRIVER_NAME = "netlify-blobs";
 
 type GetOptions = { type?: BlobResponseType };
 
+export type NetlifyStoreOptions =
+  | NetlifyDeployStoreLegacyOptions
+  | NetlifyDeployStoreOptions
+  | NetlifyNamedStoreOptions;
+
 export interface ExtraOptions {
   /** If set to `true`, the store is scoped to the deploy. This means that it is only available from that deploy, and will be deleted or rolled-back alongside it. */
   deployScoped?: boolean;
@@ -38,11 +43,6 @@ export interface NetlifyNamedStoreOptions
   name: string;
   deployScoped?: false;
 }
-
-export type NetlifyStoreOptions =
-  | NetlifyDeployStoreLegacyOptions
-  | NetlifyDeployStoreOptions
-  | NetlifyNamedStoreOptions;
 
 export default defineDriver((options: NetlifyStoreOptions) => {
   const { deployScoped, name, ...opts } = options;

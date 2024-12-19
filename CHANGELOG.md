@@ -2,6 +2,91 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.14.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.13.1...v1.14.0)
+
+### 🚀 Enhancements
+
+- Add `upstash` driver ([#500](https://github.com/unjs/unstorage/pull/500))
+- **cloudflare-r2-binding:** Allow specify raw type ([#519](https://github.com/unjs/unstorage/pull/519))
+- **indexedb:** Support raw storage ([#520](https://github.com/unjs/unstorage/pull/520))
+- Add experimental `db0` driver ([#476](https://github.com/unjs/unstorage/pull/476))
+- Add `vercel-blob` driver ([#472](https://github.com/unjs/unstorage/pull/472))
+- Add `deno-kv` driver ([#233](https://github.com/unjs/unstorage/pull/233))
+- `deno-kv-node` driver ([#521](https://github.com/unjs/unstorage/pull/521))
+- Typed storage interface ([#509](https://github.com/unjs/unstorage/pull/509))
+- Add `s3` driver ([#361](https://github.com/unjs/unstorage/pull/361))
+- Add uploadthing driver ([#390](https://github.com/unjs/unstorage/pull/390))
+- Support raw conversion in envs without `Buffer` ([#364](https://github.com/unjs/unstorage/pull/364))
+
+### 🩹 Fixes
+
+- **cloudflare-r2-binding:** Return `null` for non existing `getItem` ([fb8e00e](https://github.com/unjs/unstorage/commit/fb8e00e))
+- **upstash:** Drop `base` prefix from `keyKeys` ([8711a94](https://github.com/unjs/unstorage/commit/8711a94))
+- Capture stacktrace of thrown errors ([c704fef](https://github.com/unjs/unstorage/commit/c704fef))
+- **http:** Return `arrayBuffer` for `getItemRaw` ([#527](https://github.com/unjs/unstorage/pull/527))
+- **localstorage:** Consider `base` for `clear` and `getKeys` ([#529](https://github.com/unjs/unstorage/pull/529))
+
+### 💅 Refactors
+
+- More strict type checks ([c8ed5cf](https://github.com/unjs/unstorage/commit/c8ed5cf))
+- **cloudflare-kv-http:** Use new bulk/delete api for `clear()` ([0231775](https://github.com/unjs/unstorage/commit/0231775))
+- Reuse `localstorage` logic for `session-storage` ([#530](https://github.com/unjs/unstorage/pull/530))
+
+### 📖 Documentation
+
+- Add notes about nightly channel ([de31652](https://github.com/unjs/unstorage/commit/de31652))
+- **netlify:** Add `consistency` option ([#525](https://github.com/unjs/unstorage/pull/525))
+- **cloudflare:** Add note about r2 over http ([1f2d444](https://github.com/unjs/unstorage/commit/1f2d444))
+
+### 📦 Build
+
+- Update unbuild to v3 ([1528c3c](https://github.com/unjs/unstorage/commit/1528c3c))
+- Generate drivers meta ([#526](https://github.com/unjs/unstorage/pull/526))
+
+### 🏡 Chore
+
+- Update dev dependencies ([61fb931](https://github.com/unjs/unstorage/commit/61fb931))
+- Update eslint config ([dae5d1b](https://github.com/unjs/unstorage/commit/dae5d1b))
+- Rollback msw update ([3d34f07](https://github.com/unjs/unstorage/commit/3d34f07))
+- Apply automated lint fixes ([a400ba8](https://github.com/unjs/unstorage/commit/a400ba8))
+- Remove demo ([08c833f](https://github.com/unjs/unstorage/commit/08c833f))
+- Add todo for ioredis import ([404c2f1](https://github.com/unjs/unstorage/commit/404c2f1))
+- Lint ([1e28a25](https://github.com/unjs/unstorage/commit/1e28a25))
+- Rename vite config to remove cjs warn ([749cea0](https://github.com/unjs/unstorage/commit/749cea0))
+- Update experimental db warning ([9b1f71f](https://github.com/unjs/unstorage/commit/9b1f71f))
+
+### ✅ Tests
+
+- Add missing await ([7730923](https://github.com/unjs/unstorage/commit/7730923))
+- **cloudflare:** Use wrangler dev proxy ([#518](https://github.com/unjs/unstorage/pull/518))
+- Enable `cloudflare-r2-binding` tests ([0c4d9fd](https://github.com/unjs/unstorage/commit/0c4d9fd))
+- **upstash, vercel-blob:** Use random base ([65a10cc](https://github.com/unjs/unstorage/commit/65a10cc))
+- **cloudflare-kv-http:** Use sandbox tests ([8043897](https://github.com/unjs/unstorage/commit/8043897))
+- Add retry ([5ab4afd](https://github.com/unjs/unstorage/commit/5ab4afd))
+- Lazy init driver for conditional tests ([33d90a9](https://github.com/unjs/unstorage/commit/33d90a9))
+- **s3:** Skip if not setup ([ce9685e](https://github.com/unjs/unstorage/commit/ce9685e))
+
+### 🤖 CI
+
+- Use latest tag for nightly ([2eac300](https://github.com/unjs/unstorage/commit/2eac300))
+- Pass sandbox envs ([6b7ff6a](https://github.com/unjs/unstorage/commit/6b7ff6a))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Jan-Henrik Damaschke <jdamaschke@outlook.de>
+- Julius Marminge <julius0216@outlook.com>
+- Becem <becem.gharbi@live.com>
+- Matt Kane <m@mk.gg>
+- Wzc520pyfm ([@wzc520pyfm](http://github.com/wzc520pyfm))
+- Ray ([@so1ve](http://github.com/so1ve))
+- PikiLee <871565198@qq.com>
+- Balázs Németh ([@zsilbi](http://github.com/zsilbi))
+- Ahmed Rangel ([@ahmedrangel](http://github.com/ahmedrangel))
+- Fahreddin Özcan ([@fahreddinozcan](http://github.com/fahreddinozcan))
+
 ## v1.13.1
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.13.0...v1.13.1)

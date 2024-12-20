@@ -26,12 +26,12 @@ You need to create and assign a KV. See [KV Bindings](https://developers.cloudfl
 import { createStorage } from "unstorage";
 import cloudflareKVBindingDriver from "unstorage/drivers/cloudflare-kv-binding";
 
-// Using binding name to be picked from globalThis
+// Directly setting binding
 const storage = createStorage({
   driver: cloudflareKVBindingDriver({ binding: "STORAGE" }),
 });
 
-// Directly setting binding
+// Using binding name to be picked from globalThis
 const storage = createStorage({
   driver: cloudflareKVBindingDriver({ binding: globalThis.STORAGE }),
 });

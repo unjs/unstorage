@@ -14,18 +14,12 @@ importers:
       chokidar:
         specifier: ^3.6.0
         version: 3.6.0
-      citty:
-        specifier: ^0.1.6
-        version: 0.1.6
       destr:
         specifier: ^2.0.3
         version: 2.0.3
       h3:
         specifier: ^1.13.0
         version: 1.13.0
-      listhen:
-        specifier: ^1.9.0
-        version: 1.9.0
       lru-cache:
         specifier: ^10.4.3
         version: 10.4.3
@@ -114,6 +108,9 @@ importers:
       changelogen:
         specifier: ^0.5.7
         version: 0.5.7(magicast@0.3.5)
+      citty:
+        specifier: ^0.1.6
+        version: 0.1.6
       db0:
         specifier: ^0.2.1
         version: 0.2.1(@electric-sql/pglite@0.2.15)(@libsql/client@0.14.0)(better-sqlite3@11.7.0)(mysql2@3.11.5)
@@ -144,6 +141,9 @@ importers:
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
+      listhen:
+        specifier: ^1.9.0
+        version: 1.9.0
       mitata:
         specifier: ^1.0.21
         version: 1.0.21
@@ -2966,7 +2966,6 @@ packages:
 
   libsql@0.4.7:
     resolution: {integrity: sha512-T9eIRCs6b0J1SHKYIvD8+KCJMcWZ900iZyxdnSCdqxN12Z1ijzT+jY5nrk72Jw4B0HGzms2NgpryArlJqvc3Lw==}
-    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   lilconfig@3.1.3:

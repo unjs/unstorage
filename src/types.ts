@@ -91,10 +91,10 @@ export interface Storage<T extends StorageValue = StorageValue> {
     key: K,
     ops?: TransactionOptions
   ): Promise<StorageItemType<T, K> | null>;
-  getItem(
+  getItem<R = StorageItemType<T, string>>(
     key: string,
     opts?: TransactionOptions
-  ): Promise<StorageItemType<T, string> | null>;
+  ): Promise<R | null>;
 
   /** @experimental */
   getItems: <U extends T>(

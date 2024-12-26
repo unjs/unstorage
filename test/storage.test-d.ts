@@ -10,9 +10,9 @@ describe("types", () => {
       await storage.getItem("foo")
     ).toEqualTypeOf<StorageValue | null>();
 
-    expectTypeOf(
-      await storage.getItem<boolean>("foo")
-    ).toEqualTypeOf<boolean | null>();
+    expectTypeOf(await storage.getItem<boolean>("foo")).toEqualTypeOf<
+      boolean | null
+    >();
 
     expectTypeOf(
       await storage.getItem<{ hello: string }>("foo")

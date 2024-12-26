@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.14.2
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.14.1...v1.14.2)
+
+### 🩹 Fixes
+
+- **db:** Escape mysql queries ([#542](https://github.com/unjs/unstorage/pull/542))
+
+### 📖 Documentation
+
+- **cloudflare:** Fix example comments ([#534](https://github.com/unjs/unstorage/pull/534))
+
+### 📦 Build
+
+- Remove extra cli deps ([#538](https://github.com/unjs/unstorage/pull/538))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Bjorn Lu <bjornlu.dev@gmail.com>
+- Ville Säävuori ([@Uninen](http://github.com/Uninen))
+
 ## v1.14.1
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.14.0...v1.14.1)

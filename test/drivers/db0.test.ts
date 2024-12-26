@@ -31,28 +31,47 @@ const drivers = [
       return createDatabase(pglite());
     },
   },
+  // docker run -it --rm --name mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=unstorage -p 3306:3306 mysql
+  // VITEST_MYSQL_URI=mysql://root:root@localhost/unstorage pnpm vitest test/drivers/db0.test.ts -t mysql
+  {
+    name: "mysql",
+    enabled: !!process.env.VITEST_MYSQL_URI,
+    async getDB() {
+      const mysql = await import("db0/connectors/mysql2").then(
+        (m) => m.default
+      );
+      return createDatabase(
+        mysql({
+          uri: process.env.VITEST_MYSQL_URI,
+        })
+      );
+    },
+  },
 ];
 
 for (const driver of drivers) {
-  describe(`drivers: db0 - ${driver.name}`, async () => {
-    const db = await driver.getDB();
+  describe.skipIf(driver.enabled === false)(
+    `drivers: db0 - ${driver.name}`,
+    async () => {
+      const db = await driver.getDB();
 
-    afterAll(async () => {
-      await db.sql`DROP TABLE IF EXISTS unstorage`;
-    });
+      afterAll(async () => {
+        await db.sql`DROP TABLE IF EXISTS unstorage`;
+      });
 
-    testDriver({
-      driver: () => db0Driver({ database: db }),
-      additionalTests: (ctx) => {
-        it("meta", async () => {
-          await ctx.storage.setItem("meta:test", "test_data");
+      testDriver({
+        driver: () => db0Driver({ database: db }),
+        additionalTests: (ctx) => {
+          it("meta", async () => {
+            await ctx.storage.setItem("meta:test", "test_data");
 
-          expect(await ctx.storage.getMeta("meta:test")).toMatchObject({
-            birthtime: expect.any(Date),
-            mtime: expect.any(Date),
+            expect(await ctx.storage.getMeta("meta:test")).toMatchObject({
+              birthtime: expect.any(Date),
+              mtime: expect.any(Date),
+            });
           });
-        });
-      },
-    });
-  });
+        },
+      });
+    }
+  );
 }

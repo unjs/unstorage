@@ -10,6 +10,14 @@ describe("types", () => {
       await storage.getItem("foo")
     ).toEqualTypeOf<StorageValue | null>();
 
+    expectTypeOf(
+      await storage.getItem<boolean>("foo")
+    ).toEqualTypeOf<boolean | null>();
+
+    expectTypeOf(
+      await storage.getItem<{ hello: string }>("foo")
+    ).toEqualTypeOf<{ hello: string } | null>();
+
     await storage.setItem("foo", "str");
     await storage.set("bar", 1);
     await storage.removeItem("foo");

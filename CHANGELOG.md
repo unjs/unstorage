@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.14.4
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.14.3...v1.14.4)
+
+### 🩹 Fixes
+
+- **s3:** Use `/` as separator ([#545](https://github.com/unjs/unstorage/pull/545))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+
 ## v1.14.3
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.14.2...v1.14.3)

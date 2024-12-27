@@ -1,6 +1,7 @@
-import { describe } from "vitest";
+import { describe, it, expect } from "vitest";
 import s3Driver from "../../src/drivers/s3";
 import { testDriver } from "./utils";
+import { AwsClient } from "aws4fetch";
 
 const accessKeyId = process.env.VITE_S3_ACCESS_KEY_ID;
 const secretAccessKey = process.env.VITE_S3_SECRET_ACCESS_KEY;
@@ -20,5 +21,25 @@ describe.skipIf(
         endpoint: endpoint!,
         region: region!,
       }),
+    additionalTests(ctx) {
+      it("can access directly with / separator", async () => {
+        await ctx.storage.set("foo/bar:baz", "ok");
+        expect(await ctx.storage.get("foo/bar:baz")).toBe("ok");
+
+        const client = new AwsClient({
+          accessKeyId: accessKeyId!,
+          secretAccessKey: secretAccessKey!,
+          region,
+        });
+        const response = await client.fetch(
+          `${endpoint}/${bucket}/foo/bar/baz`,
+          {
+            method: "GET",
+          }
+        );
+        expect(response.status).toBe(200);
+        expect(await response.text()).toBe("ok");
+      });
+    },
   });
 });

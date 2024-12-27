@@ -74,7 +74,7 @@ export default defineDriver((options: S3DriverOptions) => {
 
   const baseURL = `${options.endpoint.replace(/\/$/, "")}/${options.bucket || ""}`;
 
-  const url = (key: string = "") => `${baseURL}/${normalizeKey(key)}`;
+  const url = (key: string = "") => `${baseURL}/${normalizeKey(key, "/")}`;
 
   const awsFetch = async (url: string, opts?: RequestInit) => {
     const request = await getAwsClient().sign(url, opts);

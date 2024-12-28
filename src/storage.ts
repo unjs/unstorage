@@ -10,7 +10,13 @@ import type {
 } from "./types";
 import memory from "./drivers/memory";
 import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
-import { normalizeKey, normalizeBaseKey, joinKeys } from "./utils";
+import {
+  normalizeKey,
+  normalizeBaseKey,
+  joinKeys,
+  filterKeyByDepth,
+  filterKeyByBase,
+} from "./utils";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -362,11 +368,12 @@ export function createStorage<T extends StorageValue>(
           ...maskedMounts.filter((p) => !p.startsWith(mount.mountpoint)),
         ];
       }
-      return base
-        ? allKeys.filter(
-            (key) => key.startsWith(base!) && key[key.length - 1] !== "$"
-          )
-        : allKeys.filter((key) => key[key.length - 1] !== "$");
+      return allKeys.filter(
+        (key) =>
+          (opts.maxDepth === undefined ||
+            filterKeyByDepth(key, opts.maxDepth)) &&
+          filterKeyByBase(key, base)
+      );
     },
     // Utils
     async clear(base, opts = {}) {

@@ -1,4 +1,5 @@
 import { createError, createRequiredError, defineDriver } from "./utils";
+import { type GetKeysOptions } from "../types";
 import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
   Store,
@@ -98,7 +99,7 @@ export default defineDriver((options: NetlifyStoreOptions) => {
     },
     async getKeys(
       base?: string,
-      tops?: Omit<ListOptions, "prefix" | "paginate">
+      tops?: GetKeysOptions & Omit<ListOptions, "prefix" | "paginate">
     ) {
       return (await getClient().list({ ...tops, prefix: base })).blobs.map(
         (item) => item.key

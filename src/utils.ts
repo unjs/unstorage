@@ -63,3 +63,33 @@ export function normalizeBaseKey(base?: string) {
   base = normalizeKey(base);
   return base ? base + ":" : "";
 }
+
+export function filterKeyByDepth(
+  key: string,
+  depth: number | undefined
+): boolean {
+  if (depth === undefined) {
+    return true;
+  }
+
+  let substrCount = 0;
+  let index = key.indexOf(":");
+
+  while (index > -1) {
+    substrCount++;
+    index = key.indexOf(":", index + 1);
+  }
+
+  return substrCount <= depth;
+}
+
+export function filterKeyByBase(
+  key: string,
+  base: string | undefined
+): boolean {
+  if (base) {
+    return key.startsWith(base) && key[key.length - 1] !== "$";
+  }
+
+  return key[key.length - 1] !== "$";
+}

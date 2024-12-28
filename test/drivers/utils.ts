@@ -70,6 +70,37 @@ export function testDriver(opts: TestOptions) {
     );
   });
 
+  it("getKeys with depth", async () => {
+    await ctx.storage.setItem("depth0:depth1:depth1_0", "test_data");
+    await ctx.storage.setItem("depth0:depth1:depth1_1", "test_data");
+    await ctx.storage.setItem("depth0:depth0_0", "test_data");
+    await ctx.storage.setItem("depth0:depth0_1", "test_data");
+    const depth0Keys = await ctx.storage.getKeys(undefined, { depth: 0 });
+    const depth1Keys = await ctx.storage.getKeys(undefined, { depth: 1 });
+    const depth2Keys = await ctx.storage.getKeys(undefined, { depth: 2 });
+
+    depth1Keys.sort();
+    depth2Keys.sort();
+
+    expect(depth0Keys).lengthOf(0);
+    expect(depth1Keys).toMatchObject([
+      "depth0:depth0_0",
+      "depth0:depth0_1",
+      "s1:a",
+      "s2:a",
+      "s3:a",
+    ]);
+    expect(depth2Keys).toMatchObject([
+      "depth0:depth0_0",
+      "depth0:depth0_1",
+      "depth0:depth1:depth1_0",
+      "depth0:depth1:depth1_1",
+      "s1:a",
+      "s2:a",
+      "s3:a",
+    ]);
+  });
+
   it("serialize (object)", async () => {
     await ctx.storage.setItem("/data/test.json", { json: "works" });
     expect(await ctx.storage.getItem("/data/test.json")).toMatchObject({

@@ -5,6 +5,7 @@ import type {
   Store,
   BlobResponseType,
   SetOptions,
+  ListOptions,
   GetStoreOptions,
   GetDeployStoreOptions,
 } from "@netlify/blobs";
@@ -96,7 +97,10 @@ export default defineDriver((options: NetlifyStoreOptions) => {
     removeItem(key) {
       return getClient().delete(key);
     },
-    async getKeys(base?: string, tops?: GetKeysOptions) {
+    async getKeys(
+      base?: string,
+      tops?: GetKeysOptions & Omit<ListOptions, "prefix" | "paginate">
+    ) {
       return (await getClient().list({ ...tops, prefix: base })).blobs.map(
         (item) => item.key
       );

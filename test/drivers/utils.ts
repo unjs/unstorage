@@ -1,4 +1,4 @@
-import { it, expect, beforeAll, afterAll } from "vitest";
+import { it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import {
   type Storage,
   type Driver,
@@ -33,6 +33,10 @@ export function testDriver(opts: TestOptions) {
     await ctx.storage?.dispose?.();
   });
 
+  afterEach(async () => {
+    await ctx.storage.clear();
+  });
+
   it("init", async () => {
     await restoreSnapshot(ctx.storage, { initial: "works" });
     expect(await ctx.storage.getItem("initial")).toBe("works");
@@ -55,6 +59,9 @@ export function testDriver(opts: TestOptions) {
   });
 
   it("getKeys", async () => {
+    await ctx.storage.setItem("s1:a", "test_data");
+    await ctx.storage.setItem("s2:a", "test_data");
+    await ctx.storage.setItem("s3:a?q=1", "test_data");
     expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
       ["s1:a", "s2:a", "s3:a"].sort()
     );

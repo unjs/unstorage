@@ -14,33 +14,20 @@ describe("drivers: cloudflare-kv", async () => {
   });
   testDriver({
     driver: CloudflareKVBinding({ base: "base" }),
-    async additionalTests() {
+    async additionalTests(ctx) {
       test("snapshot", async () => {
+        await ctx.storage.setItem("s1:a", "test_data");
+        await ctx.storage.setItem("s2:a", "test_data");
+        await ctx.storage.setItem("s3:a", "test_data");
+
         const storage = createStorage({
           driver: CloudflareKVBinding({}),
         });
         expect(await snapshot(storage, "")).toMatchInlineSnapshot(`
           {
-            "base:data:raw.bin": "base64:AQID",
-            "base:data:serialized1.json": "SERIALIZED",
-            "base:data:serialized2.json": {
-              "serializedObj": "works",
-            },
-            "base:data:test.json": {
-              "json": "works",
-            },
-            "base:data:true.json": true,
-            "base:my-false-flag": false,
             "base:s1:a": "test_data",
             "base:s2:a": "test_data",
             "base:s3:a": "test_data",
-            "base:t:1": "test_data_t1",
-            "base:t:2": "test_data_t2",
-            "base:t:3": "test_data_t3",
-            "base:v1:a": "test_data_v1:a",
-            "base:v2:a": "test_data_v2:a",
-            "base:v3:a": "test_data_v3:a?q=1",
-            "base:zero": 0,
           }
         `);
       });

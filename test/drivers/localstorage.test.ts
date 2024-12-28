@@ -18,6 +18,7 @@ describe("drivers: localstorage", () => {
     }),
     additionalTests: (ctx) => {
       it("check localstorage", async () => {
+        await ctx.storage.setItem("s1:a", "test_data");
         expect(jsdom.window.localStorage.getItem("test:s1:a")).toBe(
           "test_data"
         );

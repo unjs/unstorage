@@ -15,6 +15,7 @@ import {
   normalizeBaseKey,
   joinKeys,
   filterKeyByDepth,
+  filterKeyByBase,
 } from "./utils";
 
 interface StorageCTX {
@@ -367,13 +368,12 @@ export function createStorage<T extends StorageValue>(
           ...maskedMounts.filter((p) => !p.startsWith(mount.mountpoint)),
         ];
       }
-      return allKeys
-        .filter((key) => filterKeyByDepth(key, opts.maxDepth))
-        .filter(
-          base
-            ? (key) => key.startsWith(base!) && key[key.length - 1] !== "$"
-            : (key) => key[key.length - 1] !== "$"
-        );
+      return allKeys.filter(
+        (key) =>
+          (opts.maxDepth === undefined ||
+            filterKeyByDepth(key, opts.maxDepth)) &&
+          filterKeyByBase(key, base)
+      );
     },
     // Utils
     async clear(base, opts = {}) {

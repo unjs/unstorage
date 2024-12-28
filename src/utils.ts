@@ -82,3 +82,14 @@ export function filterKeyByDepth(
 
   return substrCount <= depth;
 }
+
+export function filterKeyByBase(
+  key: string,
+  base: string | undefined
+): boolean {
+  if (base) {
+    return key.startsWith(base) && key[key.length - 1] !== "$";
+  }
+
+  return key[key.length - 1] !== "$";
+}

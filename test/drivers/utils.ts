@@ -85,9 +85,6 @@ export function testDriver(opts: TestOptions) {
       "depth0:depth1_0",
       "depth0:depth1_1",
       "depth0_0",
-      "s1:a",
-      "s2:a",
-      "s3:a",
     ]);
     expect(
       (await ctx.storage.getKeys(undefined, { maxDepth: 2 })).sort()
@@ -97,9 +94,6 @@ export function testDriver(opts: TestOptions) {
       "depth0:depth1_0",
       "depth0:depth1_1",
       "depth0_0",
-      "s1:a",
-      "s2:a",
-      "s3:a",
     ]);
   });
 

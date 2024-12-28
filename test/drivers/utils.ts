@@ -81,11 +81,7 @@ export function testDriver(opts: TestOptions) {
     );
     expect(
       (await ctx.storage.getKeys(undefined, { maxDepth: 1 })).sort()
-    ).toMatchObject([
-      "depth0:depth1_0",
-      "depth0:depth1_1",
-      "depth0_0",
-    ]);
+    ).toMatchObject(["depth0:depth1_0", "depth0:depth1_1", "depth0_0"]);
     expect(
       (await ctx.storage.getKeys(undefined, { maxDepth: 2 })).sort()
     ).toMatchObject([

@@ -71,16 +71,20 @@ export function testDriver(opts: TestOptions) {
   });
 
   it("getKeys with depth", async () => {
-    await ctx.storage.setItem("depth0:depth1:depth1_0", "test_data");
-    await ctx.storage.setItem("depth0:depth1:depth1_1", "test_data");
-    await ctx.storage.setItem("depth0:depth0_0", "test_data");
-    await ctx.storage.setItem("depth0:depth0_1", "test_data");
-    expect(await ctx.storage.getKeys(undefined, { maxDepth: 0 })).lengthOf(0);
+    await ctx.storage.setItem("depth0_0", "test_data");
+    await ctx.storage.setItem("depth0:depth1:depth2_0", "test_data");
+    await ctx.storage.setItem("depth0:depth1:depth2_1", "test_data");
+    await ctx.storage.setItem("depth0:depth1_0", "test_data");
+    await ctx.storage.setItem("depth0:depth1_1", "test_data");
+    expect(await ctx.storage.getKeys(undefined, { maxDepth: 0 })).toMatchObject(
+      ["depth0_0"]
+    );
     expect(
       (await ctx.storage.getKeys(undefined, { maxDepth: 1 })).sort()
     ).toMatchObject([
-      "depth0:depth0_0",
-      "depth0:depth0_1",
+      "depth0:depth1_0",
+      "depth0:depth1_1",
+      "depth0_0",
       "s1:a",
       "s2:a",
       "s3:a",
@@ -88,10 +92,11 @@ export function testDriver(opts: TestOptions) {
     expect(
       (await ctx.storage.getKeys(undefined, { maxDepth: 2 })).sort()
     ).toMatchObject([
-      "depth0:depth0_0",
-      "depth0:depth0_1",
-      "depth0:depth1:depth1_0",
-      "depth0:depth1:depth1_1",
+      "depth0:depth1:depth2_0",
+      "depth0:depth1:depth2_1",
+      "depth0:depth1_0",
+      "depth0:depth1_1",
+      "depth0_0",
       "s1:a",
       "s2:a",
       "s3:a",

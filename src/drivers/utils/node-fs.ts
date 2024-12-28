@@ -48,8 +48,7 @@ export async function ensuredir(dir: string) {
 
 export async function readdirRecursive(
   dir: string,
-  ignore?: (p: string) => boolean,
-  maxDepth?: number
+  ignore?: (p: string) => boolean
 ) {
   if (ignore && ignore(dir)) {
     return [];
@@ -60,14 +59,8 @@ export async function readdirRecursive(
     entries.map(async (entry) => {
       const entryPath = resolve(dir, entry.name);
       if (entry.isDirectory()) {
-        if (maxDepth === undefined || maxDepth > 0) {
-          const dirFiles = await readdirRecursive(
-            entryPath,
-            ignore,
-            maxDepth === undefined ? undefined : maxDepth - 1
-          );
-          files.push(...dirFiles.map((f) => entry.name + "/" + f));
-        }
+        const dirFiles = await readdirRecursive(entryPath, ignore);
+        files.push(...dirFiles.map((f) => entry.name + "/" + f));
       } else {
         if (!(ignore && ignore(entry.name))) {
           files.push(entry.name);

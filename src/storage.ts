@@ -368,7 +368,7 @@ export function createStorage<T extends StorageValue>(
         ];
       }
       return allKeys
-        .filter((key) => filterKeyByDepth(key, opts.depth))
+        .filter((key) => filterKeyByDepth(key, opts.maxDepth))
         .filter(
           base
             ? (key) => key.startsWith(base!) && key[key.length - 1] !== "$"

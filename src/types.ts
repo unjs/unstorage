@@ -19,7 +19,7 @@ export interface StorageMeta {
 export type TransactionOptions = Record<string, any>;
 
 export type GetKeysOptions = TransactionOptions & {
-  depth?: number;
+  maxDepth?: number;
 };
 
 export interface Driver<OptionsT = any, InstanceT = any> {

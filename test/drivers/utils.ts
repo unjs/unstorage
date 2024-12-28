@@ -75,9 +75,9 @@ export function testDriver(opts: TestOptions) {
     await ctx.storage.setItem("depth0:depth1:depth1_1", "test_data");
     await ctx.storage.setItem("depth0:depth0_0", "test_data");
     await ctx.storage.setItem("depth0:depth0_1", "test_data");
-    const depth0Keys = await ctx.storage.getKeys(undefined, { depth: 0 });
-    const depth1Keys = await ctx.storage.getKeys(undefined, { depth: 1 });
-    const depth2Keys = await ctx.storage.getKeys(undefined, { depth: 2 });
+    const depth0Keys = await ctx.storage.getKeys(undefined, { maxDepth: 0 });
+    const depth1Keys = await ctx.storage.getKeys(undefined, { maxDepth: 1 });
+    const depth2Keys = await ctx.storage.getKeys(undefined, { maxDepth: 2 });
 
     depth1Keys.sort();
     depth2Keys.sort();

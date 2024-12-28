@@ -14,8 +14,12 @@ describe("drivers: redis", () => {
 
   testDriver({
     driver,
-    additionalTests() {
+    additionalTests(ctx) {
       it("verify stored keys", async () => {
+        await ctx.storage.setItem("s1:a", "test_data");
+        await ctx.storage.setItem("s2:a", "test_data");
+        await ctx.storage.setItem("s3:a?q=1", "test_data");
+
         const client = new ioredis.default("ioredis://localhost:6379/0");
         const keys = await client.keys("*");
         expect(keys).toMatchInlineSnapshot(`
@@ -23,19 +27,6 @@ describe("drivers: redis", () => {
             "test:s1:a",
             "test:s2:a",
             "test:s3:a",
-            "test:data:test.json",
-            "test:data:true.json",
-            "test:data:serialized1.json",
-            "test:data:serialized2.json",
-            "test:data:raw.bin",
-            "test:t:1",
-            "test:t:2",
-            "test:t:3",
-            "test:v1:a",
-            "test:v2:a",
-            "test:v3:a",
-            "test:zero",
-            "test:my-false-flag",
           ]
         `);
         await client.disconnect();

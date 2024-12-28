@@ -12,7 +12,8 @@ describe("drivers: session-storage", () => {
   testDriver({
     driver: driver({ window: jsdom.window as unknown as typeof window }),
     additionalTests: (ctx) => {
-      it("check session storage", () => {
+      it("check session storage", async () => {
+        await ctx.storage.setItem("s1:a", "test_data");
         expect(jsdom.window.sessionStorage.getItem("s1:a")).toBe("test_data");
       });
       it("watch session storage", async () => {

@@ -1,6 +1,7 @@
-import { it, describe, expect } from "vitest";
+import { it, describe, expect, vi, afterEach } from "vitest";
 import driver from "../../src/drivers/lru-cache";
 import { testDriver } from "./utils";
+import { LRUCache } from "lru-cache";
 
 describe("drivers: lru-cache", () => {
   testDriver({
@@ -9,6 +10,10 @@ describe("drivers: lru-cache", () => {
 });
 
 describe("drivers: lru-cache with size", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   testDriver({
     driver: driver({
       maxEntrySize: 50,
@@ -23,6 +28,39 @@ describe("drivers: lru-cache with size", () => {
 
         await ctx.storage.setItemRaw("bigBuff", Buffer.alloc(100));
         expect(await ctx.storage.getItemRaw("bigBuff")).toBe(null);
+      });
+
+      it("should pass `setItem` options through", async () => {
+        const spy = vi.spyOn(LRUCache.prototype, "set");
+        await ctx.storage.setItem("foo", "test_data", {
+          noUpdateTTL: true,
+        });
+
+        expect(spy).toHaveBeenCalledWith("foo", "test_data", {
+          noUpdateTTL: true,
+        });
+      });
+
+      it("should pass `setItemRaw` options through", async () => {
+        const spy = vi.spyOn(LRUCache.prototype, "set");
+        await ctx.storage.setItemRaw("foo", "test_data", {
+          noUpdateTTL: true,
+        });
+
+        expect(spy).toHaveBeenCalledWith("foo", "test_data", {
+          noUpdateTTL: true,
+        });
+      });
+
+      it("should pass `hasItem` options through", async () => {
+        const spy = vi.spyOn(LRUCache.prototype, "has");
+        await ctx.storage.hasItem("foo", {
+          updateAgeOnHas: true,
+        });
+
+        expect(spy).toHaveBeenCalledWith("foo", {
+          updateAgeOnHas: true,
+        });
       });
     },
   });

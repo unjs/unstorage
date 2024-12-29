@@ -1,5 +1,6 @@
 import { defineDriver } from "./utils";
 import { LRUCache } from "lru-cache";
+import { type TransactionOptions, type StorageValue } from "../types";
 
 type LRUCacheOptions = LRUCache.OptionsBase<string, any, any> &
   Partial<LRUCache.OptionsMaxLimit<string, any, any>> &
@@ -9,6 +10,13 @@ type LRUCacheOptions = LRUCache.OptionsBase<string, any, any> &
 export interface LRUDriverOptions extends LRUCacheOptions {}
 
 const DRIVER_NAME = "lru-cache";
+
+export type HasItemOptions = LRUCache.HasOptions<string, any, any> &
+  TransactionOptions;
+export type GetItemOptions = LRUCache.GetOptions<string, any, any> &
+  TransactionOptions;
+export type SetItemOptions = LRUCache.SetOptions<string, any, any> &
+  TransactionOptions;
 
 export default defineDriver((opts: LRUDriverOptions = {}) => {
   const cache = new LRUCache({
@@ -26,20 +34,23 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
     name: DRIVER_NAME,
     options: opts,
     getInstance: () => cache,
-    hasItem(key) {
-      return cache.has(key);
+    hasItem(key, opts?: HasItemOptions) {
+      return cache.has(key, opts);
     },
-    getItem(key) {
-      return cache.get(key) ?? null;
+    // Note: its important we specify the return types here, since
+    // otherwise we will end up adding an overload of `getItem` which
+    // returns `any`
+    getItem(key, opts?: GetItemOptions): StorageValue {
+      return cache.get(key, opts) ?? null;
     },
-    getItemRaw(key) {
-      return cache.get(key) ?? null;
+    getItemRaw(key, opts?: GetItemOptions): StorageValue {
+      return cache.get(key, opts) ?? null;
     },
-    setItem(key, value) {
-      cache.set(key, value);
+    setItem(key, value, opts?: SetItemOptions) {
+      cache.set(key, value, opts);
     },
-    setItemRaw(key, value) {
-      cache.set(key, value);
+    setItemRaw(key, value, opts?: SetItemOptions) {
+      cache.set(key, value, opts);
     },
     removeItem(key) {
       cache.delete(key);

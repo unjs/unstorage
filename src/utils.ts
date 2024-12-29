@@ -3,11 +3,16 @@ import type { Storage, StorageValue } from "./types";
 type StorageKeys = Array<keyof Storage>;
 
 const storageKeyProperties: StorageKeys = [
+  "has",
   "hasItem",
+  "get",
   "getItem",
   "getItemRaw",
+  "set",
   "setItem",
   "setItemRaw",
+  "del",
+  "remove",
   "removeItem",
   "getMeta",
   "setMeta",

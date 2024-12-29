@@ -4,6 +4,7 @@ import {
   snapshot,
   restoreSnapshot,
   prefixStorage,
+  type Driver,
 } from "../src";
 import memory from "../src/drivers/memory";
 
@@ -184,7 +185,7 @@ describe("Regression", () => {
     const setItem = vi.fn();
     const setItems = vi.fn();
 
-    const driver = memory();
+    const driver = memory() as Driver<unknown, unknown>;
     const storage = createStorage({
       driver: {
         ...driver,

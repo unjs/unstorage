@@ -17,7 +17,7 @@ export interface UploadThingOptions extends UTApiOptions {
 
 const DRIVER_NAME = "uploadthing";
 
-export default defineDriver<UploadThingOptions, UTApi>((opts = {}) => {
+export default defineDriver((opts: UploadThingOptions = {}) => {
   let client: UTApi;
 
   const base = opts.base ? normalizeKey(opts.base) : "";

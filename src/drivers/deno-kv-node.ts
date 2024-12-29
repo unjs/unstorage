@@ -12,18 +12,16 @@ export interface DenoKvNodeOptions {
 
 const DRIVER_NAME = "deno-kv-node";
 
-export default defineDriver<DenoKvNodeOptions, Kv | Promise<Kv>>(
-  (opts: DenoKvNodeOptions = {}) => {
-    const baseDriver = denoKV({
-      ...opts,
-      openKv: () => openKv(opts.path, opts.openKvOptions),
-    });
-    return {
-      ...baseDriver,
-      getInstance() {
-        return baseDriver.getInstance!() as Promise<Kv>;
-      },
-      name: DRIVER_NAME,
-    };
-  }
-);
+export default defineDriver((opts: DenoKvNodeOptions = {}) => {
+  const baseDriver = denoKV({
+    ...opts,
+    openKv: () => openKv(opts.path, opts.openKvOptions),
+  });
+  return {
+    ...baseDriver,
+    getInstance() {
+      return baseDriver.getInstance!() as Promise<Kv>;
+    },
+    name: DRIVER_NAME,
+  };
+});

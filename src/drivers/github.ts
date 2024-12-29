@@ -55,7 +55,7 @@ const defaultOptions: GithubOptions = {
 
 const DRIVER_NAME = "github";
 
-export default defineDriver<GithubOptions>((_opts) => {
+export default defineDriver((_opts: GithubOptions) => {
   const opts: GithubOptions = { ...defaultOptions, ..._opts };
   const rawUrl = joinURL(opts.cdnURL!, opts.repo, opts.branch!, opts.dir!);
 

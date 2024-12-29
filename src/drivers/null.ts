@@ -2,7 +2,7 @@ import { defineDriver } from "./utils";
 
 const DRIVER_NAME = "null";
 
-export default defineDriver<void>(() => {
+export default defineDriver(() => {
   return {
     name: DRIVER_NAME,
     hasItem() {

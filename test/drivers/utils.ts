@@ -6,18 +6,18 @@ import {
   restoreSnapshot,
 } from "../../src";
 
-export interface TestContext {
+export interface TestContext<T extends Driver> {
   storage: Storage;
-  driver: Driver;
+  driver: T;
 }
 
-export interface TestOptions {
-  driver: Driver | (() => Driver);
-  additionalTests?: (ctx: TestContext) => void;
+export interface TestOptions<T extends Driver> {
+  driver: T | (() => T);
+  additionalTests?: (ctx: TestContext<T>) => void;
 }
 
-export function testDriver(opts: TestOptions) {
-  const ctx = {} as TestContext;
+export function testDriver<T extends Driver>(opts: TestOptions<T>) {
+  const ctx = {} as TestContext<T>;
 
   beforeAll(() => {
     ctx.driver =

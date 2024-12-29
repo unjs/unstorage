@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { resolve } from "node:path";
+import { stat } from "node:fs/promises";
 import { readFile, writeFile } from "../../src/drivers/utils/node-fs";
 import { testDriver } from "./utils";
 import driver from "../../src/drivers/fs";
@@ -39,6 +40,40 @@ describe("drivers: fs", () => {
       it("allow double dots in filename: ", async () => {
         await ctx.storage.setItem("s1/te..st..js", "ok");
         expect(await ctx.storage.getItem("s1/te..st..js")).toBe("ok");
+      });
+
+      it("natively supports maxDepth in getKeys", async () => {
+        await ctx.storage.setItem("depth-test/file0.md", "boop");
+        await ctx.storage.setItem("depth-test/depth0/file1.md", "boop");
+        await ctx.storage.setItem("depth-test/depth0/depth1/file2.md", "boop");
+        await ctx.storage.setItem("depth-test/depth0/depth1/file3.md", "boop");
+
+        const originalStat = await stat(
+          resolve(dir, "depth-test/depth0/file1.md")
+        );
+
+        expect(
+          (
+            await ctx.storage.getKeys(undefined, {
+              maxDepth: 1,
+            })
+          ).sort()
+        ).toMatchObject(["depth-test:file0.md"]);
+
+        const newStat = await stat(resolve(dir, "depth-test/depth0/file1.md"));
+
+        // assert that the driver didn't access `file1.md`
+        // this tells us that the native filtering worked, rather than
+        // the higher level filter catching it
+        expect(originalStat.atime).toEqual(newStat.atime);
+
+        expect(
+          (
+            await ctx.storage.getKeys(undefined, {
+              maxDepth: 2,
+            })
+          ).sort()
+        ).toMatchObject(["depth-test:depth0:file1.md", "depth-test:file0.md"]);
       });
     },
   });

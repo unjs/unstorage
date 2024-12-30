@@ -22,8 +22,14 @@ export type GetKeysOptions = TransactionOptions & {
   maxDepth?: number;
 };
 
+export interface DriverFlags {
+  maxDepth?: boolean;
+  ttl?: boolean;
+}
+
 export interface Driver<OptionsT = any, InstanceT = any> {
   name?: string;
+  flags?: DriverFlags;
   options?: OptionsT;
   getInstance?: () => InstanceT;
   hasItem: (key: string, opts: TransactionOptions) => MaybePromise<boolean>;

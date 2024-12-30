@@ -23,7 +23,8 @@ export type GetKeysOptions = TransactionOptions & {
 };
 
 export interface DriverFlags {
-  supportsMaxDepth?: boolean;
+  maxDepth?: boolean;
+  ttl?: boolean;
 }
 
 export interface Driver<OptionsT = any, InstanceT = any> {

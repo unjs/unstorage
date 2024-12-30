@@ -203,4 +203,23 @@ describe("Regression", () => {
     expect(setItem).toHaveBeenCalledTimes(0);
     expect(setItems).toHaveBeenCalledTimes(1);
   });
+
+  it("prefixed storage supports aliases", async () => {
+    const storage = createStorage();
+    const pStorage = prefixStorage(storage, "foo");
+
+    await pStorage.set("x", "foo");
+    await pStorage.set("y", "bar");
+
+    expect(await pStorage.get("x")).toBe("foo");
+    expect(await pStorage.get("x")).toBe("foo");
+    expect(await pStorage.has("x")).toBe(true);
+    expect(await pStorage.get("y")).toBe("bar");
+
+    await pStorage.del("x");
+    expect(await pStorage.has("x")).toBe(false);
+
+    await pStorage.remove("y");
+    expect(await pStorage.has("y")).toBe(false);
+  });
 });

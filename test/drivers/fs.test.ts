@@ -40,6 +40,29 @@ describe("drivers: fs", () => {
         await ctx.storage.setItem("s1/te..st..js", "ok");
         expect(await ctx.storage.getItem("s1/te..st..js")).toBe("ok");
       });
+
+      it("natively supports maxDepth in getKeys", async () => {
+        await ctx.storage.setItem("depth-test/file0.md", "boop");
+        await ctx.storage.setItem("depth-test/depth0/file1.md", "boop");
+        await ctx.storage.setItem("depth-test/depth0/depth1/file2.md", "boop");
+        await ctx.storage.setItem("depth-test/depth0/depth1/file3.md", "boop");
+
+        expect(
+          (
+            await ctx.driver.getKeys("", {
+              maxDepth: 1,
+            })
+          ).sort()
+        ).toMatchObject(["depth-test/file0.md"]);
+
+        expect(
+          (
+            await ctx.driver.getKeys("", {
+              maxDepth: 2,
+            })
+          ).sort()
+        ).toMatchObject(["depth-test/depth0/file1.md", "depth-test/file0.md"]);
+      });
     },
   });
 });

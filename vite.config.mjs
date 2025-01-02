@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config";
+import { defineConfig, configDefaults } from "vitest/config";
 
 export default defineConfig({
   test: {
@@ -6,6 +6,13 @@ export default defineConfig({
     retry: process.env.CI ? 2 : undefined,
     typecheck: {
       enabled: true,
+    },
+    coverage: {
+      exclude: [
+        ...configDefaults.coverage.exclude,
+        "./drivers/**",
+        "./scripts/**",
+      ],
     },
   },
 });

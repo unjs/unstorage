@@ -348,7 +348,11 @@ export function createStorage<T extends StorageValue>(
       const mounts = getMounts(base, true);
       let maskedMounts: string[] = [];
       const allKeys = [];
+      let allMountsSupportMaxDepth = true;
       for (const mount of mounts) {
+        if (!mount.driver.flags?.maxDepth) {
+          allMountsSupportMaxDepth = false;
+        }
         const rawKeys = await asyncCall(
           mount.driver.getKeys,
           mount.relativeBase,
@@ -368,10 +372,11 @@ export function createStorage<T extends StorageValue>(
           ...maskedMounts.filter((p) => !p.startsWith(mount.mountpoint)),
         ];
       }
+      const shouldFilterByDepth =
+        opts.maxDepth !== undefined && !allMountsSupportMaxDepth;
       return allKeys.filter(
         (key) =>
-          (opts.maxDepth === undefined ||
-            filterKeyByDepth(key, opts.maxDepth)) &&
+          (!shouldFilterByDepth || filterKeyByDepth(key, opts.maxDepth)) &&
           filterKeyByBase(key, base)
       );
     },

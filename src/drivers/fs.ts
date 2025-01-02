@@ -92,8 +92,12 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       }
       return unlink(r(key));
     },
-    getKeys(_base, { maxDepth }) {
-      return readdirRecursive(r("."), anymatch(opts.ignore || []), maxDepth);
+    getKeys(_base, topts) {
+      return readdirRecursive(
+        r("."),
+        anymatch(opts.ignore || []),
+        topts?.maxDepth
+      );
     },
     async clear() {
       if (opts.readOnly || opts.noClear) {

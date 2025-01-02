@@ -34,32 +34,37 @@ describe("drivers: fs-lite", () => {
         expect(await ctx.storage.getItem("s1/te..st..js")).toBe("ok");
       });
 
-      it("supports depth in getKeys", async () => {
-        await ctx.storage.setItem("depth-test/file0.md", "boop");
-        await ctx.storage.setItem("depth-test/depth0/file1.md", "boop");
-        await ctx.storage.setItem("depth-test/depth0/depth1/file2.md", "boop");
+      it("natively supports maxDepth in getKeys", async () => {
+        await ctx.storage.setItem("file0.md", "boop");
+        await ctx.storage.setItem("depth-test/file1.md", "boop");
+        await ctx.storage.setItem("depth-test/depth0/file2.md", "boop");
         await ctx.storage.setItem("depth-test/depth0/depth1/file3.md", "boop");
+        await ctx.storage.setItem("depth-test/depth0/depth1/file4.md", "boop");
 
-        const depth1Result = await ctx.storage.getKeys(undefined, {
-          depth: 1,
-        });
-        const depth2Result = await ctx.storage.getKeys(undefined, {
-          depth: 2,
-        });
-
-        expect(depth1Result).includes.members(["depth-test:file0.md"]);
-        expect(depth1Result).not.include.members([
-          "depth-test:depth0:file1.md",
-          "depth-test:depth0:depth1:file2.md",
-          "depth-test:depth0:depth1:file3.md",
-        ]);
-        expect(depth2Result).includes.members([
-          "depth-test:file0.md",
-          "depth-test:depth0:file1.md",
-        ]);
-        expect(depth2Result).not.include.members([
-          "depth-test:depth0:depth1:file2.md",
-          "depth-test:depth0:depth1:file3.md",
+        expect(
+          (
+            await ctx.driver.getKeys("", {
+              maxDepth: 0,
+            })
+          ).sort()
+        ).toMatchObject(["file0.md"]);
+        expect(
+          (
+            await ctx.driver.getKeys("", {
+              maxDepth: 1,
+            })
+          ).sort()
+        ).toMatchObject(["depth-test/file1.md", "file0.md"]);
+        expect(
+          (
+            await ctx.driver.getKeys("", {
+              maxDepth: 2,
+            })
+          ).sort()
+        ).toMatchObject([
+          "depth-test/depth0/file2.md",
+          "depth-test/file1.md",
+          "file0.md",
         ]);
       });
     },

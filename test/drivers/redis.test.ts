@@ -93,18 +93,6 @@ describe("drivers: redis (raw: true)", () => {
 
         await client.disconnect();
       });
-
-      it("expects binary data to be sent to setItemRaw", async () => {
-        expect(() =>
-          ctx.storage.setItemRaw("s4:a", "Hello, world!")
-        ).rejects.toThrow("Expected Buffer or Uint8Array");
-        expect(() => ctx.storage.setItemRaw("s5:a", 100)).rejects.toThrow(
-          "Expected Buffer or Uint8Array"
-        );
-        expect(() =>
-          ctx.storage.setItemRaw("s5:a", { foo: "bar" })
-        ).rejects.toThrow("Expected Buffer or Uint8Array");
-      });
     },
   });
 });

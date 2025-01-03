@@ -1,4 +1,3 @@
-import type { TransactionOptions } from "../types";
 import { defineDriver, joinKeys } from "./utils";
 // TODO: use named import in v2
 import Redis, {
@@ -91,7 +90,7 @@ export default defineDriver((opts: RedisOptions) => {
     },
     setItemRaw:
       opts.raw === true
-        ? async (key: string, value: unknown, tOptions: TransactionOptions) => {
+        ? async (key, value, tOptions) => {
             const _value = normalizeValue(value);
             const ttl = tOptions?.ttl ?? opts.ttl;
             if (ttl) {

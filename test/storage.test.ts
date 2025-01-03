@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import { resolve } from "node:path";
 import {
   createStorage,
   snapshot,
@@ -6,6 +7,7 @@ import {
   prefixStorage,
 } from "../src";
 import memory from "../src/drivers/memory";
+import fs from "../src/drivers/fs";
 
 const data = {
   "etc:conf": "test",
@@ -221,5 +223,30 @@ describe("Regression", () => {
 
     await pStorage.remove("y");
     expect(await pStorage.has("y")).toBe(false);
+  });
+
+  it("getKeys supports maxDepth with mixed native support", async () => {
+    const base = resolve(__dirname, "tmp/fs");
+    const mainStorage = memory();
+    const secondaryStorage = fs({ base });
+    const storage = createStorage({ driver: mainStorage });
+
+    storage.mount("/storage_b", secondaryStorage);
+
+    try {
+      await storage.setItem("/storage_a/file_depth1", "contents");
+      await storage.setItem("/storage_a/depth1/file_depth2", "contents");
+      await storage.setItem("/storage_b/file_depth1", "contents");
+      await storage.setItem("/storage_b/depth1/file_depth2", "contents");
+
+      const keys = await storage.getKeys(undefined, { maxDepth: 1 });
+
+      expect(keys.sort()).toMatchObject([
+        "storage_a:file_depth1",
+        "storage_b:file_depth1",
+      ]);
+    } finally {
+      await storage.clear();
+    }
   });
 });

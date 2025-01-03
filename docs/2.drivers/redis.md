@@ -30,6 +30,7 @@ import redisDriver from "unstorage/drivers/redis";
 
 const storage = createStorage({
   driver: redisDriver({
+    raw: true,
     base: "unstorage",
     host: 'HOSTNAME',
     tls: true as any,
@@ -46,6 +47,7 @@ Usage with Redis cluster (e.g. AWS ElastiCache or Azure Redis Cache):
 ```js
 const storage = createStorage({
   driver: redisDriver({
+    raw: true,
     base: "{unstorage}",
     cluster: [
       {
@@ -70,6 +72,7 @@ const storage = createStorage({
 - `cluster`: List of redis nodes to use for cluster mode. Takes precedence over `url` and `host` options.
 - `clusterOptions`: Options to use for cluster mode.
 - `ttl`: Default TTL for all items in **seconds**.
+- `useRaw`: If enabled, `getItemRaw` and `setItemRaw` will use binary data instead of base64 encoded strings. (this option will be enabled by default in the next major version.)
 
 See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 

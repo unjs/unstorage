@@ -5,7 +5,7 @@ import { testDriver } from "./utils";
 
 vi.mock("ioredis", () => ioredis);
 
-describe("drivers: redis", () => {
+describe("drivers: redis (raw: false)", () => {
   const driver = redisDriver({
     base: "test:",
     url: "ioredis://localhost:6379/0",
@@ -59,12 +59,14 @@ describe("drivers: redis", () => {
       });
     },
   });
+});
 
+describe("drivers: redis (raw: true)", () => {
   const binaryDriver = redisDriver({
     base: "test:",
     url: "ioredis://localhost:6379/0",
     lazyConnect: false,
-    saveRawAsBinary: true,
+    raw: true,
   });
 
   testDriver({

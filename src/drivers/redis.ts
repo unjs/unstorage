@@ -1,4 +1,5 @@
-import { defineDriver, joinKeys } from "./utils";
+import type { TransactionOptions } from "../types";
+import { defineDriver, joinKeys, createError } from "./utils";
 // TODO: use named import in v2
 import Redis, {
   Cluster,
@@ -32,6 +33,12 @@ export interface RedisOptions extends _RedisOptions {
    * Default TTL for all items in seconds.
    */
   ttl?: number;
+
+  /**
+   * Whether to save Buffer/Uint8Arry as binary data or a base64-encoded string
+   * This option applies to the experimental getItemRaw/setItemRaw methods
+   */
+  saveRawAsBinary?: boolean;
 }
 
 const DRIVER_NAME = "redis";
@@ -56,6 +63,52 @@ export default defineDriver((opts: RedisOptions) => {
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
 
+  const getItem = async (key: string) => {
+    const value = await getRedisClient().get(p(key));
+    return value ?? null;
+  };
+
+  const setItem = async (
+    key: string,
+    value: any,
+    tOptions: TransactionOptions
+  ) => {
+    const ttl = tOptions?.ttl ?? opts.ttl;
+    if (ttl) {
+      await getRedisClient().set(p(key), value, "EX", ttl);
+    } else {
+      await getRedisClient().set(p(key), value);
+    }
+  };
+
+  const getItemRaw = async (key: string) => {
+    const value = await getRedisClient().getBuffer(p(key));
+    return value ?? null;
+  };
+
+  const setItemRaw = async (
+    key: string,
+    value: Uint8Array,
+    tOptions: TransactionOptions
+  ) => {
+    let valueToSave: Buffer;
+    if (value instanceof Uint8Array) {
+      if (value instanceof Buffer) {
+        valueToSave = value;
+      } else {
+        valueToSave = Buffer.copyBytesFrom(
+          value,
+          value.byteOffset,
+          value.byteLength
+        );
+      }
+    } else {
+      throw createError(DRIVER_NAME, "Expected Buffer or Uint8Array");
+    }
+
+    await setItem(key, valueToSave, tOptions);
+  };
+
   return {
     name: DRIVER_NAME,
     options: opts,
@@ -63,18 +116,14 @@ export default defineDriver((opts: RedisOptions) => {
     async hasItem(key) {
       return Boolean(await getRedisClient().exists(p(key)));
     },
-    async getItem(key) {
-      const value = await getRedisClient().get(p(key));
-      return value ?? null;
-    },
-    async setItem(key, value, tOptions) {
-      const ttl = tOptions?.ttl ?? opts.ttl;
-      if (ttl) {
-        await getRedisClient().set(p(key), value, "EX", ttl);
-      } else {
-        await getRedisClient().set(p(key), value);
-      }
-    },
+    getItem,
+    setItem,
+    ...(opts.saveRawAsBinary
+      ? {
+          getItemRaw,
+          setItemRaw,
+        }
+      : {}),
     async removeItem(key) {
       await getRedisClient().del(p(key));
     },

@@ -32,8 +32,76 @@ describe("drivers: redis", () => {
         await client.disconnect();
       });
 
+      it("saves raw data as a base64 string", async () => {
+        const helloBuffer = Buffer.from("Hello, world!", "utf8");
+        const byteArray = new Uint8Array(4);
+        byteArray[0] = 2;
+        byteArray[1] = 0;
+        byteArray[2] = 2;
+        byteArray[3] = 5;
+
+        await ctx.storage.setItemRaw("s4:a", helloBuffer);
+        await ctx.storage.setItemRaw("s5:a", byteArray);
+
+        const client = new ioredis.default("ioredis://localhost:6379/0");
+
+        const bufferValue = await client.get("test:s4:a");
+        expect(bufferValue).toEqual("base64:SGVsbG8sIHdvcmxkIQ==");
+
+        const byteArrayValue = await client.get("test:s5:a");
+        expect(byteArrayValue).toEqual("base64:AgACBQ==");
+
+        await client.disconnect();
+      });
+
       it("exposes instance", () => {
         expect(driver.getInstance?.()).toBeInstanceOf(ioredis.default);
+      });
+    },
+  });
+
+  const binaryDriver = redisDriver({
+    base: "test:",
+    url: "ioredis://localhost:6379/0",
+    lazyConnect: false,
+    saveRawAsBinary: true,
+  });
+
+  testDriver({
+    driver: binaryDriver,
+    additionalTests(ctx) {
+      it("saves raw data as binary", async () => {
+        const helloBuffer = Buffer.from("Hello, world!", "utf8");
+        const byteArray = new Uint8Array(4);
+        byteArray[0] = 2;
+        byteArray[1] = 0;
+        byteArray[2] = 2;
+        byteArray[3] = 5;
+
+        await ctx.storage.setItemRaw("s4:a", helloBuffer);
+        await ctx.storage.setItemRaw("s5:a", byteArray);
+
+        const client = new ioredis.default("ioredis://localhost:6379/0");
+
+        const bufferValue = await client.getBuffer("test:s4:a");
+        expect(bufferValue).toEqual(helloBuffer);
+
+        const byteArrayValue = await client.getBuffer("test:s5:a");
+        expect(byteArrayValue).toEqual(Buffer.from([2, 0, 2, 5]));
+
+        await client.disconnect();
+      });
+
+      it("expects binary data to be sent to setItemRaw", async () => {
+        expect(() =>
+          ctx.storage.setItemRaw("s4:a", "Hello, world!")
+        ).rejects.toThrow("Expected Buffer or Uint8Array");
+        expect(() => ctx.storage.setItemRaw("s5:a", 100)).rejects.toThrow(
+          "Expected Buffer or Uint8Array"
+        );
+        expect(() =>
+          ctx.storage.setItemRaw("s5:a", { foo: "bar" })
+        ).rejects.toThrow("Expected Buffer or Uint8Array");
       });
     },
   });

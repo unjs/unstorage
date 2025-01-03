@@ -1,5 +1,5 @@
 import type { TransactionOptions } from "../types";
-import { defineDriver, joinKeys, createError } from "./utils";
+import { defineDriver, joinKeys } from "./utils";
 // TODO: use named import in v2
 import Redis, {
   Cluster,

@@ -1,4 +1,5 @@
-import { describe, beforeAll, afterAll } from "vitest";
+import { describe, expect, beforeAll, afterAll, test } from "vitest";
+import { readFile } from "../../src/drivers/utils/node-fs";
 import driver from "../../src/drivers/azure-storage-blob";
 import { testDriver } from "./utils";
 import { BlobServiceClient } from "@azure/storage-blob";
@@ -22,5 +23,15 @@ describe.skip("drivers: azure-storage-blob", () => {
       connectionString: "UseDevelopmentStorage=true",
       accountName: "local",
     }),
+    additionalTests(ctx) {
+      test("properly encodes raw items", async () => {
+        const file = await readFile("./test/test.png");
+
+        await ctx.storage.setItemRaw("1.png", file);
+        const storedFileNode = await ctx.storage.getItemRaw("1.png");
+
+        expect(storedFileNode).toStrictEqual(file);
+      });
+    },
   });
 });

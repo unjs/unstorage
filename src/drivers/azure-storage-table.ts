@@ -9,6 +9,11 @@ import { DefaultAzureCredential } from "@azure/identity";
 
 export interface AzureStorageTableOptions {
   /**
+   * Optional client ID for managed identity. Needed if using one or more user assigned managed identity to authenticate.
+   */
+  managedIdentityClientId?: string;
+
+  /**
    * The name of the Azure Storage account.
    */
   accountName: string;
@@ -92,7 +97,11 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
       // fromConnectionString is only available in Node.js runtime, not in browsers
       client = TableClient.fromConnectionString(connectionString, tableName);
     } else {
-      const credential = new DefaultAzureCredential();
+      const credential = opts.managedIdentityClientId
+        ? new DefaultAzureCredential({
+            managedIdentityClientId: opts.managedIdentityClientId,
+          })
+        : new DefaultAzureCredential();
       client = new TableClient(
         `https://${accountName}.table.core.windows.net`,
         tableName,

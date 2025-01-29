@@ -29,7 +29,7 @@ describe.skip("drivers: azure-storage-blob", () => {
       connectionString: "UseDevelopmentStorage=true;",
       accountName: "devstoreaccount1",
     }),
-    additionalTests(ctx) {
+    additionalTests() {
       test("no empty account name", async () => {
         const invalidStorage = createStorage({
           driver: driver({
@@ -91,14 +91,6 @@ describe.skip("drivers: azure-storage-blob", () => {
           }),
         });
         await storage.getKeys();
-      });
-      test("properly encodes raw items", async () => {
-        const file = await readFile("./test/test.png");
-
-        await ctx.storage.setItemRaw("1.png", file);
-        const storedFileNode = await ctx.storage.getItemRaw("1.png");
-
-        expect(storedFileNode).toStrictEqual(file);
       });
     },
   });

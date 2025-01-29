@@ -54,7 +54,7 @@ export default defineDriver((opts: RedisOptions) => {
 
   const base = (opts.base || "").replace(/:$/, "");
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
-  const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
+  const d = (key: string) => (base ? key.replace(`${base}:`, "") : key); // Deprefix a key
 
   return {
     name: DRIVER_NAME,

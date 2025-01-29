@@ -10,6 +10,11 @@ Store data in the key-value store of Azure App Configuration.
 
 ### Usage
 
+**Authentication:**
+
+All Azure drivers support `DefaultAzureCredential` as authentication method. This is the recommended and default authentication method. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use active Azure CLI or Azure PowerShell sessions to authenticate.
+If you use `DefaultAzureCredential` and want to specify which managed identity to use, you can pass in the `managedIdentityClientId` option. This is useful if you are using user assigned managed identities.
+
 **Driver name:** `azure-app-configuration`
 
 ::note{to="https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview"}
@@ -88,12 +93,15 @@ const storage = createStorage({
 **Authentication:**
 
 - **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate. <br>
-  ⚠️ Make sure that your Managed Identity or personal account has at least `Cosmos DB Built-in Data Contributor` role assigned to it. If you already are the `Contributor` or `Owner` on the resource it should also be enough, but that does not accomplish a model of least privilege.
+  ⚠️ Make sure that your Managed Identity or personal account has at least `Cosmos DB Built-in Data Contributor` role assigned to it. This and other data plane rolescan only be assigned with Azure CLI, Azure PowerShell or Bicep.
 - **`accountKey`**: CosmosDB account key. If not provided, the driver will use the DefaultAzureCredential (recommended).
 
 **Options:**
 
-- **`endpoint`** (required): CosmosDB endpoint in the format of `https://<account>.documents.azure.com:443/`.
+At least `endpoint` or `connectionString` are required.
+
+- `endpoint`: CosmosDB endpoint in the format of `https://<account>.documents.azure.com:443/`.
+- `connectionString`: CosmosDB connection string. If provided, this will be used instead of endpoint and accountKey.
 - `accountKey`: CosmosDB account key. If not provided, the driver will use the DefaultAzureCredential (recommended).
 - `databaseName`: The name of the database to use. Defaults to `unstorage`.
 - `containerName`: The name of the container to use. Defaults to `unstorage`.
@@ -250,4 +258,3 @@ The driver supports the following authentication methods:
 - `tableName`: The name of the table to use. Defaults to `unstorage`.
 - `partitionKey`: The partition key to use. Defaults to `unstorage`.
 - `accountKey`: The account key to use for authentication. This is only required if you are using `AzureNamedKeyCredential`.
--

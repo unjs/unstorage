@@ -69,7 +69,11 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
         credential
       );
     } else if (opts.sasUrl) {
-      if (opts.containerName) {
+      if (
+        opts.containerName &&
+        opts.sasUrl.includes(`${opts.containerName}?`)
+      ) {
+        // Check if the sas url is a container url
         containerClient = new ContainerClient(`${opts.sasUrl}`);
         return containerClient;
       }

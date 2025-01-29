@@ -60,6 +60,7 @@ describe.skip("drivers: azure-storage-blob", () => {
         const storage = createStorage({
           driver: driver({
             sasUrl,
+            containerName: "unstorage",
           }),
         });
         await storage.getKeys();

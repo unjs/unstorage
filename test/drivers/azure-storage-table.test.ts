@@ -8,7 +8,7 @@ describe.skip("drivers: azure-storage-table", () => {
   let azuriteProcess: ChildProcess;
 
   beforeAll(async () => {
-    azuriteProcess = exec("npx azurite-table --silent");
+    azuriteProcess = exec("pnpm exec azurite-table --silent");
     const client = TableClient.fromConnectionString(
       "UseDevelopmentStorage=true",
       "unstorage"
@@ -23,7 +23,7 @@ describe.skip("drivers: azure-storage-table", () => {
   testDriver({
     driver: driver({
       connectionString: "UseDevelopmentStorage=true",
-      accountName: "local",
+      accountName: "devstoreaccount1",
     }),
   });
 });

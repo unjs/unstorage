@@ -71,6 +71,10 @@ export interface Driver<OptionsT = any, InstanceT = any> {
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }
 
+export type DriverFactory<OptionsT, InstanceT> = (
+  opts: OptionsT
+) => Driver<OptionsT, InstanceT>;
+
 type StorageDefinition = {
   items: unknown;
   [key: string]: unknown;

@@ -1,3 +1,5 @@
+import type { Driver, AsyncDriverFactory } from "../types";
+
 export function coerceQuery(query: Record<string, string | string[]>) {
   return Object.fromEntries(
     Object.entries(query).map(([key, value]: [string, string | string[]]) => {
@@ -16,4 +18,16 @@ function coerceValue(value: string | string[]): any {
   } catch {
     return value;
   }
+}
+
+export function factoryLoader<OptionsT, InstanceT>(
+  loader: () => any
+): AsyncDriverFactory<OptionsT, InstanceT> {
+  async function dynamicFactory(
+    options: OptionsT
+  ): Promise<Driver<OptionsT, InstanceT>> {
+    const factory = (await loader()).default;
+    return factory(options);
+  }
+  return dynamicFactory;
 }

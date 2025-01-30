@@ -75,6 +75,10 @@ export type DriverFactory<OptionsT, InstanceT> = (
   opts: OptionsT
 ) => Driver<OptionsT, InstanceT>;
 
+export type AsyncDriverFactory<OptionsT, InstanceT> = (
+  opts: OptionsT
+) => Promise<Driver<OptionsT, InstanceT>>;
+
 type StorageDefinition = {
   items: unknown;
   [key: string]: unknown;

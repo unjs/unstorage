@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { defineDriver } from "../src";
 import { loadFromUrl } from "../src/loader";
+import all from "../src/loader/all";
 
 interface Options {
   scheme: string;
@@ -46,5 +47,10 @@ describe("loader", () => {
     expect(driver.options.boolean).toBe(true);
     expect(driver.options.array).toStrictEqual([2, 3, 4]);
     expect(driver.options.object).toStrictEqual({ h: 5, i: 6, j: "7" });
+  });
+
+  it("all bundle", async () => {
+    const driver = await loadFromUrl("memory:", all);
+    expect(driver.name).toBe("memory");
   });
 });

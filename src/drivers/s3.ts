@@ -28,7 +28,14 @@ export interface S3DriverOptions {
    * - For AWS S3: "https://s3.[region].amazonaws.com/"
    * - For cloudflare R2: "https://[uid].r2.cloudflarestorage.com/"
    */
-  endpoint: string;
+  base: string;
+
+  /**
+   *
+   * @deprecated use `base` option
+   *
+   */
+  endpoint?: string;
 
   /**
    * The region of the S3 bucket.
@@ -41,7 +48,7 @@ export interface S3DriverOptions {
   /**
    * The name of the bucket.
    */
-  bucket: string;
+  bucket?: string;
 
   /**
    * Enabled by default to speedup `clear()` operation. Set to `false` if provider is not implementing [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html).
@@ -83,7 +90,13 @@ export default defineDriver((options: S3DriverOptions) => {
     return _awsClient;
   };
 
-  const baseURL = `${options.endpoint.replace(/\/$/, "")}/${options.bucket || ""}`;
+  if (!options.base && !options.endpoint) {
+    throw createRequiredError(DRIVER_NAME, "base");
+  }
+
+  const baseURL = options.base
+    ? `${options.base.replace(/^\/\//, "https://")}${options.bucket?.replace(/^/, "/") ?? ""}`
+    : `${options.endpoint?.replace(/\/$/, "")}/${options.bucket || ""}`;
 
   const url = (key: string = "") => `${baseURL}/${normalizeKey(key, "/")}`;
 

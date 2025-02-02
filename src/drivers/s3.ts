@@ -66,9 +66,7 @@ export default defineDriver((options: S3DriverOptions) => {
       if (!secretAccessKey) {
         throw createRequiredError(DRIVER_NAME, "secretAccessKey");
       }
-      if (!options.endpoint) {
       const region = options.region || globalThis.process?.env?.AWS_REGION;
-        throw createRequiredError(DRIVER_NAME, "endpoint");
       if (!region) {
         throw createRequiredError(DRIVER_NAME, "region");
       }

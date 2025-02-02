@@ -20,6 +20,7 @@ import type { HTTPOptions as HttpOptions } from "unstorage/drivers/http";
 import type { IDBKeyvalOptions as IndexedbOptions } from "unstorage/drivers/indexedb";
 import type { LocalStorageOptions as LocalstorageOptions } from "unstorage/drivers/localstorage";
 import type { LRUDriverOptions as LruCacheOptions } from "unstorage/drivers/lru-cache";
+import type { MemoryOptions as MemoryMetaOptions } from "unstorage/drivers/memory-meta";
 import type { MongoDbOptions as MongodbOptions } from "unstorage/drivers/mongodb";
 import type { NetlifyStoreOptions as NetlifyBlobsOptions } from "unstorage/drivers/netlify-blobs";
 import type { OverlayStorageOptions as OverlayOptions } from "unstorage/drivers/overlay";
@@ -32,7 +33,7 @@ import type { UpstashOptions as UpstashOptions } from "unstorage/drivers/upstash
 import type { VercelBlobOptions as VercelBlobOptions } from "unstorage/drivers/vercel-blob";
 import type { VercelKVOptions as VercelKVOptions } from "unstorage/drivers/vercel-kv";
 
-export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-kv" | "vercelKV";
+export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory-meta" | "memoryMeta" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-kv" | "vercelKV";
 
 export type BuiltinDriverOptions = {
   "azure-app-configuration": AzureAppConfigurationOptions;
@@ -67,6 +68,8 @@ export type BuiltinDriverOptions = {
   "localstorage": LocalstorageOptions;
   "lru-cache": LruCacheOptions;
   "lruCache": LruCacheOptions;
+  "memory-meta": MemoryMetaOptions;
+  "memoryMeta": MemoryMetaOptions;
   "mongodb": MongodbOptions;
   "netlify-blobs": NetlifyBlobsOptions;
   "netlifyBlobs": NetlifyBlobsOptions;
@@ -117,6 +120,8 @@ export const builtinDrivers = {
   "localstorage": "unstorage/drivers/localstorage",
   "lru-cache": "unstorage/drivers/lru-cache",
   "lruCache": "unstorage/drivers/lru-cache",
+  "memory-meta": "unstorage/drivers/memory-meta",
+  "memoryMeta": "unstorage/drivers/memory-meta",
   "memory": "unstorage/drivers/memory",
   "mongodb": "unstorage/drivers/mongodb",
   "netlify-blobs": "unstorage/drivers/netlify-blobs",

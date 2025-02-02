@@ -12,7 +12,7 @@ As per the default `memory` driver it keeps data in memory using [Map](https://d
 
 **Driver name:** `memory-meta`
 
-This drive aims to be a more advanced version of the `memory` driver by adding metadata support, while introducing a small overhead.
+This drive aims to be a more advanced version of the `memory` driver by adding metadata support, while introducing a small overhead and allocation cost.
 
 By supporting metadata, it allows for features like Time-To-Live (TTL),active by default, and optionally tracking a rough size of the stored data. The TTL can be set per item or globally.
 

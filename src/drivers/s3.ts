@@ -18,6 +18,11 @@ export interface S3DriverOptions {
   secretAccessKey: string;
 
   /**
+   * Session token
+   */
+  sessionToken?: string;
+
+  /**
    * The endpoint URL of the S3 service.
    *
    * - For AWS S3: "https://s3.[region].amazonaws.com/"
@@ -67,10 +72,13 @@ export default defineDriver((options: S3DriverOptions) => {
       if (!region) {
         throw createRequiredError(DRIVER_NAME, "region");
       }
+      const sessionToken =
+        options.sessionToken || globalThis.process?.env?.AWS_SESSION_TOKEN;
       _awsClient = new AwsClient({
         service: "s3",
         accessKeyId,
         secretAccessKey,
+        sessionToken,
         region,
       });
     }

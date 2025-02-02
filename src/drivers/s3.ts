@@ -50,23 +50,28 @@ export default defineDriver((options: S3DriverOptions) => {
   let _awsClient: AwsClient;
   const getAwsClient = () => {
     if (!_awsClient) {
-      if (!options.accessKeyId) {
+      const accessKeyId =
+        options.accessKeyId || globalThis.process?.env?.AWS_ACCESS_KEY_ID;
+      if (!accessKeyId) {
         throw createRequiredError(DRIVER_NAME, "accessKeyId");
       }
-      if (!options.secretAccessKey) {
+      const secretAccessKey =
+        options.secretAccessKey ||
+        globalThis.process?.env?.AWS_SECRET_ACCESS_KEY;
+      if (!secretAccessKey) {
         throw createRequiredError(DRIVER_NAME, "secretAccessKey");
       }
       if (!options.endpoint) {
+      const region = options.region || globalThis.process?.env?.AWS_REGION;
         throw createRequiredError(DRIVER_NAME, "endpoint");
-      }
-      if (!options.region) {
+      if (!region) {
         throw createRequiredError(DRIVER_NAME, "region");
       }
       _awsClient = new AwsClient({
         service: "s3",
-        accessKeyId: options.accessKeyId,
-        secretAccessKey: options.secretAccessKey,
-        region: options.region,
+        accessKeyId,
+        secretAccessKey,
+        region,
       });
     }
     return _awsClient;

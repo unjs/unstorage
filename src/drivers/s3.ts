@@ -1,3 +1,4 @@
+import type { TransactionOptions } from "../types";
 import {
   defineDriver,
   createRequiredError,
@@ -100,6 +101,28 @@ export default defineDriver((options: S3DriverOptions) => {
 
   const url = (key: string = "") => `${baseURL}/${normalizeKey(key, "/")}`;
 
+  const getHeaders = (
+    topts: TransactionOptions | undefined,
+    defaultHeaders?: Record<string, string>
+  ) => {
+    const headers = {
+      ...defaultHeaders,
+      ...(Object.fromEntries(
+        Object.entries(topts?.headers ?? {}).map(([key, value]) => [
+          `x-amz-meta-${key}`,
+          value,
+        ])
+      ) as Record<string, string>),
+    };
+    if (topts?.cacheControl && !headers["Cache-Control"]) {
+      headers["Cache-Control"] = topts.cacheControl;
+    }
+    if (topts?.contentType && !headers["Content-Type"]) {
+      headers["Content-Type"] = topts.contentType;
+    }
+    return headers;
+  };
+
   const awsFetch = async (url: string, opts?: RequestInit) => {
     const request = await getAwsClient().sign(url, opts);
     const res = await fetch(request);
@@ -147,10 +170,15 @@ export default defineDriver((options: S3DriverOptions) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
-  const putObject = async (key: string, value: string) => {
+  const putObject = async (
+    key: string,
+    value: string,
+    topts: TransactionOptions
+  ) => {
     return awsFetch(url(key), {
       method: "PUT",
       body: value,
+      headers: getHeaders(topts),
     });
   };
 
@@ -192,11 +220,11 @@ export default defineDriver((options: S3DriverOptions) => {
     getItemRaw(key) {
       return getObject(key).then((res) => (res ? res.arrayBuffer() : null));
     },
-    async setItem(key, value) {
-      await putObject(key, value);
+    async setItem(key, value, topts) {
+      await putObject(key, value, topts);
     },
-    async setItemRaw(key, value) {
-      await putObject(key, value);
+    async setItemRaw(key, value, topts) {
+      await putObject(key, value, topts);
     },
     getMeta(key) {
       return headObject(key);

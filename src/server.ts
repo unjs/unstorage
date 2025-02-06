@@ -1,4 +1,5 @@
 import type { RequestListener } from "node:http";
+import destr from "destr";
 import {
   createApp,
   createError,
@@ -19,7 +20,6 @@ import type {
 } from "./types";
 import { stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
-import destr from "destr";
 
 export type StorageServerRequest = {
   event: H3Event;

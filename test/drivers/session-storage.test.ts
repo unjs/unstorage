@@ -14,7 +14,9 @@ describe("drivers: session-storage", () => {
     additionalTests: (ctx) => {
       it("check session storage", async () => {
         await ctx.storage.setItem("s1:a", "test_data");
-        expect(jsdom.window.sessionStorage.getItem("s1:a")).toBe("test_data");
+        expect(jsdom.window.sessionStorage.getItem("s1:a")).toBe(
+          JSON.stringify("test_data")
+        );
       });
       it("watch session storage", async () => {
         const watcher = vi.fn();

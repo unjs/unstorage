@@ -9,13 +9,14 @@ import type {
   TransactionOptions,
 } from "./types";
 import memory from "./drivers/memory";
-import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
+import { asyncCall, deserializeRaw, serializeRaw } from "./_utils";
 import {
   normalizeKey,
   normalizeBaseKey,
   joinKeys,
   filterKeyByDepth,
   filterKeyByBase,
+  stringify,
 } from "./utils";
 
 interface StorageCTX {

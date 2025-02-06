@@ -1,3 +1,4 @@
+import { isPrimitive, isPureObject } from "./_utils.ts";
 import type { Storage, StorageValue } from "./types";
 
 type StorageKeys = Array<keyof Storage>;
@@ -97,4 +98,24 @@ export function filterKeyByBase(
   }
 
   return key[key.length - 1] !== "$";
+}
+
+export function stringify(value: any): string {
+  if (typeof value === "string") {
+    return JSON.stringify(value);
+  }
+
+  if (isPrimitive(value)) {
+    return String(value);
+  }
+
+  if (isPureObject(value) || Array.isArray(value)) {
+    return JSON.stringify(value);
+  }
+
+  if (typeof value.toJSON === "function") {
+    return stringify(value.toJSON());
+  }
+
+  throw new Error("[unstorage] Cannot stringify value!");
 }

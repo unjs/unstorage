@@ -249,4 +249,13 @@ describe("Regression", () => {
       await storage.clear();
     }
   });
+
+  it("setItem with strings like '1e1000000000 ' then getItem should not result in 'Infinity'", async () => {
+    const storage = createStorage({ driver: memory() });
+
+    const value = "1e1000000000";
+    await storage.setItem("foo", value);
+    const result = await storage.getItem("foo");
+    expect(result).toBe(value);
+  });
 });

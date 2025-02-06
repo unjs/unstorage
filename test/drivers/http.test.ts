@@ -43,10 +43,7 @@ describe("drivers: http", async () => {
       });
       it("null item", async () => {
         await ctx.storage.setItem("nullItem", null);
-        await ctx.storage.setItem("nullStringItem", "null");
         expect(await ctx.storage.getItem("nullItem")).toBeNull();
-        expect(await ctx.storage.getItem("nanItem")).toBeNull();
-        expect(await ctx.storage.getItem("nullStringItem")).toBeNull();
       });
     },
   });

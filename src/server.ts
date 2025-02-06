@@ -18,8 +18,7 @@ import type {
   StorageMeta,
   StorageValue,
 } from "./types";
-import { stringify } from "./_utils";
-import { normalizeKey, normalizeBaseKey } from "./utils";
+import { normalizeKey, normalizeBaseKey, stringify } from "./utils";
 
 export type StorageServerRequest = {
   event: H3Event;

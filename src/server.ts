@@ -1,5 +1,5 @@
 import type { RequestListener } from "node:http";
-import destr from "destr";
+import { destr } from "destr";
 import {
   createApp,
   createError,

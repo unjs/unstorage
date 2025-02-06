@@ -12,7 +12,9 @@ describe("drivers: fs", () => {
     additionalTests(ctx) {
       it("check filesystem", async () => {
         await ctx.storage.setItem("s1:a", "test_data");
-        expect(await readFile(resolve(dir, "s1/a"), "utf8")).toBe("test_data");
+        expect(await readFile(resolve(dir, "s1/a"), "utf8")).toBe(
+          JSON.stringify("test_data")
+        );
       });
       it("native meta", async () => {
         await ctx.storage.setItem("s1:a", "test_data");

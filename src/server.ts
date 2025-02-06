@@ -11,9 +11,15 @@ import {
   type EventHandler,
   H3Event,
 } from "h3";
-import type { Storage, TransactionOptions, StorageMeta } from "./types";
+import type {
+  Storage,
+  TransactionOptions,
+  StorageMeta,
+  StorageValue,
+} from "./types";
 import { stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
+import destr from "destr";
 
 export type StorageServerRequest = {
   event: H3Event;
@@ -118,8 +124,9 @@ export function createH3StorageHandler(
         const value = await readRawBody(event, false);
         await storage.setItemRaw(key, value, topts);
       } else {
-        const value = await readRawBody(event, "utf8");
-        if (value !== undefined) {
+        const rawBody = await readRawBody(event, "utf8");
+        if (rawBody !== undefined) {
+          const value = destr(rawBody) as StorageValue;
           await storage.setItem(key, value, topts);
         }
       }

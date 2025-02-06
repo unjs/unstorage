@@ -31,6 +31,10 @@ function isPureObject(value: any) {
 }
 
 export function stringify(value: any): string {
+  if (typeof value === "string") {
+    return JSON.stringify(value);
+  }
+
   if (isPrimitive(value)) {
     return String(value);
   }

@@ -10,6 +10,7 @@ redirects:
   "/utils": "/getting-started/utils"
   "/http-server": "/getting-started/http-server"
   "/custom-driver": "/getting-started/custom-driver"
+  "/loader": "/getting-started/loader"
   "/drivers/azure-app-configuration": "/divers/azure"
   "/drivers/azure-cosmos": "/divers/azure"
   "/drivers/azure-key-vault": "/divers/azure"

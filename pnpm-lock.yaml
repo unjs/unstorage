@@ -53,7 +53,7 @@ importers:
         version: 12.26.0
       '@capacitor/preferences':
         specifier: ^7.0.0
-        version: 7.0.0(@capacitor/core@6.2.0)
+        version: 7.0.0(@capacitor/core@7.0.1)
       '@cloudflare/workers-types':
         specifier: ^4.20250214.0
         version: 4.20250214.0
@@ -375,8 +375,8 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
-  '@capacitor/core@6.2.0':
-    resolution: {integrity: sha512-B9IlJtDpUqhhYb+T8+cp2Db/3RETX36STgjeU2kQZBs/SLAcFiMama227o+msRjLeo3DO+7HJjWVA1+XlyyPEg==}
+  '@capacitor/core@7.0.1':
+    resolution: {integrity: sha512-1Ob9bvA/p8g8aNwK6VesxEekGXowLVf6APjkW4LRnr05H+7z/bke+Q5pn9zqh/GgTbIxAQ/rwZrAZvvxkdm1UA==}
 
   '@capacitor/preferences@7.0.0':
     resolution: {integrity: sha512-crlTtTIWcdlLfQULJ9ZiCPpvpm51WoZ8CIVG3+XSJGyavjD4bscHP15U24ya5SjpYmI44bGY9lvhvcSCfB5+AA==}
@@ -2981,6 +2981,7 @@ packages:
 
   libsql@0.4.7:
     resolution: {integrity: sha512-T9eIRCs6b0J1SHKYIvD8+KCJMcWZ900iZyxdnSCdqxN12Z1ijzT+jY5nrk72Jw4B0HGzms2NgpryArlJqvc3Lw==}
+    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   lilconfig@3.1.3:
@@ -5099,13 +5100,13 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@capacitor/core@6.2.0':
+  '@capacitor/core@7.0.1':
     dependencies:
       tslib: 2.8.1
 
-  '@capacitor/preferences@7.0.0(@capacitor/core@6.2.0)':
+  '@capacitor/preferences@7.0.0(@capacitor/core@7.0.1)':
     dependencies:
-      '@capacitor/core': 6.2.0
+      '@capacitor/core': 7.0.1
 
   '@cloudflare/kv-asset-handler@0.3.4':
     dependencies:

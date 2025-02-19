@@ -112,7 +112,7 @@
     "@azure/identity": "^4.6.0",
     "@azure/keyvault-secrets": "^4.9.0",
     "@azure/storage-blob": "^12.26.0",
-    "@capacitor/preferences": "^6.0.3",
+    "@capacitor/preferences": "^7.0.0",
     "@deno/kv": ">=0.9.0",
     "@netlify/blobs": "^6.5.0 || ^7.0.0 || ^8.1.0",
     "@planetscale/database": "^1.19.0",

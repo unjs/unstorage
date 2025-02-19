@@ -12,15 +12,16 @@ const region = process.env.VITE_S3_REGION;
 describe.skipIf(
   !accessKeyId || !secretAccessKey || !bucket || !endpoint || !region
 )("drivers: s3", () => {
+  const driver = s3Driver({
+    accessKeyId: accessKeyId!,
+    secretAccessKey: secretAccessKey!,
+    bucket: bucket!,
+    endpoint: endpoint!,
+    region: region!,
+  });
+
   testDriver({
-    driver: () =>
-      s3Driver({
-        accessKeyId: accessKeyId!,
-        secretAccessKey: secretAccessKey!,
-        bucket: bucket!,
-        endpoint: endpoint!,
-        region: region!,
-      }),
+    driver,
     additionalTests(ctx) {
       it("can access directly with / separator", async () => {
         await ctx.storage.set("foo/bar:baz", "ok");
@@ -39,6 +40,10 @@ describe.skipIf(
         );
         expect(response.status).toBe(200);
         expect(await response.text()).toBe("ok");
+      });
+
+      it("exposes instance", () => {
+        expect(driver.getInstance?.()).toBeInstanceOf(AwsClient);
       });
     },
   });

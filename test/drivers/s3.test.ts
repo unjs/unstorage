@@ -12,13 +12,14 @@ const region = process.env.VITE_S3_REGION;
 describe.skipIf(
   !accessKeyId || !secretAccessKey || !bucket || !endpoint || !region
 )("drivers: s3", () => {
-  const driver = s3Driver({
-    accessKeyId: accessKeyId!,
-    secretAccessKey: secretAccessKey!,
-    bucket: bucket!,
-    endpoint: endpoint!,
-    region: region!,
-  });
+  const driver = () =>
+    s3Driver({
+      accessKeyId: accessKeyId!,
+      secretAccessKey: secretAccessKey!,
+      bucket: bucket!,
+      endpoint: endpoint!,
+      region: region!,
+    });
 
   testDriver({
     driver,
@@ -43,7 +44,7 @@ describe.skipIf(
       });
 
       it("exposes instance", () => {
-        expect(driver.getInstance?.()).toBeInstanceOf(AwsClient);
+        expect(driver().getInstance?.()).toBeInstanceOf(AwsClient);
       });
     },
   });

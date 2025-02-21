@@ -29,7 +29,10 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   }
 
   // Clone and apply defaults
-  const watchOptions = { ...opts.watchOptions };
+  const watchOptions: ChokidarOptions = {
+    ignoreInitial: true,
+    ...opts.watchOptions,
+  };
   opts = {
     ...opts,
     base: resolve(opts.base),
@@ -128,11 +131,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
         return _unwatch;
       }
       await new Promise<void>((resolve, reject) => {
-        _watcher = watch(opts.base!, {
-          ignoreInitial: true,
-          ignored: opts.ignore,
-          ...opts.watchOptions,
-        })
+        _watcher = watch(opts.base!, watchOptions)
           .on("ready", () => {
             resolve();
           })

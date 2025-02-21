@@ -30,25 +30,26 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   }
 
   // Clone and apply defaults
+  const watchOptions = { ...opts.watchOptions };
   opts = {
+    ...opts,
     base: resolve(opts.base),
-    ignore: opts.ignore ?? ["**/node_modules/**", "**/.git/**"],
-    readOnly: opts.readOnly || false,
-    noClear: opts.noClear || false,
-    watchOptions: { ...opts.watchOptions },
+    watchOptions,
   };
 
-  // Apply ignored patterns
-  if (opts.ignore?.length) {
-    const watchOptions = opts.watchOptions!;
-    // Make sure ignored is an array
-    if (!watchOptions.ignored) {
-      watchOptions.ignored = [];
-    } else if (!Array.isArray(watchOptions.ignored)) {
-      watchOptions.ignored = [watchOptions.ignored];
-    }
-    // Add glob support
+  // Ignore patterns
+  if (!watchOptions.ignored) {
+    watchOptions.ignored = [];
+  } else if (!Array.isArray(watchOptions.ignored)) {
+    watchOptions.ignored = [watchOptions.ignored];
+  }
+  // Glob support for chokidar v4 (TODO: remove for unstorage v2)
+  if (watchOptions.ignored.length > 0) {
     watchOptions.ignored.push((path) => matchesGlob(path, opts.ignore!));
+  } else {
+    watchOptions.ignored.push((path) =>
+      /[/\\](node_modules|\.git)[/\\]/.test(path)
+    );
   }
 
   const r = (key: string) => {

@@ -1,11 +1,8 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, relative, join } from "node:path";
-import {
-  FSWatcher,
-  type WatchOptions as ChokidarOptions,
-  watch,
-} from "chokidar";
+import { FSWatcher, type ChokidarOptions, watch } from "chokidar";
 import { createError, createRequiredError, defineDriver } from "./utils";
+import { matchesGlob } from "pathe";
 import {
   readFile,
   writeFile,
@@ -32,11 +29,28 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     throw createRequiredError(DRIVER_NAME, "base");
   }
 
-  if (!opts.ignore) {
-    opts.ignore = ["**/node_modules/**", "**/.git/**"];
+  // Clone and apply defaults
+  opts = {
+    base: resolve(opts.base),
+    ignore: opts.ignore ?? ["**/node_modules/**", "**/.git/**"],
+    readOnly: opts.readOnly || false,
+    noClear: opts.noClear || false,
+    watchOptions: { ...opts.watchOptions },
+  };
+
+  // Apply ignored patterns
+  if (opts.ignore?.length) {
+    const watchOptions = opts.watchOptions!;
+    // Make sure ignored is an array
+    if (!watchOptions.ignored) {
+      watchOptions.ignored = [];
+    } else if (!Array.isArray(watchOptions.ignored)) {
+      watchOptions.ignored = [watchOptions.ignored];
+    }
+    // Add glob support
+    watchOptions.ignored.push((path) => matchesGlob(path, opts.ignore!));
   }
 
-  opts.base = resolve(opts.base);
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(

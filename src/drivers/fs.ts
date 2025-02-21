@@ -40,7 +40,9 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   // Ignore patterns
   if (!watchOptions.ignored) {
     watchOptions.ignored = [];
-  } else if (!Array.isArray(watchOptions.ignored)) {
+  } else if (Array.isArray(watchOptions.ignored)) {
+    watchOptions.ignored = [...watchOptions.ignored];
+  } else {
     watchOptions.ignored = [watchOptions.ignored];
   }
   if (opts.ignore?.length) {

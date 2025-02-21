@@ -10,7 +10,7 @@ icon: simple-icons:planetscale
 
 **Driver name:** `planetscale`
 
-::read-more{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
+::read-more{to="https://planetscale.com/"}
 Learn more about PlanetScale.
 ::
 

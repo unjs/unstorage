@@ -4,9 +4,19 @@ import { DefaultAzureCredential } from "@azure/identity";
 
 export interface AzureCosmosOptions {
   /**
+   * Optional client ID for managed identity. Needed if using one or more user assigned managed identity to authenticate.
+   */
+  managedIdentityClientId?: string;
+
+  /**
+   * CosmosDB connection string. If not provided, the driver will use the DefaultAzureCredential (recommended).
+   */
+  connectionString?: string;
+
+  /**
    * CosmosDB endpoint in the format of https://<account>.documents.azure.com:443/.
    */
-  endpoint: string;
+  endpoint?: string;
 
   /**
    * CosmosDB account key. If not provided, the driver will use the DefaultAzureCredential (recommended).
@@ -51,35 +61,53 @@ export default defineDriver((opts: AzureCosmosOptions) => {
     if (client) {
       return client;
     }
-    if (!opts.endpoint) {
+    if (opts.accountKey && !opts.endpoint) {
       throw createRequiredError(DRIVER_NAME, "endpoint");
+    }
+    if (opts.connectionString) {
+      const cosmosClient = new CosmosClient(opts.connectionString);
+      const { database } = await cosmosClient.databases.createIfNotExists({
+        id: opts.databaseName || "unstorage",
+      });
+      client = (
+        await database.containers.createIfNotExists({
+          id: opts.containerName || "unstorage",
+        })
+      ).container;
+      return client;
     }
     if (opts.accountKey) {
       const cosmosClient = new CosmosClient({
-        endpoint: opts.endpoint,
+        endpoint: opts.endpoint!,
         key: opts.accountKey,
       });
       const { database } = await cosmosClient.databases.createIfNotExists({
         id: opts.databaseName || "unstorage",
       });
-      const { container } = await database.containers.createIfNotExists({
-        id: opts.containerName || "unstorage",
-      });
-      client = container;
-    } else {
-      const credential = new DefaultAzureCredential();
-      const cosmosClient = new CosmosClient({
-        endpoint: opts.endpoint,
-        aadCredentials: credential,
-      });
-      const { database } = await cosmosClient.databases.createIfNotExists({
-        id: opts.databaseName || "unstorage",
-      });
-      const { container } = await database.containers.createIfNotExists({
-        id: opts.containerName || "unstorage",
-      });
-      client = container;
+      client = (
+        await database.containers.createIfNotExists({
+          id: opts.containerName || "unstorage",
+        })
+      ).container;
+      return client;
     }
+    const credential = opts.managedIdentityClientId
+      ? new DefaultAzureCredential({
+          managedIdentityClientId: opts.managedIdentityClientId,
+        })
+      : new DefaultAzureCredential();
+    const cosmosClient = new CosmosClient({
+      endpoint: opts.endpoint!,
+      aadCredentials: credential,
+    });
+    const { database } = await cosmosClient.databases.createIfNotExists({
+      id: opts.databaseName || "unstorage",
+    });
+    client = (
+      await database.containers.createIfNotExists({
+        id: opts.containerName || "unstorage",
+      })
+    ).container;
     return client;
   };
 
@@ -109,13 +137,14 @@ export default defineDriver((opts: AzureCosmosOptions) => {
       );
     },
     async removeItem(key) {
-      await (await getCosmosClient())
+      (await getCosmosClient())
         .item(key)
-        .delete<AzureCosmosItem>({ consistencyLevel: "Session" });
+        .delete<AzureCosmosItem>({ consistencyLevel: "Session" })
+        .catch(() => {});
     },
     async getKeys() {
       const iterator = (await getCosmosClient()).items.query<AzureCosmosItem>(
-        `SELECT { id } from c`
+        `SELECT c.id from c`
       );
       return (await iterator.fetchAll()).resources.map((item) => item.id);
     },
@@ -131,7 +160,7 @@ export default defineDriver((opts: AzureCosmosOptions) => {
     },
     async clear() {
       const iterator = (await getCosmosClient()).items.query<AzureCosmosItem>(
-        `SELECT { id } from c`
+        `SELECT c.id from c`
       );
       const items = (await iterator.fetchAll()).resources;
       for (const item of items) {

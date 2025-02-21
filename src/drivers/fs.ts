@@ -1,10 +1,7 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, relative, join } from "node:path";
-import {
-  FSWatcher,
-  type WatchOptions as ChokidarOptions,
-  watch,
-} from "chokidar";
+import { FSWatcher, type ChokidarOptions, watch } from "chokidar";
+import anymatch from "anymatch";
 import { createError, createRequiredError, defineDriver } from "./utils";
 import {
   readFile,
@@ -13,7 +10,6 @@ import {
   rmRecursive,
   unlink,
 } from "./utils/node-fs";
-import anymatch from "anymatch";
 
 export interface FSStorageOptions {
   base?: string;
@@ -32,11 +28,28 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     throw createRequiredError(DRIVER_NAME, "base");
   }
 
-  if (!opts.ignore) {
-    opts.ignore = ["**/node_modules/**", "**/.git/**"];
-  }
+  // Clone and apply defaults
+  const watchOptions: ChokidarOptions = {
+    ignoreInitial: true,
+    ...opts.watchOptions,
+  };
+  opts = {
+    ...opts,
+    base: resolve(opts.base),
+    ignore: opts.ignore || ["**/node_modules/**", "**/.git/**"],
+    watchOptions,
+  };
 
-  opts.base = resolve(opts.base);
+  // Ignore patterns
+  if (!watchOptions.ignored) {
+    watchOptions.ignored = [];
+  } else if (Array.isArray(watchOptions.ignored)) {
+    watchOptions.ignored = [...watchOptions.ignored];
+  } else {
+    watchOptions.ignored = [watchOptions.ignored];
+  }
+  watchOptions.ignored.push(anymatch(opts.ignore!));
+
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(
@@ -118,11 +131,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
         return _unwatch;
       }
       await new Promise<void>((resolve, reject) => {
-        _watcher = watch(opts.base!, {
-          ignoreInitial: true,
-          ignored: opts.ignore,
-          ...opts.watchOptions,
-        })
+        _watcher = watch(opts.base!, watchOptions)
           .on("ready", () => {
             resolve();
           })

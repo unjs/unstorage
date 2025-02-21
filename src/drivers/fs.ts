@@ -45,13 +45,15 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   } else {
     watchOptions.ignored = [watchOptions.ignored];
   }
-  if (opts.ignore?.length) {
-    // Glob support for chokidar v4 (TODO: remove for unstorage v2)
-    watchOptions.ignored.push((path) => matchesGlob(path, opts.ignore!));
-  } else {
-    watchOptions.ignored.push((path) =>
-      /[/\\](node_modules|\.git)[/\\]/.test(path)
-    );
+  if (watchOptions.ignored.length === 0) {
+    if (opts.ignore?.length) {
+      // Glob support for chokidar v4 (TODO: remove for unstorage v2)
+      watchOptions.ignored.push((path) => matchesGlob(path, opts.ignore!));
+    } else {
+      watchOptions.ignored.push((path) =>
+        /[/\\](node_modules|\.git)[/\\]/.test(path)
+      );
+    }
   }
 
   const r = (key: string) => {

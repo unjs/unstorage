@@ -44,7 +44,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     watchOptions.ignored = [watchOptions.ignored];
   }
   // Glob support for chokidar v4 (TODO: remove for unstorage v2)
-  if (watchOptions.ignored.length > 0) {
+  if (opts.ignore?.length) {
     watchOptions.ignored.push((path) => matchesGlob(path, opts.ignore!));
   } else {
     watchOptions.ignored.push((path) =>

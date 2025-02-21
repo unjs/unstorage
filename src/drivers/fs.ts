@@ -33,6 +33,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   opts = {
     ...opts,
     base: resolve(opts.base),
+    ignore: opts.ignore || ["**/node_modules/**", "**/.git/**"],
     watchOptions,
   };
 
@@ -44,11 +45,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   } else {
     watchOptions.ignored = [watchOptions.ignored];
   }
-  if (opts.ignore?.length) {
-    watchOptions.ignored.push((path) => anymatch(opts.ignore!, path));
-  } else {
-    watchOptions.ignored.push(/[/\\](node_modules|\.git)[/\\]/);
-  }
+  watchOptions.ignored.push((path) => anymatch(opts.ignore!, path));
 
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {

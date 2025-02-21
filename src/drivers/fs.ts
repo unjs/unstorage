@@ -45,7 +45,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   } else {
     watchOptions.ignored = [watchOptions.ignored];
   }
-  watchOptions.ignored.push((path) => anymatch(opts.ignore!, path));
+  watchOptions.ignored.push(anymatch(opts.ignore!));
 
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {

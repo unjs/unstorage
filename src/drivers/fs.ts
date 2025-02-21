@@ -14,6 +14,7 @@ import anymatch from "anymatch";
 
 export interface FSStorageOptions {
   base?: string;
+  /** @deprecated use `watchOptions.ignored` */
   ignore?: string[];
   readOnly?: boolean;
   noClear?: boolean;

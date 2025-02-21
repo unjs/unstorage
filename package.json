@@ -51,7 +51,6 @@
     "lru-cache": "^10.4.3",
     "node-fetch-native": "^1.6.6",
     "ofetch": "^1.4.1",
-    "pathe": "^2.0.3",
     "ufo": "^1.5.4"
   },
   "devDependencies": {

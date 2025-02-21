@@ -1,8 +1,8 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, relative, join } from "node:path";
 import { FSWatcher, type ChokidarOptions, watch } from "chokidar";
+import anymatch from "anymatch";
 import { createError, createRequiredError, defineDriver } from "./utils";
-import { matchesGlob } from "pathe";
 import {
   readFile,
   writeFile,
@@ -10,11 +10,9 @@ import {
   rmRecursive,
   unlink,
 } from "./utils/node-fs";
-import anymatch from "anymatch";
 
 export interface FSStorageOptions {
   base?: string;
-  /** @deprecated use `watchOptions.ignored` */
   ignore?: string[];
   readOnly?: boolean;
   noClear?: boolean;
@@ -46,13 +44,10 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   } else {
     watchOptions.ignored = [watchOptions.ignored];
   }
-  if (watchOptions.ignored.length === 0) {
-    if (opts.ignore?.length) {
-      // Glob support for chokidar v4 (TODO: remove for unstorage v2)
-      watchOptions.ignored.push((path) => matchesGlob(path, opts.ignore!));
-    } else {
-      watchOptions.ignored.push(/[/\\](node_modules|\.git)[/\\]/);
-    }
+  if (opts.ignore?.length) {
+    watchOptions.ignored.push((path) => anymatch(opts.ignore!, path));
+  } else {
+    watchOptions.ignored.push(/[/\\](node_modules|\.git)[/\\]/);
   }
 
   const r = (key: string) => {

@@ -29,9 +29,6 @@ importers:
       ofetch:
         specifier: ^1.4.1
         version: 1.4.1
-      pathe:
-        specifier: ^2.0.3
-        version: 2.0.3
       ufo:
         specifier: ^1.5.4
         version: 1.5.4

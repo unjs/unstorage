@@ -54,7 +54,7 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
     if (containerClient) {
       return containerClient;
     }
-    if (!(opts.connectionString || opts.sasUrl) && !opts.accountName) {
+    if (!opts.connectionString && !opts.sasUrl && !opts.accountName) {
       throw createError(DRIVER_NAME, "missing accountName");
     }
     let serviceClient: BlobServiceClient;
@@ -155,14 +155,9 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
         .upload(value, Buffer.byteLength(value));
     },
     async removeItem(key) {
-      const exists = await getContainerClient()
+      await getContainerClient()
         .getBlockBlobClient(key)
-        .exists();
-      if (exists) {
-        await getContainerClient()
-          .getBlockBlobClient(key)
-          .delete({ deleteSnapshots: "include" });
-      }
+        .deleteIfExists({ deleteSnapshots: "include" });
     },
     async getKeys() {
       const iterator = getContainerClient()

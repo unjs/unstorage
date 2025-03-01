@@ -1,5 +1,4 @@
 import { describe, expect, beforeAll, afterAll, test } from "vitest";
-import { readFile } from "../../src/drivers/utils/node-fs";
 import driver from "../../src/drivers/azure-storage-blob";
 import { testDriver } from "./utils";
 import { AccountSASPermissions, BlobServiceClient } from "@azure/storage-blob";

@@ -36,6 +36,8 @@ export interface RedisOptions extends _RedisOptions {
 
 const DRIVER_NAME = "redis";
 
+const batchSize = 100;
+
 export default defineDriver((opts: RedisOptions) => {
   let redisClient: Redis | Cluster;
   const getRedisClient = () => {
@@ -55,6 +57,22 @@ export default defineDriver((opts: RedisOptions) => {
   const base = (opts.base || "").replace(/:$/, "");
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
+  // Helper function to scan all keys matching a pattern
+  const scanAllKeys = async (pattern: string): Promise<string[]> => {
+    const client = getRedisClient();
+    const keys: string[] = [];
+    let cursor = "0";
+
+    do {
+      const [nextCursor, scanKeys] = await client.scan(
+        cursor, "MATCH", pattern, "COUNT", batchSize
+      );
+      cursor = nextCursor;
+      keys.push(...scanKeys);
+    } while (cursor !== "0");
+
+    return keys;
+  };
 
   return {
     name: DRIVER_NAME,
@@ -76,19 +94,19 @@ export default defineDriver((opts: RedisOptions) => {
       }
     },
     async removeItem(key) {
-      await getRedisClient().del(p(key));
+      await getRedisClient().unlink(p(key));
     },
     async getKeys(base) {
-      const keys: string[] = await getRedisClient().keys(p(base, "*"));
+      const keys = await scanAllKeys(p(base, "*"));
       return keys.map((key) => d(key));
     },
     async clear(base) {
-      const keys = await getRedisClient().keys(p(base, "*"));
+      const keys = await scanAllKeys(p(base, "*"));
       if (keys.length === 0) {
         return;
       }
       return getRedisClient()
-        .del(keys)
+        .unlink(keys)
         .then(() => {});
     },
     dispose() {

@@ -36,6 +36,47 @@ export interface AzureStorageBlobOptions {
 
 const DRIVER_NAME = "azure-storage-blob";
 
+async function getKeysByDepth(
+  client: ContainerClient,
+  maxDepth: number
+): Promise<string[]> {
+  const queue: Array<{ depth: number; name: string }> = [];
+  let current: { depth: number; name: string } | undefined = {
+    name: "",
+    depth: 0,
+  };
+  const keys: string[] = [];
+
+  do {
+    const iterator = client
+      .listBlobsByHierarchy(":", {
+        prefix: current.name,
+      })
+      .byPage({ maxPageSize: 1000 });
+
+    for await (const result of iterator) {
+      const { blobPrefixes, blobItems } = result.segment;
+
+      if (blobPrefixes && current.depth < maxDepth) {
+        for (const childPrefix of blobPrefixes) {
+          queue.push({
+            name: childPrefix.name,
+            depth: current.depth + 1,
+          });
+        }
+      }
+
+      for (const item of blobItems) {
+        keys.push(item.name);
+      }
+    }
+
+    current = queue.pop();
+  } while (current !== undefined);
+
+  return keys;
+}
+
 export default defineDriver((opts: AzureStorageBlobOptions) => {
   let containerClient: ContainerClient;
   const getContainerClient = () => {
@@ -81,6 +122,9 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    flags: {
+      maxDepth: true,
+    },
     getInstance: getContainerClient,
     async hasItem(key) {
       return await getContainerClient().getBlockBlobClient(key).exists();
@@ -108,7 +152,11 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
     async removeItem(key) {
       await getContainerClient().getBlockBlobClient(key).delete();
     },
-    async getKeys() {
+    async getKeys(_base, opts) {
+      if (opts?.maxDepth !== undefined) {
+        return getKeysByDepth(getContainerClient(), opts.maxDepth);
+      }
+
       const iterator = getContainerClient()
         .listBlobsFlat()
         .byPage({ maxPageSize: 1000 });

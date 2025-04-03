@@ -5,16 +5,22 @@ import { joinURL } from "ufo";
 
 export interface HTTPOptions {
   base: string;
+  scheme?: string;
   headers?: Record<string, string>;
 }
 
 const DRIVER_NAME = "http";
 
 export default defineDriver((opts: HTTPOptions) => {
-  const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
+  const base =
+    opts.base.startsWith("//") && opts.scheme
+      ? `${opts.scheme}:${opts.base}`
+      : opts.base;
+
+  const r = (key: string = "") => joinURL(base!, key.replace(/:/g, "/"));
 
   const rBase = (key: string = "") =>
-    joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
+    joinURL(base!, (key || "/").replace(/:/g, "/"), ":");
 
   const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
     if (error?.response?.status === 404) {

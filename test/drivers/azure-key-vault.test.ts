@@ -6,7 +6,7 @@ describe.skip(
   "drivers: azure-key-vault",
   () => {
     testDriver({
-      driver: driver({ vaultName: "testunstoragevault" }),
+      driver: driver({ vaultName: "unstoragetest" }),
     });
   },
   { timeout: 80_000 }

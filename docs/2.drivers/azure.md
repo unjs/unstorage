@@ -193,7 +193,11 @@ The driver supports the following authentication methods:
 - `containerName`: The name of the blob container to use. Defaults to `unstorage`.
 - `accountKey`: The account key to use for authentication. This is only required if you are using `AzureNamedKeyCredential`.
 - `sasKey`: The SAS token to use for authentication. This is only required if you are using `AzureSASCredential`.
+- `sasUrl`: The SAS URL of the storage account. This is an alternative to providing `accountName` and `sasKey` separately. The URL can be either:
+  - A storage account URL: `https://<account>.blob.core.windows.net?<sas-token>`
+  - A container URL: `https://<account>.blob.core.windows.net/<container>?<sas-token>` you must specify the `containerName` option
 - `connectionString`: The storage accounts' connection string. `accountKey` and `sasKey` take precedence.
+- `endpointSuffix`: Storage account endpoint suffix. Needs to be changed for Microsoft Azure operated by 21Vianet, Azure Government or Azurite. Defaults to `.blob.core.windows.net`.
 
 ## Azure Table Storage
 

@@ -44,6 +44,44 @@ export function prefixStorage<T extends StorageValue>(
       // Remove Prefix
       .then((keys) => keys.map((key) => key.slice(base.length)));
 
+  if (typeof storage.getItems === "function") {
+    nsStorage.getItems = <U extends T>(
+      items: (string | { key: string; options?: any })[],
+      commonOptions?: any
+    ) => {
+      const prefixedItems = items.map((item) => {
+        if (typeof item === "string") {
+          return base + item;
+        } else {
+          return {
+            key: base + item.key,
+            options: item.options,
+          };
+        }
+      });
+      return storage.getItems<U>(prefixedItems, commonOptions).then((results) =>
+        results.map((entry) => ({
+          key: entry.key.slice(base.length),
+          value: entry.value,
+        }))
+      );
+    };
+  }
+
+  if (typeof storage.setItems === "function") {
+    nsStorage.setItems = <U extends T>(
+      items: { key: string; value: U; options?: any }[],
+      commonOptions?: any
+    ) => {
+      const prefixedItems = items.map((item) => ({
+        key: base + item.key,
+        value: item.value,
+        options: item.options,
+      }));
+      return storage.setItems<U>(prefixedItems, commonOptions);
+    };
+  }
+
   return nsStorage;
 }
 

@@ -249,4 +249,43 @@ describe("Regression", () => {
       await storage.clear();
     }
   });
+
+  it("prefixStorage getItems returns null (issue #396)", async () => {
+    const storage = createStorage();
+    await storage.setItem("namespace:key", "value");
+
+    const plainResult = await storage.getItems(["namespace:key"]);
+    expect(plainResult).toEqual([{ key: "namespace:key", value: "value" }]);
+
+    const prefixed = prefixStorage(storage, "namespace");
+
+    const prefixedResult = await prefixed.getItems(["key"]);
+    expect(prefixedResult).toEqual([{ key: "key", value: "value" }]);
+  });
+
+  it("prefixStorage setItems works correctly (related to issue #396)", async () => {
+    const storage = createStorage();
+
+    const prefixed = prefixStorage(storage, "namespace");
+
+    await prefixed.setItems([
+      { key: "key1", value: "value1" },
+      { key: "key2", value: "value2" },
+    ]);
+
+    const plainResult = await storage.getItems([
+      "namespace:key1",
+      "namespace:key2",
+    ]);
+    expect(plainResult).toEqual([
+      { key: "namespace:key1", value: "value1" },
+      { key: "namespace:key2", value: "value2" },
+    ]);
+
+    const prefixedResult = await prefixed.getItems(["key1", "key2"]);
+    expect(prefixedResult).toEqual([
+      { key: "key1", value: "value1" },
+      { key: "key2", value: "value2" },
+    ]);
+  });
 });

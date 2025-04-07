@@ -48,7 +48,8 @@ export interface AzureStorageTableOptions {
 
 const DRIVER_NAME = "azure-storage-table";
 
-export default defineDriver((opts: AzureStorageTableOptions) => {
+export default defineDriver((optsInput: AzureStorageTableOptions) => {
+  const opts = { ...optsInput };
   const {
     accountName = null,
     tableName = "unstorage",

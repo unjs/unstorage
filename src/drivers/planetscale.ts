@@ -18,7 +18,8 @@ interface TableSchema {
 
 const DRIVER_NAME = "planetscale";
 
-export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
+export default defineDriver<PlanetscaleDriverOptions>((optsInput = {}) => {
+  const opts = { ...optsInput };
   opts.table = opts.table || "storage";
 
   let _connection: Connection;

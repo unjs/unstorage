@@ -45,7 +45,8 @@ export interface AzureCosmosItem {
   modified: string | Date;
 }
 
-export default defineDriver((opts: AzureCosmosOptions) => {
+export default defineDriver((optsInput: AzureCosmosOptions) => {
+  const opts = { ...optsInput };
   let client: Container;
   const getCosmosClient = async () => {
     if (client) {

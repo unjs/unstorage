@@ -27,7 +27,8 @@ export interface VercelBlobOptions {
 
 const DRIVER_NAME = "vercel-blob";
 
-export default defineDriver<VercelBlobOptions>((opts) => {
+export default defineDriver<VercelBlobOptions>((optsInput) => {
+  const opts = { ...optsInput };
   const optsBase = normalizeKey(opts?.base);
 
   const r = (...keys: string[]) =>
@@ -84,20 +85,20 @@ export default defineDriver<VercelBlobOptions>((opts) => {
         ...blobHead,
       };
     },
-    async setItem(key, value, opts) {
+    async setItem(key, value, optsSet) {
       await put(r(key), value, {
         access: "public",
         addRandomSuffix: false,
         token: getToken(),
-        ...opts,
+        ...optsSet,
       });
     },
-    async setItemRaw(key, value, opts) {
+    async setItemRaw(key, value, optsSet) {
       await put(r(key), value, {
         access: "public",
         addRandomSuffix: false,
         token: getToken(),
-        ...opts,
+        ...optsSet,
       });
     },
     async removeItem(key: string) {

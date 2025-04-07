@@ -62,7 +62,7 @@ export function prefixStorage<T extends StorageValue>(
       const results = await storage.getItems<U>(prefixedItems, commonOptions);
       return results.map((entry) => ({
         key: entry.key.slice(base.length),
-        value: entry.value
+        value: entry.value,
       }));
     };
   }

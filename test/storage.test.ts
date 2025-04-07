@@ -250,7 +250,7 @@ describe("Regression", () => {
     }
   });
 
-  it("prefixStorage getItems returns null (issue #396)", async () => {
+  it("prefixStorage getItems to not returns null (issue #396)", async () => {
     const storage = createStorage();
     await storage.setItem("namespace:key", "value");
 

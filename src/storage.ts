@@ -172,12 +172,44 @@ export function createStorage<T extends StorageValue>(
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem(key: string, opts = {}) {
+    getItem: async (
+      key: string,
+      opts: TransactionOptions & {
+        type?: "json" | "text" | "bytes" | "stream" | "blob";
+      } = {}
+    ) => {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
-      return asyncCall(driver.getItem, relativeKey, opts).then(
-        (value) => destr(value) as StorageValue
-      );
+
+      const type = opts.type;
+
+      if (type === "bytes" || type === "stream" || type === "blob") {
+        if (driver.getItemRaw) {
+          return asyncCall(driver.getItemRaw, relativeKey, opts);
+        }
+        const raw = await asyncCall(driver.getItem, relativeKey, opts);
+        return deserializeRaw(raw);
+      }
+
+      const value = await asyncCall(driver.getItem, relativeKey, opts);
+
+      if (value == null) {
+        return null;
+      }
+
+      if (type === "text") {
+        return typeof value === "string" ? value : String(value);
+      }
+
+      if (type === "json") {
+        if (typeof value === "string") {
+          return JSON.parse(value);
+        }
+        return value;
+      }
+
+      // default behavior: try destr (safe JSON parse fallback to text)
+      return destr(value);
     },
     getItems(
       items: (string | { key: string; options?: TransactionOptions })[],
@@ -473,45 +505,8 @@ export function createStorage<T extends StorageValue>(
     },
     // Aliases
     keys: (base, opts = {}) => storage.getKeys(base, opts),
-    get: async (
-      key: string,
-      opts: TransactionOptions & {
-        type?: "json" | "text" | "bytes" | "stream" | "blob";
-      } = {}
-    ) => {
-      key = normalizeKey(key);
-      const { relativeKey, driver } = getMount(key);
-
-      const type = opts.type;
-
-      if (type === "bytes" || type === "stream" || type === "blob") {
-        if (driver.getItemRaw) {
-          return asyncCall(driver.getItemRaw, relativeKey, opts);
-        }
-        const raw = await asyncCall(driver.getItem, relativeKey, opts);
-        return deserializeRaw(raw);
-      }
-
-      const value = await asyncCall(driver.getItem, relativeKey, opts);
-
-      if (value == null) {
-        return null;
-      }
-
-      if (type === "text") {
-        return typeof value === "string" ? value : String(value);
-      }
-
-      if (type === "json") {
-        if (typeof value === "string") {
-          return JSON.parse(value);
-        }
-        return value;
-      }
-
-      // default behavior: try destr (safe JSON parse fallback to text)
-      return destr(value);
-    },
+    get: ((key: string, opts: TransactionOptions = {}) =>
+      storage.getItem(key, opts)) as Storage<T>["get"],
     set: (key: string, value: T, opts = {}) =>
       storage.setItem(key, value, opts),
     has: (key: string, opts = {}) => storage.hasItem(key, opts),

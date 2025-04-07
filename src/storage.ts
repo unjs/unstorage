@@ -473,7 +473,45 @@ export function createStorage<T extends StorageValue>(
     },
     // Aliases
     keys: (base, opts = {}) => storage.getKeys(base, opts),
-    get: (key: string, opts = {}) => storage.getItem(key, opts),
+    get: async (
+      key: string,
+      opts: TransactionOptions & {
+        type?: "json" | "text" | "bytes" | "stream" | "blob";
+      } = {}
+    ) => {
+      key = normalizeKey(key);
+      const { relativeKey, driver } = getMount(key);
+
+      const type = opts.type;
+
+      if (type === "bytes" || type === "stream" || type === "blob") {
+        if (driver.getItemRaw) {
+          return asyncCall(driver.getItemRaw, relativeKey, opts);
+        }
+        const raw = await asyncCall(driver.getItem, relativeKey, opts);
+        return deserializeRaw(raw);
+      }
+
+      const value = await asyncCall(driver.getItem, relativeKey, opts);
+
+      if (value == null) {
+        return null;
+      }
+
+      if (type === "text") {
+        return typeof value === "string" ? value : String(value);
+      }
+
+      if (type === "json") {
+        if (typeof value === "string") {
+          return JSON.parse(value);
+        }
+        return value;
+      }
+
+      // default behavior: try destr (safe JSON parse fallback to text)
+      return destr(value);
+    },
     set: (key: string, value: T, opts = {}) =>
       storage.setItem(key, value, opts),
     has: (key: string, opts = {}) => storage.hasItem(key, opts),

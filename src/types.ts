@@ -189,7 +189,39 @@ export interface Storage<T extends StorageValue = StorageValue> {
   ) => { base: string; driver: Driver }[];
   // Aliases
   keys: Storage["getKeys"];
-  get: Storage<T>["getItem"];
+  get<
+    U extends Extract<T, StorageDefinition>,
+    K extends keyof StorageItemMap<U>,
+  >(
+    key: K,
+    opts?: TransactionOptions & { type?: undefined }
+  ): Promise<StorageItemType<T, K> | null>;
+
+  get(
+    key: string,
+    opts: { type: "text" } & TransactionOptions
+  ): Promise<string | null>;
+  get(
+    key: string,
+    opts: { type: "json" } & TransactionOptions
+  ): Promise<unknown | null>;
+  get(
+    key: string,
+    opts: { type: "bytes" } & TransactionOptions
+  ): Promise<Uint8Array | null>;
+  get(
+    key: string,
+    opts: { type: "stream" } & TransactionOptions
+  ): Promise<ReadableStream | null>;
+  get(
+    key: string,
+    opts: { type: "blob" } & TransactionOptions
+  ): Promise<Blob | null>;
+  get(
+    key: string,
+    opts?: TransactionOptions & { type?: undefined }
+  ): Promise<StorageValue | null>;
+
   set: Storage<T>["setItem"];
   has: Storage<T>["hasItem"];
   del: Storage<T>["removeItem"];

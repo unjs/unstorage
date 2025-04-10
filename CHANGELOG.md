@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.15.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.14.4...v1.15.0)
+
+### 🚀 Enhancements
+
+- Support `maxDepth` for `getKeys` ([#547](https://github.com/unjs/unstorage/pull/547))
+- Add `flags` key to driver interface ([#552](https://github.com/unjs/unstorage/pull/552))
+- **fs, fs-lite:** Native `maxDepth` support ([#551](https://github.com/unjs/unstorage/pull/551))
+
+### 🔥 Performance
+
+- Skip `maxDepth` filtering if natively supported ([#560](https://github.com/unjs/unstorage/pull/560))
+
+### 🩹 Fixes
+
+- **prefixStorage:** Wrap shorthand aliases ([#556](https://github.com/unjs/unstorage/pull/556))
+
+### 💅 Refactors
+
+- Upgrade to chokidar to v4 ([#596](https://github.com/unjs/unstorage/pull/596))
+- **fs:** Better options handling ([#597](https://github.com/unjs/unstorage/pull/597))
+
+### 📖 Documentation
+
+- Fix link to planetscale ([#576](https://github.com/unjs/unstorage/pull/576))
+- **redis:** Update hashtags note ([#593](https://github.com/unjs/unstorage/pull/593))
+
+### 🏡 Chore
+
+- Add codeowners file ([4ba07a6](https://github.com/unjs/unstorage/commit/4ba07a6))
+- Update deps ([a022baf](https://github.com/unjs/unstorage/commit/a022baf))
+- Add `moduleResolution` field to `tsconfig.json` ([0d55b77](https://github.com/unjs/unstorage/commit/0d55b77))
+- Update ci ([91e2d7d](https://github.com/unjs/unstorage/commit/91e2d7d))
+- Add `pnpm.onlyBuiltDependencies` ([4bd6bfd](https://github.com/unjs/unstorage/commit/4bd6bfd))
+- Update dev deps ([9cf840f](https://github.com/unjs/unstorage/commit/9cf840f))
+
+### ✅ Tests
+
+- Clear storage after each test ([#548](https://github.com/unjs/unstorage/pull/548))
+- Exclude drivers and scripts directories from test coverage ([#562](https://github.com/unjs/unstorage/pull/562))
+
+### ❤️ Contributors
+
+- Connor Pearson ([@cjpearson](http://github.com/cjpearson))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Mohamed Hazem Abbas ([@CVirus](http://github.com/CVirus))
+- James Garbutt ([@43081j](http://github.com/43081j))
+- Corentin THOMASSET ([@CorentinTh](http://github.com/CorentinTh))
+
 ## v1.14.4
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.14.3...v1.14.4)

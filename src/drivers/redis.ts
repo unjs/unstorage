@@ -63,7 +63,6 @@ export default defineDriver((opts: RedisOptions) => {
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
 
-  // Helper function to scan all keys matching a pattern
   const scan = async (pattern: string): Promise<string[]> => {
     const client = getRedisClient();
     const keys: string[] = [];

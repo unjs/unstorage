@@ -8,6 +8,11 @@ import { DefaultAzureCredential } from "@azure/identity";
 
 export interface AzureStorageBlobOptions {
   /**
+   * Optional client ID for managed identity. Needed if using one or more user assigned managed identity to authenticate.
+   */
+  managedIdentityClientId?: string;
+
+  /**
    * The name of the Azure Storage account.
    */
   accountName: string;
@@ -66,7 +71,11 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
         opts.connectionString
       );
     } else {
-      const credential = new DefaultAzureCredential();
+      const credential = opts.managedIdentityClientId
+        ? new DefaultAzureCredential({
+            managedIdentityClientId: opts.managedIdentityClientId,
+          })
+        : new DefaultAzureCredential();
       serviceClient = new BlobServiceClient(
         `https://${opts.accountName}.blob.core.windows.net`,
         credential

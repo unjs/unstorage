@@ -7,7 +7,7 @@ import { ChildProcess, exec } from "node:child_process";
 describe.skip("drivers: azure-storage-blob", () => {
   let azuriteProcess: ChildProcess;
   beforeAll(async () => {
-    azuriteProcess = exec("npx azurite-blob --silent");
+    azuriteProcess = exec("pnpm exec azurite-blob --silent");
     const client = BlobServiceClient.fromConnectionString(
       "UseDevelopmentStorage=true"
     );
@@ -20,7 +20,7 @@ describe.skip("drivers: azure-storage-blob", () => {
   testDriver({
     driver: driver({
       connectionString: "UseDevelopmentStorage=true",
-      accountName: "local",
+      accountName: "devstoreaccount1",
     }),
   });
 });

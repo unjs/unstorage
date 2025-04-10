@@ -43,6 +43,7 @@ const storage = createStorage({
 - `url`: The REST URL for your Upstash Redis database. Find it in [the Upstash Redis console](https://console.upstash.com/redis/). Driver uses `UPSTASH_REDIS_REST_URL` environment by default.
 - `token`: The REST token for authentication with your Upstash Redis database. Find it in [the Upstash Redis console](https://console.upstash.com/redis/). Driver uses `UPSTASH_REDIS_REST_TOKEN` environment by default.
 - `ttl`: Default TTL for all items in **seconds**.
+- `scanCount`: How many keys to scan at once.
 
 See [@upstash/redis documentation](https://upstash.com/docs/redis/sdks/ts/overview) for all available options.
 

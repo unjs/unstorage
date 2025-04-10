@@ -52,6 +52,7 @@ To use, you will need to install `@vercel/kv` dependency in your project:
 - `token`: Rest API Token to use for connecting to your Vercel KV store. Default is `KV_REST_API_TOKEN`.
 - `base`: [optional] Prefix to use for all keys. Can be used for namespacing.
 - `env`: [optional] Flag to customize environment variable prefix (Default is `KV`). Set to `false` to disable env inference for `url` and `token` options.
+- `scanCount`: How many keys to scan at once.
 
 See [@upstash/redis](https://docs.upstash.com/redis/sdks/javascriptsdk/advanced) for all available options.
 

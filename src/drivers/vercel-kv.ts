@@ -19,6 +19,13 @@ export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
    * Default TTL for all items in seconds.
    */
   ttl?: number;
+
+  /**
+   * How many keys to scan at once.
+   *
+   * [redis documentation](https://redis.io/docs/latest/commands/scan/#the-count-option)
+   */
+  scanCount?: number;
 }
 
 const DRIVER_NAME = "vercel-kv";
@@ -63,6 +70,21 @@ export default defineDriver<VercelKVOptions, VercelKV>((opts) => {
     return _client;
   };
 
+  const scan = async (pattern: string): Promise<string[]> => {
+    const client = getClient();
+    const keys: string[] = [];
+    let cursor = "0";
+    do {
+      const [nextCursor, scanKeys] = await client.scan(cursor, {
+        match: pattern,
+        count: opts.scanCount,
+      });
+      cursor = nextCursor;
+      keys.push(...scanKeys);
+    } while (cursor !== "0");
+    return keys;
+  };
+
   return {
     name: DRIVER_NAME,
     getInstance: getClient,
@@ -80,14 +102,14 @@ export default defineDriver<VercelKVOptions, VercelKV>((opts) => {
     },
     removeItem(key) {
       return getClient()
-        .del(r(key))
+        .unlink(r(key))
         .then(() => {});
     },
     getKeys(base) {
-      return getClient().keys(r(base, "*"));
+      return scan(r(base, "*"));
     },
     async clear(base) {
-      const keys = await getClient().keys(r(base, "*"));
+      const keys = await scan(r(base, "*"));
       if (keys.length === 0) {
         return;
       }

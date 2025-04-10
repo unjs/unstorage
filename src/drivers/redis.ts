@@ -32,11 +32,16 @@ export interface RedisOptions extends _RedisOptions {
    * Default TTL for all items in seconds.
    */
   ttl?: number;
+
+  /**
+   * How many keys to scan at once.
+   *
+   * [redis documentation](https://redis.io/docs/latest/commands/scan/#the-count-option)
+   */
+  scanCount?: number;
 }
 
 const DRIVER_NAME = "redis";
-
-const batchSize = 100;
 
 export default defineDriver((opts: RedisOptions) => {
   let redisClient: Redis | Cluster;
@@ -57,20 +62,19 @@ export default defineDriver((opts: RedisOptions) => {
   const base = (opts.base || "").replace(/:$/, "");
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
+
   // Helper function to scan all keys matching a pattern
   const scanAllKeys = async (pattern: string): Promise<string[]> => {
     const client = getRedisClient();
     const keys: string[] = [];
     let cursor = "0";
-
     do {
-      const [nextCursor, scanKeys] = await client.scan(
-        cursor, "MATCH", pattern, "COUNT", batchSize
-      );
+      const [nextCursor, scanKeys] = opts.scanCount
+        ? await client.scan(cursor, "MATCH", pattern, "COUNT", opts.scanCount)
+        : await client.scan(cursor, "MATCH", pattern);
       cursor = nextCursor;
       keys.push(...scanKeys);
     } while (cursor !== "0");
-
     return keys;
   };
 

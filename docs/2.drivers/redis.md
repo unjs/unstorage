@@ -70,6 +70,7 @@ const storage = createStorage({
 - `cluster`: List of redis nodes to use for cluster mode. Takes precedence over `url` and `host` options.
 - `clusterOptions`: Options to use for cluster mode.
 - `ttl`: Default TTL for all items in **seconds**.
+- `scanCount`: How many keys to scan at once ([redis documentation](https://redis.io/docs/latest/commands/scan/#the-count-option)).
 
 See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 

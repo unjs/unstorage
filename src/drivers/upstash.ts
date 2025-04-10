@@ -11,6 +11,13 @@ export interface UpstashOptions extends Partial<RedisConfigNodejs> {
    * Default TTL for all items in seconds.
    */
   ttl?: number;
+
+  /**
+   * How many keys to scan at once.
+   *
+   * [redis documentation](https://redis.io/docs/latest/commands/scan/#the-count-option)
+   */
+  scanCount?: number;
 }
 
 const DRIVER_NAME = "upstash";
@@ -32,6 +39,22 @@ export default defineDriver<UpstashOptions, Redis>(
       redisClient = new Redis({ url, token, ...options });
       return redisClient;
     };
+
+    const scan = async (pattern: string): Promise<string[]> => {
+      const client = getClient();
+      const keys: string[] = [];
+      let cursor = "0";
+      do {
+        const [nextCursor, scanKeys] = await client.scan(cursor, {
+          match: pattern,
+          count: options.scanCount,
+        });
+        cursor = nextCursor;
+        keys.push(...scanKeys);
+      } while (cursor !== "0");
+      return keys;
+    };
+
     return {
       name: DRIVER_NAME,
       getInstance: getClient,
@@ -49,18 +72,16 @@ export default defineDriver<UpstashOptions, Redis>(
       },
       removeItem(key) {
         return getClient()
-          .del(r(key))
+          .unlink(r(key))
           .then(() => {});
       },
       getKeys(_base) {
-        return getClient()
-          .keys(r(_base, "*"))
-          .then((keys) =>
-            base ? keys.map((key) => key.slice(base.length + 1)) : keys
-          );
+        return scan(r(_base, "*")).then((keys) =>
+          base ? keys.map((key) => key.slice(base.length + 1)) : keys
+        );
       },
       async clear(base) {
-        const keys = await getClient().keys(r(base, "*"));
+        const keys = await scan(r(base, "*"));
         if (keys.length === 0) {
           return;
         }

@@ -1,4 +1,4 @@
-import type { Storage, StorageValue } from "./types";
+import type { Storage, StorageValue, TransactionOptions } from "./types";
 
 type StorageKeys = Array<keyof Storage>;
 
@@ -43,6 +43,32 @@ export function prefixStorage<T extends StorageValue>(
       .getKeys(base + key, ...arguments_)
       // Remove Prefix
       .then((keys) => keys.map((key) => key.slice(base.length)));
+
+  nsStorage.getItems = async <U extends T>(
+    items: (string | { key: string; options?: TransactionOptions })[],
+    commonOptions?: TransactionOptions
+  ) => {
+    const prefixedItems = items.map((item) =>
+      typeof item === "string" ? base + item : { ...item, key: base + item.key }
+    );
+    const results = await storage.getItems<U>(prefixedItems, commonOptions);
+    return results.map((entry) => ({
+      key: entry.key.slice(base.length),
+      value: entry.value,
+    }));
+  };
+
+  nsStorage.setItems = async <U extends T>(
+    items: { key: string; value: U; options?: TransactionOptions }[],
+    commonOptions?: TransactionOptions
+  ) => {
+    const prefixedItems = items.map((item) => ({
+      key: base + item.key,
+      value: item.value,
+      options: item.options,
+    }));
+    return storage.setItems<U>(prefixedItems, commonOptions);
+  };
 
   return nsStorage;
 }

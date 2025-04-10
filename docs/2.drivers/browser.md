@@ -57,6 +57,10 @@ const storage = createStorage({
 });
 ```
 
+::note
+By default, unstorage will `JSON.stringify` the value before passing to IndexedDB. If you want objects to be stored "as-is", you can use `storage.setItemRaw`.
+::
+
 **Options:**
 
 - `base`: Add `${base}:` to all keys to avoid collision

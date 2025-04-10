@@ -64,7 +64,11 @@ export default defineDriver((opts: RedisOptions) => {
   const d = (key: string) => (base ? key.replace(`${base}:`, "") : key); // Deprefix a key
 
   if (opts.preConnect) {
-    getRedisClient();
+    try {
+      getRedisClient();
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return {

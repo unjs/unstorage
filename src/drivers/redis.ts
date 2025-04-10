@@ -36,7 +36,6 @@ export interface RedisOptions extends _RedisOptions {
   /**
    * Whether to initialize the redis instance immediately.
    * Otherwise, it will be initialized on the first read/write call.
-   * When enabled, it also sets `lazyConnect` to `false` if unset.
    * @default false
    */
   preConnect?: boolean;

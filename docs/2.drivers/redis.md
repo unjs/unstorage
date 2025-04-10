@@ -70,7 +70,7 @@ const storage = createStorage({
 - `cluster`: List of redis nodes to use for cluster mode. Takes precedence over `url` and `host` options.
 - `clusterOptions`: Options to use for cluster mode.
 - `ttl`: Default TTL for all items in **seconds**.
-- `preConnect`: Whether to initialize the redis instance immediately. Otherwise, it will be initialized on the first read/write call. When enabled, it also sets `lazyConnect` to `false` if unset. Default disabled.
+- `preConnect`: Whether to initialize the redis instance immediately. Otherwise, it will be initialized on the first read/write call. Default: `false`.
 
 See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 

@@ -124,3 +124,85 @@ export function filterKeyByBase(
 
   return key[key.length - 1] !== "$";
 }
+
+/**
+ * Transform raw data into the expected type.
+ */
+export function transformRawToType(
+  raw: any,
+  type: "bytes" | "blob" | "stream"
+) {
+  // Handle "bytes"
+  if (type === "bytes") {
+    if (
+      raw instanceof Uint8Array ||
+      (typeof Buffer !== "undefined" && raw instanceof Buffer)
+    ) {
+      return raw;
+    }
+    if (typeof raw === "string") {
+      return new TextEncoder().encode(raw);
+    }
+    // Try to convert ArrayBuffer
+    if (raw instanceof ArrayBuffer) {
+      return new Uint8Array(raw);
+    }
+    throw new Error("[unstorage] Cannot convert raw data to bytes");
+  }
+
+  // Handle "blob"
+  if (type === "blob") {
+    if (typeof Blob !== "undefined" && raw instanceof Blob) {
+      return raw;
+    }
+    if (
+      raw instanceof Uint8Array ||
+      (typeof Buffer !== "undefined" && raw instanceof Buffer)
+    ) {
+      return new Blob([raw]);
+    }
+    if (typeof raw === "string") {
+      return new Blob([new TextEncoder().encode(raw)]);
+    }
+    if (raw instanceof ArrayBuffer) {
+      return new Blob([new Uint8Array(raw)]);
+    }
+    throw new Error("[unstorage] Cannot convert raw data to Blob");
+  }
+
+  // Handle "stream"
+  if (type === "stream") {
+    if (
+      typeof ReadableStream !== "undefined" &&
+      raw instanceof ReadableStream
+    ) {
+      return raw;
+    }
+    // Convert Uint8Array, Buffer, string, or ArrayBuffer to stream
+    let uint8array: Uint8Array;
+    if (
+      raw instanceof Uint8Array ||
+      (typeof Buffer !== "undefined" && raw instanceof Buffer)
+    ) {
+      uint8array = raw;
+    } else if (typeof raw === "string") {
+      uint8array = new TextEncoder().encode(raw);
+    } else if (raw instanceof ArrayBuffer) {
+      uint8array = new Uint8Array(raw);
+    } else {
+      throw new TypeError(
+        "[unstorage] Cannot convert raw data to ReadableStream"
+      );
+    }
+
+    // Create a ReadableStream from Uint8Array
+    return new ReadableStream({
+      start(controller) {
+        controller.enqueue(uint8array);
+        controller.close();
+      },
+    });
+  }
+
+  throw new Error("[unstorage] Unknown type for transformRawToType");
+}

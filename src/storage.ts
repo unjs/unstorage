@@ -16,6 +16,7 @@ import {
   joinKeys,
   filterKeyByDepth,
   filterKeyByBase,
+  transformRawToType,
 } from "./utils";
 
 interface StorageCTX {
@@ -185,10 +186,12 @@ export function createStorage<T extends StorageValue>(
 
       if (type === "bytes" || type === "stream" || type === "blob") {
         if (driver.getItemRaw) {
-          return asyncCall(driver.getItemRaw, relativeKey, opts);
+          const raw = await asyncCall(driver.getItemRaw, relativeKey, opts);
+          return transformRawToType(raw, type);
         }
-        const raw = await asyncCall(driver.getItem, relativeKey, opts);
-        return deserializeRaw(raw);
+        const rawValue = await asyncCall(driver.getItem, relativeKey, opts);
+        const raw = deserializeRaw(rawValue);
+        return transformRawToType(raw, type);
       }
 
       const value = await asyncCall(driver.getItem, relativeKey, opts);

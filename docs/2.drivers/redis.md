@@ -74,7 +74,6 @@ const storage = createStorage({
 
 See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 
-
 **Transaction options:**
 
 - `ttl`: Supported for `setItem(key, value, { ttl: number /* seconds */ })`

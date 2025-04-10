@@ -88,8 +88,8 @@ importers:
         specifier: ^1.34.7
         version: 1.34.7
       '@vercel/blob':
-        specifier: ^0.27.3
-        version: 0.27.3
+        specifier: ^1.0.0
+        version: 1.0.0
       '@vercel/kv':
         specifier: ^3.0.0
         version: 3.0.0
@@ -1470,8 +1470,8 @@ packages:
   '@upstash/redis@1.34.7':
     resolution: {integrity: sha512-EJ/g+ttDL3MFS8WNDLj/Buybo3FpPw2IAFl4X8lxh8/l7YTq6kTqT6FKkq8eYRdN6lGlVw+W6qnmym734m39Tg==}
 
-  '@vercel/blob@0.27.3':
-    resolution: {integrity: sha512-WizeAxzOTmv0JL7wOaxvLIU/KdBcrclM1ZUOdSlIZAxsTTTe1jsyBthStLby0Ueh7FnmKYAjLz26qRJTk5SDkQ==}
+  '@vercel/blob@1.0.0':
+    resolution: {integrity: sha512-fe4fzpL0h/2gRhaCixygaconaMXVgPo06L5ZyTlz9FSVTXDu+MBOu06DqDZ3Ye1s84m1g2sJ9w8Z5SbKCfkQ0A==}
     engines: {node: '>=16.14'}
 
   '@vercel/kv@3.0.0':
@@ -3045,7 +3045,6 @@ packages:
 
   libsql@0.5.4:
     resolution: {integrity: sha512-GEFeWca4SDAQFxjHWJBE6GK52LEtSskiujbG3rqmmeTO9t4sfSBKIURNLLpKDDF7fb7jmTuuRkDAn9BZGITQNw==}
-    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   lilconfig@3.1.3:
@@ -5974,7 +5973,7 @@ snapshots:
     dependencies:
       crypto-js: 4.2.0
 
-  '@vercel/blob@0.27.3':
+  '@vercel/blob@1.0.0':
     dependencies:
       async-retry: 1.3.3
       is-buffer: 2.0.5

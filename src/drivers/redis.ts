@@ -33,7 +33,8 @@ export interface RedisOptions extends _RedisOptions {
    */
   ttl?: number;
 
-  /* How many keys to scan at once.
+  /*
+   * How many keys to scan at once.
    *
    * [redis documentation](https://redis.io/docs/latest/commands/scan/#the-count-option)
    */

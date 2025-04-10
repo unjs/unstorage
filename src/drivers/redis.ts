@@ -65,7 +65,6 @@ export default defineDriver((opts: RedisOptions) => {
   const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
 
   if (opts.preConnect) {
-    opts.lazyConnect = opts.lazyConnect ?? false;
     getRedisClient();
   }
 

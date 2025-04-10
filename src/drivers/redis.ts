@@ -64,7 +64,7 @@ export default defineDriver((opts: RedisOptions) => {
   const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
 
   // Helper function to scan all keys matching a pattern
-  const scanAllKeys = async (pattern: string): Promise<string[]> => {
+  const scan = async (pattern: string): Promise<string[]> => {
     const client = getRedisClient();
     const keys: string[] = [];
     let cursor = "0";
@@ -101,11 +101,11 @@ export default defineDriver((opts: RedisOptions) => {
       await getRedisClient().unlink(p(key));
     },
     async getKeys(base) {
-      const keys = await scanAllKeys(p(base, "*"));
+      const keys = await scan(p(base, "*"));
       return keys.map((key) => d(key));
     },
     async clear(base) {
-      const keys = await scanAllKeys(p(base, "*"));
+      const keys = await scan(p(base, "*"));
       if (keys.length === 0) {
         return;
       }

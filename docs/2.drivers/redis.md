@@ -74,7 +74,6 @@ const storage = createStorage({
 
 See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 
-However, if `preConnect` is enabled while `lazyConnect` is unset, lazy connection will be disabled in favor of pre-connection.
 
 **Transaction options:**
 

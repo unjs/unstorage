@@ -96,14 +96,40 @@ export interface Storage<T extends StorageValue = StorageValue> {
 
   getItem<
     U extends Extract<T, StorageDefinition>,
-    K extends string & keyof StorageItemMap<U>,
+    K extends keyof StorageItemMap<U>,
   >(
     key: K,
-    ops?: TransactionOptions
+    opts?: TransactionOptions & { type?: undefined }
   ): Promise<StorageItemType<T, K> | null>;
+
+  getItem(
+    key: string,
+    opts: { type: "text" } & TransactionOptions
+  ): Promise<string | null>;
+
+  getItem(
+    key: string,
+    opts: { type: "json" } & TransactionOptions
+  ): Promise<unknown | null>;
+
+  getItem(
+    key: string,
+    opts: { type: "bytes" } & TransactionOptions
+  ): Promise<Uint8Array | null>;
+
+  getItem(
+    key: string,
+    opts: { type: "stream" } & TransactionOptions
+  ): Promise<ReadableStream | null>;
+
+  getItem(
+    key: string,
+    opts: { type: "blob" } & TransactionOptions
+  ): Promise<Blob | null>;
+
   getItem<R = StorageItemType<T, string>>(
     key: string,
-    opts?: TransactionOptions
+    opts?: TransactionOptions & { type?: undefined }
   ): Promise<R | null>;
 
   /** @experimental */
@@ -190,6 +216,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
   // Aliases
   keys: Storage["getKeys"];
   get: Storage<T>["getItem"];
+
   set: Storage<T>["setItem"];
   has: Storage<T>["hasItem"];
   del: Storage<T>["removeItem"];

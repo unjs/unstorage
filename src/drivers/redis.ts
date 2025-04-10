@@ -32,6 +32,14 @@ export interface RedisOptions extends _RedisOptions {
    * Default TTL for all items in seconds.
    */
   ttl?: number;
+
+  /**
+   * Whether to initialize the redis instance immediately. 
+   * Otherwise, it will be initialized on the first read/write call.
+   * When enabled, it also sets `lazyConnect` to `false` if unset.
+   * @default false
+   */
+  preConnect?: boolean;
 }
 
 const DRIVER_NAME = "redis";
@@ -55,6 +63,11 @@ export default defineDriver((opts: RedisOptions) => {
   const base = (opts.base || "").replace(/:$/, "");
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(base, "") : key); // Deprefix a key
+
+  if (opts.preConnect) {
+    opts.lazyConnect = opts.lazyConnect ?? false;
+    getRedisClient();
+  }
 
   return {
     name: DRIVER_NAME,

@@ -251,7 +251,7 @@ describe("Regression", () => {
     }
   });
 
-  it.only("getKeys - ignore errors and fetch available keys ", async () => {
+  it("getKeys - ignore errors and fetch available keys ", async () => {
     const storage = createStorage();
     const invalidDriver = redisDriver({
       url: "ioredis://localhost:9999/0",

@@ -59,20 +59,31 @@ export function createStorage<T extends StorageValue>(
   };
 
   const getMounts = (base: string, includeParent?: boolean) => {
-    return context.mountpoints
-      .filter(
-        (mountpoint) =>
-          mountpoint.startsWith(base) ||
-          (includeParent && base!.startsWith(mountpoint))
-      )
-      .map((mountpoint) => ({
-        relativeBase:
-          base.length > mountpoint.length
-            ? base!.slice(mountpoint.length)
-            : undefined,
-        mountpoint,
-        driver: context.mounts[mountpoint]!,
-      }));
+    const mountpoints = context.mountpoints.filter(
+      (mountpoint) =>
+        mountpoint.startsWith(base) ||
+        (includeParent && base!.startsWith(mountpoint))
+    );
+
+    // Should fallback to the root mount if no mountpoints found
+    if (mountpoints.length === 0) {
+      return [
+        {
+          relativeBase: undefined,
+          mountpoint: "",
+          driver: context.mounts[""]!,
+        },
+      ];
+    }
+
+    return mountpoints.map((mountpoint) => ({
+      relativeBase:
+        base.length > mountpoint.length
+          ? base!.slice(mountpoint.length)
+          : undefined,
+      mountpoint,
+      driver: context.mounts[mountpoint]!,
+    }));
   };
 
   const onChange: WatchCallback = (event, key) => {

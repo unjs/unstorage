@@ -208,4 +208,13 @@ export function testDriver(opts: TestOptions) {
     await ctx.storage.clear();
     expect(await ctx.storage.getKeys()).toMatchObject([]);
   });
+
+  it("clear - clear the root mount when no matched mountpoints", async () => {
+    const prefix = "s1";
+    await ctx.storage.setItem(`${prefix}:key`, "value");
+
+    expect(await ctx.storage.getKeys(prefix)).toMatchObject(["s1:key"]);
+    await ctx.storage.clear(prefix);
+    expect(await ctx.storage.getKeys(prefix)).toMatchObject([]);
+  });
 }

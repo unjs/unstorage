@@ -20,6 +20,23 @@ export type TransactionOptions = Record<string, any>;
 
 export type GetKeysOptions = TransactionOptions & {
   maxDepth?: number;
+  /**
+   * Whether to ignore errors during key retrieval and return available keys.
+   * @default false
+   */
+  try?: boolean;
+};
+
+export interface StorageError {
+  error: unknown;
+  mount: {
+    base: string;
+    driver: Driver;
+  };
+}
+
+export type WithErrors<T> = T & {
+  errors?: StorageError[];
 };
 
 export interface DriverFlags {
@@ -65,7 +82,10 @@ export interface Driver<OptionsT = any, InstanceT = any> {
     key: string,
     opts: TransactionOptions
   ) => MaybePromise<StorageMeta | null>;
-  getKeys: (base: string, opts: GetKeysOptions) => MaybePromise<string[]>;
+  getKeys: (
+    base: string,
+    opts: GetKeysOptions
+  ) => MaybePromise<WithErrors<string[]>>;
   clear?: (base: string, opts: TransactionOptions) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
@@ -173,7 +193,10 @@ export interface Storage<T extends StorageValue = StorageValue> {
   ) => Promise<void>;
   removeMeta: (key: string, opts?: TransactionOptions) => Promise<void>;
   // Keys
-  getKeys: (base?: string, opts?: GetKeysOptions) => Promise<string[]>;
+  getKeys: (
+    base?: string,
+    opts?: GetKeysOptions
+  ) => Promise<WithErrors<string[]>>;
   // Utils
   clear: (base?: string, opts?: TransactionOptions) => Promise<void>;
   dispose: () => Promise<void>;

@@ -7,6 +7,7 @@ import type {
   StorageValue,
   WatchEvent,
   TransactionOptions,
+  StorageError,
 } from "./types";
 import memory from "./drivers/memory";
 import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
@@ -348,6 +349,7 @@ export function createStorage<T extends StorageValue>(
       const mounts = getMounts(base, true);
       let maskedMounts: string[] = [];
       const allKeys = [];
+      const errors: StorageError[] = [];
       let allMountsSupportMaxDepth = true;
       for (const mount of mounts) {
         if (!mount.driver.flags?.maxDepth) {
@@ -357,7 +359,25 @@ export function createStorage<T extends StorageValue>(
           mount.driver.getKeys,
           mount.relativeBase,
           opts
-        );
+        ).catch((error) => {
+          if (!opts.try) {
+            throw error;
+          }
+
+          console.warn(
+            `[unstorage]: Failed to get keys for "${mount.mountpoint}":`,
+            error
+          );
+          errors.push({
+            error,
+            mount: {
+              base: mount.mountpoint,
+              driver: mount.driver,
+            },
+          });
+          return [];
+        });
+
         for (const key of rawKeys) {
           const fullKey = mount.mountpoint + normalizeKey(key);
           if (!maskedMounts.some((p) => fullKey.startsWith(p))) {
@@ -374,11 +394,19 @@ export function createStorage<T extends StorageValue>(
       }
       const shouldFilterByDepth =
         opts.maxDepth !== undefined && !allMountsSupportMaxDepth;
-      return allKeys.filter(
+      const keys = allKeys.filter(
         (key) =>
           (!shouldFilterByDepth || filterKeyByDepth(key, opts.maxDepth)) &&
           filterKeyByBase(key, base)
       );
+      if (opts.try) {
+        Object.defineProperty(keys, "errors", {
+          enumerable: false,
+          value: errors,
+        });
+      }
+
+      return keys;
     },
     // Utils
     async clear(base, opts = {}) {

@@ -16,7 +16,7 @@ import {
   joinKeys,
   filterKeyByDepth,
   filterKeyByBase,
-  transformRawToType,
+  toBinary,
 } from "./utils";
 
 interface StorageCTX {
@@ -185,34 +185,36 @@ export function createStorage<T extends StorageValue>(
       const type = opts.type;
 
       if (type === "bytes" || type === "stream" || type === "blob") {
-        if (driver.getItemRaw) {
-          const raw = await asyncCall(driver.getItemRaw, relativeKey, opts);
-          return transformRawToType(raw, type);
+        const raw = driver.getItemRaw
+          ? await asyncCall(driver.getItemRaw, relativeKey, opts)
+          : await asyncCall(driver.getItem, relativeKey, opts).then((val) =>
+              deserializeRaw(val)
+            );
+        if (raw === null || raw === undefined) {
+          return null;
         }
-        const rawValue = await asyncCall(driver.getItem, relativeKey, opts);
-        const raw = deserializeRaw(rawValue);
-        return transformRawToType(raw, type);
+        return toBinary(raw, type);
       }
 
       const value = await asyncCall(driver.getItem, relativeKey, opts);
-
       if (value == null) {
         return null;
       }
 
-      if (type === "text") {
-        return typeof value === "string" ? value : String(value);
-      }
-
-      if (type === "json") {
-        if (typeof value === "string") {
-          return JSON.parse(value);
+      switch (type) {
+        case "text": {
+          return typeof value === "string" ? value : String(value);
         }
-        return value;
+        case "json": {
+          if (typeof value === "string") {
+            return JSON.parse(value);
+          }
+          return value;
+        }
+        default: {
+          return destr(value);
+        }
       }
-
-      // default behavior: try destr (safe JSON parse fallback to text)
-      return destr(value);
     },
     getItems(
       items: (string | { key: string; options?: TransactionOptions })[],

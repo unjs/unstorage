@@ -1,28 +1,28 @@
 import { describe, it, expect } from "vitest";
-import { transformRawToType } from "../src/utils";
+import { toBinary } from "../src/utils";
 
 const isNode = typeof Buffer !== "undefined";
 const hasBlob = typeof Blob !== "undefined";
 const hasReadableStream = typeof ReadableStream !== "undefined";
 
-describe("transformRawToType", () => {
+describe("toBinary", () => {
   describe('"bytes"', () => {
     it("returns Uint8Array as-is", () => {
       const input = new Uint8Array([1, 2, 3]);
-      const result = transformRawToType(input, "bytes");
+      const result = toBinary(input, "bytes");
       expect(result).toBe(input);
     });
 
     it("returns Buffer as-is", () => {
       if (!isNode) return;
       const input = Buffer.from([1, 2, 3]);
-      const result = transformRawToType(input, "bytes");
+      const result = toBinary(input, "bytes");
       expect(result).toBe(input);
     });
 
     it("converts string to Uint8Array", () => {
       const input = "hello";
-      const result = transformRawToType(input, "bytes");
+      const result = toBinary(input, "bytes");
       expect(
         result instanceof Uint8Array || (isNode && result instanceof Buffer)
       ).toBe(true);
@@ -36,7 +36,7 @@ describe("transformRawToType", () => {
 
     it("converts ArrayBuffer to Uint8Array", () => {
       const input = new Uint8Array([1, 2, 3]).buffer;
-      const result = transformRawToType(input, "bytes");
+      const result = toBinary(input, "bytes");
       expect(
         result instanceof Uint8Array || (isNode && result instanceof Buffer)
       ).toBe(true);
@@ -49,15 +49,15 @@ describe("transformRawToType", () => {
     });
 
     it('throws when "bytes" input is invalid', () => {
-      expect(() => transformRawToType(123, "bytes")).toThrow();
-      expect(() => transformRawToType({}, "bytes")).toThrow();
-      expect(() => transformRawToType(null, "bytes")).toThrow();
-      expect(() => transformRawToType(undefined, "bytes")).toThrow();
+      expect(() => toBinary(123, "bytes")).toThrow();
+      expect(() => toBinary({}, "bytes")).toThrow();
+      expect(() => toBinary(null, "bytes")).toThrow();
+      expect(() => toBinary(undefined, "bytes")).toThrow();
     });
 
     it("throws on unsupported input", () => {
-      expect(() => transformRawToType(123, "bytes")).toThrow();
-      expect(() => transformRawToType({}, "bytes")).toThrow();
+      expect(() => toBinary(123, "bytes")).toThrow();
+      expect(() => toBinary({}, "bytes")).toThrow();
     });
   });
 
@@ -65,28 +65,28 @@ describe("transformRawToType", () => {
     it("returns Blob as-is", () => {
       if (!hasBlob) return;
       const input = new Blob(["hello"]);
-      const result = transformRawToType(input, "blob");
+      const result = toBinary(input, "blob");
       expect(result).toBe(input);
     });
 
     it("converts Uint8Array to Blob", () => {
       if (!hasBlob) return;
       const input = new Uint8Array([1, 2, 3]);
-      const result = transformRawToType(input, "blob");
+      const result = toBinary(input, "blob");
       expect(result).toBeInstanceOf(Blob);
     });
 
     it("converts Buffer to Blob", () => {
       if (!hasBlob || !isNode) return;
       const input = Buffer.from([1, 2, 3]);
-      const result = transformRawToType(input, "blob");
+      const result = toBinary(input, "blob");
       expect(result).toBeInstanceOf(Blob);
     });
 
     it("converts string to Blob", () => {
       if (!hasBlob) return;
       const input = "hello";
-      const result = transformRawToType(input, "blob");
+      const result = toBinary(input, "blob");
       expect(result).toBeInstanceOf(Blob);
     });
 
@@ -95,10 +95,10 @@ describe("transformRawToType", () => {
       // Force Blob to be defined to enter error branches
       globalThis.Blob = class MockBlob {} as any;
       try {
-        expect(() => transformRawToType(123, "blob")).toThrow();
-        expect(() => transformRawToType({}, "blob")).toThrow();
-        expect(() => transformRawToType(null, "blob")).toThrow();
-        expect(() => transformRawToType(undefined, "blob")).toThrow();
+        expect(() => toBinary(123, "blob")).toThrow();
+        expect(() => toBinary({}, "blob")).toThrow();
+        expect(() => toBinary(null, "blob")).toThrow();
+        expect(() => toBinary(undefined, "blob")).toThrow();
       } finally {
         globalThis.Blob = originalBlob;
       }
@@ -107,14 +107,14 @@ describe("transformRawToType", () => {
     it("converts ArrayBuffer to Blob", () => {
       if (!hasBlob) return;
       const input = new Uint8Array([1, 2, 3]).buffer;
-      const result = transformRawToType(input, "blob");
+      const result = toBinary(input, "blob");
       expect(result).toBeInstanceOf(Blob);
     });
 
     it("throws on unsupported input", () => {
       if (!hasBlob) return;
-      expect(() => transformRawToType(123, "blob")).toThrow();
-      expect(() => transformRawToType({}, "blob")).toThrow();
+      expect(() => toBinary(123, "blob")).toThrow();
+      expect(() => toBinary({}, "blob")).toThrow();
     });
   });
 
@@ -122,21 +122,21 @@ describe("transformRawToType", () => {
     it("returns ReadableStream as-is", () => {
       if (!hasReadableStream) return;
       const input = new ReadableStream({});
-      const result = transformRawToType(input, "stream");
+      const result = toBinary(input, "stream");
       expect(result).toBe(input);
     });
 
     it("converts Uint8Array to ReadableStream", async () => {
       if (!hasReadableStream) return;
       const input = new Uint8Array([1, 2, 3]);
-      const stream = transformRawToType(input, "stream");
+      const stream = toBinary(input, "stream");
       expect(stream).toBeInstanceOf(ReadableStream);
     });
 
     it("converts Buffer to ReadableStream", async () => {
       if (!hasReadableStream || !isNode) return;
       const input = Buffer.from([1, 2, 3]);
-      const stream = transformRawToType(input, "stream");
+      const stream = toBinary(input, "stream");
       expect(stream).toBeInstanceOf(ReadableStream);
     });
 
@@ -145,10 +145,10 @@ describe("transformRawToType", () => {
       // Force ReadableStream to be defined to enter error branches
       globalThis.ReadableStream = class MockStream {} as any;
       try {
-        expect(() => transformRawToType(123, "stream")).toThrow();
-        expect(() => transformRawToType({}, "stream")).toThrow();
-        expect(() => transformRawToType(null, "stream")).toThrow();
-        expect(() => transformRawToType(undefined, "stream")).toThrow();
+        expect(() => toBinary(123, "stream")).toThrow();
+        expect(() => toBinary({}, "stream")).toThrow();
+        expect(() => toBinary(null, "stream")).toThrow();
+        expect(() => toBinary(undefined, "stream")).toThrow();
       } finally {
         globalThis.ReadableStream = originalStream;
       }
@@ -157,27 +157,27 @@ describe("transformRawToType", () => {
     it("converts string to ReadableStream", async () => {
       if (!hasReadableStream) return;
       const input = "hello";
-      const stream = transformRawToType(input, "stream");
+      const stream = toBinary(input, "stream");
       expect(stream).toBeInstanceOf(ReadableStream);
     });
 
     it("converts ArrayBuffer to ReadableStream", async () => {
       if (!hasReadableStream) return;
       const input = new Uint8Array([1, 2, 3]).buffer;
-      const stream = transformRawToType(input, "stream");
+      const stream = toBinary(input, "stream");
       expect(stream).toBeInstanceOf(ReadableStream);
     });
 
     it("throws on unsupported input", () => {
       if (!hasReadableStream) return;
-      expect(() => transformRawToType(123, "stream")).toThrow();
-      expect(() => transformRawToType({}, "stream")).toThrow();
+      expect(() => toBinary(123, "stream")).toThrow();
+      expect(() => toBinary({}, "stream")).toThrow();
     });
   });
 
   describe("unknown type", () => {
     it("throws on unknown type", () => {
-      expect(() => transformRawToType("hello", "unknown" as any)).toThrow();
+      expect(() => toBinary("hello", "unknown" as any)).toThrow();
     });
   });
 });

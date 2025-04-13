@@ -128,72 +128,43 @@ export function filterKeyByBase(
 /**
  * Transform raw data into the expected type.
  */
-export function transformRawToType(
-  raw: any,
+export function toBinary(
+  value: unknown,
   type: "bytes" | "blob" | "stream"
-) {
-  // Handle "bytes"
-  if (type === "bytes") {
-    if (raw instanceof Uint8Array) {
-      return raw;
+): Uint8Array | Blob | ReadableStream {
+  switch (type) {
+    case "bytes": {
+      if (value instanceof Uint8Array) {
+        return value;
+      }
+      if (typeof value === "string") {
+        return new TextEncoder().encode(value);
+      }
+      if (value instanceof ArrayBuffer) {
+        return new Uint8Array(value);
+      }
+      throw new Error(`Cannot convert raw data to bytes: ${value}`);
     }
-    if (typeof raw === "string") {
-      return new TextEncoder().encode(raw);
+    case "blob": {
+      if (value instanceof Blob) {
+        return value;
+      }
+      return new Blob([toBinary(value, "bytes") as Uint8Array]);
     }
-    // Try to convert ArrayBuffer
-    if (raw instanceof ArrayBuffer) {
-      return new Uint8Array(raw);
+    case "stream": {
+      if (value instanceof ReadableStream) {
+        return value;
+      }
+      const bytes = toBinary(value, "bytes") as Uint8Array;
+      return new ReadableStream({
+        start(controller) {
+          controller.enqueue([bytes]);
+          controller.close();
+        },
+      });
     }
-    throw new Error("[unstorage] Cannot convert raw data to bytes");
+    default: {
+      throw new Error(`Unsupported type: ${type}`);
+    }
   }
-
-  // Handle "blob"
-  if (type === "blob") {
-    if (typeof Blob !== "undefined" && raw instanceof Blob) {
-      return raw;
-    }
-    if (raw instanceof Uint8Array) {
-      return new Blob([raw]);
-    }
-    if (typeof raw === "string") {
-      return new Blob([new TextEncoder().encode(raw)]);
-    }
-    if (raw instanceof ArrayBuffer) {
-      return new Blob([new Uint8Array(raw)]);
-    }
-    throw new Error("[unstorage] Cannot convert raw data to Blob");
-  }
-
-  // Handle "stream"
-  if (type === "stream") {
-    if (
-      typeof ReadableStream !== "undefined" &&
-      raw instanceof ReadableStream
-    ) {
-      return raw;
-    }
-    // Convert Uint8Array, Buffer, string, or ArrayBuffer to stream
-    let uint8array: Uint8Array;
-    if (raw instanceof Uint8Array) {
-      uint8array = raw;
-    } else if (typeof raw === "string") {
-      uint8array = new TextEncoder().encode(raw);
-    } else if (raw instanceof ArrayBuffer) {
-      uint8array = new Uint8Array(raw);
-    } else {
-      throw new TypeError(
-        "[unstorage] Cannot convert raw data to ReadableStream"
-      );
-    }
-
-    // Create a ReadableStream from Uint8Array
-    return new ReadableStream({
-      start(controller) {
-        controller.enqueue(uint8array);
-        controller.close();
-      },
-    });
-  }
-
-  throw new Error("[unstorage] Unknown type for transformRawToType");
 }

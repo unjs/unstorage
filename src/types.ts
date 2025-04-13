@@ -222,7 +222,6 @@ export interface Storage<T extends StorageValue = StorageValue> {
   // Aliases
   keys: Storage["getKeys"];
   get: Storage<T>["getItem"];
-
   set: Storage<T>["setItem"];
   has: Storage<T>["hasItem"];
   del: Storage<T>["removeItem"];

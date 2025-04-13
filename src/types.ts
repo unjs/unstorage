@@ -6,6 +6,12 @@ type MaybePromise<T> = T | Promise<T>;
 
 type MaybeDefined<T> = T extends any ? T : any;
 
+// prettier-ignore
+export type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
+// prettier-ignore
+export interface JSONObject { [key: string]: JSONValue; }
+export type JSONArray = JSONValue[];
+
 export type Unwatch = () => MaybePromise<void>;
 
 export interface StorageMeta {
@@ -110,7 +116,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
   getItem(
     key: string,
     opts: { type: "json" } & TransactionOptions
-  ): Promise<unknown | null>;
+  ): Promise<JSONValue | null>;
 
   getItem(
     key: string,

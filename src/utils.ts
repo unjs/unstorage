@@ -42,7 +42,16 @@ export function prefixStorage<T extends StorageValue>(
     storage
       .getKeys(base + key, ...arguments_)
       // Remove Prefix
-      .then((keys) => keys.map((key) => key.slice(base.length)));
+      .then((_keys) => {
+        const keys = _keys.map((key) => key.slice(base.length));
+        if (_keys.errors) {
+          Object.defineProperty(keys, "errors", {
+            enumerable: false,
+            value: _keys.errors,
+          });
+        }
+        return keys;
+      });
 
   nsStorage.getItems = async <U extends T>(
     items: (string | { key: string; options?: TransactionOptions })[],

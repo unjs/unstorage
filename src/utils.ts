@@ -134,10 +134,7 @@ export function transformRawToType(
 ) {
   // Handle "bytes"
   if (type === "bytes") {
-    if (
-      raw instanceof Uint8Array ||
-      (typeof Buffer !== "undefined" && raw instanceof Buffer)
-    ) {
+    if (raw instanceof Uint8Array) {
       return raw;
     }
     if (typeof raw === "string") {
@@ -155,10 +152,7 @@ export function transformRawToType(
     if (typeof Blob !== "undefined" && raw instanceof Blob) {
       return raw;
     }
-    if (
-      raw instanceof Uint8Array ||
-      (typeof Buffer !== "undefined" && raw instanceof Buffer)
-    ) {
+    if (raw instanceof Uint8Array) {
       return new Blob([raw]);
     }
     if (typeof raw === "string") {
@@ -180,10 +174,7 @@ export function transformRawToType(
     }
     // Convert Uint8Array, Buffer, string, or ArrayBuffer to stream
     let uint8array: Uint8Array;
-    if (
-      raw instanceof Uint8Array ||
-      (typeof Buffer !== "undefined" && raw instanceof Buffer)
-    ) {
+    if (raw instanceof Uint8Array) {
       uint8array = raw;
     } else if (typeof raw === "string") {
       uint8array = new TextEncoder().encode(raw);

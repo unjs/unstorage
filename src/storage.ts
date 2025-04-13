@@ -16,8 +16,8 @@ import {
   joinKeys,
   filterKeyByDepth,
   filterKeyByBase,
-  toBinary,
 } from "./utils";
+import { toBlob, toReadableStream, toUint8Array } from "undio";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -190,10 +190,33 @@ export function createStorage<T extends StorageValue>(
           : await asyncCall(driver.getItem, relativeKey, opts).then((val) =>
               deserializeRaw(val)
             );
+
         if (raw === null || raw === undefined) {
           return null;
         }
-        return toBinary(raw, type);
+
+        switch (type) {
+          case "bytes": {
+            return await toUint8Array(raw);
+          }
+          case "blob": {
+            if (typeof Blob === "undefined") {
+              throw new TypeError("Blob is not supported in this environment.");
+            }
+            return await toBlob(raw);
+          }
+          case "stream": {
+            if (typeof ReadableStream === "undefined") {
+              throw new TypeError(
+                "ReadableStream is not supported in this environment."
+              );
+            }
+            return await toReadableStream(raw);
+          }
+          default: {
+            throw new Error(`Invalid binary type: ${type}`);
+          }
+        }
       }
 
       const value = await asyncCall(driver.getItem, relativeKey, opts);

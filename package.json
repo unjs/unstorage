@@ -51,7 +51,8 @@
     "lru-cache": "^10.4.3",
     "node-fetch-native": "^1.6.6",
     "ofetch": "^1.4.1",
-    "ufo": "^1.6.1"
+    "ufo": "^1.6.1",
+    "undio": "^0.2.0"
   },
   "devDependencies": {
     "@azure/app-configuration": "^1.9.0",

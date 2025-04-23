@@ -2,6 +2,7 @@
   "name": "unstorage",
   "version": "1.15.0",
   "description": "Universal Storage Layer",
+  "homepage": "https://unstorage.unjs.io",
   "repository": "unjs/unstorage",
   "license": "MIT",
   "sideEffects": false,

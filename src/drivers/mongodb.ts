@@ -26,11 +26,6 @@ export interface MongoDbOptions {
 }
 
 const DRIVER_NAME = "mongodb";
-const DEFAULT_MONGO_OPTIONS: MongoClientOptions = {
-  driverInfo: {
-    name: "unstorage",
-  },
-};
 
 export default defineDriver((opts: MongoDbOptions) => {
   let collection: Collection;
@@ -39,12 +34,10 @@ export default defineDriver((opts: MongoDbOptions) => {
       if (!opts.connectionString) {
         throw createRequiredError(DRIVER_NAME, "connectionString");
       }
-
-      const mongoOptions: MongoClientOptions = {
-        ...DEFAULT_MONGO_OPTIONS,
-        ...opts.clientOptions,
-      };
-      const mongoClient = new MongoClient(opts.connectionString, mongoOptions);
+      const mongoClient = new MongoClient(
+        opts.connectionString,
+        opts.clientOptions
+      );
       const db = mongoClient.db(opts.databaseName || "unstorage");
       collection = db.collection(opts.collectionName || "unstorage");
     }

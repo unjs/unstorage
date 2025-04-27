@@ -4,6 +4,12 @@ import { DefaultAzureCredential } from "@azure/identity";
 
 export interface AzureAppConfigurationOptions {
   /**
+   * Optional client ID for managed identity. Needed if using one or more user assigned managed identity to authenticate.
+   * @default null
+   */
+  managedIdentityClientId?: string;
+
+  /**
    * Optional prefix for keys. This can be used to isolate keys from different applications in the same Azure App Configuration instance. E.g. "app01" results in keys like "app01:foo" and "app01:bar".
    * @default null
    */
@@ -59,7 +65,11 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
     if (opts.connectionString) {
       client = new AppConfigurationClient(opts.connectionString);
     } else {
-      const credential = new DefaultAzureCredential();
+      const credential = opts.managedIdentityClientId
+        ? new DefaultAzureCredential({
+            managedIdentityClientId: opts.managedIdentityClientId,
+          })
+        : new DefaultAzureCredential();
       client = new AppConfigurationClient(appConfigEndpoint, credential);
     }
     return client;

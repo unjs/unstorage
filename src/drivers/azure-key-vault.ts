@@ -7,13 +7,18 @@ import { DefaultAzureCredential } from "@azure/identity";
 
 export interface AzureKeyVaultOptions {
   /**
+   * Optional client ID for managed identity. Needed if using one or more user assigned managed identity to authenticate.
+   */
+  managedIdentityClientId?: string;
+
+  /**
    * The name of the key vault to use.
    */
   vaultName: string;
 
   /**
-   * Version of the Azure Key Vault service to use. Defaults to 7.3.
-   * @default '7.3'
+   * Version of the Azure Key Vault service to use. Defaults to 7.4.
+   * @default '7.4'
    */
   serviceVersion?: SecretClientOptions["serviceVersion"];
 
@@ -22,6 +27,12 @@ export interface AzureKeyVaultOptions {
    * @default 25
    */
   pageSize?: number;
+
+  /**
+   * Whether to purge the deleted secret after it is deleted.
+   * @default false
+   */
+  dontPurgeAfterDelete?: boolean;
 }
 
 const DRIVER_NAME = "azure-key-vault";
@@ -32,14 +43,18 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
     if (keyVaultClient) {
       return keyVaultClient;
     }
-    const { vaultName = null, serviceVersion = "7.3", pageSize = 25 } = opts;
+    const { vaultName = null, serviceVersion = "7.4", pageSize = 25 } = opts;
     if (!vaultName) {
       throw createRequiredError(DRIVER_NAME, "vaultName");
     }
     if (pageSize > 25) {
       throw createError(DRIVER_NAME, "`pageSize` cannot be greater than `25`");
     }
-    const credential = new DefaultAzureCredential();
+    const credential = opts.managedIdentityClientId
+      ? new DefaultAzureCredential({
+          managedIdentityClientId: opts.managedIdentityClientId,
+        })
+      : new DefaultAzureCredential();
     const url = `https://${vaultName}.vault.azure.net`;
     keyVaultClient = new SecretClient(url, credential, { serviceVersion });
     return keyVaultClient;
@@ -69,9 +84,15 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
       await getKeyVaultClient().setSecret(encode(key), value);
     },
     async removeItem(key) {
-      const poller = await getKeyVaultClient().beginDeleteSecret(encode(key));
-      await poller.pollUntilDone();
-      await getKeyVaultClient().purgeDeletedSecret(encode(key));
+      try {
+        const poller = await getKeyVaultClient().beginDeleteSecret(encode(key));
+        await poller.pollUntilDone();
+        if (!opts.dontPurgeAfterDelete) {
+          await getKeyVaultClient().purgeDeletedSecret(encode(key));
+        }
+      } catch {
+        /* empty */
+      }
     },
     async getKeys() {
       const secrets = getKeyVaultClient()
@@ -102,7 +123,11 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
             secret.name
           );
           await poller.pollUntilDone();
-          await getKeyVaultClient().purgeDeletedSecret(secret.name);
+          if (!opts.dontPurgeAfterDelete) {
+            await getKeyVaultClient().purgeDeletedSecret(secret.name);
+            // Average time to purge is 750ms
+            await new Promise((resolve) => setTimeout(resolve, 750));
+          }
         });
         await Promise.all(deletionPromises);
       }

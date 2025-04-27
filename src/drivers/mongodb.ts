@@ -8,7 +8,7 @@ export interface MongoDbOptions {
   connectionString: string;
 
   /**
-   * Optional configuration settings for the MongoClient instance
+   * Optional configuration settings for the MongoClient instance.
    */
   clientOptions?: MongoClientOptions;
 

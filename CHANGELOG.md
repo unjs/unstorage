@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.16.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.15.0...v1.16.0)
+
+### 🚀 Enhancements
+
+- **redis, vercel-kv, upstash:** Use non-blocking methods ([#600](https://github.com/unjs/unstorage/pull/600))
+- **redis:** Add support for `preConnect` ([#614](https://github.com/unjs/unstorage/pull/614))
+- **mongodb:** Allow setting additional clientOptions ([#625](https://github.com/unjs/unstorage/pull/625))
+- **azure-storage-blob:** Add raw support ([#565](https://github.com/unjs/unstorage/pull/565))
+
+### 🩹 Fixes
+
+- **deno:** Avoid crossing package boundary in deno-kv driver ([70310f9](https://github.com/unjs/unstorage/commit/70310f9))
+- **prefixStorage:** Prefix `getItems` and `setItems` ([#611](https://github.com/unjs/unstorage/pull/611))
+- **session-storage:** Correct `name` ([#623](https://github.com/unjs/unstorage/pull/623))
+
+### 💅 Refactors
+
+- **redis:** Remove colon from base prefix ([#586](https://github.com/unjs/unstorage/pull/586))
+
+### 📖 Documentation
+
+- Add notes for `.setItemRaw` of IndexedDB driver ([#564](https://github.com/unjs/unstorage/pull/564))
+
+### 📦 Build
+
+- Allow `@capacitor/preferences` v7 in `peerDependencies` ([#620](https://github.com/unjs/unstorage/pull/620))
+- Add `homepage` field to package.json ([#624](https://github.com/unjs/unstorage/pull/624))
+
+### 🏡 Chore
+
+- Fix type ([0d2bee9](https://github.com/unjs/unstorage/commit/0d2bee9))
+- Update deps ([6188da4](https://github.com/unjs/unstorage/commit/6188da4))
+- Test against `@vercel/blob` 1.x ([f33d75b](https://github.com/unjs/unstorage/commit/f33d75b))
+- Update deps ([1e91c1b](https://github.com/unjs/unstorage/commit/1e91c1b))
+- Test against latest pglite ([8be2b78](https://github.com/unjs/unstorage/commit/8be2b78))
+
+### ❤️ Contributors
+
+- Peter Budai <peterbudai@hotmail.com>
+- Alex Bevilacqua ([@alexbevi](http://github.com/alexbevi))
+- Julio Marquez <carretes_geologia0l@icloud.com>
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Maxime Pauvert ([@maximepvrt](http://github.com/maximepvrt))
+- Kricsleo ([@kricsleo](http://github.com/kricsleo))
+- Dmytro ([@dschewchenko](http://github.com/dschewchenko))
+- Typed SIGTERM ([@typed-sigterm](http://github.com/typed-sigterm))
+- Denis Ustiuzhanin ([@denisugo](http://github.com/denisugo))
+- João Lucas De Oliveira Lopes ([@jlucaso1](http://github.com/jlucaso1))
+- 凉风 <yinyu3@xiaohongshu.com>
+
 ## v1.15.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.14.4...v1.15.0)

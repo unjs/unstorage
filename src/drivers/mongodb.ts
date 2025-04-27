@@ -1,5 +1,5 @@
 import { createRequiredError, defineDriver } from "./utils";
-import { Collection, MongoClient, type MongoClientOptions } from "mongodb";
+import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 
 export interface MongoDbOptions {
   /**

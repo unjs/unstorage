@@ -1,6 +1,6 @@
 import { describe, it, expectTypeOf } from "vitest";
-import { createStorage } from "../src";
-import type { StorageValue } from "../src";
+import { createStorage, prefixStorage } from "../src";
+import type { Storage, StorageValue } from "../src";
 
 describe("types", () => {
   it("default types for storage", async () => {
@@ -71,5 +71,19 @@ describe("types", () => {
     await storage.removeItem("foo");
     await storage.remove("bar");
     await storage.del("baz");
+  });
+
+  it("prefix storage", () => {
+    const storage1 = createStorage();
+    const prefixedStorage1 = prefixStorage(storage1, "foo");
+    expectTypeOf(prefixedStorage1).toEqualTypeOf<Storage<StorageValue>>();
+
+    const storage2 = createStorage<string>();
+    const prefixedStorage2 = prefixStorage(storage2, "foo");
+    expectTypeOf(prefixedStorage2).toEqualTypeOf<Storage<string>>();
+
+    const storage3 = createStorage<string>();
+    const prefixedStorage3 = prefixStorage<number>(storage3, "foo");
+    expectTypeOf(prefixedStorage3).toEqualTypeOf<Storage<number>>();
   });
 });

@@ -26,7 +26,7 @@ const storageKeyProperties: StorageKeys = [
 export function prefixStorage<T extends StorageValue>(
   storage: Storage<T> | Storage<any>,
   base: string
-): Storage<T>
+): Storage<T>;
 export function prefixStorage<T extends StorageValue>(
   storage: Storage<T>,
   base: string

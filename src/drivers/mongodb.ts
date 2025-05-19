@@ -1,11 +1,16 @@
 import { createRequiredError, defineDriver } from "./utils";
-import { Collection, MongoClient } from "mongodb";
+import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 
 export interface MongoDbOptions {
   /**
    * The MongoDB connection string.
    */
   connectionString: string;
+
+  /**
+   * Optional configuration settings for the MongoClient instance.
+   */
+  clientOptions?: MongoClientOptions;
 
   /**
    * The name of the database to use.
@@ -29,7 +34,10 @@ export default defineDriver((opts: MongoDbOptions) => {
       if (!opts.connectionString) {
         throw createRequiredError(DRIVER_NAME, "connectionString");
       }
-      const mongoClient = new MongoClient(opts.connectionString);
+      const mongoClient = new MongoClient(
+        opts.connectionString,
+        opts.clientOptions
+      );
       const db = mongoClient.db(opts.databaseName || "unstorage");
       collection = db.collection(opts.collectionName || "unstorage");
     }

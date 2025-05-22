@@ -7,6 +7,7 @@ import {
   prefixStorage,
 } from "../src";
 import memory from "../src/drivers/memory";
+import redisDriver from "../src/drivers/redis";
 import fs from "../src/drivers/fs";
 
 const data = {
@@ -248,6 +249,28 @@ describe("Regression", () => {
     } finally {
       await storage.clear();
     }
+  });
+
+  it("getKeys - ignore errors and fetch available keys ", async () => {
+    const storage = createStorage();
+    const invalidDriver = redisDriver({
+      url: "ioredis://localhost:9999/0",
+      connectTimeout: 10,
+      retryStrategy: () => null,
+    });
+    storage.mount("/invalid", invalidDriver);
+
+    await storage.setItem("foo", "bar");
+
+    await expect(storage.getKeys()).rejects.toThrowError(
+      "Connection is closed"
+    );
+
+    const keys = await storage.getKeys(undefined, { try: true });
+    expect(keys).toMatchObject(["foo"]);
+    expect(keys.errors![0]!.error).toMatchInlineSnapshot(
+      `[Error: Connection is closed.]`
+    );
   });
 
   it("prefixStorage getItems to not returns null (issue #396)", async () => {

@@ -1,5 +1,5 @@
 import { createError, createRequiredError, defineDriver } from "./utils";
-import { type GetKeysOptions } from "../types";
+import type { GetKeysOptions } from "..";
 import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
   Store,

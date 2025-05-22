@@ -1,15 +1,16 @@
 import type { Driver } from "../..";
 
-type DriverFactory<OptionsT, InstanceT> = (
-  opts: OptionsT
+export type DriverFactory<OptionsT = unknown, InstanceT = unknown> = (
+  opts: Readonly<OptionsT>
 ) => Driver<OptionsT, InstanceT>;
-interface ErrorOptions {}
 
-export function defineDriver<OptionsT = any, InstanceT = never>(
+export function defineDriver<OptionsT = unknown, InstanceT = unknown>(
   factory: DriverFactory<OptionsT, InstanceT>
 ): DriverFactory<OptionsT, InstanceT> {
   return factory;
 }
+
+interface ErrorOptions {}
 
 export function normalizeKey(
   key: string | undefined,

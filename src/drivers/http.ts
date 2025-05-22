@@ -1,4 +1,4 @@
-import type { TransactionOptions } from "../types";
+import type { TransactionOptions } from "..";
 import { defineDriver } from "./utils";
 import { type FetchError, $fetch as _fetch } from "ofetch";
 import { joinURL } from "ufo";

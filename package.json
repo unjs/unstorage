@@ -42,6 +42,7 @@
     "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
     "test:types": "tsc --noEmit --skipLibCheck",
+    "test:attw": "attw --pack",
     "unstorage": "pnpm jiti src/cli"
   },
   "dependencies": {
@@ -55,6 +56,7 @@
     "ufo": "^1.6.1"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.1",
     "@azure/app-configuration": "^1.9.0",
     "@azure/cosmos": "^4.3.0",
     "@azure/data-tables": "^13.3.0",

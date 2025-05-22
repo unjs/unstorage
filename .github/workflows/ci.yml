@@ -29,6 +29,7 @@ jobs:
       - run: pnpm install
       - run: pnpm lint
       - run: pnpm test:types
+      - run: pnpm test:attw
       - run: pnpm build
       - run: pnpm vitest --coverage
         env:

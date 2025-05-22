@@ -17,6 +17,7 @@ import {
   filterKeyByDepth,
   filterKeyByBase,
 } from "./utils";
+import { toBlob, toReadableStream, toUint8Array } from "undio";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -172,12 +173,71 @@ export function createStorage<T extends StorageValue>(
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem(key: string, opts = {}) {
+    getItem: async (
+      key: string,
+      opts: TransactionOptions & {
+        type?: "json" | "text" | "bytes" | "stream" | "blob";
+      } = {}
+    ) => {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
-      return asyncCall(driver.getItem, relativeKey, opts).then(
-        (value) => destr(value) as StorageValue
-      );
+
+      const type = opts.type;
+
+      if (type === "bytes" || type === "stream" || type === "blob") {
+        const raw = driver.getItemRaw
+          ? await asyncCall(driver.getItemRaw, relativeKey, opts)
+          : await asyncCall(driver.getItem, relativeKey, opts).then((val) =>
+              deserializeRaw(val)
+            );
+
+        if (raw === null || raw === undefined) {
+          return null;
+        }
+
+        switch (type) {
+          case "bytes": {
+            return await toUint8Array(raw);
+          }
+          case "blob": {
+            if (typeof Blob === "undefined") {
+              throw new TypeError("Blob is not supported in this environment.");
+            }
+            return await toBlob(raw);
+          }
+          case "stream": {
+            if (typeof ReadableStream === "undefined") {
+              throw new TypeError(
+                "ReadableStream is not supported in this environment."
+              );
+            }
+            return await toReadableStream(raw);
+          }
+          default: {
+            throw new Error(`Invalid binary type: ${type}`);
+          }
+        }
+      }
+
+      const value = await asyncCall(driver.getItem, relativeKey, opts);
+      if (value == null) {
+        return null;
+      }
+
+      switch (type) {
+        case "text": {
+          return typeof value === "string" ? value : String(value);
+        }
+        case "json": {
+          if (typeof value === "string") {
+            return JSON.parse(value);
+          }
+          return value;
+        }
+        default: {
+          return destr(value);
+        }
+      }
     },
     getItems(
       items: (string | { key: string; options?: TransactionOptions })[],
@@ -473,7 +533,8 @@ export function createStorage<T extends StorageValue>(
     },
     // Aliases
     keys: (base, opts = {}) => storage.getKeys(base, opts),
-    get: (key: string, opts = {}) => storage.getItem(key, opts),
+    get: ((key: string, opts: TransactionOptions = {}) =>
+      storage.getItem(key, opts)) as Storage<T>["get"],
     set: (key: string, value: T, opts = {}) =>
       storage.setItem(key, value, opts),
     has: (key: string, opts = {}) => storage.hasItem(key, opts),

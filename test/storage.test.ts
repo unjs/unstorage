@@ -289,3 +289,57 @@ describe("Regression", () => {
     ]);
   });
 });
+
+describe("get() with type option", () => {
+  const storage = createStorage();
+
+  it("should get JSON object with type=json", async () => {
+    const obj = { foo: "bar", num: 42 };
+    await storage.setItem("json-key", obj);
+    const result = await storage.get("json-key", { type: "json" });
+    expect(result).toEqual(obj);
+  });
+
+  it("should get string with type=text", async () => {
+    await storage.setItem("text-key", "hello world");
+    const result = await storage.get("text-key", { type: "text" });
+    expect(result).toBe("hello world");
+  });
+
+  it("should get bytes with type=bytes", async () => {
+    const bytes = new Uint8Array([1, 2, 3, 4]);
+    await storage.setItemRaw("bytes-key", bytes);
+    const result = await storage.get("bytes-key", { type: "bytes" });
+    const len = result?.length || result?.byteLength;
+    expect(len).toBe(4);
+  });
+
+  it("should get bytes with type=stream", async () => {
+    const bytes = new Uint8Array([1, 2, 3, 4]);
+    await storage.setItemRaw("stream-key", bytes);
+    const result = await storage.get("stream-key", { type: "stream" });
+    expect(result).toBeInstanceOf(ReadableStream);
+    const reader = result?.getReader();
+    if (!reader) {
+      throw new Error("Reader is not defined");
+    }
+    const { done, value } = await reader.read();
+    expect(done).toBe(false);
+    expect(value).toEqual(bytes);
+    const len = value?.length || value?.byteLength;
+    expect(len).toBe(4);
+
+    const { done: doneAfter, value: valueAfter } = await reader.read();
+    expect(doneAfter).toBe(true);
+    expect(valueAfter).toBeUndefined();
+  });
+
+  it("should get bytes with type=blob", async () => {
+    const bytes = new Uint8Array([1, 2, 3, 4]);
+    await storage.setItemRaw("blob-key", bytes);
+    const result = await storage.get("blob-key", { type: "blob" });
+    expect(result).toBeInstanceOf(Blob);
+    const arrayBuffer = await result?.arrayBuffer();
+    expect(new Uint8Array(arrayBuffer || [])).toEqual(bytes);
+  });
+});

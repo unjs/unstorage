@@ -32,6 +32,9 @@ importers:
       ufo:
         specifier: ^1.6.1
         version: 1.6.1
+      undio:
+        specifier: ^0.2.0
+        version: 0.2.0
     devDependencies:
       '@azure/app-configuration':
         specifier: ^1.9.0
@@ -4458,6 +4461,9 @@ packages:
   undici@5.29.0:
     resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
     engines: {node: '>=14.0'}
+
+  undio@0.2.0:
+    resolution: {integrity: sha512-1LH824ipsUNqX1qsO6qpcusv0oGPlfFWVykwWq5jJB0Mq6x4kEHO/izSq2KLjGZvOosEd91+HXoxYUSoVI0zPg==}
 
   unenv@2.0.0-rc.15:
     resolution: {integrity: sha512-J/rEIZU8w6FOfLNz/hNKsnY+fFHWnu9MH4yRbSZF3xbbGHovcetXPs7sD+9p8L6CeNC//I9bhRYAOsBt2u7/OA==}
@@ -9373,6 +9379,8 @@ snapshots:
   undici@5.29.0:
     dependencies:
       '@fastify/busboy': 2.1.1
+
+  undio@0.2.0: {}
 
   unenv@2.0.0-rc.15:
     dependencies:

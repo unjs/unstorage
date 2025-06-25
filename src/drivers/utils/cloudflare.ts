@@ -1,4 +1,10 @@
 /// <reference types="@cloudflare/workers-types" />
+
+import type {
+  Cache,
+  CacheStorage,
+} from "@cloudflare/workers-types/experimental";
+
 import { createError } from "./index";
 
 export function getBinding(binding: KVNamespace | R2Bucket | string) {
@@ -35,4 +41,9 @@ export function getKVBinding(binding: KVNamespace | string = "STORAGE") {
 
 export function getR2Binding(binding: R2Bucket | string = "BUCKET") {
   return getBinding(binding) as R2Bucket;
+}
+
+export async function getCache(name?: string): Promise<Cache> {
+  const cacheStorage = caches as unknown as CacheStorage;
+  return name ? await cacheStorage.open(name) : cacheStorage.default;
 }

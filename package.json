@@ -78,7 +78,7 @@
     "@vitest/coverage-v8": "^3.2.4",
     "aws4fetch": "^1.0.20",
     "azurite": "^3.34.0",
-    "better-sqlite3": "^11.10.0",
+    "better-sqlite3": "^12.1.1",
     "changelogen": "^0.6.1",
     "citty": "^0.1.6",
     "db0": "^0.3.2",

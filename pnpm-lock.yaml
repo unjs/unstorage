@@ -103,8 +103,8 @@ importers:
         specifier: ^3.34.0
         version: 3.34.0
       better-sqlite3:
-        specifier: ^11.10.0
-        version: 11.10.0
+        specifier: ^12.1.1
+        version: 12.1.1
       changelogen:
         specifier: ^0.6.1
         version: 0.6.1(magicast@0.3.5)
@@ -113,7 +113,7 @@ importers:
         version: 0.1.6
       db0:
         specifier: ^0.3.2
-        version: 0.3.2(@electric-sql/pglite@0.3.3)(@libsql/client@0.15.9)(better-sqlite3@11.10.0)(mysql2@3.14.1)
+        version: 0.3.2(@electric-sql/pglite@0.3.3)(@libsql/client@0.15.9)(better-sqlite3@12.1.1)(mysql2@3.14.1)
       eslint:
         specifier: ^9.29.0
         version: 9.29.0(jiti@2.4.2)
@@ -1780,8 +1780,9 @@ packages:
     resolution: {integrity: sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==}
     engines: {node: '>= 0.8'}
 
-  better-sqlite3@11.10.0:
-    resolution: {integrity: sha512-EwhOpyXiOEL/lKzHz9AW1msWFNzGc/z+LzeB3/jnFJpxu+th2yqvzsSWas1v9jgs9+xiXJcD5A8CJxAG2TaghQ==}
+  better-sqlite3@12.1.1:
+    resolution: {integrity: sha512-xjl/TjWLy/6yLa5wkbQSjTgIgSiaEJy3XzjF5TAdiWaAsu/v0OCkYOc6tos+PkM/k4qURN2pFKTsbcG3gk29Uw==}
+    engines: {node: 20.x || 22.x || 23.x || 24.x}
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
@@ -6472,7 +6473,7 @@ snapshots:
     dependencies:
       safe-buffer: 5.1.2
 
-  better-sqlite3@11.10.0:
+  better-sqlite3@12.1.1:
     dependencies:
       bindings: 1.5.0
       prebuild-install: 7.1.3
@@ -6880,11 +6881,11 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.2
 
-  db0@0.3.2(@electric-sql/pglite@0.3.3)(@libsql/client@0.15.9)(better-sqlite3@11.10.0)(mysql2@3.14.1):
+  db0@0.3.2(@electric-sql/pglite@0.3.3)(@libsql/client@0.15.9)(better-sqlite3@12.1.1)(mysql2@3.14.1):
     optionalDependencies:
       '@electric-sql/pglite': 0.3.3
       '@libsql/client': 0.15.9
-      better-sqlite3: 11.10.0
+      better-sqlite3: 12.1.1
       mysql2: 3.14.1
 
   debug@2.6.9:

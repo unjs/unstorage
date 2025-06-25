@@ -88,11 +88,15 @@ export default defineDriver((options: NetlifyStoreOptions) => {
       // @ts-expect-error has trouble with the overloaded types
       return getClient().get(key, { type: topts?.type ?? "arrayBuffer" });
     },
-    setItem(key, value, topts?: SetOptions) {
-      return getClient().set(key, value, topts);
+    async setItem(key, value, topts?: SetOptions) {
+      await getClient().set(key, value, topts);
     },
-    setItemRaw(key, value: string | ArrayBuffer | Blob, topts?: SetOptions) {
-      return getClient().set(key, value, topts);
+    async setItemRaw(
+      key,
+      value: string | ArrayBuffer | Blob,
+      topts?: SetOptions
+    ) {
+      await getClient().set(key, value, topts);
     },
     removeItem(key) {
       return getClient().delete(key);

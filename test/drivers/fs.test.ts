@@ -1,8 +1,9 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { resolve } from "node:path";
 import { readFile, writeFile } from "../../src/drivers/utils/node-fs";
-import { testDriver } from "./utils";
+import { testDriver, type TestContext } from "./utils";
 import driver from "../../src/drivers/fs";
+import { createStorage } from "../../src";
 
 describe("drivers: fs", () => {
   const dir = resolve(__dirname, "tmp/fs");
@@ -64,5 +65,37 @@ describe("drivers: fs", () => {
         ).toMatchObject(["depth-test/depth0/file1.md", "depth-test/file0.md"]);
       });
     },
+  });
+
+  const ctx = {} as TestContext;
+
+  it("excludes ignored folder in key listing", async () => {
+    ctx.driver = driver({
+      base: dir,
+      ignore: [resolve(dir, "folder1")]
+    })
+    ctx.storage = createStorage({
+      driver: ctx.driver,
+    })
+    await ctx.storage.setItem("folder1/file1", "boop");
+    expect(await ctx.storage.getKeys()).toHaveLength(0)
+  })
+
+  it("excludes ignored file in key listing", async () => {
+    ctx.driver = driver({
+      base: dir,
+      ignore: [resolve(dir, "folder1/file1")]
+    })
+    ctx.storage = createStorage({
+      driver: ctx.driver,
+    })
+    await ctx.storage.setItem("folder1/file1", "boop");
+    expect(await ctx.storage.getKeys()).toHaveLength(0)
+  })
+
+  afterEach(async () => {
+    await ctx.storage?.clear();
+    await ctx.storage?.dispose();
+    await ctx.driver?.dispose?.();
   });
 });

@@ -160,12 +160,17 @@ export function testDriver(opts: TestOptions) {
   });
 
   it("getItems", async () => {
-    await ctx.storage.setItem("v1:a", "test_data_v1:a");
-    await ctx.storage.setItem("v2:a", "test_data_v2:a");
     await ctx.storage.setItem("v3:a?q=1", "test_data_v3:a?q=1");
+    await ctx.storage.setItem("v2:a", "test_data_v2:a");
+    await ctx.storage.setItem("v1:a", "test_data_v1:a");
 
     expect(
-      await ctx.storage.getItems([{ key: "v1:a" }, "v2:a", { key: "v3:a?q=1" }])
+      await ctx.storage.getItems([
+        { key: "v1:a" },
+        "v2:a",
+        { key: "v3:a?q=1" },
+        "v4:undefined",
+      ])
     ).toMatchObject([
       {
         key: "v1:a",
@@ -178,6 +183,10 @@ export function testDriver(opts: TestOptions) {
       {
         key: "v3:a", // key should lose the querystring
         value: "test_data_v3:a?q=1",
+      },
+      {
+        key: "v4:undefined",
+        value: null,
       },
     ]);
   });

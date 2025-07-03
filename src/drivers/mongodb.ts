@@ -56,17 +56,43 @@ export default defineDriver((opts: MongoDbOptions) => {
       const document = await getMongoCollection().findOne({ key });
       return document?.value ?? null;
     },
+    async getItems(items) {
+      const keys = items.map((item) => item.key);
+
+      const result = await getMongoCollection()
+        .find({ key: { $in: keys } })
+        .toArray();
+
+      // return result in correct order
+      const resultMap = new Map(result.map((doc) => [doc.key, doc]));
+      return keys.map((key) => {
+        return { key: key, value: resultMap.get(key)?.value ?? null };
+      });
+    },
     async setItem(key, value) {
       const currentDateTime = new Date();
-      await getMongoCollection().findOneAndUpdate(
+      await getMongoCollection().updateOne(
         { key },
         {
           $set: { key, value, modifiedAt: currentDateTime },
           $setOnInsert: { createdAt: currentDateTime },
         },
-        { upsert: true, returnDocument: "after" }
+        { upsert: true }
       );
-      return;
+    },
+    async setItems(items) {
+      const currentDateTime = new Date();
+      const operations = items.map(({ key, value }) => ({
+        updateOne: {
+          filter: { key },
+          update: {
+            $set: { key, value, modifiedAt: currentDateTime },
+            $setOnInsert: { createdAt: currentDateTime },
+          },
+          upsert: true,
+        },
+      }));
+      await getMongoCollection().bulkWrite(operations);
     },
     async removeItem(key) {
       await getMongoCollection().deleteOne({ key });

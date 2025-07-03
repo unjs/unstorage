@@ -4,6 +4,7 @@ import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
   Store,
   BlobResponseType,
+  // NOTE: this type is different in v10+ vs. pre-v10
   SetOptions,
   ListOptions,
   GetStoreOptions,
@@ -89,6 +90,9 @@ export default defineDriver((options: NetlifyStoreOptions) => {
       return getClient().get(key, { type: topts?.type ?? "arrayBuffer" });
     },
     async setItem(key, value, topts?: SetOptions) {
+      // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
+      // TODO(serhalp): Allow drivers to return a value from `setItem`. The @netlify/blobs v10
+      // functionality isn't usable without this.
       await getClient().set(key, value, topts);
     },
     async setItemRaw(
@@ -96,6 +100,8 @@ export default defineDriver((options: NetlifyStoreOptions) => {
       value: string | ArrayBuffer | Blob,
       topts?: SetOptions
     ) {
+      // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
+      // See TODO above.
       await getClient().set(key, value, topts);
     },
     removeItem(key) {

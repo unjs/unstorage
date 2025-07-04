@@ -58,25 +58,34 @@ export default defineDriver<UpstashOptions, Redis>(
     return {
       name: DRIVER_NAME,
       getInstance: getClient,
-      hasItem(key) {
-        return getClient().exists(r(key)).then(Boolean);
+      async hasItem(key) {
+        return Boolean(await getClient().exists(r(key)));
       },
-      getItem(key) {
-        return getClient().get(r(key));
+      async getItem(key) {
+        return await getClient().get(r(key));
       },
-      setItem(key, value, tOptions) {
+      async getItems(items) {
+        const keys = items.map((item) => r(item.key));
+        const data = await getClient().mget(...keys);
+
+        return keys.map((key, index) => {
+          return {
+            key: base ? key.slice(base.length + 1) : key,
+            value: data[index] ?? null,
+          };
+        });
+      },
+      async setItem(key, value, tOptions) {
         const ttl = tOptions?.ttl || options.ttl;
         return getClient()
           .set(r(key), value, ttl ? { ex: ttl } : undefined)
           .then(() => {});
       },
-      removeItem(key) {
-        return getClient()
-          .unlink(r(key))
-          .then(() => {});
+      async removeItem(key) {
+        await getClient().unlink(r(key));
       },
-      getKeys(_base) {
-        return scan(r(_base, "*")).then((keys) =>
+      async getKeys(_base) {
+        return await scan(r(_base, "*")).then((keys) =>
           base ? keys.map((key) => key.slice(base.length + 1)) : keys
         );
       },
@@ -85,9 +94,7 @@ export default defineDriver<UpstashOptions, Redis>(
         if (keys.length === 0) {
           return;
         }
-        return getClient()
-          .del(...keys)
-          .then(() => {});
+        await getClient().del(...keys);
       },
     };
   }

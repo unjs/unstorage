@@ -67,8 +67,8 @@ importers:
         specifier: ^0.15.9
         version: 0.15.9
       '@netlify/blobs':
-        specifier: ^10.0.1
-        version: 10.0.1
+        specifier: ^10.0.3
+        version: 10.0.3
       '@planetscale/database':
         specifier: ^1.19.0
         version: 1.19.0
@@ -1092,12 +1092,12 @@ packages:
   '@neon-rs/load@0.0.4':
     resolution: {integrity: sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw==}
 
-  '@netlify/blobs@10.0.1':
-    resolution: {integrity: sha512-Mbf5WkJlbR5nWA8LgA9CH+dVg7yKxoRXr1jfl1CdzEsRAVIJROPCTXGUYI5N7Q6vk/py0fVLbEie+N9d7eYVdw==}
+  '@netlify/blobs@10.0.3':
+    resolution: {integrity: sha512-edfIKZTkKMKU00/L7u86jR14RrV7NyJBtxSEWLdtY1t2sxFprJgVJNIqPWXPF/LRvTCfNqmvyxkLvB2mbPA0aQ==}
     engines: {node: ^14.16.0 || >=16.0.0}
 
-  '@netlify/dev-utils@3.2.1':
-    resolution: {integrity: sha512-a96wZheD3duD20aEJXBIui73GewRIcKwsXyzyFyerrsDffQjaWFuWxU9fnVSiunl6UVrvpBjWMJRGkCv4zf2KQ==}
+  '@netlify/dev-utils@3.2.2':
+    resolution: {integrity: sha512-ECz/xEaqhAPUoFkeC2Ofpky1HBEKwPCsAL66iK/dLFHUFs39SC3y6Bn5QY76DzONmt+RjWmoYkSIEhJ1xAWHfA==}
     engines: {node: ^18.14.0 || >=20}
 
   '@netlify/runtime-utils@2.1.0':
@@ -4547,9 +4547,16 @@ packages:
     resolution: {integrity: sha512-WMi/OQ2axVTf/ykqCQgXiIct+mSQDFdH2fkwhPwgEwvJ1kSzZRiinb0zF2Xb8u4+OqPChmyI6MEu4EezNJz+FQ==}
     hasBin: true
 
+  tmp-promise@3.0.3:
+    resolution: {integrity: sha512-RwM7MoPojPxsOBYnyd2hy0bxtIlVrihNs9pj5SUvY8Zz1sQcQG2tG1hSr8PDxfgEB8RNKDhqbIlroIarSNDNsQ==}
+
   tmp@0.0.33:
     resolution: {integrity: sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==}
     engines: {node: '>=0.6.0'}
+
+  tmp@0.2.3:
+    resolution: {integrity: sha512-nZD7m9iCPC5g0pYmcaxogYKggSfLsdxl8of3Q/oIbqCqLLIO9IAF0GWjX1z9NZRHPiXv8Wex4yDCaZsgEw0Y8w==}
+    engines: {node: '>=14.14'}
 
   to-readable-stream@2.1.0:
     resolution: {integrity: sha512-o3Qa6DGg1CEXshSdvWNX2sN4QHqg03SPq7U6jPXRahlQdl5dK8oXjkU/2/sGrnOZKeGV1zLSO8qPwyKklPPE7w==}
@@ -5873,12 +5880,12 @@ snapshots:
 
   '@neon-rs/load@0.0.4': {}
 
-  '@netlify/blobs@10.0.1':
+  '@netlify/blobs@10.0.3':
     dependencies:
-      '@netlify/dev-utils': 3.2.1
+      '@netlify/dev-utils': 3.2.2
       '@netlify/runtime-utils': 2.1.0
 
-  '@netlify/dev-utils@3.2.1':
+  '@netlify/dev-utils@3.2.2':
     dependencies:
       '@whatwg-node/server': 0.10.10
       ansis: 4.1.0
@@ -5892,6 +5899,7 @@ snapshots:
       lodash.debounce: 4.0.8
       parse-gitignore: 2.0.0
       semver: 7.7.2
+      tmp-promise: 3.0.3
       uuid: 11.1.0
       write-file-atomic: 5.0.1
 
@@ -9708,9 +9716,15 @@ snapshots:
     dependencies:
       tldts-core: 6.1.86
 
+  tmp-promise@3.0.3:
+    dependencies:
+      tmp: 0.2.3
+
   tmp@0.0.33:
     dependencies:
       os-tmpdir: 1.0.2
+
+  tmp@0.2.3: {}
 
   to-readable-stream@2.1.0: {}
 

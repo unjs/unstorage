@@ -68,6 +68,7 @@ export function testDriver(opts: TestOptions) {
     expect(await ctx.storage.getKeys("s1").then((k) => k.sort())).toMatchObject(
       ["s1:a"].sort()
     );
+    expect(await ctx.storage.getKeys("s1:a")).toMatchObject([]);
   });
 
   it("getKeys with depth", async () => {
@@ -211,10 +212,30 @@ export function testDriver(opts: TestOptions) {
   });
 
   it("clear", async () => {
+    await ctx.storage.setItem("s1:a", "test_data");
+    await ctx.storage.setItem("s2:a", "test_data");
+
     await ctx.storage.clear();
     expect(await ctx.storage.getKeys()).toMatchObject([]);
     // ensure we can clear empty storage as well: #162
     await ctx.storage.clear();
     expect(await ctx.storage.getKeys()).toMatchObject([]);
+  });
+
+  it("clear with base", async () => {
+    await ctx.storage.setItem("s1:a", "test_data");
+    await ctx.storage.setItem("s1-s2:a", "test_data");
+    await ctx.storage.setItem("s2:a", "test_data");
+    await ctx.storage.setItem("s2:a:b", "test_data");
+
+    await ctx.storage.clear("s1");
+    expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
+      ["s1-s2:a", "s2:a", "s2:a:b"].sort()
+    );
+
+    await ctx.storage.clear("s2:a");
+    expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
+      ["s1-s2:a", "s2:a"].sort()
+    );
   });
 }

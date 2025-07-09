@@ -384,7 +384,7 @@ export function createStorage<T extends StorageValue>(
     async clear(base, opts = {}) {
       base = normalizeBaseKey(base);
       await Promise.all(
-        getMounts(base, false).map(async (m) => {
+        getMounts(base, true).map(async (m) => {
           if (m.driver.clear) {
             return asyncCall(m.driver.clear, m.relativeBase, opts);
           }

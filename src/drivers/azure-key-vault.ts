@@ -92,18 +92,20 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
         expireTime: secret.properties.expiresOn,
       };
     },
-    async clear() {
+    async clear(base = "") {
       const secrets = getKeyVaultClient()
         .listPropertiesOfSecrets()
         .byPage({ maxPageSize: opts.pageSize || 25 });
       for await (const page of secrets) {
-        const deletionPromises = page.map(async (secret) => {
-          const poller = await getKeyVaultClient().beginDeleteSecret(
-            secret.name
-          );
-          await poller.pollUntilDone();
-          await getKeyVaultClient().purgeDeletedSecret(secret.name);
-        });
+        const deletionPromises = page
+          .filter((secret) => secret.name.startsWith(base))
+          .map(async (secret) => {
+            const poller = await getKeyVaultClient().beginDeleteSecret(
+              secret.name
+            );
+            await poller.pollUntilDone();
+            await getKeyVaultClient().purgeDeletedSecret(secret.name);
+          });
         await Promise.all(deletionPromises);
       }
     },

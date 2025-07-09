@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { defineDriver, normalizeKey } from "./utils";
 import {
   get,
   set,
@@ -50,11 +50,23 @@ export default defineDriver((opts: IDBKeyvalOptions = {}) => {
     removeItem(key) {
       return del(makeKey(key), customStore);
     },
-    getKeys() {
-      return keys(customStore);
+    async getKeys() {
+      const _keys: string[] = await keys(customStore);
+      return _keys.map((key) => key.replace(base, ""));
     },
-    clear() {
-      return clear(customStore);
+    async clear(prefix) {
+      const _base = [base, prefix].filter(Boolean).join("");
+      if (_base) {
+        const _keys: string[] = await keys(customStore);
+        for (const key of _keys) {
+          console.log(key, _base);
+          if (key.startsWith(_base) && key !== normalizeKey(_base)) {
+            del(key, customStore);
+          }
+        }
+      } else {
+        await clear(customStore);
+      }
     },
   };
 });

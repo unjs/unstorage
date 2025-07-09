@@ -97,9 +97,9 @@ export default defineDriver((opts: MongoDbOptions) => {
     async removeItem(key) {
       await getMongoCollection().deleteOne({ key });
     },
-    async getKeys() {
+    async getKeys(base = "") {
       return await getMongoCollection()
-        .find()
+        .find({ key: { $regex: `^${base}` } })
         .project({ key: true })
         .map((d) => d.key)
         .toArray();
@@ -113,8 +113,8 @@ export default defineDriver((opts: MongoDbOptions) => {
           }
         : {};
     },
-    async clear() {
-      await getMongoCollection().deleteMany({});
+    async clear(base = "") {
+      await getMongoCollection().deleteMany({ key: { $regex: `^${base}` } });
     },
   };
 });

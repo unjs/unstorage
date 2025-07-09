@@ -132,7 +132,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
         const listBlobResult: Awaited<ReturnType<typeof list>> = await list({
           token: getToken(),
           cursor,
-          prefix: r(base),
+          prefix: `${r(base)}/`,
         });
         blobs.push(...listBlobResult.blobs);
         cursor = listBlobResult.cursor;

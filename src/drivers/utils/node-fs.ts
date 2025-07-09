@@ -2,7 +2,11 @@ import { Dirent, existsSync, promises as fsPromises } from "node:fs";
 import { resolve, dirname } from "node:path";
 
 function ignoreNotfound(err: any) {
-  return err.code === "ENOENT" || err.code === "EISDIR" ? null : err;
+  return err.code === "ENOENT" ||
+    err.code === "EISDIR" ||
+    err.code === "ENOTDIR"
+    ? null
+    : err;
 }
 
 function ignoreExists(err: any) {

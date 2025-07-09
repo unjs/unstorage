@@ -225,17 +225,22 @@ export function testDriver(opts: TestOptions) {
   it("clear with base", async () => {
     await ctx.storage.setItem("s1:a", "test_data");
     await ctx.storage.setItem("s1-s2:a", "test_data");
-    await ctx.storage.setItem("s2:a", "test_data");
     await ctx.storage.setItem("s2:a:b", "test_data");
+    await ctx.storage.setItem("s3:a", "test_data");
 
     await ctx.storage.clear("s1");
     expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
-      ["s1-s2:a", "s2:a", "s2:a:b"].sort()
+      ["s1-s2:a", "s2:a:b", "s3:a"].sort()
     );
 
     await ctx.storage.clear("s2:a");
     expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
-      ["s1-s2:a", "s2:a"].sort()
+      ["s1-s2:a", "s3:a"].sort()
+    );
+
+    await ctx.storage.clear("s3:a");
+    expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
+      ["s1-s2:a", "s3:a"].sort()
     );
   });
 }

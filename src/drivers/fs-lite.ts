@@ -1,6 +1,11 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, join } from "node:path";
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+  normalizeKey,
+} from "./utils";
 import {
   readFile,
   writeFile,
@@ -79,11 +84,11 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     getKeys(_base, topts) {
       return readdirRecursive(r("."), opts.ignore, topts?.maxDepth);
     },
-    async clear() {
+    async clear(prefix) {
       if (opts.readOnly || opts.noClear) {
         return;
       }
-      await rmRecursive(r("."));
+      await rmRecursive(r(normalizeKey(prefix)));
     },
   };
 });

@@ -63,7 +63,7 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
       const _base = [base, prefix].filter(Boolean).join(":");
       if (_base) {
         for (const key of Object.keys(storage!)) {
-          if (key.startsWith(`${_base}:`)) {
+          if (key.startsWith(_base)) {
             storage?.removeItem(key);
           }
         }

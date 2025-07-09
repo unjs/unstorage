@@ -29,8 +29,16 @@ export default defineDriver<void, Map<string, any>>(() => {
     getKeys() {
       return [...data.keys()];
     },
-    clear() {
-      data.clear();
+    clear(base) {
+      if (base) {
+        for (const key of data.keys()) {
+          if (key.startsWith(base)) {
+            data.delete(key);
+          }
+        }
+      } else {
+        data.clear();
+      }
     },
     dispose() {
       data.clear();

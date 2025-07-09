@@ -392,7 +392,9 @@ export function createStorage<T extends StorageValue>(
           if (m.driver.removeItem) {
             const keys = await m.driver.getKeys(m.relativeBase || "", opts);
             return Promise.all(
-              keys.map((key) => m.driver.removeItem!(key, opts))
+              keys
+                .filter((key) => filterKeyByBase(key, base))
+                .map((key) => m.driver.removeItem!(key, opts))
             );
           }
           // Readonly

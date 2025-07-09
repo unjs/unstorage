@@ -94,8 +94,11 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
       );
       return rows(res).map((r) => r.id);
     },
-    clear: async () => {
-      await getConnection().execute(`DELETE FROM ${opts.table};`);
+    clear: async (base = "") => {
+      await getConnection().execute(
+        `DELETE FROM ${opts.table} WHERE id LIKE :base;`,
+        { base: `${base}%` }
+      );
     },
   };
 });

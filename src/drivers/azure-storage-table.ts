@@ -153,20 +153,22 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
         etag: entity.etag,
       };
     },
-    async clear() {
+    async clear(base = "") {
       const iterator = getClient()
         .listEntities()
         .byPage({ maxPageSize: pageSize });
       for await (const page of iterator) {
         await Promise.all(
-          page.map(async (entity) => {
-            if (entity.partitionKey && entity.rowKey) {
-              await getClient().deleteEntity(
-                entity.partitionKey,
-                entity.rowKey
-              );
-            }
-          })
+          page
+            .filter((entity) => (entity.rowKey ?? "").startsWith(base))
+            .map(async (entity) => {
+              if (entity.partitionKey && entity.rowKey) {
+                await getClient().deleteEntity(
+                  entity.partitionKey,
+                  entity.rowKey
+                );
+              }
+            })
         );
       }
     },

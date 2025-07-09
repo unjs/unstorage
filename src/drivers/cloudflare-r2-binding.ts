@@ -17,7 +17,7 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
   const getKeys = async (base?: string) => {
     const binding = getR2Binding(opts.binding);
     const kvList = await binding.list(
-      base || opts.base ? { prefix: r(base) } : undefined
+      base || opts.base ? { prefix: `${r(base)}:` } : undefined
     );
     return kvList.objects.map((obj) => obj.key);
   };

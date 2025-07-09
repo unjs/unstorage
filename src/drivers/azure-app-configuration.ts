@@ -129,13 +129,15 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
         tags: setting.tags,
       };
     },
-    async clear() {
+    async clear(base) {
       const settings = getClient().listConfigurationSettings({
         keyFilter,
         labelFilter,
         fields: ["key", "value", "label"],
       });
       for await (const setting of settings) {
+        if (!setting.key.startsWith(base)) continue;
+
         await getClient().deleteConfigurationSetting({
           key: setting.key,
           label: setting.label,

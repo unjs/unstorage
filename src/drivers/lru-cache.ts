@@ -47,8 +47,16 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
     getKeys() {
       return [...cache.keys()];
     },
-    clear() {
-      cache.clear();
+    clear(base) {
+      if (base) {
+        for (const key of cache.keys()) {
+          if (key.startsWith(base)) {
+            cache.delete(key);
+          }
+        }
+      } else {
+        cache.clear();
+      }
     },
     dispose() {
       cache.clear();

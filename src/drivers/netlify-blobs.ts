@@ -1,4 +1,9 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+  normalizeKey,
+} from "./utils";
 import type { GetKeysOptions } from "..";
 import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
@@ -108,9 +113,9 @@ export default defineDriver((options: NetlifyStoreOptions) => {
     async clear(base?: string) {
       const client = getClient();
       return Promise.allSettled(
-        (await client.list({ prefix: base })).blobs.map((item) =>
-          client.delete(item.key)
-        )
+        (await client.list({ prefix: base })).blobs
+          .filter((item) => item.key !== normalizeKey(base))
+          .map((item) => client.delete(item.key))
       ).then(() => {});
     },
   };

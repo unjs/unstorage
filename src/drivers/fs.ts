@@ -2,7 +2,12 @@ import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, relative, join } from "node:path";
 import { FSWatcher, type ChokidarOptions, watch } from "chokidar";
 import anymatch from "anymatch";
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+  normalizeKey,
+} from "./utils";
 import {
   readFile,
   writeFile,
@@ -95,11 +100,11 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
     getKeys(_base, topts) {
       return readdirRecursive(r("."), ignore, topts?.maxDepth);
     },
-    async clear() {
+    async clear(prefix) {
       if (userOptions.readOnly || userOptions.noClear) {
         return;
       }
-      await rmRecursive(r("."));
+      await rmRecursive(r(normalizeKey(prefix)));
     },
     async dispose() {
       if (_watcher) {

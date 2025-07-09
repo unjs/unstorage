@@ -35,7 +35,7 @@ export default defineDriver<UploadThingOptions, UTApi>((opts = {}) => {
     const { files } = await client.listFiles({});
     return files
       .map((file) => file.customId)
-      .filter((k) => k && k.startsWith(base)) as string[];
+      .filter((k) => k && k.startsWith(base) && k !== base) as string[];
   };
 
   const toFile = (key: string, value: BlobPart) => {
@@ -50,8 +50,9 @@ export default defineDriver<UploadThingOptions, UTApi>((opts = {}) => {
     getInstance() {
       return getClient();
     },
-    getKeys(base) {
-      return getKeys(r(base));
+    async getKeys(prefix = "") {
+      const keys = await getKeys(r(prefix));
+      return base ? keys.map((key) => key.slice(base.length + 1)) : keys;
     },
     async hasItem(key) {
       const client = getClient();
@@ -92,7 +93,7 @@ export default defineDriver<UploadThingOptions, UTApi>((opts = {}) => {
       const client = getClient();
       await client.deleteFiles([r(key)]);
     },
-    async clear(base) {
+    async clear(base = "") {
       const client = getClient();
       const keys = await getKeys(r(base));
       await client.deleteFiles(keys);

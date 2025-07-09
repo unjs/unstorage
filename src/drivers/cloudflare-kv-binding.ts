@@ -27,7 +27,10 @@ export default defineDriver((opts: KVOptions) => {
     const keys = [];
     let cursor: string | undefined = undefined;
     do {
-      const kvList = await binding.list({ prefix: base || undefined, cursor });
+      const kvList = await binding.list({
+        prefix: base ? `${base}:` : undefined,
+        cursor,
+      });
 
       keys.push(...kvList.keys);
       cursor = (kvList.list_complete ? undefined : kvList.cursor) as
@@ -73,10 +76,9 @@ export default defineDriver((opts: KVOptions) => {
       const binding = getKVBinding(opts.binding);
       return binding.delete(key);
     },
-    getKeys(base) {
-      return getKeys(base).then((keys) =>
-        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key))
-      );
+    async getKeys(base) {
+      const keys = await getKeys(base);
+      return keys.map((key) => (opts.base ? key.slice(opts.base.length) : key));
     },
     async clear(base) {
       const binding = getKVBinding(opts.binding);

@@ -131,9 +131,10 @@ export default defineDriver((opts: DB0DriverOptions) => {
 
       return rows?.map((r) => r.key);
     },
-    clear: async () => {
+    clear: async (base = "") => {
       await ensureTable();
-      await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}}`;
+      await opts.database
+        .sql /* sql */ `DELETE FROM {${opts.tableName}} WHERE key LIKE ${base + "%"}`;
     },
   };
 });

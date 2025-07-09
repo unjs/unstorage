@@ -384,7 +384,7 @@ export function createStorage<T extends StorageValue>(
     async clear(base, opts = {}) {
       base = normalizeBaseKey(base);
       await Promise.all(
-        getMounts(base, false).map(async (m) => {
+        getMounts(base, true).map(async (m) => {
           if (m.driver.clear) {
             return asyncCall(m.driver.clear, m.relativeBase, opts);
           }
@@ -392,7 +392,9 @@ export function createStorage<T extends StorageValue>(
           if (m.driver.removeItem) {
             const keys = await m.driver.getKeys(m.relativeBase || "", opts);
             return Promise.all(
-              keys.map((key) => m.driver.removeItem!(key, opts))
+              keys
+                .filter((key) => filterKeyByBase(key, base))
+                .map((key) => m.driver.removeItem!(key, opts))
             );
           }
           // Readonly

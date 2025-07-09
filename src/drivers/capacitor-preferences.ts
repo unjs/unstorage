@@ -41,7 +41,7 @@ export default defineDriver<CapacitorPreferencesOptions, typeof Preferences>(
       },
       async clear(prefix) {
         const { keys } = await Preferences.keys();
-        const _prefix = resolveKey(prefix || "");
+        const _prefix = resolveKey(prefix ? `${prefix}:` : "");
         await Promise.all(
           keys
             .filter((key) => key.startsWith(_prefix))

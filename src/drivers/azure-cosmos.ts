@@ -129,12 +129,14 @@ export default defineDriver((opts: AzureCosmosOptions) => {
           : undefined,
       };
     },
-    async clear() {
+    async clear(base = "") {
       const iterator = (await getCosmosClient()).items.query<AzureCosmosItem>(
         `SELECT { id } from c`
       );
       const items = (await iterator.fetchAll()).resources;
       for (const item of items) {
+        if (!item.id.startsWith(base)) continue;
+
         await (await getCosmosClient())
           .item(item.id)
           .delete<AzureCosmosItem>({ consistencyLevel: "Session" });

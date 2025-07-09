@@ -181,18 +181,20 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
         ...blobProperties.metadata,
       };
     },
-    async clear() {
+    async clear(base = "") {
       const iterator = getContainerClient()
         .listBlobsFlat()
         .byPage({ maxPageSize: 1000 });
       for await (const page of iterator) {
         await Promise.all(
-          page.segment.blobItems.map(
-            async (blob) =>
-              await getContainerClient().deleteBlob(blob.name, {
-                deleteSnapshots: "include",
-              })
-          )
+          page.segment.blobItems
+            .filter((blob) => blob.name.startsWith(base))
+            .map(
+              async (blob) =>
+                await getContainerClient().deleteBlob(blob.name, {
+                  deleteSnapshots: "include",
+                })
+            )
         );
       }
     },

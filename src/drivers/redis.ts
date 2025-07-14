@@ -103,6 +103,17 @@ export default defineDriver((opts: RedisOptions) => {
       const value = await getRedisClient().get(p(key));
       return value ?? null;
     },
+    async getItems(items) {
+      const keys = items.map((item) => p(item.key));
+      const data = await getRedisClient().mget(...keys);
+
+      return keys.map((key, index) => {
+        return {
+          key: d(key),
+          value: data[index] ?? null,
+        };
+      });
+    },
     async setItem(key, value, tOptions) {
       const ttl = tOptions?.ttl ?? opts.ttl;
       if (ttl) {
@@ -123,9 +134,7 @@ export default defineDriver((opts: RedisOptions) => {
       if (keys.length === 0) {
         return;
       }
-      return getRedisClient()
-        .unlink(keys)
-        .then(() => {});
+      await getRedisClient().unlink(keys);
     },
     dispose() {
       return getRedisClient().disconnect();

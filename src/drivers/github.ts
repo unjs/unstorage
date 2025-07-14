@@ -138,7 +138,7 @@ async function fetchFiles(opts: GithubOptions) {
       {
         baseURL: opts.apiURL,
         headers: {
-          "User-Agent": "unstorage-github-driver",
+          "User-Agent": "unstorage",
           ...(opts.token && { Authorization: `token ${opts.token}` }),
         },
       }

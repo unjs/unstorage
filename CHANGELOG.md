@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.16.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.16.0...v1.16.1)
+
+### 🔥 Performance
+
+- **mongoDB:** Use bulk operations for `getItems` and `setItems` ([#641](https://github.com/unjs/unstorage/pull/641))
+- **redis, upstash:** Use bulk operations for `getItems` ([#642](https://github.com/unjs/unstorage/pull/642))
+
+### 🩹 Fixes
+
+- **types:** Fix `prefixStorage` type compatibility ([#630](https://github.com/unjs/unstorage/pull/630))
+- **s3:** Accept `200` for delete response for better compatibility ([#636](https://github.com/unjs/unstorage/pull/636))
+- **github:** Add `user-agent` header ([#644](https://github.com/unjs/unstorage/pull/644))
+
+### 💅 Refactors
+
+- Allow `@netlify/blobs` v9 and v10 as peer dependency ([#640](https://github.com/unjs/unstorage/pull/640))
+
+### 📖 Documentation
+
+- **github:** Update `GitHub` casing ([#632](https://github.com/unjs/unstorage/pull/632))
+
+### 📦 Build
+
+- Fix invalid runtime type ([#631](https://github.com/unjs/unstorage/pull/631))
+
+### 🏡 Chore
+
+- Update deps ([34b90bf](https://github.com/unjs/unstorage/commit/34b90bf))
+- Lint ([d11f908](https://github.com/unjs/unstorage/commit/d11f908))
+- Update deps ([3961589](https://github.com/unjs/unstorage/commit/3961589))
+
+### ✅ Tests
+
+- R2 native meta ([#646](https://github.com/unjs/unstorage/pull/646))
+
+### ❤️ Contributors
+
+- ToBinio ([@ToBinio](https://github.com/ToBinio))
+- James Garbutt ([@43081j](https://github.com/43081j))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Alexandre Hallaine <alexandre.hallaine@icloud.com>
+- Philippe Serhal <philippe.serhal@netlify.com>
+- Quentin <blog@buzut.fr>
+- Abeer0 ([@iiio2](https://github.com/iiio2))
+- Daniel Roe ([@danielroe](https://github.com/danielroe))
+- Kricsleo ([@kricsleo](https://github.com/kricsleo))
+
 ## v1.16.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.15.0...v1.16.0)

@@ -137,11 +137,10 @@ async function fetchFiles(opts: GithubOptions) {
       `/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`,
       {
         baseURL: opts.apiURL,
-        headers: opts.token
-          ? {
-              Authorization: `token ${opts.token}`,
-            }
-          : undefined,
+        headers: {
+          "User-Agent": "unstorage",
+          ...(opts.token && { Authorization: `token ${opts.token}` }),
+        },
       }
     );
 

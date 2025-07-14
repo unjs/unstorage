@@ -12,11 +12,24 @@ jobs:
     strategy:
       matrix:
         packageName:
-          - "@netlify/blobs@6.5"
-          - "@netlify/blobs@7"
-          - "@netlify/blobs@8"
-          - "@capacitor/preferences@6"
-          - "@capacitor/preferences@7"
+          - "@azure/app-configuration@latest"
+          - "@azure/cosmos@latest"
+          - "@azure/data-tables@latest"
+          - "@azure/identity@latest"
+          - "@azure/keyvault-secrets@latest"
+          - "@azure/storage-blob@latest"
+          - "@capacitor/preferences@latest"
+          - "@deno/kv@latest"
+          - "@netlify/blobs@latest"
+          - "@planetscale/database@latest"
+          - "@upstash/redis@latest"
+          - "@vercel/blob@latest"
+          - "@vercel/kv@latest"
+          - "aws4fetch@latest"
+          - "db0@latest"
+          - "idb-keyval@latest"
+          - "ioredis@latest"
+          - "uploadthing@latest"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

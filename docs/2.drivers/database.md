@@ -57,4 +57,4 @@ Before first operation, driver ensures a table with columns of `id`, `value`, `b
 **Options:**
 
 - **`database`** (required): A `db0` database instance.
-- `table`: The name of the table to use. It defaults to `unstorage`.
+- `tableName`: The name of the table to use. It defaults to `unstorage`.

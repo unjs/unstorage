@@ -182,7 +182,7 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.8.0",
+  "packageManager": "pnpm@10.15.0",
   "pnpm": {
     "ignoredBuiltDependencies": [
       "@parcel/watcher",

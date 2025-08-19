@@ -2,7 +2,7 @@ import { defineDriver, normalizeKey, joinKeys } from "./utils";
 import { getCache } from "@vercel/functions";
 import type { RuntimeCache } from "@vercel/functions";
 
-export interface VercelRuntimeCacheOptions {
+export interface VercelCacheOptions {
   /**
    * Optional prefix to use for all keys. Can be used for namespacing.
    */
@@ -36,7 +36,7 @@ export interface VercelRuntimeCacheOptions {
 
 const DRIVER_NAME = "vercel-runtime-cache";
 
-export default defineDriver<VercelRuntimeCacheOptions, RuntimeCache>((opts) => {
+export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
   const base = normalizeKey(opts?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
 

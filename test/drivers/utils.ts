@@ -13,6 +13,7 @@ export interface TestContext {
 
 export interface TestOptions {
   driver: Driver | (() => Driver);
+  noKeysSupport?: boolean;
   additionalTests?: (ctx: TestContext) => void;
 }
 
@@ -58,7 +59,7 @@ export function testDriver(opts: TestOptions) {
     expect(await ctx.storage.getItem("s3:a?q=2")).toBe("test_data");
   });
 
-  it("getKeys", async () => {
+  it.skipIf(opts.noKeysSupport)("getKeys", async () => {
     await ctx.storage.setItem("s1:a", "test_data");
     await ctx.storage.setItem("s2:a", "test_data");
     await ctx.storage.setItem("s3:a?q=1", "test_data");
@@ -70,7 +71,7 @@ export function testDriver(opts: TestOptions) {
     );
   });
 
-  it("getKeys with depth", async () => {
+  it.skipIf(opts.noKeysSupport)("getKeys with depth", async () => {
     await ctx.storage.setItem("depth0_0", "test_data");
     await ctx.storage.setItem("depth0:depth1:depth2_0", "test_data");
     await ctx.storage.setItem("depth0:depth1:depth2_1", "test_data");

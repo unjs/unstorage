@@ -1,5 +1,4 @@
 import { defineDriver, normalizeKey, joinKeys } from "./utils";
-import { getCache } from "@vercel/functions";
 import type { RuntimeCache } from "@vercel/functions";
 
 export interface VercelCacheOptions {
@@ -7,21 +6,6 @@ export interface VercelCacheOptions {
    * Optional prefix to use for all keys. Can be used for namespacing.
    */
   base?: string;
-
-  /**
-   * Optional namespace to prefix cache keys.
-   */
-  namespace?: string;
-
-  /**
-   * Optional separator string for the namespace.
-   */
-  namespaceSeparator?: string;
-
-  /**
-   * Optional custom hash function for generating keys.
-   */
-  keyHashFunction?: (key: string) => string;
 
   /**
    * Default TTL for all items in seconds.
@@ -32,6 +16,23 @@ export interface VercelCacheOptions {
    * Default tags to apply to all cache entries.
    */
   tags?: string[];
+
+  // --- advanced: passed as CacheOptions ---
+
+  /**
+   * Optional custom hash function for generating keys.
+   */
+  keyHashFunction?: (key: string) => string;
+
+  /**
+   * Optional namespace to prefix cache keys.
+   */
+  namespace?: string;
+
+  /**
+   * Optional separator string for the namespace.
+   */
+  namespaceSeparator?: string;
 }
 
 const DRIVER_NAME = "vercel-runtime-cache";
@@ -48,7 +49,7 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
         namespace: opts?.namespace,
         namespaceSeparator: opts?.namespaceSeparator,
         keyHashFunction: opts?.keyHashFunction,
-      });
+      })!;
     }
     return _cache;
   };
@@ -66,7 +67,7 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
     },
     async setItem(key, value, tOptions) {
       const ttl = tOptions?.ttl ?? opts?.ttl;
-      const tags = tOptions?.tags ?? opts?.tags;
+      const tags = tOptions?.tags ?? opts?.tags; // TODO: Should we merge instead?
 
       await getClient().set(r(key), value, {
         ttl,
@@ -89,3 +90,98 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
     },
   };
 });
+
+// --- internal ---
+
+// Derived from Apache 2.0 licensed code:
+// https://github.com/vercel/vercel/blob/main/packages/functions/src/cache
+// Copyright 2017 Vercel, Inc.
+
+type Context = {
+  waitUntil?: (promise: Promise<unknown>) => void;
+  cache?: RuntimeCache;
+  headers?: Record<string, string>;
+};
+
+interface CacheOptions {
+  keyHashFunction?: (key: string) => string;
+  namespace?: string;
+  namespaceSeparator?: string;
+}
+
+const SYMBOL_FOR_REQ_CONTEXT = /*#__PURE__*/ Symbol.for(
+  "@vercel/request-context"
+);
+
+function getContext(): Context {
+  const fromSymbol: typeof globalThis & {
+    [SYMBOL_FOR_REQ_CONTEXT]?: { get?: () => Context };
+  } = globalThis;
+  return fromSymbol[SYMBOL_FOR_REQ_CONTEXT]?.get?.() ?? {};
+}
+
+function getCache(cacheOptions?: CacheOptions): RuntimeCache | undefined {
+  const resolveCache = () => {
+    const cache = getContext()?.cache || tryGetCacheWithLib()?.(cacheOptions);
+    if (!cache) {
+      throw new Error("Runtime cache is not available!");
+    }
+    return cache;
+  };
+  return wrapWithKeyTransformation(
+    resolveCache,
+    createKeyTransformer(cacheOptions)
+  );
+}
+
+function tryGetCacheWithLib() {
+  const { createRequire } =
+    globalThis.process?.getBuiltinModule?.("node:module") || {};
+  const mod = createRequire?.(import.meta.url)("@vercel/functions");
+  return (mod as typeof import("@vercel/functions"))?.getCache;
+}
+
+function wrapWithKeyTransformation(
+  resolveCache: () => RuntimeCache,
+  makeKey: (key: string) => string
+): RuntimeCache {
+  return {
+    get: (key: string) => {
+      return resolveCache().get(makeKey(key));
+    },
+    set: (
+      key: string,
+      value: unknown,
+      options?: { name?: string; tags?: string[]; ttl?: number }
+    ) => {
+      return resolveCache().set(makeKey(key), value, options);
+    },
+    delete: (key: string) => {
+      return resolveCache().delete(makeKey(key));
+    },
+    expireTag: (tag: string | string[]) => {
+      return resolveCache().expireTag(tag);
+    },
+  };
+}
+
+function createKeyTransformer(
+  cacheOptions?: CacheOptions
+): (key: string) => string {
+  const hashFunction = cacheOptions?.keyHashFunction || djb2Hash;
+
+  return (key: string) => {
+    if (!cacheOptions?.namespace) return hashFunction(key);
+    const separator = cacheOptions.namespaceSeparator || "$";
+    return `${cacheOptions.namespace}${separator}${hashFunction(key)}`;
+  };
+}
+
+function djb2Hash(key: string) {
+  let hash = 5381;
+  for (let i = 0; i < key.length; i++) {
+    // eslint-disable-next-line unicorn/prefer-code-point
+    hash = (hash * 33) ^ key.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(16); // Convert the hash to a string
+}

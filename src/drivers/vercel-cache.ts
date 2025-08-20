@@ -41,7 +41,7 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
   const base = normalizeKey(opts?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
 
-  let _cache: any;
+  let _cache: RuntimeCache;
 
   const getClient = () => {
     if (!_cache) {

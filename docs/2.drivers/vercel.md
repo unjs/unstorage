@@ -18,10 +18,10 @@ Learn more about Vercel Functions and Runtime Cache.
 
 ```js
 import { createStorage } from "unstorage";
-import vercelRuntimeCacheDriver from "unstorage/drivers/vercel-runtime-cache";
+import vercelCacheDriver from "unstorage/drivers/vercel-cache";
 
 const storage = createStorage({
-  driver: vercelRuntimeCacheDriver({
+  driver: vercelCacheDriver({
     // base: "app",
     // ttl: 60, // seconds
     // tags: ["v1"],
@@ -29,7 +29,7 @@ const storage = createStorage({
 });
 ```
 
-**Optional step:** To allow using outside of vercel functions, install `@vercel/functions` in your project
+**Optional step:** To allow using outside of vercel functions, install `@vercel/functions` in your project:
 
 :pm-install{name="@vercel/functions"}
 

@@ -9,7 +9,7 @@ jobs:
         with: { fetch-depth: 0 }
       - run: npm i -fg corepack && corepack enable
       - uses: actions/setup-node@v4
-        with: { node-version: LTS, cache: 'pnpm' }
+        with: { node-version: lts-latest, cache: 'pnpm' }
       - run: pnpm install
       - run: pnpm changelogen --bump --canary nightly
       - run: npm publish --tag latest

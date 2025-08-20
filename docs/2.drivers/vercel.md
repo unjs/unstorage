@@ -23,9 +23,6 @@ import vercelRuntimeCacheDriver from "unstorage/drivers/vercel-runtime-cache";
 const storage = createStorage({
   driver: vercelRuntimeCacheDriver({
     // base: "app",
-    // namespace: "my-app",
-    // namespaceSeparator: ":",
-    // keyHashFunction: (key) => key, // optional
     // ttl: 60, // seconds
     // tags: ["v1"],
   }),
@@ -39,10 +36,7 @@ const storage = createStorage({
 ### Options
 
 - `base`: Optional prefix to use for all keys (namespacing).
-- `namespace`: Optional namespace passed to the underlying runtime cache.
-- `namespaceSeparator`: Optional separator string for the namespace.
-- `keyHashFunction`: Optional custom hash function for generating keys.
-- `ttl`: Default TTL for all items in seconds.
+- `ttl`: Default TTL for all items in seconds (Note: Will be merged with per-call option tags).
 - `tags`: Default tags to apply to all cache entries.
 
 ### Per-call options

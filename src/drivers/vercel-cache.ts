@@ -122,7 +122,8 @@ function getContext(): Context {
 
 function getCache(cacheOptions?: CacheOptions): RuntimeCache | undefined {
   const resolveCache = () => {
-    const cache = getContext()?.cache || tryGetCacheWithLib()?.(cacheOptions);
+    const cache =
+      getContext()?.cache || tryRequireVCFunctions()?.getCache?.(cacheOptions);
     if (!cache) {
       throw new Error("Runtime cache is not available!");
     }
@@ -134,11 +135,15 @@ function getCache(cacheOptions?: CacheOptions): RuntimeCache | undefined {
   );
 }
 
-function tryGetCacheWithLib() {
-  const { createRequire } =
-    globalThis.process?.getBuiltinModule?.("node:module") || {};
-  const mod = createRequire?.(import.meta.url)("@vercel/functions");
-  return (mod as typeof import("@vercel/functions"))?.getCache;
+let _vcFunctionsLib: typeof import("@vercel/functions") | undefined;
+
+function tryRequireVCFunctions() {
+  if (!_vcFunctionsLib) {
+    const { createRequire } =
+      globalThis.process?.getBuiltinModule?.("node:module") || {};
+    _vcFunctionsLib = createRequire?.(import.meta.url)("@vercel/functions");
+  }
+  return _vcFunctionsLib;
 }
 
 function wrapWithKeyTransformation(

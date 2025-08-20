@@ -14,11 +14,11 @@ Learn more about Vercel Functions and Runtime Cache.
 
 ### Usage
 
-**Driver name:** `vercel-cache`
+**Driver name:** `vercel-runtime-cache`
 
 ```js
 import { createStorage } from "unstorage";
-import vercelCacheDriver from "unstorage/drivers/vercel-cache";
+import vercelCacheDriver from "unstorage/drivers/vercel-runtime-cache";
 
 const storage = createStorage({
   driver: vercelCacheDriver({

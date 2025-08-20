@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import vercelRuntimeCacheDriver from "../../src/drivers/vercel-cache";
+import vercelRuntimeCacheDriver from "../../src/drivers/vercel-runtime-cache";
 import { testDriver } from "./utils";
 
-describe("drivers: vercel-cache", async () => {
+describe("drivers: vercel-runtime-cache", async () => {
   testDriver({
     driver: vercelRuntimeCacheDriver({
       base: Math.round(Math.random() * 1_000_000).toString(16),

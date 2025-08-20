@@ -4,7 +4,7 @@ icon: gg:vercel
 
 # Vercel
 
-## Vercel Cache
+## Vercel Runtime Cache
 
 > Cache data within Vercel Functions using the Runtime Cache API.
 
@@ -18,10 +18,10 @@ Learn more about Vercel Functions and Runtime Cache.
 
 ```js
 import { createStorage } from "unstorage";
-import vercelCacheDriver from "unstorage/drivers/vercel-runtime-cache";
+import vercelRuntimeCacheDriver from "unstorage/drivers/vercel-runtime-cache";
 
 const storage = createStorage({
-  driver: vercelCacheDriver({
+  driver: vercelRuntimeCacheDriver({
     // base: "app",
     // ttl: 60, // seconds
     // tags: ["v1"],
@@ -36,8 +36,8 @@ const storage = createStorage({
 ### Options
 
 - `base`: Optional prefix to use for all keys (namespacing).
-- `ttl`: Default TTL for all items in seconds (Note: Will be merged with per-call option tags).
-- `tags`: Default tags to apply to all cache entries.
+- `ttl`: Default TTL for all items in seconds.
+- `tags`: Default tags to apply to all cache entries (Note: Will be merged with per-call option tags).
 
 ### Per-call options
 
@@ -65,6 +65,9 @@ await storage.clear("", { tags: ["user:123"] });
 - `clear`: The runtime cache API does not support clearing by base; only tag-based expiration is supported.
 - Metadata: Runtime cache does not expose metadata; `getMeta` is not implemented.
 - Persistence: This is not a persistent store; it’s intended for request-time caching inside Vercel Functions.
+
+> [!NOTE]
+> The Unstorage driver does not hash keys by default. To replicate the same behavior in `@vercel/functions` when using `getCache`, set the `keyHashFunction: (key) => key` option.
 
 ## Vercel KV
 

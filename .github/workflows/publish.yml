@@ -1,0 +1,15 @@
+name: publish
+on: { push: { branches: [main] } }
+permissions: { id-token: write, contents: read }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - run: npm i -fg corepack && corepack enable
+      - uses: actions/setup-node@v4
+        with: { node-version: lts/*, cache: "pnpm" }
+      - run: pnpm install
+      - run: pnpm changelogen --bump --canary nightly
+      - run: npm i -g npm@latest && npm publish --tag latest

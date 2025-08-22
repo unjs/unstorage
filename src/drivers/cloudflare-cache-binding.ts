@@ -82,12 +82,21 @@ export default defineDriver((opts: CacheOptions) => {
 
     async setItemRaw(key, value, tOptions) {
       const cacheKey = r(key);
+
+      // https://developers.cloudflare.com/workers/runtime-apis/cache/#headers
+      const headers = {} as Record<string, string>;
       const ttl = tOptions?.ttl ?? opts.ttl;
-      const cacheValue = new Response(value, {
-        headers: ttl ? { "Cache-Control": `max-age=${ttl}` } : undefined,
-      }) as unknown as CFResponse;
+      if (ttl) {
+        headers["Cache-Control"] = `max-age=${ttl}`;
+      }
+      if (tOptions.tag) {
+        headers["Cache-Tag"] = tOptions.tag;
+      }
+
+      const cacheValue = new Response(value, { headers });
+
       const cache = await getCache();
-      await cache.put(cacheKey, cacheValue);
+      await cache.put(cacheKey, cacheValue as unknown as CFResponse);
     },
 
     async removeItem(key) {

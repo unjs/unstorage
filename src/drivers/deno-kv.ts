@@ -55,14 +55,6 @@ export default defineDriver<DenoKvOptions, Promise<Deno.Kv | Kv>>(
       return _kv;
     };
 
-    /**
-     * Converts TTL from seconds to milliseconds.
-     * @see https://docs.deno.com/deploy/kv/manual/key_expiration/
-     */
-    function convertTTL(ttl: number | undefined) {
-      return typeof ttl === "number" && ttl > 0 ? ttl * 1000 : undefined;
-    }
-
     return {
       name: DRIVER_NAME,
       getInstance() {
@@ -84,12 +76,12 @@ export default defineDriver<DenoKvOptions, Promise<Deno.Kv | Kv>>(
         return value.value;
       },
       async setItem(key, value, tOptions: DenoKVSetOptions) {
-        const ttl = convertTTL(tOptions?.ttl ?? opts?.ttl);
+        const ttl = normalizeTTL(tOptions?.ttl ?? opts?.ttl);
         const kv = await getKv();
         await kv.set(r(key), value, { expireIn: ttl });
       },
       async setItemRaw(key, value, tOptions: DenoKVSetOptions) {
-        const ttl = convertTTL(tOptions?.ttl ?? opts?.ttl);
+        const ttl = normalizeTTL(tOptions?.ttl ?? opts?.ttl);
         const kv = await getKv();
         await kv.set(r(key), value, { expireIn: ttl });
       },
@@ -128,3 +120,13 @@ export default defineDriver<DenoKvOptions, Promise<Deno.Kv | Kv>>(
     };
   }
 );
+
+// --- internal ---
+
+/**
+ * Converts TTL from seconds to milliseconds.
+ * @see https://docs.deno.com/deploy/kv/manual/key_expiration/
+ */
+function normalizeTTL(ttl: number | undefined): number | undefined {
+  return typeof ttl === "number" && ttl > 0 ? ttl * 1000 : undefined;
+}

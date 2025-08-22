@@ -20,8 +20,7 @@ export interface DenoKVSetOptions {
   ttl?: number;
 }
 
-export interface DenoKVGetOptions {
-}
+export interface DenoKVGetOptions {}
 
 const DRIVER_NAME = "deno-kv";
 
@@ -65,7 +64,7 @@ export default defineDriver<
    * Converts TTL from seconds to milliseconds.
    * @see https://docs.deno.com/deploy/kv/manual/key_expiration/
    */
-  function convertTTL(ttl: number | undefined){
+  function convertTTL(ttl: number | undefined) {
     return typeof ttl === "number" && ttl > 0 ? ttl * 1000 : undefined;
   }
 

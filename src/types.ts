@@ -15,7 +15,6 @@ export interface StorageMeta {
   [key: string]: StorageValue | Date | undefined;
 }
 
-// TODO: type ttl
 export type TransactionOptions = Record<string, any>;
 
 export type GetKeysOptions = TransactionOptions & {
@@ -27,46 +26,48 @@ export interface DriverFlags {
   ttl?: boolean;
 }
 
-export interface Driver<OptionsT = any, InstanceT = any> {
+export interface Driver<
+  OptionsT = any,
+  InstanceT = any,
+  SetItemOptionsT = TransactionOptions,
+  GetItemOptionsT = TransactionOptions,
+> {
   name?: string;
   flags?: DriverFlags;
   options?: OptionsT;
   getInstance?: () => InstanceT;
-  hasItem: (key: string, opts: TransactionOptions) => MaybePromise<boolean>;
-  getItem: (
-    key: string,
-    opts?: TransactionOptions
-  ) => MaybePromise<StorageValue>;
+  hasItem: (key: string, opts: GetItemOptionsT) => MaybePromise<boolean>;
+  getItem: (key: string, opts?: GetItemOptionsT) => MaybePromise<StorageValue>;
   /** @experimental */
   getItems?: (
-    items: { key: string; options?: TransactionOptions }[],
-    commonOptions?: TransactionOptions
+    items: { key: string; options?: GetItemOptionsT }[],
+    commonOptions?: GetItemOptionsT
   ) => MaybePromise<{ key: string; value: StorageValue }[]>;
   /** @experimental */
-  getItemRaw?: (key: string, opts: TransactionOptions) => MaybePromise<unknown>;
+  getItemRaw?: (key: string, opts: GetItemOptionsT) => MaybePromise<unknown>;
   setItem?: (
     key: string,
     value: string,
-    opts: TransactionOptions
+    opts: SetItemOptionsT
   ) => MaybePromise<void>;
   /** @experimental */
   setItems?: (
-    items: { key: string; value: string; options?: TransactionOptions }[],
-    commonOptions?: TransactionOptions
+    items: { key: string; value: string; options?: SetItemOptionsT }[],
+    commonOptions?: SetItemOptionsT
   ) => MaybePromise<void>;
   /** @experimental */
   setItemRaw?: (
     key: string,
     value: any,
-    opts: TransactionOptions
+    opts: SetItemOptionsT
   ) => MaybePromise<void>;
-  removeItem?: (key: string, opts: TransactionOptions) => MaybePromise<void>;
+  removeItem?: (key: string, opts: GetItemOptionsT) => MaybePromise<void>;
   getMeta?: (
     key: string,
-    opts: TransactionOptions
+    opts: GetItemOptionsT
   ) => MaybePromise<StorageMeta | null>;
   getKeys: (base: string, opts: GetKeysOptions) => MaybePromise<string[]>;
-  clear?: (base: string, opts: TransactionOptions) => MaybePromise<void>;
+  clear?: (base: string, opts: GetItemOptionsT) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }
@@ -83,7 +84,13 @@ type StorageItemType<T, K> = K extends keyof StorageItemMap<T>
     ? StorageValue
     : T;
 
-export interface Storage<T extends StorageValue = StorageValue> {
+type StorageSetOptions<DriverT extends Driver> = DriverT extends Driver<any, any, infer SetItemOptionsT>
+  ? SetItemOptionsT : never
+
+type StorageGetOptions<DriverT extends Driver> = DriverT extends Driver<any, any, any, infer GetItemOptionsT>
+  ? GetItemOptionsT : never
+
+export interface Storage<T extends StorageValue = StorageValue, DriverT extends Driver = Driver> {
   // Item
   hasItem<
     U extends Extract<T, StorageDefinition>,
@@ -99,22 +106,22 @@ export interface Storage<T extends StorageValue = StorageValue> {
     K extends string & keyof StorageItemMap<U>,
   >(
     key: K,
-    ops?: TransactionOptions
+    ops?: StorageGetOptions<DriverT>
   ): Promise<StorageItemType<T, K> | null>;
   getItem<R = StorageItemType<T, string>>(
     key: string,
-    opts?: TransactionOptions
+    opts?: StorageGetOptions<DriverT>
   ): Promise<R | null>;
 
   /** @experimental */
   getItems: <U extends T>(
-    items: (string | { key: string; options?: TransactionOptions })[],
-    commonOptions?: TransactionOptions
+    items: (string | { key: string; options?: StorageGetOptions<DriverT> })[],
+    commonOptions?: StorageGetOptions<DriverT>
   ) => Promise<{ key: string; value: U }[]>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   getItemRaw: <T = any>(
     key: string,
-    opts?: TransactionOptions
+    opts?: StorageGetOptions<DriverT>
   ) => Promise<MaybeDefined<T> | null>;
 
   setItem<
@@ -123,24 +130,24 @@ export interface Storage<T extends StorageValue = StorageValue> {
   >(
     key: K,
     value: StorageItemType<T, K>,
-    opts?: TransactionOptions
+    opts?: StorageSetOptions<DriverT>
   ): Promise<void>;
   setItem<U extends T>(
     key: string,
     value: U,
-    opts?: TransactionOptions
+    opts?: StorageSetOptions<DriverT>
   ): Promise<void>;
 
   /** @experimental */
   setItems: <U extends T>(
-    items: { key: string; value: U; options?: TransactionOptions }[],
-    commonOptions?: TransactionOptions
+    items: { key: string; value: U; options?: StorageSetOptions<DriverT> }[],
+    commonOptions?: StorageSetOptions<DriverT>
   ) => Promise<void>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   setItemRaw: <T = any>(
     key: string,
     value: MaybeDefined<T>,
-    opts?: TransactionOptions
+    opts?: StorageSetOptions<DriverT>
   ) => Promise<void>;
 
   removeItem<

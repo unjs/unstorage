@@ -22,73 +22,73 @@ export interface DriverFlags {
   ttl?: boolean;
 }
 
-export type TransactionOpts<
+export type DriverMethodOptionsMap<
   GetOptionsT = TransactionOptions,
   SetOptionsT = TransactionOptions,
   HasOptionsT = TransactionOptions,
   RemoveOptionsT = TransactionOptions,
   GetKeysOptionsT = TransactionOptions,
 > = {
-  getOptions?: GetOptionsT;
-  setOptions?: SetOptionsT;
-  hasOptions?: HasOptionsT;
-  removeOptions?: RemoveOptionsT;
-  getKeysOptions?: GetKeysOptionsT;
+  getOptions?: GetOptionsT ;
+  setOptions?: SetOptionsT ;
+  hasOptions?: HasOptionsT ;
+  removeOptions?: RemoveOptionsT ;
+  getKeysOptions?: GetKeysOptionsT ;
 };
 
 export interface Driver<
   OptionsT = any,
   InstanceT = any,
-  optionsT extends TransactionOpts = TransactionOpts,
+  DriverMethodOptionsMapT extends DriverMethodOptionsMap = DriverMethodOptionsMap,
 > {
   name?: string;
   flags?: DriverFlags;
   options?: OptionsT;
   getInstance?: () => InstanceT;
-  hasItem: (key: string, opts: optionsT["hasOptions"]) => MaybePromise<boolean>;
+  hasItem: (key: string, opts: DriverMethodOptionsMapT["hasOptions"]) => MaybePromise<boolean>;
   getItem: (
     key: string,
-    opts?: optionsT["getOptions"]
+    opts?: DriverMethodOptionsMapT["getOptions"]
   ) => MaybePromise<StorageValue>;
   /** @experimental */
   getItems?: (
-    items: { key: string; options?: optionsT["getOptions"] }[],
-    commonOptions?: optionsT["getOptions"]
+    items: { key: string; options?: DriverMethodOptionsMapT["getOptions"] }[],
+    commonOptions?: DriverMethodOptionsMapT["getOptions"]
   ) => MaybePromise<{ key: string; value: StorageValue }[]>;
   /** @experimental */
   getItemRaw?: (
     key: string,
-    opts: optionsT["getOptions"]
+    opts: DriverMethodOptionsMapT["getOptions"]
   ) => MaybePromise<unknown>;
   setItem?: (
     key: string,
     value: string,
-    opts: optionsT["setOptions"]
+    opts: DriverMethodOptionsMapT["setOptions"]
   ) => MaybePromise<void>;
   /** @experimental */
   setItems?: (
-    items: { key: string; value: string; options?: optionsT["setOptions"] }[],
-    commonOptions?: optionsT["setOptions"]
+    items: { key: string; value: string; options?: DriverMethodOptionsMapT["setOptions"] }[],
+    commonOptions?: DriverMethodOptionsMapT["setOptions"]
   ) => MaybePromise<void>;
   /** @experimental */
   setItemRaw?: (
     key: string,
     value: any,
-    opts: optionsT["setOptions"]
+    opts: DriverMethodOptionsMapT["setOptions"]
   ) => MaybePromise<void>;
   removeItem?: (
     key: string,
-    opts: optionsT["removeOptions"]
+    opts: DriverMethodOptionsMapT["removeOptions"]
   ) => MaybePromise<void>;
   getMeta?: (
     key: string,
-    opts: optionsT["getOptions"]
+    opts: DriverMethodOptionsMapT["getOptions"]
   ) => MaybePromise<StorageMeta | null>;
   getKeys: (
     base: string,
-    opts: optionsT["getKeysOptions"]
+    opts: DriverMethodOptionsMapT["getKeysOptions"]
   ) => MaybePromise<string[]>;
-  clear?: (base: string, opts: optionsT["removeOptions"]) => MaybePromise<void>;
+  clear?: (base: string, opts: DriverMethodOptionsMapT["removeOptions"]) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }
@@ -114,7 +114,7 @@ type StorageMethodOptions<DriverT extends Driver> =
 type SetOptionsType<DriverT extends Driver> =
   unknown extends StorageMethodOptions<DriverT>["setOptions"]
     ? TransactionOptions
-    : StorageMethodOptions<DriverT>["setOptions"];
+    : StorageMethodOptions<DriverT>["setOptions"] | undefined;
 type GetOptionsType<DriverT extends Driver> =
   unknown extends StorageMethodOptions<DriverT>["getOptions"]
     ? TransactionOptions

@@ -1,20 +1,20 @@
-import type { Driver, TransactionOpts } from "../..";
+import type { Driver, DriverMethodOptionsMap } from "../..";
 
 type DriverFactory<
   OptionsT,
   InstanceT,
-  TransactionOptsT extends TransactionOpts,
+  DriverMethodOptionsMapT extends DriverMethodOptionsMap,
   // Partial here, to not required typed options to be optional in type argument
-> = (opts: OptionsT) => Driver<OptionsT, InstanceT, Partial<TransactionOptsT>>;
+> = (opts: OptionsT) => Driver<OptionsT, InstanceT, Partial<DriverMethodOptionsMapT>>;
 interface ErrorOptions {}
 
 export function defineDriver<
   OptionsT = any,
   InstanceT = never,
-  TransactionOptsT extends TransactionOpts = TransactionOpts,
+  DriverMethodOptionsMapT extends DriverMethodOptionsMap = DriverMethodOptionsMap,
 >(
-  factory: DriverFactory<OptionsT, InstanceT, TransactionOptsT>
-): DriverFactory<OptionsT, InstanceT, TransactionOptsT> {
+  factory: DriverFactory<OptionsT, InstanceT, DriverMethodOptionsMapT>
+): DriverFactory<OptionsT, InstanceT, DriverMethodOptionsMapT> {
   return factory;
 }
 

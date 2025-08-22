@@ -69,13 +69,23 @@ export default defineDriver((opts: CacheOptions) => {
       return response ? await response.text() : null;
     },
 
+    async getItemRaw(key) {
+      const cacheKey = r(key);
+      const cache = await getCache();
+      const response = await cache.match(cacheKey);
+      return response ? await response.arrayBuffer() : null;
+    },
+
     async setItem(key, value, tOptions) {
+      return this.setItemRaw!(key, value, tOptions);
+    },
+
+    async setItemRaw(key, value, tOptions) {
       const cacheKey = r(key);
       const ttl = tOptions?.ttl ?? opts.ttl;
       const cacheValue = new Response(value, {
         headers: ttl ? { "Cache-Control": `max-age=${ttl}` } : undefined,
       }) as unknown as CFResponse;
-      console.log(`Setting item in cache: ${cacheKey}`, cacheValue);
       const cache = await getCache();
       await cache.put(cacheKey, cacheValue);
     },
@@ -87,8 +97,6 @@ export default defineDriver((opts: CacheOptions) => {
     },
 
     getKeys() {
-      // Not available in the Cloudflare Workers Cache API
-      // https://developers.cloudflare.com/workers/runtime-apis/cache/#methods
       return [];
     },
   };

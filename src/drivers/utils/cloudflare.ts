@@ -1,10 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import type {
-  Cache,
-  CacheStorage,
-} from "@cloudflare/workers-types/experimental";
-
 import { createError } from "./index";
 
 export function getBinding(binding: KVNamespace | R2Bucket | string) {

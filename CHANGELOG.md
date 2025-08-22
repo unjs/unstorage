@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.17.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.16.1...v1.17.0)
+
+### 🚀 Enhancements
+
+- Add `vercel-runtime-cache` driver ([#656](https://github.com/unjs/unstorage/pull/656))
+- **deno-kv:** Support `ttl` for `setItem` and `setItemRaw` ([#659](https://github.com/unjs/unstorage/pull/659))
+
+### 📖 Documentation
+
+- **database:** Correct `tableName` config key ([#652](https://github.com/unjs/unstorage/pull/652))
+- **database:** Correct `tableName` config key ([#653](https://github.com/unjs/unstorage/pull/653))
+
+### 🏡 Chore
+
+- Update deps ([9839656](https://github.com/unjs/unstorage/commit/9839656))
+- Update pnpm ([59adda3](https://github.com/unjs/unstorage/commit/59adda3))
+- Update ci scripts ([59a1f9e](https://github.com/unjs/unstorage/commit/59a1f9e))
+
+### ❤️ Contributors
+
+- Schplitt ([@schplitt](https://github.com/schplitt))
+- Anthony Shew <anthonyshew@gmail.com>
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Kanashimo ([@Kanashimo](https://github.com/Kanashimo))
+
 ## v1.16.1
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.16.0...v1.16.1)

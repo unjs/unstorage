@@ -1,5 +1,4 @@
 import { createError, createRequiredError, defineDriver } from "./utils";
-import type { GetKeysOptions } from "..";
 import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
   Store,
@@ -46,7 +45,15 @@ export interface NetlifyNamedStoreOptions
   deployScoped?: false;
 }
 
-export default defineDriver((options: NetlifyStoreOptions) => {
+export interface NetlifyGetKeysOptions extends Omit<ListOptions, "prefix" | "paginate"> {
+  maxDepth?: number
+}
+
+export default defineDriver<NetlifyStoreOptions, Store, {
+  setOptions: SetOptions;
+  getOptions: GetOptions
+  getKeysOptions: NetlifyGetKeysOptions
+}>((options: NetlifyStoreOptions) => {
   const { deployScoped, name, ...opts } = options;
   let store: Store;
 
@@ -109,7 +116,7 @@ export default defineDriver((options: NetlifyStoreOptions) => {
     },
     async getKeys(
       base?: string,
-      tops?: GetKeysOptions & Omit<ListOptions, "prefix" | "paginate">
+      tops?: NetlifyGetKeysOptions
     ) {
       return (await getClient().list({ ...tops, prefix: base })).blobs.map(
         (item) => item.key

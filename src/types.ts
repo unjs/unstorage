@@ -29,23 +29,27 @@ export type DriverMethodOptionsMap<
   RemoveOptionsT = TransactionOptions,
   GetKeysOptionsT = TransactionOptions,
 > = {
-  getOptions?: GetOptionsT ;
-  setOptions?: SetOptionsT ;
-  hasOptions?: HasOptionsT ;
-  removeOptions?: RemoveOptionsT ;
-  getKeysOptions?: GetKeysOptionsT ;
+  getOptions?: GetOptionsT;
+  setOptions?: SetOptionsT;
+  hasOptions?: HasOptionsT;
+  removeOptions?: RemoveOptionsT;
+  getKeysOptions?: GetKeysOptionsT;
 };
 
 export interface Driver<
   OptionsT = any,
   InstanceT = any,
-  DriverMethodOptionsMapT extends DriverMethodOptionsMap = DriverMethodOptionsMap,
+  DriverMethodOptionsMapT extends
+    DriverMethodOptionsMap = DriverMethodOptionsMap,
 > {
   name?: string;
   flags?: DriverFlags;
   options?: OptionsT;
   getInstance?: () => InstanceT;
-  hasItem: (key: string, opts: DriverMethodOptionsMapT["hasOptions"]) => MaybePromise<boolean>;
+  hasItem: (
+    key: string,
+    opts: DriverMethodOptionsMapT["hasOptions"]
+  ) => MaybePromise<boolean>;
   getItem: (
     key: string,
     opts?: DriverMethodOptionsMapT["getOptions"]
@@ -67,7 +71,11 @@ export interface Driver<
   ) => MaybePromise<void>;
   /** @experimental */
   setItems?: (
-    items: { key: string; value: string; options?: DriverMethodOptionsMapT["setOptions"] }[],
+    items: {
+      key: string;
+      value: string;
+      options?: DriverMethodOptionsMapT["setOptions"];
+    }[],
     commonOptions?: DriverMethodOptionsMapT["setOptions"]
   ) => MaybePromise<void>;
   /** @experimental */
@@ -88,7 +96,10 @@ export interface Driver<
     base: string,
     opts: DriverMethodOptionsMapT["getKeysOptions"]
   ) => MaybePromise<string[]>;
-  clear?: (base: string, opts: DriverMethodOptionsMapT["removeOptions"]) => MaybePromise<void>;
+  clear?: (
+    base: string,
+    opts: DriverMethodOptionsMapT["removeOptions"]
+  ) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }

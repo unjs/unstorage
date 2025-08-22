@@ -5,13 +5,16 @@ type DriverFactory<
   InstanceT,
   DriverMethodOptionsMapT extends DriverMethodOptionsMap,
   // Partial here, to not required typed options to be optional in type argument
-> = (opts: OptionsT) => Driver<OptionsT, InstanceT, Partial<DriverMethodOptionsMapT>>;
+> = (
+  opts: OptionsT
+) => Driver<OptionsT, InstanceT, Partial<DriverMethodOptionsMapT>>;
 interface ErrorOptions {}
 
 export function defineDriver<
   OptionsT = any,
   InstanceT = never,
-  DriverMethodOptionsMapT extends DriverMethodOptionsMap = DriverMethodOptionsMap,
+  DriverMethodOptionsMapT extends
+    DriverMethodOptionsMap = DriverMethodOptionsMap,
 >(
   factory: DriverFactory<OptionsT, InstanceT, DriverMethodOptionsMapT>
 ): DriverFactory<OptionsT, InstanceT, DriverMethodOptionsMapT> {

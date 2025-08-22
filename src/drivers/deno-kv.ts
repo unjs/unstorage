@@ -12,23 +12,18 @@ export interface DenoKvOptions {
    */
   ttl?: number;
 }
-
-export interface DenoKVSetOptions {
+interface DenoKVSetOptions {
   /**
    * TTL in seconds.
    */
   ttl?: number;
 }
 
-export interface DenoKVGetOptions {}
-
 const DRIVER_NAME = "deno-kv";
 
 export default defineDriver<
   DenoKvOptions,
-  Promise<Deno.Kv | Kv>,
-  DenoKVSetOptions,
-  DenoKVGetOptions
+  Promise<Deno.Kv | Kv>
 >((opts: DenoKvOptions = {}) => {
   const basePrefix: KvKey = opts.base ? normalizeKey(opts.base).split(":") : [];
 
@@ -88,12 +83,12 @@ export default defineDriver<
       const value = await kv.get(r(key));
       return value.value;
     },
-    async setItem(key, value, tOptions) {
+    async setItem(key, value, tOptions: DenoKVSetOptions) {
       const ttl = convertTTL(tOptions?.ttl ?? opts?.ttl);
       const kv = await getKv();
       await kv.set(r(key), value, { expireIn: ttl });
     },
-    async setItemRaw(key, value, tOptions) {
+    async setItemRaw(key, value, tOptions: DenoKVSetOptions) {
       const ttl = convertTTL(tOptions?.ttl ?? opts?.ttl);
       const kv = await getKv();
       await kv.set(r(key), value, { expireIn: ttl });

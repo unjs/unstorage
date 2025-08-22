@@ -1,18 +1,13 @@
-import type { Driver, TransactionOptions } from "../..";
+import type { Driver } from "../..";
 
-type DriverFactory<OptionsT, InstanceT, SetItemOptionsT, GetItemOptionsT> = (
+type DriverFactory<OptionsT, InstanceT> = (
   opts: OptionsT
-) => Driver<OptionsT, InstanceT, SetItemOptionsT, GetItemOptionsT>;
+) => Driver<OptionsT, InstanceT>;
 interface ErrorOptions {}
 
-export function defineDriver<
-  OptionsT = any,
-  InstanceT = never,
-  SetItemOptionsT = TransactionOptions,
-  GetItemOptionsT = TransactionOptions,
->(
-  factory: DriverFactory<OptionsT, InstanceT, SetItemOptionsT, GetItemOptionsT>
-): DriverFactory<OptionsT, InstanceT, SetItemOptionsT, GetItemOptionsT> {
+export function defineDriver<OptionsT = any, InstanceT = never>(
+  factory: DriverFactory<OptionsT, InstanceT>
+): DriverFactory<OptionsT, InstanceT> {
   return factory;
 }
 

@@ -4,7 +4,8 @@ type DriverFactory<
   OptionsT,
   InstanceT,
   TransactionOptsT extends TransactionOpts,
-> = (opts: OptionsT) => Driver<OptionsT, InstanceT, TransactionOptsT>;
+  // Partial here, to not required typed options to be optional in type argument
+> = (opts: OptionsT) => Driver<OptionsT, InstanceT, Partial<TransactionOptsT>>;
 interface ErrorOptions {}
 
 export function defineDriver<

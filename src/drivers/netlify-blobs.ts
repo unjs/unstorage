@@ -45,15 +45,20 @@ export interface NetlifyNamedStoreOptions
   deployScoped?: false;
 }
 
-export interface NetlifyGetKeysOptions extends Omit<ListOptions, "prefix" | "paginate"> {
-  maxDepth?: number
+export interface NetlifyGetKeysOptions
+  extends Omit<ListOptions, "prefix" | "paginate"> {
+  maxDepth?: number;
 }
 
-export default defineDriver<NetlifyStoreOptions, Store, {
-  setOptions: SetOptions;
-  getOptions: GetOptions
-  getKeysOptions: NetlifyGetKeysOptions
-}>((options: NetlifyStoreOptions) => {
+export default defineDriver<
+  NetlifyStoreOptions,
+  Store,
+  {
+    setOptions: SetOptions;
+    getOptions: GetOptions;
+    getKeysOptions: NetlifyGetKeysOptions;
+  }
+>((options: NetlifyStoreOptions) => {
   const { deployScoped, name, ...opts } = options;
   let store: Store;
 
@@ -114,10 +119,7 @@ export default defineDriver<NetlifyStoreOptions, Store, {
     removeItem(key) {
       return getClient().delete(key);
     },
-    async getKeys(
-      base?: string,
-      tops?: NetlifyGetKeysOptions
-    ) {
+    async getKeys(base?: string, tops?: NetlifyGetKeysOptions) {
       return (await getClient().list({ ...tops, prefix: base })).blobs.map(
         (item) => item.key
       );

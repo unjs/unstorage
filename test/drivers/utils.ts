@@ -11,8 +11,8 @@ export interface TestContext {
   driver: Driver;
 }
 
-export interface TestOptions {
-  driver: Driver | (() => Driver);
+export interface TestOptions{
+  driver: Driver<any, any, any> | (() => Driver<any, any, any>);
   noKeysSupport?: boolean;
   additionalTests?: (ctx: TestContext) => void;
 }

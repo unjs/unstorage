@@ -133,7 +133,7 @@ export default defineDriver((options: S3DriverOptions) => {
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
   const deleteObject = async (key: string) => {
     return awsFetch(url(key), { method: "DELETE" }).then((r) => {
-      if (r?.status !== 204) {
+      if (r?.status !== 204 && r?.status !== 200) {
         throw createError(DRIVER_NAME, `Failed to delete ${key}`);
       }
     });

@@ -1,19 +1,14 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import driver from "../../src/drivers/mongodb";
 import { testDriver } from "./utils";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { promisify } from "node:util";
 
-describe.skip("drivers: mongodb", async () => {
+describe("drivers: mongodb", async () => {
   const sleep = promisify(setTimeout);
 
-  let mongoServer: MongoMemoryServer;
-  let connectionString: string | undefined;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    connectionString = mongoServer.getUri();
-  });
+  const mongoServer = await MongoMemoryServer.create();
+  const connectionString = mongoServer.getUri();
 
   afterAll(async () => {
     if (mongoServer) {
@@ -29,7 +24,7 @@ describe.skip("drivers: mongodb", async () => {
     }),
     additionalTests: (ctx) => {
       it("should throw error if no connection string is provided", async () => {
-        expect(() =>
+        await expect(() =>
           driver({
             databaseName: "test",
             collectionName: "test",

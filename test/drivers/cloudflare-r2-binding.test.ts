@@ -35,6 +35,19 @@ describe("drivers: cloudflare-r2-binding", async () => {
           }
         `);
       });
+      test("native meta", async () => {
+        await ctx.storage.setItem("s1:a", "test_data");
+        const meta = await ctx.storage.getMeta("/s1/a");
+        expect(meta).toEqual(
+          expect.objectContaining({
+            atime: expect.any(Date),
+            mtime: expect.any(Date),
+            size: expect.any(Number),
+          })
+        );
+        const nonExistentMeta = await ctx.storage.getMeta("/s1/nonexistent");
+        expect(nonExistentMeta).toEqual({});
+      });
     },
   });
 });

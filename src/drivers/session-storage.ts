@@ -7,10 +7,10 @@ const DRIVER_NAME = "session-storage";
 
 export default defineDriver((opts: SessionStorageOptions = {}) => {
   return {
-    name: DRIVER_NAME,
     ...localstorage({
       windowKey: "sessionStorage",
       ...opts,
     }),
+    name: DRIVER_NAME,
   };
 });

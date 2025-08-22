@@ -17,39 +17,49 @@ export interface StorageMeta {
 
 export type TransactionOptions = Record<string, any>;
 
-
-
 export interface DriverFlags {
   maxDepth?: boolean;
   ttl?: boolean;
 }
 
-export type TransactionOpts<GetOptionsT = TransactionOptions, SetOptionsT = TransactionOptions, HasOptionsT = TransactionOptions, RemoveOptionsT = TransactionOptions, GetKeysOptionsT = TransactionOptions> = {
+export type TransactionOpts<
+  GetOptionsT = TransactionOptions,
+  SetOptionsT = TransactionOptions,
+  HasOptionsT = TransactionOptions,
+  RemoveOptionsT = TransactionOptions,
+  GetKeysOptionsT = TransactionOptions,
+> = {
   getOptions?: GetOptionsT;
   setOptions?: SetOptionsT;
   hasOptions?: HasOptionsT;
   removeOptions?: RemoveOptionsT;
   getKeysOptions?: GetKeysOptionsT;
-}
+};
 
 export interface Driver<
   OptionsT = any,
   InstanceT = any,
-  optionsT extends TransactionOpts = TransactionOpts
+  optionsT extends TransactionOpts = TransactionOpts,
 > {
   name?: string;
   flags?: DriverFlags;
   options?: OptionsT;
   getInstance?: () => InstanceT;
   hasItem: (key: string, opts: optionsT["hasOptions"]) => MaybePromise<boolean>;
-  getItem: (key: string, opts?: optionsT["getOptions"]) => MaybePromise<StorageValue>;
+  getItem: (
+    key: string,
+    opts?: optionsT["getOptions"]
+  ) => MaybePromise<StorageValue>;
   /** @experimental */
   getItems?: (
     items: { key: string; options?: optionsT["getOptions"] }[],
     commonOptions?: optionsT["getOptions"]
   ) => MaybePromise<{ key: string; value: StorageValue }[]>;
   /** @experimental */
-  getItemRaw?: (key: string, opts: optionsT["getOptions"]) => MaybePromise<unknown>;
+  getItemRaw?: (
+    key: string,
+    opts: optionsT["getOptions"]
+  ) => MaybePromise<unknown>;
   setItem?: (
     key: string,
     value: string,
@@ -66,12 +76,18 @@ export interface Driver<
     value: any,
     opts: optionsT["setOptions"]
   ) => MaybePromise<void>;
-  removeItem?: (key: string, opts: optionsT["removeOptions"]) => MaybePromise<void>;
+  removeItem?: (
+    key: string,
+    opts: optionsT["removeOptions"]
+  ) => MaybePromise<void>;
   getMeta?: (
     key: string,
     opts: optionsT["getOptions"]
   ) => MaybePromise<StorageMeta | null>;
-  getKeys: (base: string, opts: optionsT["getKeysOptions"]) => MaybePromise<string[]>;
+  getKeys: (
+    base: string,
+    opts: optionsT["getKeysOptions"]
+  ) => MaybePromise<string[]>;
   clear?: (base: string, opts: optionsT["removeOptions"]) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
@@ -89,18 +105,37 @@ type StorageItemType<T, K> = K extends keyof StorageItemMap<T>
     ? StorageValue
     : T;
 
-type StorageMethodOptions<DriverT extends Driver> = DriverT extends Driver<any, any, infer MethodOptionsT>
-  ? MethodOptionsT : never;
-
+type StorageMethodOptions<DriverT extends Driver> =
+  DriverT extends Driver<any, any, infer MethodOptionsT>
+    ? MethodOptionsT
+    : never;
 
 // if options type is not set it is unknown and we default back to TransactionOptions
-type SetOptionsType<DriverT extends Driver> = unknown extends StorageMethodOptions<DriverT>["setOptions"] ? TransactionOptions : StorageMethodOptions<DriverT>["setOptions"];
-type GetOptionsType<DriverT extends Driver> = unknown extends StorageMethodOptions<DriverT>["getOptions"] ? TransactionOptions : StorageMethodOptions<DriverT>["getOptions"];
-type RemoveOptionsType<DriverT extends Driver> = unknown extends StorageMethodOptions<DriverT>["removeOptions"] ? TransactionOptions : StorageMethodOptions<DriverT>["removeOptions"];
-type GetKeysOptionsType<DriverT extends Driver> = unknown extends StorageMethodOptions<DriverT>["getKeysOptions"] ? TransactionOptions : StorageMethodOptions<DriverT>["getKeysOptions"];
-type HasOptionsType<DriverT extends Driver> = unknown extends StorageMethodOptions<DriverT>["hasOptions"] ? TransactionOptions : StorageMethodOptions<DriverT>["hasOptions"];
+type SetOptionsType<DriverT extends Driver> =
+  unknown extends StorageMethodOptions<DriverT>["setOptions"]
+    ? TransactionOptions
+    : StorageMethodOptions<DriverT>["setOptions"];
+type GetOptionsType<DriverT extends Driver> =
+  unknown extends StorageMethodOptions<DriverT>["getOptions"]
+    ? TransactionOptions
+    : StorageMethodOptions<DriverT>["getOptions"];
+type RemoveOptionsType<DriverT extends Driver> =
+  unknown extends StorageMethodOptions<DriverT>["removeOptions"]
+    ? TransactionOptions
+    : StorageMethodOptions<DriverT>["removeOptions"];
+type GetKeysOptionsType<DriverT extends Driver> =
+  unknown extends StorageMethodOptions<DriverT>["getKeysOptions"]
+    ? TransactionOptions
+    : StorageMethodOptions<DriverT>["getKeysOptions"];
+type HasOptionsType<DriverT extends Driver> =
+  unknown extends StorageMethodOptions<DriverT>["hasOptions"]
+    ? TransactionOptions
+    : StorageMethodOptions<DriverT>["hasOptions"];
 
-export interface Storage<T extends StorageValue = StorageValue, DriverT extends Driver = Driver> {
+export interface Storage<
+  T extends StorageValue = StorageValue,
+  DriverT extends Driver = Driver,
+> {
   // Item
   hasItem<
     U extends Extract<T, StorageDefinition>,
@@ -166,13 +201,13 @@ export interface Storage<T extends StorageValue = StorageValue, DriverT extends 
   >(
     key: K,
     opts?:
-      | RemoveOptionsType<DriverT> & { removeMeta?: boolean }
+      | (RemoveOptionsType<DriverT> & { removeMeta?: boolean })
       | boolean /* legacy: removeMeta */
   ): Promise<void>;
   removeItem(
     key: string,
     opts?:
-      | RemoveOptionsType<DriverT> & { removeMeta?: boolean } 
+      | (RemoveOptionsType<DriverT> & { removeMeta?: boolean })
       | boolean /* legacy: removeMeta */
   ): Promise<void>;
 
@@ -190,7 +225,10 @@ export interface Storage<T extends StorageValue = StorageValue, DriverT extends 
   ) => Promise<void>;
   removeMeta: (key: string, opts?: RemoveOptionsType<DriverT>) => Promise<void>;
   // Keys
-  getKeys: (base?: string, opts?: GetKeysOptionsType<DriverT>) => Promise<string[]>;
+  getKeys: (
+    base?: string,
+    opts?: GetKeysOptionsType<DriverT>
+  ) => Promise<string[]>;
   // Utils
   clear: (base?: string, opts?: RemoveOptionsType<DriverT>) => Promise<void>;
   dispose: () => Promise<void>;

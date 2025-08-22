@@ -1,14 +1,16 @@
 import type { Driver, TransactionOpts } from "../..";
 
-type DriverFactory<OptionsT, InstanceT, TransactionOptsT extends TransactionOpts> = (
-  opts: OptionsT
-) => Driver<OptionsT, InstanceT, TransactionOptsT>;
+type DriverFactory<
+  OptionsT,
+  InstanceT,
+  TransactionOptsT extends TransactionOpts,
+> = (opts: OptionsT) => Driver<OptionsT, InstanceT, TransactionOptsT>;
 interface ErrorOptions {}
 
 export function defineDriver<
   OptionsT = any,
   InstanceT = never,
-  TransactionOptsT extends TransactionOpts = TransactionOpts
+  TransactionOptsT extends TransactionOpts = TransactionOpts,
 >(
   factory: DriverFactory<OptionsT, InstanceT, TransactionOptsT>
 ): DriverFactory<OptionsT, InstanceT, TransactionOptsT> {

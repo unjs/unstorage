@@ -218,6 +218,8 @@ describe("Regression", () => {
     expect(await pStorage.has("x")).toBe(true);
     expect(await pStorage.get("y")).toBe("bar");
 
+    expect(await pStorage.keys()).toStrictEqual(["x", "y"]);
+
     await pStorage.del("x");
     expect(await pStorage.has("x")).toBe(false);
 

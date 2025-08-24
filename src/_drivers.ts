@@ -33,6 +33,8 @@ import type { VercelBlobOptions as VercelBlobOptions } from "unstorage/drivers/v
 import type { VercelKVOptions as VercelKVOptions } from "unstorage/drivers/vercel-kv";
 import type { VercelCacheOptions as VercelRuntimeCacheOptions } from "unstorage/drivers/vercel-runtime-cache";
 
+import type { DenoKvDriver as DenoKVDriver } from "unstorage/drivers/deno-kv";
+
 export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-kv" | "vercelKV" | "vercel-runtime-cache" | "vercelRuntimeCache";
 
 export type BuiltinDriverOptions = {
@@ -140,3 +142,28 @@ export const builtinDrivers = {
   "vercel-runtime-cache": "unstorage/drivers/vercel-runtime-cache",
   "vercelRuntimeCache": "unstorage/drivers/vercel-runtime-cache",
 } as const;
+
+export type BuiltinDrivers = {
+  "deno-kv": DenoKVDriver;
+  "denoKV": DenoKVDriver;
+}
+
+export type DriverGetOptions = {
+  "deno-kv"?: DenoKVDriver extends { getOptions: infer TGet } ? unknown extends TGet ? {} : TGet : {}
+  "denoKV"?: DenoKVDriver extends { getOptions: infer TGet } ? unknown extends TGet ? {} : TGet : {}
+}
+
+export type DriverSetOptions = {
+  "deno-kv"?: DenoKVDriver extends { setOptions: infer TSet } ? unknown extends TSet ? {} : TSet : {}
+  "denoKV"?: DenoKVDriver extends { setOptions: infer TSet } ? unknown extends TSet ? {} : TSet : {}
+}
+
+export type DriverRemoveOptions = {
+  "deno-kv"?: DenoKVDriver extends { removeOptions: infer TRemove } ? unknown extends TRemove ? {} : TRemove : {}
+  "denoKV"?: DenoKVDriver extends { removeOptions: infer TRemove } ? unknown extends TRemove ? {} : TRemove : {}
+}
+
+export type DriverListOptions = {
+  "deno-kv"?: DenoKVDriver extends { listOptions: infer TList } ? unknown extends TList ? {} : TList : {}
+  "denoKV"?: DenoKVDriver extends { listOptions: infer TList } ? unknown extends TList ? {} : TList : {}
+}

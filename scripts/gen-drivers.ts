@@ -23,6 +23,8 @@ const drivers: {
   subpath: string;
   optionsTExport?: string;
   optionsTName?: string;
+  driverOptionsExport?: string;
+  driverName?: string;
 }[] = [];
 
 for (const entry of driverEntries) {
@@ -31,8 +33,13 @@ for (const entry of driverEntries) {
   const fullPath = join(driversDir, `${name}.ts`);
 
   const contents = await readFile(fullPath, "utf8");
-  const optionsTExport = findTypeExports(contents).find((type) =>
+  const typeExports = findTypeExports(contents);
+  const optionsTExport = typeExports.find((type) =>
     type.name?.endsWith("Options")
+  )?.name;
+
+  const driverOptionsExport = typeExports.find((type) =>
+    type.name?.endsWith("Driver")
   )?.name;
 
   const safeName = camelCase(name)
@@ -41,7 +48,10 @@ for (const entry of driverEntries) {
 
   const names = [...new Set([name, safeName])];
 
+  // TODO: due to name + safe name, options are duplicated for same driver which is confusing a bit tedious to pass options (e.g. deno-kv or denoKV?) -> currently only (deno-kv works but denoKV is typed)
   const optionsTName = upperFirst(safeName) + "Options";
+
+  const driverName = upperFirst(safeName) + "Driver";
 
   drivers.push({
     name,
@@ -50,6 +60,8 @@ for (const entry of driverEntries) {
     subpath,
     optionsTExport,
     optionsTName,
+    driverOptionsExport,
+    driverName,
   });
 }
 
@@ -61,6 +73,14 @@ ${drivers
   .map(
     (d) =>
       /* ts */ `import type { ${d.optionsTExport} as ${d.optionsTName} } from "${d.subpath}";`
+  )
+  .join("\n")}
+
+${drivers
+  .filter((d) => d.driverOptionsExport)
+  .map(
+    (d) =>
+      /* ts */ `import type { ${d.driverOptionsExport} as ${d.driverName} } from "${d.subpath}";`
   )
   .join("\n")}
 
@@ -76,6 +96,51 @@ export type BuiltinDriverOptions = {
 export const builtinDrivers = {
   ${drivers.flatMap((d) => d.names.map((name) => `"${name}": "${d.subpath}"`)).join(",\n  ")},
 } as const;
+
+export type BuiltinDrivers = {
+  ${drivers
+    .filter((d) => d.driverOptionsExport)
+    .flatMap((d) =>
+      d.names.map((name) => `"${name}": ${d.driverName};`)
+    )
+    .join("\n  ")}
+}
+
+export type DriverGetOptions = {
+  ${drivers
+    .filter((d) => d.driverOptionsExport)
+    .flatMap((d) =>
+      d.names.map((name) => `"${name}"?: ${d.driverName} extends { getOptions: infer TGet } ? unknown extends TGet ? {} : TGet : {}`)
+    )
+    .join("\n  ")}
+}
+
+export type DriverSetOptions = {
+  ${drivers
+    .filter((d) => d.driverOptionsExport)
+    .flatMap((d) =>
+      d.names.map((name) => `"${name}"?: ${d.driverName} extends { setOptions: infer TSet } ? unknown extends TSet ? {} : TSet : {}`)
+    )
+    .join("\n  ")}
+}
+
+export type DriverRemoveOptions = {
+  ${drivers
+    .filter((d) => d.driverOptionsExport)
+    .flatMap((d) =>
+      d.names.map((name) => `"${name}"?: ${d.driverName} extends { removeOptions: infer TRemove } ? unknown extends TRemove ? {} : TRemove : {}`)
+    )
+    .join("\n  ")}
+}
+
+export type DriverListOptions = {
+  ${drivers
+    .filter((d) => d.driverOptionsExport)
+    .flatMap((d) =>
+      d.names.map((name) => `"${name}"?: ${d.driverName} extends { listOptions: infer TList } ? unknown extends TList ? {} : TList : {}`)
+    )
+    .join("\n  ")}
+}
 `;
 
 await writeFile(driversMetaFile, genCode, "utf8");

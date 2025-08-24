@@ -39,6 +39,35 @@ export interface CommonRemoveOptions {
 
 export interface CommonListOptions {}
 
+
+/**
+ * Type-level mimic of the `safeName` logic from gen-drivers.ts
+ * - camelCase
+ * - replace 'kv' (case-insensitive) with 'KV'
+ * - replace 'localStorage' with 'localstorage'
+ */
+type ToCamelCase<S extends string> = S extends `${infer F}_${infer R}`
+  ? `${Lowercase<F>}${Capitalize<ToCamelCase<R>>}`
+  : S;
+
+type ReplaceKV<S extends string> = S extends `${infer P}kv${infer Q}`
+  ? `${P}KV${Q}`
+  : S extends `${infer P}KV${infer Q}`
+    ? `${P}KV${Q}`
+    : S;
+
+type RemoveDashes<S extends string> = S extends `${infer P}-${infer Q}`
+  ? `${P}${RemoveDashes<Q>}`
+  : S;
+
+type ReplaceLocalStorage<S extends string> = S extends `${infer P}localStorage${infer Q}`
+  ? `${P}localstorage${Q}`
+  : S;
+
+type SafeName<TName extends string> = ReplaceLocalStorage<ReplaceKV<RemoveDashes<ToCamelCase<TName>>>> 
+
+export type WithSafeName<TName extends string> = TName | SafeName<TName>;
+
 export type InferOperationOptions<
   TDriver,
   TName extends string,
@@ -50,19 +79,19 @@ export type InferOperationOptions<
 }
   ? {
       getOptions?: {
-        [N in TName]?: unknown extends TGet ? {} : TGet;
+        [N in WithSafeName<TName>]?: unknown extends TGet ? {} : TGet;
       } & CommonGetOptions &
         TransactionOptions;
       setOptions?: {
-        [N in TName]?: unknown extends TSet ? {} : TSet;
+        [N in WithSafeName<TName>]?: unknown extends TSet ? {} : TSet;
       } & CommonSetOptions &
         TransactionOptions;
       removeOptions?: {
-        [N in TName]?: unknown extends TRemove ? {} : TRemove;
+        [N in WithSafeName<TName>]?: unknown extends TRemove ? {} : TRemove;
       } & CommonRemoveOptions &
         TransactionOptions;
       listOptions?: {
-        [N in TName]?: unknown extends TList ? {} : TList;
+        [N in WithSafeName<TName>]?: unknown extends TList ? {} : TList;
       } & CommonListOptions &
         TransactionOptions;
     }

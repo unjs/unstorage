@@ -68,8 +68,12 @@ export type InferOperationOptions<
     }
   : never;
 
-export type GetOptions = DriverGetOptions;
-export type SetOptions = DriverSetOptions;
+export type GetOptions = DriverGetOptions &
+  CommonGetOptions &
+  TransactionOptions;
+export type SetOptions = DriverSetOptions &
+  CommonSetOptions &
+  TransactionOptions;
 export type RemoveOptions = DriverRemoveOptions &
   CommonRemoveOptions &
   TransactionOptions;

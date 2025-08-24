@@ -4,9 +4,7 @@ import type { WithSafeName } from "../src/types";
 
 test("WithSafeName utility type produces correct safe names", () => {
   // Test: 'deno-kv' => 'deno-kv' | 'denoKV'
-  expectTypeOf<WithSafeName<"deno-kv">>().toEqualTypeOf<
-    "deno-kv" | "denoKV"
-  >();
+  expectTypeOf<WithSafeName<"deno-kv">>().toEqualTypeOf<"deno-kv" | "denoKV">();
   // Test: 'cloudflare-kv-binding' => 'cloudflare-kv-binding' | 'cloudflareKVBinding'
   expectTypeOf<WithSafeName<"cloudflare-kv-binding">>().toEqualTypeOf<
     "cloudflare-kv-binding" | "cloudflareKVBinding"

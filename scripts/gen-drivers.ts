@@ -2,7 +2,7 @@ import { readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findTypeExports } from "mlly";
-import {  upperFirst } from "scule";
+import { upperFirst } from "scule";
 import { getSafeName } from "../src";
 
 const driversDir = fileURLToPath(new URL("../src/drivers", import.meta.url));

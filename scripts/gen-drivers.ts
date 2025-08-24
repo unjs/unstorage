@@ -100,9 +100,7 @@ export const builtinDrivers = {
 export type BuiltinDrivers = {
   ${drivers
     .filter((d) => d.driverOptionsExport)
-    .flatMap((d) =>
-      d.names.map((name) => `"${name}": ${d.driverName};`)
-    )
+    .flatMap((d) => d.names.map((name) => `"${name}": ${d.driverName};`))
     .join("\n  ")}
 }
 
@@ -110,7 +108,10 @@ export type DriverGetOptions = {
   ${drivers
     .filter((d) => d.driverOptionsExport)
     .flatMap((d) =>
-      d.names.map((name) => `"${name}"?: ${d.driverName} extends { getOptions: infer TGet } ? unknown extends TGet ? {} : TGet : {}`)
+      d.names.map(
+        (name) =>
+          `"${name}"?: ${d.driverName} extends { getOptions: infer TGet } ? unknown extends TGet ? {} : TGet : {}`
+      )
     )
     .join("\n  ")}
 }
@@ -119,7 +120,10 @@ export type DriverSetOptions = {
   ${drivers
     .filter((d) => d.driverOptionsExport)
     .flatMap((d) =>
-      d.names.map((name) => `"${name}"?: ${d.driverName} extends { setOptions: infer TSet } ? unknown extends TSet ? {} : TSet : {}`)
+      d.names.map(
+        (name) =>
+          `"${name}"?: ${d.driverName} extends { setOptions: infer TSet } ? unknown extends TSet ? {} : TSet : {}`
+      )
     )
     .join("\n  ")}
 }
@@ -128,7 +132,10 @@ export type DriverRemoveOptions = {
   ${drivers
     .filter((d) => d.driverOptionsExport)
     .flatMap((d) =>
-      d.names.map((name) => `"${name}"?: ${d.driverName} extends { removeOptions: infer TRemove } ? unknown extends TRemove ? {} : TRemove : {}`)
+      d.names.map(
+        (name) =>
+          `"${name}"?: ${d.driverName} extends { removeOptions: infer TRemove } ? unknown extends TRemove ? {} : TRemove : {}`
+      )
     )
     .join("\n  ")}
 }
@@ -137,7 +144,10 @@ export type DriverListOptions = {
   ${drivers
     .filter((d) => d.driverOptionsExport)
     .flatMap((d) =>
-      d.names.map((name) => `"${name}"?: ${d.driverName} extends { listOptions: infer TList } ? unknown extends TList ? {} : TList : {}`)
+      d.names.map(
+        (name) =>
+          `"${name}"?: ${d.driverName} extends { listOptions: infer TList } ? unknown extends TList ? {} : TList : {}`
+      )
     )
     .join("\n  ")}
 }

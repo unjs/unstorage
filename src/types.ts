@@ -1,4 +1,9 @@
-import type { DriverGetOptions, DriverListOptions, DriverRemoveOptions, DriverSetOptions } from "./_drivers";
+import type {
+  DriverGetOptions,
+  DriverListOptions,
+  DriverRemoveOptions,
+  DriverSetOptions,
+} from "./_drivers";
 
 export type StorageValue = null | string | number | boolean | object;
 export type WatchEvent = "update" | "remove";
@@ -17,44 +22,60 @@ export interface StorageMeta {
   [key: string]: StorageValue | Date | undefined;
 }
 
-
 export type TransactionOptions = Record<string, any>;
 
-export interface CommonGetOptions {
-  
-}
+export interface CommonGetOptions {}
 
 export interface CommonSetOptions {
   /**
    * Time to live in seconds.
    */
-  ttl?: number
+  ttl?: number;
 }
 
 export interface CommonRemoveOptions {
-  removeMeta?: boolean
+  removeMeta?: boolean;
 }
 
-export interface CommonListOptions {
+export interface CommonListOptions {}
 
-}
-
-export type InferOperationOptions<TDriver, TName extends string> = TDriver extends {
+export type InferOperationOptions<
+  TDriver,
+  TName extends string,
+> = TDriver extends {
   getOptions?: infer TGet;
   setOptions?: infer TSet;
   removeOptions?: infer TRemove;
   listOptions?: infer TList;
-} ?  {
-  getOptions?: {[N in TName]?: unknown extends TGet ? {} : TGet } & CommonGetOptions & TransactionOptions;
-  setOptions?: {[N in TName]?: unknown extends TSet ? {} : TSet } & CommonSetOptions & TransactionOptions;
-  removeOptions?: {[N in TName]?: unknown extends TRemove ? {} : TRemove } & CommonRemoveOptions & TransactionOptions;
-  listOptions?: {[N in TName]?: unknown extends TList ? {} : TList } & CommonListOptions & TransactionOptions;
-} : never;
+}
+  ? {
+      getOptions?: {
+        [N in TName]?: unknown extends TGet ? {} : TGet;
+      } & CommonGetOptions &
+        TransactionOptions;
+      setOptions?: {
+        [N in TName]?: unknown extends TSet ? {} : TSet;
+      } & CommonSetOptions &
+        TransactionOptions;
+      removeOptions?: {
+        [N in TName]?: unknown extends TRemove ? {} : TRemove;
+      } & CommonRemoveOptions &
+        TransactionOptions;
+      listOptions?: {
+        [N in TName]?: unknown extends TList ? {} : TList;
+      } & CommonListOptions &
+        TransactionOptions;
+    }
+  : never;
 
 export type GetOptions = DriverGetOptions;
 export type SetOptions = DriverSetOptions;
-export type RemoveOptions = DriverRemoveOptions & CommonRemoveOptions & TransactionOptions;
-export type ListOptions = DriverListOptions & CommonListOptions & TransactionOptions;
+export type RemoveOptions = DriverRemoveOptions &
+  CommonRemoveOptions &
+  TransactionOptions;
+export type ListOptions = DriverListOptions &
+  CommonListOptions &
+  TransactionOptions;
 
 export type GetKeysOptions = TransactionOptions & {
   maxDepth?: number;
@@ -163,11 +184,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
     value: StorageItemType<T, K>,
     opts?: SetOptions
   ): Promise<void>;
-  setItem<U extends T>(
-    key: string,
-    value: U,
-    opts?: SetOptions
-  ): Promise<void>;
+  setItem<U extends T>(key: string, value: U, opts?: SetOptions): Promise<void>;
 
   /** @experimental */
   setItems: <U extends T>(
@@ -186,15 +203,11 @@ export interface Storage<T extends StorageValue = StorageValue> {
     K extends keyof StorageItemMap<U>,
   >(
     key: K,
-    opts?:
-      | (RemoveOptions)
-      | boolean /* legacy: removeMeta */
+    opts?: RemoveOptions | boolean /* legacy: removeMeta */
   ): Promise<void>;
   removeItem(
     key: string,
-    opts?:
-      | (RemoveOptions)
-      | boolean /* legacy: removeMeta */
+    opts?: RemoveOptions | boolean /* legacy: removeMeta */
   ): Promise<void>;
 
   // Meta
@@ -213,7 +226,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
   // Keys
   getKeys: (base?: string, opts?: GetKeysOptions) => Promise<string[]>;
   // Utils
-  
+
   // TODO: what options should it have?
   clear: (base?: string, opts?: TransactionOptions) => Promise<void>;
   dispose: () => Promise<void>;

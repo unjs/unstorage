@@ -14,18 +14,11 @@ export interface DenoKvOptions {
   ttl?: number;
 }
 
-export interface  DenoKvDriver {
-  setOptions: {
-
-  }
-  getOptions: {
-    
-  }
-  removeOptions: {
-
-  }
+export interface DenoKvDriver {
+  setOptions: {};
+  getOptions: {};
+  removeOptions: {};
 }
-
 
 const DRIVER_NAME = "deno-kv";
 

@@ -2,7 +2,8 @@ import { readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findTypeExports } from "mlly";
-import { camelCase, upperFirst } from "scule";
+import {  upperFirst } from "scule";
+import { getSafeName } from "../src";
 
 const driversDir = fileURLToPath(new URL("../src/drivers", import.meta.url));
 
@@ -42,9 +43,7 @@ for (const entry of driverEntries) {
     type.name?.endsWith("Driver")
   )?.name;
 
-  const safeName = camelCase(name)
-    .replace(/kv/i, "KV")
-    .replace("localStorage", "localstorage");
+  const safeName = getSafeName(name);
 
   const names = [...new Set([name, safeName])];
 

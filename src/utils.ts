@@ -1,4 +1,10 @@
-import type { Storage, StorageValue, TransactionOptions } from "./types";
+import { camelCase } from "scule";
+import type {
+  SafeName,
+  Storage,
+  StorageValue,
+  TransactionOptions,
+} from "./types";
 
 type StorageKeys = Array<keyof Storage>;
 
@@ -127,4 +133,10 @@ export function filterKeyByBase(
   }
 
   return key[key.length - 1] !== "$";
+}
+
+export function getSafeName<T extends string>(name: T): SafeName<T> {
+  return camelCase(name)
+    .replace(/kv/i, "KV")
+    .replace("localStorage", "localstorage") as SafeName<T>;
 }

@@ -1,3 +1,4 @@
+import type { CamelCase } from "scule";
 import type {
   DriverGetOptions,
   DriverListOptions,
@@ -39,31 +40,23 @@ export interface CommonRemoveOptions {
 
 export interface CommonListOptions {}
 
-/**
- * Type-level mimic of the `safeName` logic from gen-drivers.ts
- * - camelCase
- * - replace 'kv' (case-insensitive) with 'KV'
- * - replace 'localStorage' with 'localstorage'
- */
-type ToCamelCase<S extends string> = S extends `${infer F}_${infer R}`
-  ? `${Lowercase<F>}${Capitalize<ToCamelCase<R>>}`
-  : S;
+type ReplaceAll<
+  SourceT extends string,
+  TargetT extends string,
+  ReplacementT extends string,
+> = SourceT extends `${infer P}${TargetT}${infer Q}`
+  ? `${P}${ReplacementT}${ReplaceAll<Q, TargetT, ReplacementT>}`
+  : SourceT;
 
-type ReplaceKV<S extends string> = S extends `${infer P}kv${infer Q}`
-  ? `${P}KV${Q}`
-  : S extends `${infer P}KV${infer Q}`
-    ? `${P}KV${Q}`
-    : S;
+type ReplaceKV<S extends string> = ReplaceAll<S, "kv" | "Kv" | "kV", "KV">;
+type ReplaceLocalStorage<S extends string> = ReplaceAll<
+  S,
+  "localStorage",
+  "localstorage"
+>;
 
-type RemoveDashes<S extends string> = S extends `${infer P}-${infer Q}`
-  ? `${P}${RemoveDashes<Q>}`
-  : S;
-
-type ReplaceLocalStorage<S extends string> =
-  S extends `${infer P}localStorage${infer Q}` ? `${P}localstorage${Q}` : S;
-
-type SafeName<TName extends string> = ReplaceLocalStorage<
-  ReplaceKV<RemoveDashes<ToCamelCase<TName>>>
+export type SafeName<TName extends string> = ReplaceLocalStorage<
+  ReplaceKV<CamelCase<TName>>
 >;
 
 export type WithSafeName<TName extends string> = TName | SafeName<TName>;

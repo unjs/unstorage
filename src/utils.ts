@@ -1,8 +1,4 @@
-import type {
-  Storage,
-  StorageValue,
-  TransactionOptions,
-} from "./types";
+import type { Storage, StorageValue, TransactionOptions } from "./types";
 
 type StorageKeys = Array<keyof Storage>;
 

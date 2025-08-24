@@ -39,7 +39,6 @@ export interface CommonRemoveOptions {
 
 export interface CommonListOptions {}
 
-
 /**
  * Type-level mimic of the `safeName` logic from gen-drivers.ts
  * - camelCase
@@ -60,11 +59,12 @@ type RemoveDashes<S extends string> = S extends `${infer P}-${infer Q}`
   ? `${P}${RemoveDashes<Q>}`
   : S;
 
-type ReplaceLocalStorage<S extends string> = S extends `${infer P}localStorage${infer Q}`
-  ? `${P}localstorage${Q}`
-  : S;
+type ReplaceLocalStorage<S extends string> =
+  S extends `${infer P}localStorage${infer Q}` ? `${P}localstorage${Q}` : S;
 
-type SafeName<TName extends string> = ReplaceLocalStorage<ReplaceKV<RemoveDashes<ToCamelCase<TName>>>> 
+type SafeName<TName extends string> = ReplaceLocalStorage<
+  ReplaceKV<RemoveDashes<ToCamelCase<TName>>>
+>;
 
 export type WithSafeName<TName extends string> = TName | SafeName<TName>;
 

@@ -1,4 +1,3 @@
-import type { CamelCase } from "scule";
 import type {
   DriverGetOptions,
   DriverListOptions,
@@ -40,65 +39,18 @@ export interface CommonRemoveOptions {
 
 export interface CommonListOptions {}
 
-type ReplaceAll<
-  SourceT extends string,
-  TargetT extends string,
-  ReplacementT extends string,
-> = SourceT extends `${infer P}${TargetT}${infer Q}`
-  ? `${P}${ReplacementT}${ReplaceAll<Q, TargetT, ReplacementT>}`
-  : SourceT;
-
-type ReplaceKV<S extends string> = ReplaceAll<S, "kv" | "Kv" | "kV", "KV">;
-type ReplaceLocalStorage<S extends string> = ReplaceAll<
-  S,
-  "localStorage",
-  "localstorage"
->;
-
-export type SafeName<TName extends string> = ReplaceLocalStorage<
-  ReplaceKV<CamelCase<TName>>
->;
-
-export type WithSafeName<TName extends string> = TName | SafeName<TName>;
-
-export type InferOperationOptions<
-  TDriver,
-  TName extends string,
-> = TDriver extends {
-  getOptions?: infer TGet;
-  setOptions?: infer TSet;
-  removeOptions?: infer TRemove;
-  listOptions?: infer TList;
-}
-  ? {
-      getOptions?: {
-        [N in WithSafeName<TName>]?: unknown extends TGet ? {} : TGet;
-      } & CommonGetOptions &
-        TransactionOptions;
-      setOptions?: {
-        [N in WithSafeName<TName>]?: unknown extends TSet ? {} : TSet;
-      } & CommonSetOptions &
-        TransactionOptions;
-      removeOptions?: {
-        [N in WithSafeName<TName>]?: unknown extends TRemove ? {} : TRemove;
-      } & CommonRemoveOptions &
-        TransactionOptions;
-      listOptions?: {
-        [N in WithSafeName<TName>]?: unknown extends TList ? {} : TList;
-      } & CommonListOptions &
-        TransactionOptions;
-    }
-  : never;
-
 export type GetOptions = DriverGetOptions &
   CommonGetOptions &
   TransactionOptions;
+
 export type SetOptions = DriverSetOptions &
   CommonSetOptions &
   TransactionOptions;
+
 export type RemoveOptions = DriverRemoveOptions &
   CommonRemoveOptions &
   TransactionOptions;
+
 export type ListOptions = DriverListOptions &
   CommonListOptions &
   TransactionOptions;

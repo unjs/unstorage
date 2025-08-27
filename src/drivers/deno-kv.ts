@@ -1,6 +1,6 @@
-import type { InferOperationOptions } from "../types";
 import { defineDriver, createError, normalizeKey } from "./utils/index";
 import type { Kv, KvKey } from "@deno/kv";
+import type { SetOptions } from "../types";
 
 // https://docs.deno.com/deploy/kv/manual/
 
@@ -21,8 +21,6 @@ export interface DenoKvDriver {
 }
 
 const DRIVER_NAME = "deno-kv";
-
-type MethodTypes = InferOperationOptions<DenoKvDriver, typeof DRIVER_NAME>;
 
 export default defineDriver<DenoKvOptions, Promise<Deno.Kv | Kv>>(
   (opts: DenoKvOptions = {}) => {
@@ -78,12 +76,12 @@ export default defineDriver<DenoKvOptions, Promise<Deno.Kv | Kv>>(
         const value = await kv.get(r(key));
         return value.value;
       },
-      async setItem(key, value, tOptions: MethodTypes["setOptions"]) {
+      async setItem(key, value, tOptions: SetOptions) {
         const ttl = normalizeTTL(tOptions?.ttl ?? opts?.ttl);
         const kv = await getKv();
         await kv.set(r(key), value, { expireIn: ttl });
       },
-      async setItemRaw(key, value, tOptions: MethodTypes["setOptions"]) {
+      async setItemRaw(key, value, tOptions: SetOptions) {
         const ttl = normalizeTTL(tOptions?.ttl ?? opts?.ttl);
         const kv = await getKv();
         await kv.set(r(key), value, { expireIn: ttl });

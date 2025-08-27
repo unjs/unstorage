@@ -3,13 +3,6 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findTypeExports } from "mlly";
 import { camelCase, upperFirst } from "scule";
-import type { SafeName } from "../src";
-
-function getSafeName<T extends string>(name: T): SafeName<T> {
-  return camelCase(name)
-    .replace(/kv/i, "KV")
-    .replace("localStorage", "localstorage") as SafeName<T>;
-}
 
 const driversDir = fileURLToPath(new URL("../src/drivers", import.meta.url));
 
@@ -49,7 +42,9 @@ for (const entry of driverEntries) {
     type.name?.endsWith("Driver")
   )?.name;
 
-  const safeName = getSafeName(name);
+  const safeName = camelCase(name)
+    .replace(/kv/i, "KV")
+    .replace("localStorage", "localstorage");
 
   const names = [...new Set([name, safeName])];
 

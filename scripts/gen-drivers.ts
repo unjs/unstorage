@@ -112,11 +112,9 @@ export type BuiltinDrivers = {
 export type DriverGetOptions = {
   ${drivers
     .filter((d) => d.driverOptionsExport)
-    .flatMap((d) =>
-      d.names.map(
-        (name) =>
-          `"${name}"?: ${d.driverName} extends { getOptions: infer TGet } ? unknown extends TGet ? {} : TGet : {}`
-      )
+    .map(
+      (d) =>
+        `"${d.name}"?: ${d.driverName} extends { getOptions: infer TGet } ? unknown extends TGet ? {} : TGet : {}`
     )
     .join("\n  ")}
 }
@@ -124,11 +122,9 @@ export type DriverGetOptions = {
 export type DriverSetOptions = {
   ${drivers
     .filter((d) => d.driverOptionsExport)
-    .flatMap((d) =>
-      d.names.map(
-        (name) =>
-          `"${name}"?: ${d.driverName} extends { setOptions: infer TSet } ? unknown extends TSet ? {} : TSet : {}`
-      )
+    .map(
+      (d) =>
+        `"${d.name}"?: ${d.driverName} extends { setOptions: infer TSet } ? unknown extends TSet ? {} : TSet : {}`
     )
     .join("\n  ")}
 }
@@ -136,11 +132,9 @@ export type DriverSetOptions = {
 export type DriverRemoveOptions = {
   ${drivers
     .filter((d) => d.driverOptionsExport)
-    .flatMap((d) =>
-      d.names.map(
-        (name) =>
-          `"${name}"?: ${d.driverName} extends { removeOptions: infer TRemove } ? unknown extends TRemove ? {} : TRemove : {}`
-      )
+    .map(
+      (d) =>
+        `"${d.name}"?: ${d.driverName} extends { removeOptions: infer TRemove } ? unknown extends TRemove ? {} : TRemove : {}`
     )
     .join("\n  ")}
 }
@@ -148,11 +142,9 @@ export type DriverRemoveOptions = {
 export type DriverListOptions = {
   ${drivers
     .filter((d) => d.driverOptionsExport)
-    .flatMap((d) =>
-      d.names.map(
-        (name) =>
-          `"${name}"?: ${d.driverName} extends { listOptions: infer TList } ? unknown extends TList ? {} : TList : {}`
-      )
+    .map(
+      (d) =>
+        `"${d.name}"?: ${d.driverName} extends { listOptions: infer TList } ? unknown extends TList ? {} : TList : {}`
     )
     .join("\n  ")}
 }

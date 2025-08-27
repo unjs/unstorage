@@ -150,20 +150,16 @@ export type BuiltinDrivers = {
 
 export type DriverGetOptions = {
   "deno-kv"?: DenoKVDriver extends { getOptions: infer TGet } ? unknown extends TGet ? {} : TGet : {}
-  "denoKV"?: DenoKVDriver extends { getOptions: infer TGet } ? unknown extends TGet ? {} : TGet : {}
 }
 
 export type DriverSetOptions = {
   "deno-kv"?: DenoKVDriver extends { setOptions: infer TSet } ? unknown extends TSet ? {} : TSet : {}
-  "denoKV"?: DenoKVDriver extends { setOptions: infer TSet } ? unknown extends TSet ? {} : TSet : {}
 }
 
 export type DriverRemoveOptions = {
   "deno-kv"?: DenoKVDriver extends { removeOptions: infer TRemove } ? unknown extends TRemove ? {} : TRemove : {}
-  "denoKV"?: DenoKVDriver extends { removeOptions: infer TRemove } ? unknown extends TRemove ? {} : TRemove : {}
 }
 
 export type DriverListOptions = {
   "deno-kv"?: DenoKVDriver extends { listOptions: infer TList } ? unknown extends TList ? {} : TList : {}
-  "denoKV"?: DenoKVDriver extends { listOptions: infer TList } ? unknown extends TList ? {} : TList : {}
 }

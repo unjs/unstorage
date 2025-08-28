@@ -1,4 +1,5 @@
 import type {
+  DriverClearOptions,
   DriverGetOptions,
   DriverListOptions,
   DriverRemoveOptions,
@@ -39,6 +40,8 @@ export interface CommonRemoveOptions {
 
 export interface CommonListOptions {}
 
+export interface CommonClearOptions {}
+
 export type GetOptions = DriverGetOptions &
   CommonGetOptions &
   TransactionOptions;
@@ -53,6 +56,10 @@ export type RemoveOptions = DriverRemoveOptions &
 
 export type ListOptions = DriverListOptions &
   CommonListOptions &
+  TransactionOptions;
+
+export type ClearOptions = DriverClearOptions &
+  CommonClearOptions &
   TransactionOptions;
 
 export type GetKeysOptions = TransactionOptions & {
@@ -205,8 +212,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
   getKeys: (base?: string, opts?: GetKeysOptions) => Promise<string[]>;
   // Utils
 
-  // TODO: what options should it have?
-  clear: (base?: string, opts?: TransactionOptions) => Promise<void>;
+  clear: (base?: string, opts?: ClearOptions) => Promise<void>;
   dispose: () => Promise<void>;
   watch: (callback: WatchCallback) => Promise<Unwatch>;
   unwatch: () => Promise<void>;

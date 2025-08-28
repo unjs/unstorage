@@ -1,4 +1,62 @@
-# Contributing: Developing Drivers for Unstorage
+# Contribution Guide
+
+<!-- https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/setting-guidelines-for-repository-contributors -->
+
+> All contributors lead the growth of Unstorage - including you!
+
+## Discussions
+
+You can involve in discussions using:
+
+- [GitHub Discussions](https://github.com/unjs/unstorage/discussions)
+
+## Contribute to the Code
+
+> [!IMPORTANT]
+> Please discuss your ideas with the maintainers before opening a pull request.
+
+### Local Development
+
+- Clone the [`unjs/unstorage`](https://github.com/unjs/unstorage) git repository.
+- Install the latest LTS version of [Node.js](https://nodejs.org/en/) (v22+).
+- Enable [corepack](https://github.com/nodejs/corepack) using `corepack enable` (run `npm i -g corepack` if it's not available).
+- Install dependencies using `pnpm install`.
+- Run the generation script after creating a new driver using `pnpm generate`.
+- Build the project using `pnpm build`.
+- Add, modify, and run tests using `pnpm test`.
+
+## Reporting Issues
+
+You might encounter a bug while using Unstorage.
+
+Although we aim to resolve all known issues, new bugs can emerge over time. Your bug report helps us find and fix them faster — even if you're unable to fix the underlying code yourself.
+
+Here’s how to report a bug effectively:
+
+### Ensure It's a Bug
+
+Sometimes what seems like a bug may actually be expected behavior or a missing feature. Make sure you’re reporting an actual bug by creating a minimal unstorage project and reducing scope.
+
+### Create a Minimal Reproduction
+
+Please create a minimal reproduction using the starter templates or a simple repository.
+
+Sometimes, bugs originate from another layer — not Unstorage itself. A minimal reproduction helps identify the source and speeds up debugging.
+
+If your bug involves a higher-level framework, please report it there. Maintainers will help narrow it down to an Unstorage-level issue if needed.
+
+### Search Existing Issues and Discussions
+
+Before creating a new issue, search existing [issues](https://github.com/unjs/unstorage/issues) and [discussions](https://github.com/unjs/unstorage/discussions) to see if your bug has already been reported.
+
+If it has already been reported:
+- Add a 👍 reaction to the original post (instead of commenting "me too" or "when will it be fixed").
+- If you can provide additional context or a better/smaller reproduction, please share it.
+
+> [!NOTE]
+> If the issue seems related but different or old or already closed, it's **better to open a new issue**. Maintainers will merge similar issues if needed.
+
+## Contributing: Developing Drivers for Unstorage
 
 This guide explains how to develop a custom driver for `unstorage`, including naming conventions, typing options, and best practices. For a practical example, see the [`deno-kv` driver](https://github.com/unjs/unstorage/blob/main/src/drivers/deno-kv.ts).
 

@@ -50,6 +50,7 @@ If your bug involves a higher-level framework, please report it there. Maintaine
 Before creating a new issue, search existing [issues](https://github.com/unjs/unstorage/issues) and [discussions](https://github.com/unjs/unstorage/discussions) to see if your bug has already been reported.
 
 If it has already been reported:
+
 - Add a 👍 reaction to the original post (instead of commenting "me too" or "when will it be fixed").
 - If you can provide additional context or a better/smaller reproduction, please share it.
 

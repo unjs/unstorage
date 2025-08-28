@@ -1,8 +1,4 @@
----
-icon: ic:round-code
----
-
-# Developing Drivers
+# Contributing: Developing Drivers for Unstorage
 
 This guide explains how to develop a custom driver for `unstorage`, including naming conventions, typing options, and best practices. For a practical example, see the [`deno-kv` driver](https://github.com/unjs/unstorage/blob/main/src/drivers/deno-kv.ts).
 
@@ -11,8 +7,8 @@ This guide explains how to develop a custom driver for `unstorage`, including na
 - **Driver file:** Use a clear, kebab-case name (e.g., `my-custom-driver.ts`).
 - **Options interface:** Name it as `MyCustomOptions` (PascalCase, ends with `Options`).
 - **Driver interface:** Name it as `MyCustomDriver` (PascalCase, ends with `Driver`).
-- **Driver name constant:** Declare a `DRIVER_NAME` constant in your file, and ensure its value is identical to the file name (without extension). This should match the pattern in [`src/drivers`](https://github.com/unjs/unstorage/tree/main/src/drivers) (see e.g. `deno-kv.ts`, `fs.ts`, `redis.ts`).
-  - The file name is used to determine how to access the driver's options in the global options types (e.g. `opts["my-custom-driver"]`).
+- **Driver name constant:** It is recommended to use a `DRIVER_NAME` constant as the driver name in the implementation and should match the pattern in [`src/drivers`](https://github.com/unjs/unstorage/tree/main/src/drivers) (see e.g. `deno-kv.ts`, `fs.ts`, `redis.ts`). The file name should match the `DRIVER_NAME` constant.
+- **File name transformation:** The file name is used to determine how to access the driver's options in the global options types. Internally, a transformation (is applied to the file name for type access. For example, `deno-kv` becomes `denoKV`, so you would access options as `opts.denoKV`.
 
 ## 2. Typing Driver Options
 
@@ -34,6 +30,7 @@ Define a driver interface with the suffix `Driver`. This interface should have t
 - `setOptions`: Type for options passed to `setItem`.
 - `removeOptions`: Type for options passed to `removeItem`.
 - `listOptions`: Type for options passed to `getKeys`.
+- `clearOptions`: Type for options passed to `clear` (if your driver supports it).
 
 Example:
 
@@ -43,6 +40,7 @@ export interface MyCustomDriver {
   setOptions: { foo?: string };
   removeOptions: {};
   listOptions: { prefix?: string };
+  clearOptions: { deep?: boolean };
 }
 ```
 
@@ -52,6 +50,7 @@ Use the `defineDriver` helper, passing your options and driver types:
 
 ```ts
 import { defineDriver } from "unstorage";
+import type { MyCustomOptions, MyCustomDriver } from "./my-custom-driver";
 import type {
   GetOptions,
   SetOptions,
@@ -59,13 +58,15 @@ import type {
   ListOptions,
 } from "../types";
 
-const DRIVER_NAME = "my-driver";
+const DRIVER_NAME = "my-custom-driver";
 
-export default defineDriver<MyCustomOptions, MyCustomDriverInstance>(
+export default defineDriver<MyCustomOptions, unknown, MyCustomDriver>(
   (options) => {
     return {
-      name: "my-custom-driver",
+      name: DRIVER_NAME,
       async getItem(key, opts: GetOptions) {
+        // Get the raw option
+        const raw = opts?.["my-custom-driver"]?.raw;
         /** Implementation */
       },
       async setItem(key, value, opts: SetOptions) {
@@ -89,32 +90,30 @@ Take a look at the [deno driver](https://github.com/unjs/unstorage/blob/main/src
 
 After defining your driver and its types:
 
-**Run the code generation script:**
+1. **Run the code generation script:**
 
-```sh
-pnpm gen-drivers
-```
+   ```sh
+   pnpm gen-drivers
+   ```
 
-This will update the generated types so your driver's options are available inside the `GetOptions`, `SetOptions`, `RemoveOptions`, and `ListOptions` types.
+   This will update the generated types so your driver's options are available inside the `GetOptions`, `SetOptions`, `RemoveOptions`, and `ListOptions` types.
 
-**Use the generated types** in your code:
+2. **Use the generated types** in your code:
 
-```ts
-import type { SetOptions } from "unstorage";
+   ```ts
+   import type { SetOptions } from "unstorage";
 
-defineDriver((options) => {
-  return {
-    async setItem(key, value, opts: SetOptions) {
-      // Get the raw option
-      const raw = opts?.["my-driver"]?.raw;
-      // opts is typed for your driver
-    },
-  };
-});
-```
+   defineDriver((options) => {
+     return {
+       async setItem(key, value, opts: SetOptions) {
+         // opts is typed for your driver
+       },
+     };
+   });
+   ```
 
 Some important notes:
 
 - Always use the `Driver` and `Options` suffixes for your types.
 - Document your options and method behaviors.
-- Document if your driver supports the [common options](https://github.com/unjs/unstorage/blob/main/src/types.ts#L27)
+- Document if your driver supports the [common options](https://github.com/unjs/unstorage/blob/src/types.ts#L27)

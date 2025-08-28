@@ -56,6 +56,7 @@ import type {
   SetOptions,
   RemoveOptions,
   ListOptions,
+  ClearOptions,
 } from "../types";
 
 const DRIVER_NAME = "my-custom-driver";
@@ -76,6 +77,9 @@ export default defineDriver<MyCustomOptions, unknown, MyCustomDriver>(
         /** Implementation */
       },
       async getKeys(base, opts: ListOptions) {
+        /** Implementation */
+      },
+      async clear(base, opts: ClearOptions) {
         /** Implementation */
       },
       // ...other methods...

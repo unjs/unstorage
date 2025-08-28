@@ -48,6 +48,8 @@ export function prefixStorage<T extends StorageValue>(
       // Remove Prefix
       .then((keys) => keys.map((key) => key.slice(base.length)));
 
+  nsStorage.keys = nsStorage.getKeys;
+
   nsStorage.getItems = async <U extends T>(
     items: (string | { key: string; options?: TransactionOptions })[],
     commonOptions?: TransactionOptions

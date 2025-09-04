@@ -55,8 +55,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2(@capacitor/core@7.4.3)
       '@cloudflare/workers-types':
-        specifier: ^4.20250903.0
-        version: 4.20250903.0
+        specifier: ^4.20250904.0
+        version: 4.20250904.0
       '@deno/kv':
         specifier: ^0.12.0
         version: 0.12.0
@@ -185,7 +185,7 @@ importers:
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.3.0)(jiti@2.5.1)(jsdom@26.1.0)
       wrangler:
         specifier: ^4.33.2
-        version: 4.33.2(@cloudflare/workers-types@4.20250903.0)
+        version: 4.33.2(@cloudflare/workers-types@4.20250904.0)
 
 packages:
 
@@ -403,8 +403,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20250903.0':
-    resolution: {integrity: sha512-F6G3MG7EZxsJ2Fgsy3eed+U2fU/XGfKqDlyY/vCL/zUqI8KuaNx8GVnxttqzktBY55HK3xe82Zpj8xujW6PfXw==}
+  '@cloudflare/workers-types@4.20250904.0':
+    resolution: {integrity: sha512-674ULxQdY+RJOUdmQUa8XSYjHR8EVcQjFz50dKuubX7NxlUeDWeeEgsXGeYZ1oXZSGRazykalt6BMwuKm05DMw==}
 
   '@colors/colors@1.6.0':
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
@@ -2479,6 +2479,7 @@ packages:
   eslint-plugin-markdown@5.1.0:
     resolution: {integrity: sha512-SJeyKko1K6GwI0AN6xeCDToXDkfKZfXcexA6B+O2Wr2btUS9GrC+YgwSyVli5DJnctUHjFXcQ2cqTaAmVoLi2A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: Please use @eslint/markdown instead
     peerDependencies:
       eslint: '>=8'
 
@@ -5384,7 +5385,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20250829.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20250903.0': {}
+  '@cloudflare/workers-types@4.20250904.0': {}
 
   '@colors/colors@1.6.0': {}
 
@@ -10078,7 +10079,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20250829.0
       '@cloudflare/workerd-windows-64': 1.20250829.0
 
-  wrangler@4.33.2(@cloudflare/workers-types@4.20250903.0):
+  wrangler@4.33.2(@cloudflare/workers-types@4.20250904.0):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.0
       '@cloudflare/unenv-preset': 2.7.1(unenv@2.0.0-rc.19)(workerd@1.20250829.0)
@@ -10089,7 +10090,7 @@ snapshots:
       unenv: 2.0.0-rc.19
       workerd: 1.20250829.0
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20250903.0
+      '@cloudflare/workers-types': 4.20250904.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil

@@ -20,7 +20,8 @@ const DEFAULT_TABLE_NAME = "unstorage";
 
 const kExperimentalWarning = "__unstorage_db0_experimental_warning__";
 
-export default defineDriver((opts: DB0DriverOptions) => {
+export default defineDriver<DB0DriverOptions>((optsInput) => {
+  const opts = { ...optsInput };
   opts.tableName = opts.tableName || DEFAULT_TABLE_NAME;
 
   let setupPromise: Promise<void> | undefined;

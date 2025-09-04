@@ -12,7 +12,7 @@ export interface TestContext {
 }
 
 export interface TestOptions {
-  driver: Driver | (() => Driver);
+  driver: Driver<any, any, any> | (() => Driver<any, any, any>);
   noKeysSupport?: boolean;
   additionalTests?: (ctx: TestContext) => void;
 }

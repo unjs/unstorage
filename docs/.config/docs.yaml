@@ -5,6 +5,11 @@ description: Unified key-value storage API with conventional features and 20+ bu
 github: unjs/unstorage
 themeColor: amber
 url: https://unstorage.unjs.io
+socials:
+  twitter: "https://twitter.com/unjsio"
+  bluesky: "https://bsky.app/profile/unjs.io"
+sponsors:
+  api: https://sponsors.pi0.io/sponsors.json
 redirects:
   "/usage": "/getting-started/usage"
   "/utils": "/getting-started/utils"

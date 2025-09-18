@@ -88,8 +88,8 @@ importers:
         specifier: ^1.35.3
         version: 1.35.3
       '@vercel/blob':
-        specifier: ^1.1.1
-        version: 1.1.1
+        specifier: ^2.0.0
+        version: 2.0.0
       '@vercel/functions':
         specifier: ^3.0.0
         version: 3.0.0
@@ -1606,9 +1606,9 @@ packages:
   '@upstash/redis@1.35.3':
     resolution: {integrity: sha512-hSjv66NOuahW3MisRGlSgoszU2uONAY2l5Qo3Sae8OT3/Tng9K+2/cBRuyPBX8egwEGcNNCF9+r0V6grNnhL+w==}
 
-  '@vercel/blob@1.1.1':
-    resolution: {integrity: sha512-heiJGj2qt5qTv6yiShH9f6KRAoZGj+lz61GQ+lBRL4lhvUmKI9A51KYlQTnsUd9ymdFlKHBlvmPeG+yGz2Qsbg==}
-    engines: {node: '>=16.14'}
+  '@vercel/blob@2.0.0':
+    resolution: {integrity: sha512-oAj7Pdy83YKSwIaMFoM7zFeLYWRc+qUpW3PiDSblxQMnGFb43qs4bmfq7dr/+JIfwhs6PTwe1o2YBwKhyjWxXw==}
+    engines: {node: '>=20.0.0'}
 
   '@vercel/functions@3.0.0':
     resolution: {integrity: sha512-U7PRdjAcwirEg1u/oAbbwgWXZvZvrtuh2F1B9LB49bcXAIMXYonbFCn2euKZCyxDsANBJUY4R1QgExyKdTLhiA==}
@@ -2479,6 +2479,7 @@ packages:
   eslint-plugin-markdown@5.1.0:
     resolution: {integrity: sha512-SJeyKko1K6GwI0AN6xeCDToXDkfKZfXcexA6B+O2Wr2btUS9GrC+YgwSyVli5DJnctUHjFXcQ2cqTaAmVoLi2A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: Please use @eslint/markdown instead
     peerDependencies:
       eslint: '>=8'
 
@@ -6354,7 +6355,7 @@ snapshots:
     dependencies:
       uncrypto: 0.1.3
 
-  '@vercel/blob@1.1.1':
+  '@vercel/blob@2.0.0':
     dependencies:
       async-retry: 1.3.3
       is-buffer: 2.0.5

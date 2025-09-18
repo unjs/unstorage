@@ -69,7 +69,7 @@ export async function readdirRecursive(
           files.push(...dirFiles.map((f) => entry.name + "/" + f));
         }
       } else {
-        if (!(ignore && ignore(entry.name))) {
+        if (!(ignore && ignore(entryPath))) {
           files.push(entry.name);
         }
       }

@@ -60,6 +60,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
 
   return {
     name: DRIVER_NAME,
+    options: opts,
     async hasItem(key: string) {
       const blob = await get(key);
       return !!blob;

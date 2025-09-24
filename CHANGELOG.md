@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.17.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.17.0...v1.17.1)
+
+### 🩹 Fixes
+
+- **prefixStorage:** Strip prefix from `keys()` ([#666](https://github.com/unjs/unstorage/pull/666))
+- **vercel-blob:** Expose driver `options` ([#671](https://github.com/unjs/unstorage/pull/671))
+
+### 📖 Documentation
+
+- **redis:** Update github links and cluster warning ([#667](https://github.com/unjs/unstorage/pull/667))
+
+### 📦 Build
+
+- Allow `@vercel/functions` v3 as peer dep ([8bb9943](https://github.com/unjs/unstorage/commit/8bb9943))
+
+### 🏡 Chore
+
+- Update deps ([a7f09d9](https://github.com/unjs/unstorage/commit/a7f09d9))
+- Update lockfile ([c888a96](https://github.com/unjs/unstorage/commit/c888a96))
+
+### ❤️ Contributors
+
+- Connor Pearson ([@cjpearson](https://github.com/cjpearson))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Sébastien Chopin <seb@nuxt.com>
+- Rihan ([@RihanArfan](https://github.com/RihanArfan))
+
 ## v1.17.0
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.16.1...v1.17.0)

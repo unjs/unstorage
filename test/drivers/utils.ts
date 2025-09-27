@@ -206,6 +206,7 @@ export function testDriver(opts: TestOptions) {
   }
 
   it("removeItem", async () => {
+    await ctx.storage.setItem("s1:a", "test_data");
     await ctx.storage.removeItem("s1:a", false);
     expect(await ctx.storage.hasItem("s1:a")).toBe(false);
     expect(await ctx.storage.getItem("s1:a")).toBe(null);

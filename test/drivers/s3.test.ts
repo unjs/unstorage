@@ -18,7 +18,7 @@ describe.skipIf(
         accessKeyId: accessKeyId!,
         secretAccessKey: secretAccessKey!,
         bucket: bucket!,
-        endpoint: endpoint!,
+        base: endpoint!,
         region: region!,
       }),
     additionalTests(ctx) {

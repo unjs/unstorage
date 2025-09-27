@@ -20,6 +20,18 @@ export default defineBuildConfig({
       ext: "cjs",
       declaration: false,
     },
+    {
+      input: "src/loader/",
+      outDir: "dist/loader",
+      format: "esm",
+    },
+    {
+      input: "src/loader/",
+      outDir: "dist/loader",
+      format: "cjs",
+      ext: "cjs",
+      declaration: false,
+    },
   ],
   externals: ["mongodb", "unstorage", /unstorage\/drivers\//],
 });

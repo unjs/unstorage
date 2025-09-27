@@ -1,3 +1,4 @@
+import type { TransactionOptions } from "../types";
 import {
   defineDriver,
   createRequiredError,
@@ -18,12 +19,24 @@ export interface S3DriverOptions {
   secretAccessKey: string;
 
   /**
+   * Session token
+   */
+  sessionToken?: string;
+
+  /**
    * The endpoint URL of the S3 service.
    *
    * - For AWS S3: "https://s3.[region].amazonaws.com/"
    * - For cloudflare R2: "https://[uid].r2.cloudflarestorage.com/"
    */
-  endpoint: string;
+  base: string;
+
+  /**
+   *
+   * @deprecated use `base` option
+   *
+   */
+  endpoint?: string;
 
   /**
    * The region of the S3 bucket.
@@ -36,7 +49,7 @@ export interface S3DriverOptions {
   /**
    * The name of the bucket.
    */
-  bucket: string;
+  bucket?: string;
 
   /**
    * Enabled by default to speedup `clear()` operation. Set to `false` if provider is not implementing [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html).
@@ -50,31 +63,65 @@ export default defineDriver((options: S3DriverOptions) => {
   let _awsClient: AwsClient;
   const getAwsClient = () => {
     if (!_awsClient) {
-      if (!options.accessKeyId) {
+      const accessKeyId =
+        options.accessKeyId || globalThis.process?.env?.AWS_ACCESS_KEY_ID;
+      if (!accessKeyId) {
         throw createRequiredError(DRIVER_NAME, "accessKeyId");
       }
-      if (!options.secretAccessKey) {
+      const secretAccessKey =
+        options.secretAccessKey ||
+        globalThis.process?.env?.AWS_SECRET_ACCESS_KEY;
+      if (!secretAccessKey) {
         throw createRequiredError(DRIVER_NAME, "secretAccessKey");
       }
-      if (!options.endpoint) {
-        throw createRequiredError(DRIVER_NAME, "endpoint");
-      }
-      if (!options.region) {
+      const region = options.region || globalThis.process?.env?.AWS_REGION;
+      if (!region) {
         throw createRequiredError(DRIVER_NAME, "region");
       }
+      const sessionToken =
+        options.sessionToken || globalThis.process?.env?.AWS_SESSION_TOKEN;
       _awsClient = new AwsClient({
         service: "s3",
-        accessKeyId: options.accessKeyId,
-        secretAccessKey: options.secretAccessKey,
-        region: options.region,
+        accessKeyId,
+        secretAccessKey,
+        sessionToken,
+        region,
       });
     }
     return _awsClient;
   };
 
-  const baseURL = `${options.endpoint.replace(/\/$/, "")}/${options.bucket || ""}`;
+  if (!options.base && !options.endpoint) {
+    throw createRequiredError(DRIVER_NAME, "base");
+  }
+
+  const baseURL = options.base
+    ? `${options.base.replace(/^\/\//, "https://")}${options.bucket?.replace(/^/, "/") ?? ""}`
+    : `${options.endpoint?.replace(/\/$/, "")}/${options.bucket || ""}`;
 
   const url = (key: string = "") => `${baseURL}/${normalizeKey(key, "/")}`;
+
+  const getHeaders = (
+    topts: TransactionOptions | undefined,
+    defaultHeaders?: Record<string, string>
+  ) => {
+    const headers = {
+      ...defaultHeaders,
+      ...(Object.fromEntries(
+        Object.entries(topts?.headers ?? {}).map(([key, value]) => [
+          `x-amz-meta-${key}`,
+          value,
+        ])
+      ) as Record<string, string>),
+    };
+    if (topts?.cacheControl && !headers["Cache-Control"]) {
+      headers["Cache-Control"] = topts.cacheControl;
+    }
+    if (topts?.contentType && !headers["Content-Type"]) {
+      headers["Content-Type"] = topts.contentType;
+    }
+    return headers;
+  };
 
   const awsFetch = async (url: string, opts?: RequestInit) => {
     const request = await getAwsClient().sign(url, opts);
@@ -123,10 +170,15 @@ export default defineDriver((options: S3DriverOptions) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
-  const putObject = async (key: string, value: string) => {
+  const putObject = async (
+    key: string,
+    value: string,
+    topts: TransactionOptions
+  ) => {
     return awsFetch(url(key), {
       method: "PUT",
       body: value,
+      headers: getHeaders(topts),
     });
   };
 
@@ -168,11 +220,11 @@ export default defineDriver((options: S3DriverOptions) => {
     getItemRaw(key) {
       return getObject(key).then((res) => (res ? res.arrayBuffer() : null));
     },
-    async setItem(key, value) {
-      await putObject(key, value);
+    async setItem(key, value, topts) {
+      await putObject(key, value, topts);
     },
-    async setItemRaw(key, value) {
-      await putObject(key, value);
+    async setItemRaw(key, value, topts) {
+      await putObject(key, value, topts);
     },
     getMeta(key) {
       return headObject(key);

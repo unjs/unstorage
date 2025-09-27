@@ -21,6 +21,11 @@
       "types": "./dist/server.d.ts",
       "import": "./dist/server.mjs",
       "require": "./dist/server.cjs"
+    },
+    "./loader/*": {
+      "types": "./dist/loader/*.d.ts",
+      "import": "./dist/loader/*.mjs",
+      "require": "./dist/loader/*.cjs"
     }
   },
   "main": "./dist/index.cjs",

@@ -15,9 +15,7 @@
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "files": [
-    "dist",
-    "drivers",
-    "server.d.ts"
+    "dist"
   ],
   "scripts": {
     "bench": "node test/server.bench.ts",
@@ -31,9 +29,6 @@
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
     "test:types": "tsc --noEmit --skipLibCheck",
     "unstorage": "node jiti src/cli.ts"
-  },
-  "dependencies": {
-    "srvx": "^0.8.13"
   },
   "devDependencies": {
     "@azure/app-configuration": "^1.9.0",
@@ -84,6 +79,7 @@
     "ofetch": "^1.4.1",
     "prettier": "^3.6.2",
     "scule": "^1.3.0",
+    "srvx": "^0.8.13",
     "typescript": "^5.9.2",
     "uploadthing": "^7.7.4",
     "vite": "^7.1.6",

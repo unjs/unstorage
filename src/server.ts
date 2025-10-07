@@ -1,5 +1,5 @@
 import type { Storage, TransactionOptions, StorageMeta } from "./types";
-import { H3, HTTPError, H3Event, defineHandler } from "h3";
+import { HTTPError, H3Event, defineHandler } from "h3";
 import { stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
 
@@ -131,7 +131,7 @@ export function createStorageHandler(
     });
   });
 
-  return new H3({ debug: false }).use(handler).fetch;
+  return handler.fetch as (req: Request) => Response | Promise<Response>;
 }
 
 function setMetaHeaders(event: H3Event, meta: StorageMeta) {

@@ -1,6 +1,6 @@
 {
   "name": "unstorage",
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0-alpha.1",
   "description": "Universal Storage Layer",
   "homepage": "https://unstorage.unjs.io",
   "repository": "unjs/unstorage",
@@ -25,7 +25,7 @@
     "lint": "eslint . && prettier -c .",
     "lint:fix": "eslint . --fix && prettier -w .",
     "prepack": "pnpm build",
-    "release": "pnpm test && pnpm build && changelogen --release --publish --publishTag alpha --push",
+    "release": "pnpm test && pnpm build && changelogen --release --prerelease --publish --publishTag alpha --push",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
     "test:types": "tsc --noEmit --skipLibCheck",
     "unstorage": "node jiti src/cli.ts"

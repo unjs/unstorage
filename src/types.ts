@@ -1,3 +1,11 @@
+import type {
+  DriverClearOptions,
+  DriverGetOptions,
+  DriverListOptions,
+  DriverRemoveOptions,
+  DriverSetOptions,
+} from "./_drivers";
+
 export type StorageValue = null | string | number | boolean | object;
 export type WatchEvent = "update" | "remove";
 export type WatchCallback = (event: WatchEvent, key: string) => any;
@@ -15,8 +23,44 @@ export interface StorageMeta {
   [key: string]: StorageValue | Date | undefined;
 }
 
-// TODO: type ttl
 export type TransactionOptions = Record<string, any>;
+
+export interface CommonGetOptions {}
+
+export interface CommonSetOptions {
+  /**
+   * Time to live in seconds.
+   */
+  ttl?: number;
+}
+
+export interface CommonRemoveOptions {
+  removeMeta?: boolean;
+}
+
+export interface CommonListOptions {}
+
+export interface CommonClearOptions {}
+
+export type GetOptions = DriverGetOptions &
+  CommonGetOptions &
+  TransactionOptions;
+
+export type SetOptions = DriverSetOptions &
+  CommonSetOptions &
+  TransactionOptions;
+
+export type RemoveOptions = DriverRemoveOptions &
+  CommonRemoveOptions &
+  TransactionOptions;
+
+export type ListOptions = DriverListOptions &
+  CommonListOptions &
+  TransactionOptions;
+
+export type ClearOptions = DriverClearOptions &
+  CommonClearOptions &
+  TransactionOptions;
 
 export type GetKeysOptions = TransactionOptions & {
   maxDepth?: number;
@@ -99,22 +143,22 @@ export interface Storage<T extends StorageValue = StorageValue> {
     K extends string & keyof StorageItemMap<U>,
   >(
     key: K,
-    ops?: TransactionOptions
+    ops?: GetOptions
   ): Promise<StorageItemType<T, K> | null>;
   getItem<R = StorageItemType<T, string>>(
     key: string,
-    opts?: TransactionOptions
+    opts?: GetOptions
   ): Promise<R | null>;
 
   /** @experimental */
   getItems: <U extends T>(
-    items: (string | { key: string; options?: TransactionOptions })[],
-    commonOptions?: TransactionOptions
+    items: (string | { key: string; options?: GetOptions })[],
+    commonOptions?: GetOptions
   ) => Promise<{ key: string; value: U }[]>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   getItemRaw: <T = any>(
     key: string,
-    opts?: TransactionOptions
+    opts?: GetOptions
   ) => Promise<MaybeDefined<T> | null>;
 
   setItem<
@@ -123,24 +167,20 @@ export interface Storage<T extends StorageValue = StorageValue> {
   >(
     key: K,
     value: StorageItemType<T, K>,
-    opts?: TransactionOptions
+    opts?: SetOptions
   ): Promise<void>;
-  setItem<U extends T>(
-    key: string,
-    value: U,
-    opts?: TransactionOptions
-  ): Promise<void>;
+  setItem<U extends T>(key: string, value: U, opts?: SetOptions): Promise<void>;
 
   /** @experimental */
   setItems: <U extends T>(
-    items: { key: string; value: U; options?: TransactionOptions }[],
-    commonOptions?: TransactionOptions
+    items: { key: string; value: U; options?: SetOptions }[],
+    commonOptions?: SetOptions
   ) => Promise<void>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   setItemRaw: <T = any>(
     key: string,
     value: MaybeDefined<T>,
-    opts?: TransactionOptions
+    opts?: SetOptions
   ) => Promise<void>;
 
   removeItem<
@@ -148,34 +188,31 @@ export interface Storage<T extends StorageValue = StorageValue> {
     K extends keyof StorageItemMap<U>,
   >(
     key: K,
-    opts?:
-      | (TransactionOptions & { removeMeta?: boolean })
-      | boolean /* legacy: removeMeta */
+    opts?: RemoveOptions | boolean /* legacy: removeMeta */
   ): Promise<void>;
   removeItem(
     key: string,
-    opts?:
-      | (TransactionOptions & { removeMeta?: boolean })
-      | boolean /* legacy: removeMeta */
+    opts?: RemoveOptions | boolean /* legacy: removeMeta */
   ): Promise<void>;
 
   // Meta
   getMeta: (
     key: string,
     opts?:
-      | (TransactionOptions & { nativeOnly?: boolean })
+      | (GetOptions & { nativeOnly?: boolean })
       | boolean /* legacy: nativeOnly */
   ) => MaybePromise<StorageMeta>;
   setMeta: (
     key: string,
     value: StorageMeta,
-    opts?: TransactionOptions
+    opts?: SetOptions
   ) => Promise<void>;
-  removeMeta: (key: string, opts?: TransactionOptions) => Promise<void>;
+  removeMeta: (key: string, opts?: RemoveOptions) => Promise<void>;
   // Keys
   getKeys: (base?: string, opts?: GetKeysOptions) => Promise<string[]>;
   // Utils
-  clear: (base?: string, opts?: TransactionOptions) => Promise<void>;
+
+  clear: (base?: string, opts?: ClearOptions) => Promise<void>;
   dispose: () => Promise<void>;
   watch: (callback: WatchCallback) => Promise<Unwatch>;
   unwatch: () => Promise<void>;

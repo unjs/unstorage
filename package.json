@@ -35,8 +35,7 @@
   "dependencies": {
     "destr": "^2.0.5",
     "ofetch": "^1.4.1",
-    "srvx": "^0.8.13",
-    "ufo": "^1.6.1"
+    "srvx": "^0.8.13"
   },
   "devDependencies": {
     "@azure/app-configuration": "^1.9.0",

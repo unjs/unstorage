@@ -4,7 +4,7 @@ import { stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
 
 export type StorageServerRequest = {
-  request: Request;
+  request: globalThis.Request;
   key: string;
   type: "read" | "write";
 };
@@ -20,6 +20,10 @@ export interface StorageServerOptions {
   authorize?: (request: StorageServerRequest) => void | Promise<void>;
   resolvePath?: (event: H3Event) => string;
 }
+
+export type FetchHandler = (
+  req: globalThis.Request
+) => globalThis.Response | Promise<globalThis.Response>;
 
 /**
  * This function creates a fetch handler for your custom storage server.
@@ -39,7 +43,9 @@ export interface StorageServerOptions {
 export function createStorageHandler(
   storage: Storage,
   opts: StorageServerOptions = {}
-): (req: Request) => Response | Promise<Response> {
+): (
+  req: globalThis.Request
+) => globalThis.Response | Promise<globalThis.Response> {
   const handler = defineHandler(async (event) => {
     const _path = opts.resolvePath?.(event) ?? event.url.pathname;
     const lastChar = _path[_path.length - 1];

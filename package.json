@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "anymatch": "^3.1.3",
-    "chokidar": "^4.0.3",
     "destr": "^2.0.5",
     "lru-cache": "^11.2.2",
     "node-fetch-native": "^1.6.7",
@@ -69,6 +68,7 @@
     "azurite": "^3.35.0",
     "better-sqlite3": "^12.2.0",
     "changelogen": "^0.6.2",
+    "chokidar": "^4.0.3",
     "citty": "^0.1.6",
     "db0": "^0.3.2",
     "eslint": "^9.35.0",
@@ -109,6 +109,7 @@
     "@vercel/functions": "^2.2.12 || ^3.0.0",
     "@vercel/kv": "^1.0.1",
     "aws4fetch": "^1.0.20",
+    "chokidar": "^4.0.3",
     "db0": ">=0.2.1",
     "idb-keyval": "^6.2.1",
     "ioredis": "^5.4.2",
@@ -159,6 +160,9 @@
       "optional": true
     },
     "aws4fetch": {
+      "optional": true
+    },
+    "chokidar": {
       "optional": true
     },
     "db0": {

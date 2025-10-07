@@ -1,8 +1,8 @@
 import { resolve } from "node:path";
 import { defineCommand, runMain } from "citty";
-import { listen } from "listhen";
+import { serve } from "srvx";
 import { createStorage } from "./storage.ts";
-import { createStorageServer } from "./server.ts";
+import { createStorageHandler } from "./server.ts";
 import fsDriver from "./drivers/fs.ts";
 
 const main = defineCommand({
@@ -15,24 +15,33 @@ const main = defineCommand({
       type: "string",
       description: "project root directory",
     },
+    port: {
+      type: "string",
+      description: "port to listen on",
+    },
+    host: {
+      type: "string",
+      description: "hostname to listen on",
+    },
     _dir: {
       type: "positional",
       default: ".",
       description: "project root directory (prefer using `--dir`)",
     },
   },
-  async run(args) {
-    const rootDir = resolve(args.args.dir || args.args._dir);
+  async run({ args }) {
+    const rootDir = resolve(args.dir || args._dir);
 
     const storage = createStorage({
       driver: fsDriver({ base: rootDir }),
     });
 
-    const storageServer = createStorageServer(storage);
+    const storageHandler = createStorageHandler(storage);
 
-    await listen(storageServer.handle, {
-      name: "unstorage server",
-      port: 8080,
+    serve({
+      fetch: storageHandler,
+      port: args.port,
+      hostname: args.host,
     });
   },
 });

@@ -8,8 +8,8 @@
   "sideEffects": false,
   "type": "module",
   "exports": {
-    "./drivers/*": "./drivers/*.mjs",
     ".": "./dist/index.mjs",
+    "./drivers/*": "./dist/drivers/*.mjs",
     "./server": "./dist/server.mjs"
   },
   "main": "./dist/index.mjs",

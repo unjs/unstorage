@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import vercelRuntimeCacheDriver from "../../src/drivers/vercel-runtime-cache";
-import { testDriver } from "./utils";
+import vercelRuntimeCacheDriver from "../../src/drivers/vercel-runtime-cache.ts";
+import { testDriver } from "./utils.ts";
 
 describe("drivers: vercel-runtime-cache", async () => {
   testDriver({

@@ -1,4 +1,8 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
 import {
   SecretClient,
   type SecretClientOptions,
@@ -77,7 +81,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
       const secrets = getKeyVaultClient()
         .listPropertiesOfSecrets()
         .byPage({ maxPageSize: opts.pageSize || 25 });
-      const keys = [];
+      const keys: string[] = [];
       for await (const page of secrets) {
         const pageKeys = page.map((secret) => decode(secret.name));
         keys.push(...pageKeys);

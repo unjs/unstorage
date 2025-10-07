@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from "vitest";
-import driver from "../../src/drivers/mongodb";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/mongodb.ts";
+import { testDriver } from "./utils.ts";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { promisify } from "node:util";
 

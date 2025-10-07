@@ -1,9 +1,9 @@
 import { describe, afterAll, expect, it } from "vitest";
-import driver from "../../src/drivers/http";
-import { createStorage } from "../../src";
-import { createStorageServer } from "../../src/server";
+import driver from "../../src/drivers/http.ts";
+import { createStorage } from "../../src/index.ts";
+import { createStorageServer } from "../../src/server.ts";
 import { listen } from "listhen";
-import { testDriver } from "./utils";
+import { testDriver } from "./utils.ts";
 
 describe("drivers: http", async () => {
   const remoteStorage = createStorage();

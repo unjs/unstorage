@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import driver from "../../src/drivers/indexedb";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/indexedb.ts";
+import { testDriver } from "./utils.ts";
 import "fake-indexeddb/auto";
-import { createStorage } from "../../src";
+import { createStorage } from "../../src/index.ts";
 
 describe("drivers: indexeddb", () => {
   testDriver({ driver: driver({ dbName: "test-db" }) });

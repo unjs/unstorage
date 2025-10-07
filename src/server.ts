@@ -1,7 +1,7 @@
-import type { Storage, TransactionOptions, StorageMeta } from "./types";
+import type { Storage, TransactionOptions, StorageMeta } from "./types.ts";
 import { HTTPError, H3Event, defineHandler } from "h3";
-import { stringify } from "./_utils";
-import { normalizeKey, normalizeBaseKey } from "./utils";
+import { stringify } from "./_utils.ts";
+import { normalizeKey, normalizeBaseKey } from "./utils.ts";
 
 export type StorageServerRequest = {
   request: globalThis.Request;

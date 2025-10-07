@@ -1,6 +1,6 @@
 import { describe } from "vitest";
-import driver from "../../src/drivers/azure-app-configuration";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/azure-app-configuration.ts";
+import { testDriver } from "./utils.ts";
 
 describe.skip("drivers: azure-app-configuration", () => {
   testDriver({

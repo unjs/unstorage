@@ -1,6 +1,6 @@
 import { describe } from "vitest";
-import cfKvHttpDriver from "../../src/drivers/cloudflare-kv-http";
-import { testDriver } from "./utils";
+import cfKvHttpDriver from "../../src/drivers/cloudflare-kv-http.ts";
+import { testDriver } from "./utils.ts";
 
 const accountId = process.env.VITE_CLOUDFLARE_ACC_ID;
 const namespaceId = process.env.VITE_CLOUDFLARE_KV_NS_ID;

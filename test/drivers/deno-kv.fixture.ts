@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
-import { createStorage } from "../../src";
+import { createStorage } from "../../src/index.ts";
 import denoKV from "../../src/drivers/deno-kv.ts";
-import { createStorageServer } from "../../src/server";
+import { createStorageServer } from "../../src/server.ts";
 
 const storage = createStorage({
   driver: denoKV({

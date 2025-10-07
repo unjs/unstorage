@@ -3,7 +3,7 @@ import { exec, execSync, type ChildProcess } from "node:child_process";
 import { describe, beforeAll, afterAll } from "vitest";
 import { getRandomPort, waitForPort } from "get-port-please";
 import httpDriver from "../../src/drivers/http.ts";
-import { testDriver } from "./utils";
+import { testDriver } from "./utils.ts";
 
 let hasDeno: boolean;
 // prettier-ignore

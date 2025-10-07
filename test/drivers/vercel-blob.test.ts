@@ -1,6 +1,6 @@
 import { describe } from "vitest";
-import { testDriver } from "./utils";
-import vercelBlobDriver from "../../src/drivers/vercel-blob";
+import { testDriver } from "./utils.ts";
+import vercelBlobDriver from "../../src/drivers/vercel-blob.ts";
 
 const token = process.env.VITE_VERCEL_BLOB_READ_WRITE_TOKEN;
 

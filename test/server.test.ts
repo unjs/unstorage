@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import { describe, it, expect } from "vitest";
 import { serve } from "srvx";
 import { $fetch } from "ofetch";
-import { createStorage } from "../src";
-import { createStorageHandler } from "../src/server";
+import { createStorage } from "../src/index.ts";
+import { createStorageHandler } from "../src/server.ts";
 import fsDriver from "../src/drivers/fs.ts";
 import httpDriver from "../src/drivers/http.ts";
 

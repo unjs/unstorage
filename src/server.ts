@@ -11,9 +11,9 @@ import {
   type EventHandler,
   H3Event,
 } from "h3";
-import type { Storage, TransactionOptions, StorageMeta } from "./types";
-import { stringify } from "./_utils";
-import { normalizeKey, normalizeBaseKey } from "./utils";
+import type { Storage, TransactionOptions, StorageMeta } from "./types.ts";
+import { stringify } from "./_utils.ts";
+import { normalizeKey, normalizeBaseKey } from "./utils.ts";
 
 export type StorageServerRequest = {
   event: H3Event;

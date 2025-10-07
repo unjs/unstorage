@@ -1,6 +1,6 @@
 import { it, describe, expect } from "vitest";
-import driver from "../../src/drivers/lru-cache";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/lru-cache.ts";
+import { testDriver } from "./utils.ts";
 
 describe("drivers: lru-cache", () => {
   testDriver({

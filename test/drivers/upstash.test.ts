@@ -1,6 +1,6 @@
 import { describe } from "vitest";
-import { testDriver } from "./utils";
-import upstashDriver from "../../src/drivers/upstash";
+import { testDriver } from "./utils.ts";
+import upstashDriver from "../../src/drivers/upstash.ts";
 
 const url = process.env.VITE_UPSTASH_REDIS_REST_URL;
 const token = process.env.VITE_UPSTASH_REDIS_REST_TOKEN;

@@ -1,4 +1,4 @@
-import { defineDriver, createError, normalizeKey } from "./utils/index";
+import { defineDriver, createError, normalizeKey } from "./utils/index.ts";
 import type { Kv, KvKey } from "@deno/kv";
 
 // https://docs.deno.com/deploy/kv/manual/

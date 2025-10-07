@@ -1,4 +1,4 @@
-import type { Driver } from "../..";
+import type { Driver } from "../../types.ts";
 
 type DriverFactory<OptionsT, InstanceT> = (
   opts: OptionsT

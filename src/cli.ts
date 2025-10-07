@@ -1,9 +1,9 @@
 import { resolve } from "node:path";
 import { defineCommand, runMain } from "citty";
 import { listen } from "listhen";
-import { createStorage } from "./storage";
-import { createStorageServer } from "./server";
-import fsDriver from "./drivers/fs";
+import { createStorage } from "./storage.ts";
+import { createStorageServer } from "./server.ts";
+import fsDriver from "./drivers/fs.ts";
 
 const main = defineCommand({
   meta: {

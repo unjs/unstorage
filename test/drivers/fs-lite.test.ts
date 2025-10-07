@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { resolve } from "node:path";
-import { readFile } from "../../src/drivers/utils/node-fs";
-import { testDriver } from "./utils";
-import driver from "../../src/drivers/fs-lite";
+import { readFile } from "../../src/drivers/utils/node-fs.ts";
+import { testDriver } from "./utils.ts";
+import driver from "../../src/drivers/fs-lite.ts";
 
 describe("drivers: fs-lite", () => {
   const dir = resolve(__dirname, "tmp/fs-lite");

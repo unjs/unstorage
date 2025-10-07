@@ -3,7 +3,7 @@ import {
   createRequiredError,
   normalizeKey,
   createError,
-} from "./utils";
+} from "./utils/index.ts";
 import { AwsClient } from "aws4fetch";
 
 export interface S3DriverOptions {

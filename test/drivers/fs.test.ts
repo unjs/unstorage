@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { resolve } from "node:path";
-import { readFile, writeFile } from "../../src/drivers/utils/node-fs";
-import { testDriver } from "./utils";
-import driver from "../../src/drivers/fs";
+import { readFile, writeFile } from "../../src/drivers/utils/node-fs.ts";
+import { testDriver } from "./utils.ts";
+import driver from "../../src/drivers/fs.ts";
 
 describe("drivers: fs", () => {
   const dir = resolve(__dirname, "tmp/fs");

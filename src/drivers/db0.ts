@@ -1,5 +1,5 @@
 import type { Database } from "db0";
-import { createError, defineDriver } from "./utils";
+import { createError, defineDriver } from "./utils/index.ts";
 
 interface ResultSchema {
   rows: Array<{

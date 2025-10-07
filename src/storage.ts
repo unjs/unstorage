@@ -7,16 +7,21 @@ import type {
   StorageValue,
   WatchEvent,
   TransactionOptions,
-} from "./types";
-import memory from "./drivers/memory";
-import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
+} from "./types.ts";
+import memory from "./drivers/memory.ts";
+import {
+  asyncCall,
+  deserializeRaw,
+  serializeRaw,
+  stringify,
+} from "./_utils.ts";
 import {
   normalizeKey,
   normalizeBaseKey,
   joinKeys,
   filterKeyByDepth,
   filterKeyByBase,
-} from "./utils";
+} from "./utils.ts";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -347,7 +352,7 @@ export function createStorage<T extends StorageValue>(
       base = normalizeBaseKey(base);
       const mounts = getMounts(base, true);
       let maskedMounts: string[] = [];
-      const allKeys = [];
+      const allKeys: string[] = [];
       let allMountsSupportMaxDepth = true;
       for (const mount of mounts) {
         if (!mount.driver.flags?.maxDepth) {

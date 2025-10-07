@@ -33,13 +33,13 @@
     "unstorage": "node jiti src/cli.ts"
   },
   "dependencies": {
-    "destr": "^2.0.5",
     "ofetch": "^1.4.1",
     "srvx": "^0.8.13"
   },
   "devDependencies": {
     "@azure/app-configuration": "^1.9.0",
     "@azure/cosmos": "^4.5.1",
+    "destr": "^2.0.5",
     "@azure/data-tables": "^13.3.1",
     "@azure/identity": "^4.12.0",
     "@azure/keyvault-secrets": "^4.10.0",

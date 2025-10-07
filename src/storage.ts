@@ -1,4 +1,4 @@
-import destr from "destr";
+import { destr } from "destr";
 import type {
   Storage,
   Driver,

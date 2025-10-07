@@ -7,7 +7,7 @@ describe("drivers: session-storage", () => {
   const jsdom = new JSDOM("", {
     url: "http://localhost",
   });
-  jsdom.virtualConsole.sendTo(console);
+  // jsdom.virtualConsole.sendTo(console);
 
   testDriver({
     driver: driver({ window: jsdom.window as unknown as typeof window }),

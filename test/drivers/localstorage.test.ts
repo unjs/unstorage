@@ -7,7 +7,7 @@ describe("drivers: localstorage", () => {
   const jsdom = new JSDOM("", {
     url: "http://localhost",
   });
-  jsdom.virtualConsole.sendTo(console);
+  // jsdom.virtualConsole.sendTo(console);
 
   jsdom.window.localStorage.setItem("__external_key__", "unrelated_data");
 

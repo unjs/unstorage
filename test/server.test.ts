@@ -1,31 +1,32 @@
 import { readFile } from "node:fs/promises";
 import { describe, it, expect } from "vitest";
-import { listen } from "listhen";
+import { serve } from "srvx";
 import { $fetch } from "ofetch";
 import { createStorage } from "../src";
-import { createStorageServer } from "../src/server";
+import { createStorageHandler } from "../src/server";
 import fsDriver from "../src/drivers/fs.ts";
 import httpDriver from "../src/drivers/http.ts";
 
 describe("server", () => {
   it("basic", async () => {
     const storage = createTestStorage();
-    const storageServer = createStorageServer(storage, {
+    const storageServer = createStorageHandler(storage, {
       authorize(req) {
         if (req.type === "read" && req.key.startsWith("private:")) {
           throw new Error("Unauthorized Read");
         }
       },
     });
-    const { close, url: serverURL } = await listen(storageServer.handle, {
-      port: { random: true },
+    const server = await serve({
+      port: 0,
+      fetch: storageServer,
     });
 
     const fetchStorage = (url: string, options?: any) =>
-      $fetch(url, { baseURL: serverURL, ...options });
+      $fetch(url, { baseURL: server.url!, ...options });
 
     const remoteStorage = createStorage({
-      driver: httpDriver({ base: serverURL }),
+      driver: httpDriver({ base: server.url! }),
     });
 
     expect(await fetchStorage("foo/", {})).toMatchObject([]);
@@ -48,8 +49,8 @@ describe("server", () => {
         throw error.data;
       })
     ).rejects.toMatchObject({
-      statusCode: 404,
-      statusMessage: "KV value not found",
+      status: 404,
+      message: "KV value not found",
     });
 
     await expect(
@@ -57,8 +58,9 @@ describe("server", () => {
         throw error.data;
       })
     ).rejects.toMatchObject({
-      statusCode: 401,
-      statusMessage: "Unauthorized Read",
+      status: 401,
+      statusText: "Unauthorized Read",
+      message: "Unauthorized Read",
     });
 
     // TTL
@@ -66,20 +68,21 @@ describe("server", () => {
     expect(await storage.getMeta("ttl")).toMatchObject({ ttl: 1000 });
     expect(await remoteStorage.getMeta("ttl")).toMatchObject({ ttl: 1000 });
 
-    await close();
+    await server.close();
   });
 
   it("properly encodes raw items", async () => {
     const storage = createStorage({
       driver: fsDriver({ base: "./test/fs-storage" }),
     });
-    const storageServer = createStorageServer(storage);
-    const { close, url: serverURL } = await listen(storageServer.handle, {
-      port: { random: true },
+    const storageServer = createStorageHandler(storage);
+    const server = await serve({
+      port: 0,
+      fetch: storageServer,
     });
 
     const fetchStorage = (url: string, options?: any) =>
-      $fetch(url, { baseURL: serverURL, ...options });
+      $fetch(url, { baseURL: server.url!, ...options });
 
     const file = await readFile("./test/test.png");
 
@@ -98,7 +101,7 @@ describe("server", () => {
     expect(storedFileFetch).toStrictEqual(file);
     expect(storedFileFetch).toStrictEqual(storedFileNode);
 
-    await close();
+    await server.close();
   });
 });
 

@@ -14,7 +14,6 @@ import type {
   GetStoreOptions,
   GetDeployStoreOptions,
 } from "@netlify/blobs";
-import { fetch } from "ofetch";
 
 const DRIVER_NAME = "netlify-blobs";
 

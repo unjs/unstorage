@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "destr": "^2.0.5",
-    "node-fetch-native": "^1.6.7",
     "ofetch": "^1.4.1",
     "srvx": "^0.8.13",
     "ufo": "^1.6.1"

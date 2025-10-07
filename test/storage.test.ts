@@ -5,9 +5,9 @@ import {
   snapshot,
   restoreSnapshot,
   prefixStorage,
-} from "../src";
-import memory from "../src/drivers/memory";
-import fs from "../src/drivers/fs";
+} from "../src/index.ts";
+import memory from "../src/drivers/memory.ts";
+import fs from "../src/drivers/fs.ts";
 
 const data = {
   "etc:conf": "test",

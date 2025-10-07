@@ -1,4 +1,4 @@
-import type { Storage, StorageValue, TransactionOptions } from "./types";
+import type { Storage, StorageValue, TransactionOptions } from "./types.ts";
 
 type StorageKeys = Array<keyof Storage>;
 

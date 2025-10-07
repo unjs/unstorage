@@ -1,6 +1,6 @@
 import { describe } from "vitest";
-import driver from "../../src/drivers/azure-cosmos";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/azure-cosmos.ts";
+import { testDriver } from "./utils.ts";
 
 describe.skip("drivers: azure-cosmos", () => {
   testDriver({

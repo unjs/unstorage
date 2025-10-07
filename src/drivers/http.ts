@@ -1,5 +1,5 @@
-import type { TransactionOptions } from "..";
-import { defineDriver } from "./utils";
+import type { TransactionOptions } from "../types.ts";
+import { defineDriver } from "./utils/index.ts";
 import { type FetchError, $fetch as _fetch } from "ofetch";
 import { joinURL } from "ufo";
 
@@ -69,8 +69,8 @@ export default defineDriver((opts: HTTPOptions) => {
         method: "HEAD",
         headers: getHeaders(topts),
       });
-      let mtime = undefined;
-      let ttl = undefined;
+      let mtime: Date | undefined;
+      let ttl: number | undefined;
       const _lastModified = res.headers.get("last-modified");
       if (_lastModified) {
         mtime = new Date(_lastModified);

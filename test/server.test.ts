@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import { describe, it, expect } from "vitest";
 import { listen } from "listhen";
 import { $fetch } from "ofetch";
-import { createStorage } from "../src";
-import { createStorageServer } from "../src/server";
+import { createStorage } from "../src/index.ts";
+import { createStorageServer } from "../src/server.ts";
 import fsDriver from "../src/drivers/fs.ts";
 import httpDriver from "../src/drivers/http.ts";
 

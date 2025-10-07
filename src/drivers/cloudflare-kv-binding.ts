@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
-import { defineDriver, joinKeys } from "./utils";
-import { getKVBinding } from "./utils/cloudflare";
+import { defineDriver, joinKeys } from "./utils/index.ts";
+import { getKVBinding } from "./utils/cloudflare.ts";
 export interface KVOptions {
   binding?: string | KVNamespace;
 
@@ -24,7 +24,7 @@ export default defineDriver((opts: KVOptions) => {
   async function getKeys(base: string = "") {
     base = r(base);
     const binding = getKVBinding(opts.binding);
-    const keys = [];
+    const keys: { name: string }[] = [];
     let cursor: string | undefined = undefined;
     do {
       const kvList = await binding.list({ prefix: base || undefined, cursor });

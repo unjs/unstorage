@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import driver from "../../src/drivers/localstorage";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/localstorage.ts";
+import { testDriver } from "./utils.ts";
 import { JSDOM } from "jsdom";
 
 describe("drivers: localstorage", () => {

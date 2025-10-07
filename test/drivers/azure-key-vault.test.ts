@@ -1,6 +1,6 @@
 import { describe } from "vitest";
-import driver from "../../src/drivers/azure-key-vault";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/azure-key-vault.ts";
+import { testDriver } from "./utils.ts";
 
 describe.skip(
   "drivers: azure-key-vault",

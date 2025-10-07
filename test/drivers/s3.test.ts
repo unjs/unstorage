@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import s3Driver from "../../src/drivers/s3";
-import { testDriver } from "./utils";
+import s3Driver from "../../src/drivers/s3.ts";
+import { testDriver } from "./utils.ts";
 import { AwsClient } from "aws4fetch";
 
 const accessKeyId = process.env.VITE_S3_ACCESS_KEY_ID;

@@ -2,14 +2,18 @@ import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, relative, join } from "node:path";
 import { FSWatcher, type ChokidarOptions, watch } from "chokidar";
 import anymatch from "anymatch";
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
 import {
   readFile,
   writeFile,
   readdirRecursive,
   rmRecursive,
   unlink,
-} from "./utils/node-fs";
+} from "./utils/node-fs.ts";
 
 export interface FSStorageOptions {
   base?: string;
@@ -29,8 +33,7 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
   }
 
   const base = resolve(userOptions.base);
-
-  const ignore = anymatch(
+  const ignore = (anymatch as any)(
     userOptions.ignore || ["**/node_modules/**", "**/.git/**"]
   );
 

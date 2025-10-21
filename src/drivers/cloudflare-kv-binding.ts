@@ -8,6 +8,12 @@ export interface KVOptions {
   base?: string;
 
   /**
+   * The default time-to-live (ttl) for setItem in seconds.
+   * Should be larger than 60 seconds as per Cloudflare's [documentation](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
+   */
+  ttl?: number;
+
+  /**
    * The minimum time-to-live (ttl) for setItem in seconds.
    * The default is 60 seconds as per Cloudflare's [documentation](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
    */
@@ -55,18 +61,18 @@ export default defineDriver((opts: KVOptions) => {
     setItem(key, value, topts) {
       key = r(key);
       const binding = getKVBinding(opts.binding);
-      return binding.put(
-        key,
-        value,
-        topts
-          ? {
-              expirationTtl: topts?.ttl
-                ? Math.max(topts.ttl, opts.minTTL ?? 60)
-                : undefined,
-              ...topts,
-            }
-          : undefined
-      );
+      // prettier-ignore
+      const expirationTtl = topts?.ttl
+        ? Math.max(topts.ttl, opts.minTTL ?? 60)
+        : (opts.ttl ? Math.max(opts.ttl, opts.minTTL ?? 60) 
+          : undefined);
+      // prettier-ignore
+      const _opts = topts 
+        ? { expirationTtl, ...topts }
+        : (expirationTtl ? { expirationTtl } 
+          : undefined);
+
+      return binding.put(key, value, _opts);
     },
     removeItem(key) {
       key = r(key);

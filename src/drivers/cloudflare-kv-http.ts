@@ -58,6 +58,11 @@ export type KVHTTPOptions = {
    */
   base?: string;
   /**
+   * The default time-to-live (ttl) for setItem in seconds.
+   * Should be larger than 60 seconds as per Cloudflare's [documentation](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
+   */
+  ttl?: number;
+  /**
    * The minimum time-to-live (ttl) for setItem in seconds.
    * The default is 60 seconds as per Cloudflare's [documentation](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
    */
@@ -146,12 +151,21 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   };
 
   const setItem = async (key: string, value: any, topts: any) => {
+    // prettier-ignore
+    const expirationTtl = topts?.ttl
+        ? Math.max(topts.ttl, opts.minTTL ?? 60)
+        : (opts.ttl ? Math.max(opts.ttl, opts.minTTL ?? 60) 
+          : undefined);
+    // prettier-ignore
+    const query = topts 
+        ? { expiration_ttl: expirationTtl, ...topts }
+        : (expirationTtl ? { expiration_ttl: expirationTtl } 
+          : undefined);
+
     return await kvFetch(`/values/${r(key)}`, {
       method: "PUT",
       body: value,
-      query: topts?.ttl
-        ? { expiration_ttl: Math.max(topts?.ttl, opts.minTTL || 60) }
-        : undefined,
+      query,
     });
   };
 

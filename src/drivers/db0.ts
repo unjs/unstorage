@@ -137,7 +137,7 @@ export default defineDriver((opts: DB0DriverOptions) => {
     },
     dispose: async () => {
       await opts.database.dispose();
-    }
+    },
   };
 });
 

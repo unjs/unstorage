@@ -135,6 +135,9 @@ export default defineDriver((opts: DB0DriverOptions) => {
       await ensureTable();
       await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}}`;
     },
+    dispose: async () => {
+      await opts.database.dispose();
+    }
   };
 });
 

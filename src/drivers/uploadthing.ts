@@ -1,4 +1,5 @@
 import { defineDriver, normalizeKey } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { UTApi } from "uploadthing/server";
 
 // Reference: https://docs.uploadthing.com
@@ -101,4 +102,4 @@ export default defineDriver<UploadThingOptions, UTApi>((opts = {}) => {
     //   // TODO: We don't currently have an endpoint to fetch metadata, but it does exist
     // },
   };
-});
+}) as DriverFactory<UploadThingOptions, UTApi>;

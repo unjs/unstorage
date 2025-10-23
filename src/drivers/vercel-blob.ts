@@ -5,6 +5,7 @@ import {
   joinKeys,
   createError,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 
 export interface VercelBlobOptions {
   /**
@@ -154,4 +155,4 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       }
     },
   };
-});
+}) as DriverFactory<VercelBlobOptions, void>;

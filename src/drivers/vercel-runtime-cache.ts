@@ -1,4 +1,5 @@
 import { defineDriver, normalizeKey, joinKeys } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import type { RuntimeCache } from "@vercel/functions";
 
 export interface VercelCacheOptions {
@@ -70,7 +71,7 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
       }
     },
   };
-});
+}) as DriverFactory<VercelCacheOptions, RuntimeCache>;
 
 // --- internal ---
 

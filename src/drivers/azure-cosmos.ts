@@ -1,4 +1,5 @@
 import { createRequiredError, defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { Container, CosmosClient } from "@azure/cosmos";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -141,4 +142,4 @@ export default defineDriver((opts: AzureCosmosOptions) => {
       }
     },
   };
-});
+}) as DriverFactory<AzureCosmosOptions, Promise<Container>>;

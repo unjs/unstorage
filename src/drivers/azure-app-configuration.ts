@@ -1,4 +1,5 @@
 import { defineDriver, createRequiredError } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { AppConfigurationClient } from "@azure/app-configuration";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -143,4 +144,4 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
       }
     },
   };
-});
+}) as DriverFactory<AzureAppConfigurationOptions, AppConfigurationClient>;

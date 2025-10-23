@@ -1,4 +1,5 @@
 import { defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 
 const DRIVER_NAME = "memory";
 
@@ -36,4 +37,4 @@ export default defineDriver<void, Map<string, any>>(() => {
       data.clear();
     },
   };
-});
+}) as DriverFactory<void, Map<string, any>>;

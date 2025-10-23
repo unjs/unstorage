@@ -1,4 +1,5 @@
 import { defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { LRUCache } from "lru-cache";
 
 type LRUCacheOptions = LRUCache.OptionsBase<string, any, any> &
@@ -54,7 +55,7 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
       cache.clear();
     },
   };
-});
+}) as DriverFactory<LRUDriverOptions, LRUCache<string, any, any>>;
 
 function byteLength(value: any) {
   if (typeof Buffer !== "undefined") {

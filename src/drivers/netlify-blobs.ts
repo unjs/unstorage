@@ -3,6 +3,7 @@ import {
   createRequiredError,
   defineDriver,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import type { GetKeysOptions } from "../types.ts";
 import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
@@ -127,4 +128,4 @@ export default defineDriver((options: NetlifyStoreOptions) => {
       ).then(() => {});
     },
   };
-});
+}) as DriverFactory<NetlifyStoreOptions, Store>;

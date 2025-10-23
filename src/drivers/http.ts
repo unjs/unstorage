@@ -1,5 +1,6 @@
 import type { TransactionOptions } from "../types.ts";
 import { defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { type FetchError, $fetch as _fetch } from "ofetch";
 import { joinURL } from "./utils/path.ts";
 
@@ -120,4 +121,4 @@ export default defineDriver((opts: HTTPOptions) => {
       });
     },
   };
-});
+}) as DriverFactory<HTTPOptions, void>;

@@ -3,6 +3,7 @@ import {
   createRequiredError,
   defineDriver,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import {
   TableClient,
   AzureNamedKeyCredential,
@@ -175,4 +176,4 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
       }
     },
   };
-});
+}) as DriverFactory<AzureStorageTableOptions, TableClient>;

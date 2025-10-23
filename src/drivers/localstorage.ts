@@ -3,6 +3,7 @@ import {
   defineDriver,
   normalizeKey,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 
 export interface LocalStorageOptions {
   base?: string;
@@ -93,4 +94,4 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
       return _unwatch;
     },
   };
-});
+}) as DriverFactory<LocalStorageOptions, Storage>;

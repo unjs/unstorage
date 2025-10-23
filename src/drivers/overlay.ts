@@ -1,4 +1,5 @@
 import { defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import type { Driver } from "../types.ts";
 import { normalizeKey } from "./utils/index.ts";
 
@@ -77,4 +78,4 @@ export default defineDriver((options: OverlayStorageOptions) => {
       );
     },
   };
-});
+}) as DriverFactory<OverlayStorageOptions, void>;

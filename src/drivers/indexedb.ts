@@ -1,4 +1,5 @@
 import { defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import {
   get,
   set,
@@ -57,4 +58,4 @@ export default defineDriver((opts: IDBKeyvalOptions = {}) => {
       return clear(customStore);
     },
   };
-});
+}) as DriverFactory<IDBKeyvalOptions, void>;

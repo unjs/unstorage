@@ -225,7 +225,7 @@ export function createStorage<T extends StorageValue>(
         return asyncCall(driver.getItemRaw, relativeKey, opts);
       }
       return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
-        deserializeRaw(value)
+        deserializeRaw(value) as any
       );
     },
     async setItem(key: string, value: T, opts = {}) {
@@ -510,7 +510,7 @@ export async function restoreSnapshot(
   driver: Storage,
   snapshot: Snapshot<StorageValue>,
   base = ""
-) {
+): Promise<void> {
   base = normalizeBaseKey(base);
   await Promise.all(
     Object.entries(snapshot).map((e) => driver.setItem(base + e[0], e[1]))

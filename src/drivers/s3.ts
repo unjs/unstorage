@@ -4,6 +4,7 @@ import {
   normalizeKey,
   createError,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { AwsClient } from "aws4fetch";
 
 export interface S3DriverOptions {
@@ -190,7 +191,7 @@ export default defineDriver((options: S3DriverOptions) => {
       await deleteObjects(base);
     },
   };
-});
+}) as DriverFactory<S3DriverOptions, AwsClient>;
 
 // --- utils ---
 

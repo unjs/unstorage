@@ -1,4 +1,5 @@
 import { defineDriver, joinKeys } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { Cluster, Redis } from "ioredis";
 
 import type {
@@ -140,4 +141,4 @@ export default defineDriver((opts: RedisOptions) => {
       return getRedisClient().disconnect();
     },
   };
-});
+}) as DriverFactory<RedisOptions, Redis | Cluster>;

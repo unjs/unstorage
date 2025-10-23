@@ -6,6 +6,7 @@ import {
   createRequiredError,
   defineDriver,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import {
   readFile,
   writeFile,
@@ -148,4 +149,4 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
       return _unwatch;
     },
   };
-});
+}) as DriverFactory<FSStorageOptions, void>;

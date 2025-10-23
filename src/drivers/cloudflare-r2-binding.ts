@@ -1,5 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 import { defineDriver, joinKeys } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { getR2Binding } from "./utils/cloudflare.ts";
 
 export interface CloudflareR2Options {
@@ -79,7 +80,7 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
       await binding.delete(keys);
     },
   };
-});
+}) as DriverFactory<CloudflareR2Options, R2Bucket>;
 
 function getObjBody(
   object: R2ObjectBody,

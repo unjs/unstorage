@@ -5,6 +5,7 @@ import {
   defineDriver,
   joinKeys,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 
 interface KVAuthAPIToken {
   /**
@@ -229,4 +230,4 @@ export default defineDriver<KVHTTPOptions>((opts) => {
       ),
     clear,
   };
-});
+}) as DriverFactory<KVHTTPOptions, void>;

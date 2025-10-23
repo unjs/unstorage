@@ -1,4 +1,5 @@
 import { createRequiredError, defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 
 export interface MongoDbOptions {
@@ -117,4 +118,4 @@ export default defineDriver((opts: MongoDbOptions) => {
       await getMongoCollection().deleteMany({});
     },
   };
-});
+}) as DriverFactory<MongoDbOptions, Collection>;

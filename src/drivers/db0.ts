@@ -1,5 +1,6 @@
 import type { Database } from "db0";
 import { createError, defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 
 interface ResultSchema {
   rows: Array<{
@@ -136,7 +137,7 @@ export default defineDriver((opts: DB0DriverOptions) => {
       await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}}`;
     },
   };
-});
+}) as DriverFactory<DB0DriverOptions, Database>;
 
 /** Run database init/migration once */
 async function setupTable(opts: DB0DriverOptions) {

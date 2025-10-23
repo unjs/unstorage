@@ -3,6 +3,7 @@ import {
   createRequiredError,
   defineDriver,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import {
   SecretClient,
   type SecretClientOptions,
@@ -112,7 +113,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
       }
     },
   };
-});
+}) as DriverFactory<AzureKeyVaultOptions, SecretClient>;
 
 const base64Map: { [key: string]: string } = {
   "=": "-e-",

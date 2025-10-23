@@ -1,4 +1,5 @@
 import { createError, defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import {
   BlobServiceClient,
   ContainerClient,
@@ -197,7 +198,7 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
       }
     },
   };
-});
+}) as DriverFactory<AzureStorageBlobOptions, ContainerClient>;
 
 const isBrowser = typeof window !== "undefined";
 

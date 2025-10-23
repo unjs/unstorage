@@ -40,7 +40,10 @@ export function createError(
   return err;
 }
 
-export function createRequiredError(driver: string, name: string | string[]): Error {
+export function createRequiredError(
+  driver: string,
+  name: string | string[]
+): Error {
   if (Array.isArray(name)) {
     return createError(
       driver,

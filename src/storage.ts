@@ -224,8 +224,8 @@ export function createStorage<T extends StorageValue>(
       if (driver.getItemRaw) {
         return asyncCall(driver.getItemRaw, relativeKey, opts);
       }
-      return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
-        deserializeRaw(value) as any
+      return asyncCall(driver.getItem, relativeKey, opts).then(
+        (value) => deserializeRaw(value) as any
       );
     },
     async setItem(key: string, value: T, opts = {}) {

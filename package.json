@@ -52,7 +52,7 @@
     "@vercel/blob": "^2.0.0",
     "@vercel/functions": "^3.1.0",
     "@vercel/kv": "^3.0.0",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^4.0.4",
     "aws4fetch": "^1.0.20",
     "azurite": "^3.35.0",
     "better-sqlite3": "^12.2.0",
@@ -83,7 +83,7 @@
     "typescript": "^5.9.2",
     "uploadthing": "^7.7.4",
     "vite": "^7.1.6",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.4",
     "wrangler": "^4.38.0"
   },
   "peerDependencies": {

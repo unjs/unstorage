@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm i -fg corepack && corepack enable
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with: { node-version: lts/*, cache: "pnpm" }
       - uses: denoland/setup-deno@v2
         with: { deno-version: 2.5.6 }

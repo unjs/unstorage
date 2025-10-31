@@ -9,7 +9,7 @@ jobs:
       - uses: actions/setup-node@v5
         with: { node-version: lts/*, cache: "pnpm" }
       - uses: denoland/setup-deno@v2
-        with: { deno-version: v2.x }
+        with: { deno-version: 2.5.6 }
       - run: pnpm install
       - run: pnpm lint
       - run: pnpm test:types

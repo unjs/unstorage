@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.17.2
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.17.1...v1.17.2)
+
+### 📦 Build
+
+- Fix masquerading as CJS issue ([#700](https://github.com/unjs/unstorage/pull/700))
+
+### 🏡 Chore
+
+- Update undocs ([599af79](https://github.com/unjs/unstorage/commit/599af79))
+- Fix docs deps ([7393346](https://github.com/unjs/unstorage/commit/7393346))
+- Fix docs deps ([b8477a7](https://github.com/unjs/unstorage/commit/b8477a7))
+- Update docs ([52a88e4](https://github.com/unjs/unstorage/commit/52a88e4))
+- Update deps ([21ac94b](https://github.com/unjs/unstorage/commit/21ac94b))
+- Update tests ([4840fbf](https://github.com/unjs/unstorage/commit/4840fbf))
+- Update dependencies ([eaf5b67](https://github.com/unjs/unstorage/commit/eaf5b67))
+- Update tests ([985edbd](https://github.com/unjs/unstorage/commit/985edbd))
+
+### 🤖 CI
+
+- Remove nightly from v1 ([b3e1808](https://github.com/unjs/unstorage/commit/b3e1808))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Kricsleo ([@kricsleo](https://github.com/kricsleo))
+
 ## v1.17.1
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.17.0...v1.17.1)

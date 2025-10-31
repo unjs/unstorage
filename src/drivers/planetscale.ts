@@ -1,4 +1,5 @@
 import { createRequiredError, defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import type { ExecutedQuery, Connection } from "@planetscale/database";
 import { connect } from "@planetscale/database";
 
@@ -97,7 +98,7 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
       await getConnection().execute(`DELETE FROM ${opts.table};`);
     },
   };
-});
+}) as DriverFactory<PlanetscaleDriverOptions, Connection>;
 
 function rows<T = TableSchema[]>(res: ExecutedQuery) {
   return (res.rows as T) || [];

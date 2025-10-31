@@ -8,6 +8,7 @@ import {
   joinKeys,
   createError,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 
 export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
   /**
@@ -123,4 +124,4 @@ export default defineDriver<VercelKVOptions, VercelKV>((opts) => {
         .then(() => {});
     },
   };
-});
+}) as DriverFactory<VercelKVOptions, VercelKV>;

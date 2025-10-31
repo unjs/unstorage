@@ -3,6 +3,7 @@ import {
   createRequiredError,
   defineDriver,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { $fetch } from "ofetch";
 import { withTrailingSlash, joinURL } from "./utils/path.ts";
 
@@ -134,7 +135,7 @@ export default defineDriver<GithubOptions>((_opts) => {
       return item ? item.meta : null;
     },
   };
-});
+}) as DriverFactory<GithubOptions, void>;
 
 async function fetchFiles(opts: GithubOptions) {
   const prefix = withTrailingSlash(opts.dir).replace(/^\//, "");

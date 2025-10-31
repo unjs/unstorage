@@ -1,4 +1,5 @@
 import { defineDriver, createError, normalizeKey } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import type { Kv, KvKey } from "@deno/kv";
 
 // https://docs.deno.com/deploy/kv/manual/
@@ -119,7 +120,7 @@ export default defineDriver<DenoKvOptions, Promise<Deno.Kv | Kv>>(
       },
     };
   }
-);
+) as DriverFactory<DenoKvOptions, Promise<Deno.Kv | Kv>>;
 
 // --- internal ---
 

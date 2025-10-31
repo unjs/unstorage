@@ -18,7 +18,7 @@
     "noEmit": true,
     "skipLibCheck": true,
     "composite": true,
-    // "isolatedDeclarations": true,
+    "isolatedDeclarations": true,
     "allowImportingTsExtensions": true,
     "types": ["node", "deno"],
     "paths": {

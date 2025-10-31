@@ -1,5 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 import { defineDriver, joinKeys } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import { getKVBinding } from "./utils/cloudflare.ts";
 export interface KVOptions {
   binding?: string | KVNamespace;
@@ -84,4 +85,4 @@ export default defineDriver((opts: KVOptions) => {
       await Promise.all(keys.map((key) => binding.delete(key)));
     },
   };
-});
+}) as DriverFactory<KVOptions, KVNamespace>;

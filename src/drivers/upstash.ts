@@ -1,5 +1,6 @@
 import { type RedisConfigNodejs, Redis } from "@upstash/redis";
 import { defineDriver, normalizeKey, joinKeys } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 
 export interface UpstashOptions extends Partial<RedisConfigNodejs> {
   /**
@@ -98,4 +99,4 @@ export default defineDriver<UpstashOptions, Redis>(
       },
     };
   }
-);
+) as DriverFactory<UpstashOptions, Redis>;

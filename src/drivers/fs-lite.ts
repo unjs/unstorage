@@ -5,6 +5,7 @@ import {
   createRequiredError,
   defineDriver,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import {
   readFile,
   writeFile,
@@ -90,4 +91,4 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       await rmRecursive(r("."));
     },
   };
-});
+}) as DriverFactory<FSStorageOptions, void>;

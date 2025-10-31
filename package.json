@@ -64,7 +64,7 @@
     "eslint-config-unjs": "^0.5.0",
     "fake-indexeddb": "^6.2.4",
     "get-port-please": "^3.2.0",
-    "h3": "2.0.1-rc.5",
+    "h3": "^2.0.1-rc.5",
     "idb-keyval": "^6.2.2",
     "ioredis": "^5.8.2",
     "ioredis-mock": "^8.13.1",

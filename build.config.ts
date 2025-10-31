@@ -1,6 +1,6 @@
 import { defineBuildConfig } from "unbuild";
 import { glob } from "tinyglobby";
-import { basename, extname } from "node:path";
+import { basename } from "node:path";
 import { writeFile } from "node:fs/promises";
 
 export default defineBuildConfig({

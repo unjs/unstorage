@@ -8,17 +8,14 @@
   "sideEffects": false,
   "exports": {
     "./drivers/*": {
-      "types": "./drivers/*.d.ts",
       "import": "./drivers/*.mjs",
       "require": "./drivers/*.cjs"
     },
     ".": {
-      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
     "./server": {
-      "types": "./dist/server.d.ts",
       "import": "./dist/server.mjs",
       "require": "./dist/server.cjs"
     }

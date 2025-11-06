@@ -44,6 +44,19 @@ export interface UnstorageTracingData {
    * Useful for tracking which storage driver/mount is handling the operation.
    */
   base?: string;
+  /**
+   * Driver information for the operation.
+   */
+  driver?: {
+    /**
+     * The name of the driver handling this operation.
+     */
+    name?: string;
+    /**
+     * Driver-specific options.
+     */
+    options?: any;
+  };
 }
 
 /**
@@ -74,8 +87,15 @@ interface TracerInit {
   };
 }
 
+/**
+ * Create a tracer object with helper functions to wrap operations with tracing.
+ */
 export function createTracer({ getMount }: TracerInit) {
-  // Helper to wrap single-key operations with tracing
+  /**
+   * Helper to wrap single-key operations with tracing
+   * Note: single-key operations can only span one mount,
+   * so driver info is included as there is only one driver involved
+   */
   const withTrace = <T>(
     operation: TracingOperation,
     key: string,
@@ -88,21 +108,34 @@ export function createTracer({ getMount }: TracerInit) {
     return tracePromise(operation, () => fn(mount), {
       keys: [key],
       base: mount.base,
+      driver: {
+        name: mount.driver.name,
+        options: mount.driver.options,
+      },
       ...extraData,
     });
   };
 
-  // Helper to wrap base-path operations with tracing
+  /**
+   * Helper to wrap base-path operations with tracing
+   * Note: base operations (getKeys, clear) can span multiple mounts,
+   * so driver info is not included as there may be multiple drivers involved
+   */
   const withBaseTrace = <T>(
     operation: TracingOperation,
     base: string | undefined,
     fn: () => Promise<T>
   ) => {
     base = normalizeBaseKey(base);
+
     return tracePromise(operation, fn, { keys: [base], base });
   };
 
-  // Helper to wrap batch operations (getItems, setItems) with tracing
+  /**
+   * Helper to wrap batch operations (getItems, setItems) with tracing
+   * Note: batch operations can span multiple mounts,
+   * so driver info is not included as there may be multiple drivers involved
+   */
   const withBatchTrace = <T>(
     operation: TracingOperation,
     items: (string | { key: string; [key: string]: any })[],
@@ -111,6 +144,7 @@ export function createTracer({ getMount }: TracerInit) {
     const keys = items.map((item) =>
       normalizeKey(typeof item === "string" ? item : item.key)
     );
+
     return tracePromise(operation, fn, { keys });
   };
 

@@ -175,17 +175,17 @@ export function createStorage<T extends StorageValue>(
     // Item
     hasItem(key: string, opts = {}) {
       key = normalizeKey(key);
-      const { relativeKey, driver } = getMount(key);
+      const { relativeKey, driver, base } = getMount(key);
 
       return tracePromise(
         "hasItem",
         () => asyncCall(driver.hasItem, relativeKey, opts),
-        { keys: [key] }
+        { keys: [key], base }
       );
     },
     getItem(key: string, opts = {}) {
       key = normalizeKey(key);
-      const { relativeKey, driver } = getMount(key);
+      const { relativeKey, driver, base } = getMount(key);
 
       return tracePromise(
         "getItem",
@@ -193,7 +193,7 @@ export function createStorage<T extends StorageValue>(
           asyncCall(driver.getItem, relativeKey, opts).then(
             (value) => destr(value) as StorageValue
           ),
-        { keys: [key] }
+        { keys: [key], base }
       );
     },
     getItems(
@@ -241,7 +241,7 @@ export function createStorage<T extends StorageValue>(
     },
     getItemRaw(key, opts = {}) {
       key = normalizeKey(key);
-      const { relativeKey, driver } = getMount(key);
+      const { relativeKey, driver, base } = getMount(key);
 
       return tracePromise(
         "getItemRaw",
@@ -253,7 +253,7 @@ export function createStorage<T extends StorageValue>(
             deserializeRaw(value)
           );
         },
-        { keys: [key] }
+        { keys: [key], base }
       );
     },
     async setItem(key: string, value: T, opts = {}) {
@@ -261,7 +261,7 @@ export function createStorage<T extends StorageValue>(
         return storage.removeItem(key);
       }
       key = normalizeKey(key);
-      const { relativeKey, driver } = getMount(key);
+      const { relativeKey, driver, base } = getMount(key);
 
       return tracePromise(
         "setItem",
@@ -275,7 +275,7 @@ export function createStorage<T extends StorageValue>(
             onChange("update", key);
           }
         },
-        { keys: [key], meta: key.endsWith("$") }
+        { keys: [key], meta: key.endsWith("$"), base }
       );
     },
     async setItems(items, commonOptions) {
@@ -322,7 +322,7 @@ export function createStorage<T extends StorageValue>(
       }
 
       key = normalizeKey(key);
-      const { relativeKey, driver } = getMount(key);
+      const { relativeKey, driver, base } = getMount(key);
 
       return tracePromise(
         "setItemRaw",
@@ -343,7 +343,7 @@ export function createStorage<T extends StorageValue>(
             onChange("update", key);
           }
         },
-        { keys: [key] }
+        { keys: [key], base }
       );
     },
     async removeItem(
@@ -357,7 +357,7 @@ export function createStorage<T extends StorageValue>(
         opts = { removeMeta: opts };
       }
       key = normalizeKey(key);
-      const { relativeKey, driver } = getMount(key);
+      const { relativeKey, driver, base } = getMount(key);
 
       return tracePromise(
         "removeItem",
@@ -374,7 +374,7 @@ export function createStorage<T extends StorageValue>(
             onChange("remove", key);
           }
         },
-        { keys: [key], meta: key.endsWith("$") }
+        { keys: [key], meta: key.endsWith("$"), base }
       );
     },
     // Meta
@@ -384,7 +384,7 @@ export function createStorage<T extends StorageValue>(
         opts = { nativeOnly: opts };
       }
       key = normalizeKey(key);
-      const { relativeKey, driver } = getMount(key);
+      const { relativeKey, driver, base } = getMount(key);
 
       // getMeta uses getItem tracing channel
       return tracePromise(
@@ -416,7 +416,7 @@ export function createStorage<T extends StorageValue>(
           }
           return meta;
         },
-        { keys: [key], meta: true }
+        { keys: [key], meta: true, base }
       );
     },
     setMeta(key: string, value: any, opts = {}) {
@@ -467,7 +467,7 @@ export function createStorage<T extends StorageValue>(
               filterKeyByBase(key, base)
           );
         },
-        { keys: [base] }
+        { keys: [base], base }
       );
     },
     // Utils
@@ -493,7 +493,7 @@ export function createStorage<T extends StorageValue>(
             })
           );
         },
-        { keys: [base] }
+        { keys: [base], base }
       );
     },
     async dispose() {

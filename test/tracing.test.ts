@@ -95,6 +95,7 @@ describe("tracing", () => {
       expect(listener.handlers.error).not.toHaveBeenCalled();
 
       expect(listener.events.start?.data.keys).toEqual(["test:key"]);
+      expect(listener.events.start?.data.base).toBe("");
       expect(listener.events.asyncEnd?.result).toBe(true);
 
       listener.cleanup();
@@ -629,6 +630,36 @@ describe("tracing", () => {
       // Verify meta flag is set to true in error event
       expect(listener.events.error?.data.meta).toBe(true);
       expect(listener.events.error?.data.keys).toEqual(["error:key$"]);
+
+      listener.cleanup();
+    });
+  });
+
+  describe("base mount tracking", () => {
+    it("should include correct base for different mount points", async () => {
+      const listener = createTracingListener("getItem");
+
+      // Create storage with multiple mounts
+      const multiStorage = createStorage({ driver: memory() });
+      multiStorage.mount("/cache", memory());
+      multiStorage.mount("/db", memory());
+
+      // Set items in different mounts
+      await multiStorage.setItem("root:key", "root value");
+      await multiStorage.setItem("cache:key", "cache value");
+      await multiStorage.setItem("db:key", "db value");
+
+      // Test root mount
+      await multiStorage.getItem("root:key");
+      expect(listener.events.start?.data.base).toBe("");
+
+      // Test cache mount
+      await multiStorage.getItem("cache:key");
+      expect(listener.events.start?.data.base).toBe("cache:");
+
+      // Test db mount
+      await multiStorage.getItem("db:key");
+      expect(listener.events.start?.data.base).toBe("db:");
 
       listener.cleanup();
     });

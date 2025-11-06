@@ -37,6 +37,11 @@ export interface UnstorageTracingData {
    * When true, the operation is accessing/modifying metadata (e.g., getMeta, setMeta).
    */
   meta?: boolean;
+  /**
+   * The mount point base path where this operation is being executed.
+   * Useful for tracking which storage driver/mount is handling the operation.
+   */
+  base?: string;
 }
 
 /**

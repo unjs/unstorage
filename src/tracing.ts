@@ -1,4 +1,6 @@
 import { TracingChannel, tracingChannel } from "node:diagnostics_channel";
+import type { Driver } from "./types.ts";
+import { normalizeBaseKey, normalizeKey } from "./utils.ts";
 
 /**
  * All operations that can be traced.
@@ -62,4 +64,59 @@ export async function tracePromise<T>(
   const channel = channels[operation];
 
   return channel.tracePromise(exec, data);
+}
+
+interface TracerInit {
+  getMount: (key: string) => {
+    base: string;
+    relativeKey: string;
+    driver: Driver;
+  };
+}
+
+export function createTracer({ getMount }: TracerInit) {
+  // Helper to wrap single-key operations with tracing
+  const withTrace = <T>(
+    operation: TracingOperation,
+    key: string,
+    fn: (mount: ReturnType<typeof getMount>) => Promise<T>,
+    extraData?: { meta?: boolean }
+  ) => {
+    key = normalizeKey(key);
+    const mount = getMount(key);
+
+    return tracePromise(operation, () => fn(mount), {
+      keys: [key],
+      base: mount.base,
+      ...extraData,
+    });
+  };
+
+  // Helper to wrap base-path operations with tracing
+  const withBaseTrace = <T>(
+    operation: TracingOperation,
+    base: string | undefined,
+    fn: () => Promise<T>
+  ) => {
+    base = normalizeBaseKey(base);
+    return tracePromise(operation, fn, { keys: [base], base });
+  };
+
+  // Helper to wrap batch operations (getItems, setItems) with tracing
+  const withBatchTrace = <T>(
+    operation: TracingOperation,
+    items: (string | { key: string; [key: string]: any })[],
+    fn: () => Promise<T>
+  ) => {
+    const keys = items.map((item) =>
+      normalizeKey(typeof item === "string" ? item : item.key)
+    );
+    return tracePromise(operation, fn, { keys });
+  };
+
+  return {
+    withTrace,
+    withBaseTrace,
+    withBatchTrace,
+  };
 }

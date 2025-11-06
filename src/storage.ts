@@ -22,7 +22,7 @@ import {
   filterKeyByDepth,
   filterKeyByBase,
 } from "./utils.ts";
-import { tracePromise } from "./tracing.ts";
+import { createTracer } from "./tracing.ts";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -171,162 +171,131 @@ export function createStorage<T extends StorageValue>(
     );
   };
 
+  const { withTrace, withBaseTrace, withBatchTrace } = createTracer({
+    getMount,
+  });
+
   const storage: Storage = {
     // Item
     hasItem(key: string, opts = {}) {
-      key = normalizeKey(key);
-      const { relativeKey, driver, base } = getMount(key);
-
-      return tracePromise(
-        "hasItem",
-        () => asyncCall(driver.hasItem, relativeKey, opts),
-        { keys: [key], base }
+      return withTrace("hasItem", key, ({ relativeKey, driver }) =>
+        asyncCall(driver.hasItem, relativeKey, opts)
       );
     },
     getItem(key: string, opts = {}) {
-      key = normalizeKey(key);
-      const { relativeKey, driver, base } = getMount(key);
-
-      return tracePromise(
-        "getItem",
-        () =>
-          asyncCall(driver.getItem, relativeKey, opts).then(
-            (value) => destr(value) as StorageValue
-          ),
-        { keys: [key], base }
+      return withTrace("getItem", key, ({ relativeKey, driver }) =>
+        asyncCall(driver.getItem, relativeKey, opts).then(
+          (value) => destr(value) as StorageValue
+        )
       );
     },
     getItems(
       items: (string | { key: string; options?: TransactionOptions })[],
       commonOptions = {}
     ) {
-      return tracePromise(
-        "getItems",
-        () =>
-          runBatch(items, commonOptions, (batch) => {
-            if (batch.driver.getItems) {
-              return asyncCall(
-                batch.driver.getItems,
-                batch.items.map((item) => ({
-                  key: item.relativeKey,
-                  options: item.options,
-                })),
-                commonOptions
-              ).then((r) =>
-                r.map((item) => ({
-                  key: joinKeys(batch.base, item.key),
-                  value: destr(item.value),
-                }))
-              );
-            }
-            return Promise.all(
-              batch.items.map((item) => {
-                return asyncCall(
-                  batch.driver.getItem,
-                  item.relativeKey,
-                  item.options
-                ).then((value) => ({
-                  key: item.key,
-                  value: destr(value),
-                }));
-              })
+      return withBatchTrace("getItems", items, () =>
+        runBatch(items, commonOptions, (batch) => {
+          if (batch.driver.getItems) {
+            return asyncCall(
+              batch.driver.getItems,
+              batch.items.map((item) => ({
+                key: item.relativeKey,
+                options: item.options,
+              })),
+              commonOptions
+            ).then((r) =>
+              r.map((item) => ({
+                key: joinKeys(batch.base, item.key),
+                value: destr(item.value),
+              }))
             );
-          }),
-        {
-          keys: items.map((item) =>
-            normalizeKey(typeof item === "string" ? item : item.key)
-          ),
-        }
+          }
+          return Promise.all(
+            batch.items.map((item) => {
+              return asyncCall(
+                batch.driver.getItem,
+                item.relativeKey,
+                item.options
+              ).then((value) => ({
+                key: item.key,
+                value: destr(value),
+              }));
+            })
+          );
+        })
       );
     },
     getItemRaw(key, opts = {}) {
-      key = normalizeKey(key);
-      const { relativeKey, driver, base } = getMount(key);
-
-      return tracePromise(
-        "getItemRaw",
-        () => {
-          if (driver.getItemRaw) {
-            return asyncCall(driver.getItemRaw, relativeKey, opts);
-          }
-          return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
-            deserializeRaw(value)
-          );
-        },
-        { keys: [key], base }
-      );
+      return withTrace("getItemRaw", key, ({ relativeKey, driver }) => {
+        if (driver.getItemRaw) {
+          return asyncCall(driver.getItemRaw, relativeKey, opts);
+        }
+        return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
+          deserializeRaw(value)
+        );
+      });
     },
     async setItem(key: string, value: T, opts = {}) {
       if (value === undefined) {
         return storage.removeItem(key);
       }
-      key = normalizeKey(key);
-      const { relativeKey, driver, base } = getMount(key);
+      const normalizedKey = normalizeKey(key);
 
-      return tracePromise(
+      return withTrace(
         "setItem",
-        async () => {
+        normalizedKey,
+        async ({ relativeKey, driver }) => {
           if (!driver.setItem) {
             return; // Readonly
           }
-
           await asyncCall(driver.setItem, relativeKey, stringify(value), opts);
           if (!driver.watch) {
-            onChange("update", key);
+            onChange("update", normalizedKey);
           }
         },
-        { keys: [key], meta: key.endsWith("$"), base }
+        { meta: normalizedKey.endsWith("$") }
       );
     },
     async setItems(items, commonOptions) {
-      return tracePromise(
-        "setItems",
-        async () => {
-          await runBatch(items, commonOptions, async (batch) => {
-            if (batch.driver.setItems) {
-              return asyncCall(
-                batch.driver.setItems,
-                batch.items.map((item) => ({
-                  key: item.relativeKey,
-                  value: stringify(item.value),
-                  options: item.options,
-                })),
-                commonOptions
-              );
-            }
-            if (!batch.driver.setItem) {
-              return;
-            }
-            await Promise.all(
-              batch.items.map((item) => {
-                return asyncCall(
-                  batch.driver.setItem!,
-                  item.relativeKey,
-                  stringify(item.value),
-                  item.options
-                );
-              })
+      return withBatchTrace("setItems", items, async () => {
+        await runBatch(items, commonOptions, async (batch) => {
+          if (batch.driver.setItems) {
+            return asyncCall(
+              batch.driver.setItems,
+              batch.items.map((item) => ({
+                key: item.relativeKey,
+                value: stringify(item.value),
+                options: item.options,
+              })),
+              commonOptions
             );
-          });
-        },
-        {
-          keys: items.map((item) =>
-            normalizeKey(typeof item === "string" ? item : item.key)
-          ),
-        }
-      );
+          }
+          if (!batch.driver.setItem) {
+            return;
+          }
+          await Promise.all(
+            batch.items.map((item) => {
+              return asyncCall(
+                batch.driver.setItem!,
+                item.relativeKey,
+                stringify(item.value),
+                item.options
+              );
+            })
+          );
+        });
+      });
     },
     async setItemRaw(key, value, opts = {}) {
       if (value === undefined) {
         return storage.removeItem(key, opts);
       }
+      const normalizedKey = normalizeKey(key);
 
-      key = normalizeKey(key);
-      const { relativeKey, driver, base } = getMount(key);
-
-      return tracePromise(
+      return withTrace(
         "setItemRaw",
-        async () => {
+        normalizedKey,
+        async ({ relativeKey, driver }) => {
           if (driver.setItemRaw) {
             await asyncCall(driver.setItemRaw, relativeKey, value, opts);
           } else if (driver.setItem) {
@@ -340,10 +309,9 @@ export function createStorage<T extends StorageValue>(
             return; // Readonly
           }
           if (!driver.watch) {
-            onChange("update", key);
+            onChange("update", normalizedKey);
           }
-        },
-        { keys: [key], base }
+        }
       );
     },
     async removeItem(
@@ -356,25 +324,23 @@ export function createStorage<T extends StorageValue>(
       if (typeof opts === "boolean") {
         opts = { removeMeta: opts };
       }
-      key = normalizeKey(key);
-      const { relativeKey, driver, base } = getMount(key);
-
-      return tracePromise(
+      const normalizedKey = normalizeKey(key);
+      return withTrace(
         "removeItem",
-        async () => {
+        normalizedKey,
+        async ({ relativeKey, driver }) => {
           if (!driver.removeItem) {
             return; // Readonly
           }
-
           await asyncCall(driver.removeItem, relativeKey, opts);
           if (opts.removeMeta || opts.removeMata /* #281 */) {
             await asyncCall(driver.removeItem, relativeKey + "$", opts);
           }
           if (!driver.watch) {
-            onChange("remove", key);
+            onChange("remove", normalizedKey);
           }
         },
-        { keys: [key], meta: key.endsWith("$"), base }
+        { meta: normalizedKey.endsWith("$") }
       );
     },
     // Meta
@@ -383,13 +349,11 @@ export function createStorage<T extends StorageValue>(
       if (typeof opts === "boolean") {
         opts = { nativeOnly: opts };
       }
-      key = normalizeKey(key);
-      const { relativeKey, driver, base } = getMount(key);
-
       // getMeta uses getItem tracing channel
-      return tracePromise(
+      return withTrace(
         "getItem",
-        async () => {
+        key,
+        async ({ relativeKey, driver }) => {
           const meta = Object.create(null);
           if (driver.getMeta) {
             Object.assign(
@@ -416,7 +380,7 @@ export function createStorage<T extends StorageValue>(
           }
           return meta;
         },
-        { keys: [key], meta: true, base }
+        { meta: true }
       );
     },
     setMeta(key: string, value: any, opts = {}) {
@@ -427,74 +391,64 @@ export function createStorage<T extends StorageValue>(
     },
     // Keys
     async getKeys(base, opts = {}) {
-      base = normalizeBaseKey(base);
-
-      return tracePromise(
-        "getKeys",
-        async () => {
-          const mounts = getMounts(base, true);
-          let maskedMounts: string[] = [];
-          const allKeys: string[] = [];
-          let allMountsSupportMaxDepth = true;
-          for (const mount of mounts) {
-            if (!mount.driver.flags?.maxDepth) {
-              allMountsSupportMaxDepth = false;
-            }
-            const rawKeys = await asyncCall(
-              mount.driver.getKeys,
-              mount.relativeBase,
-              opts
-            );
-            for (const key of rawKeys) {
-              const fullKey = mount.mountpoint + normalizeKey(key);
-              if (!maskedMounts.some((p) => fullKey.startsWith(p))) {
-                allKeys.push(fullKey);
-              }
-            }
-
-            // When /mnt/foo is processed, any key in /mnt with /mnt/foo prefix should be masked
-            // Using filter to improve performance. /mnt mask already covers /mnt/foo
-            maskedMounts = [
-              mount.mountpoint,
-              ...maskedMounts.filter((p) => !p.startsWith(mount.mountpoint)),
-            ];
+      return withBaseTrace("getKeys", base, async () => {
+        const normalizedBase = normalizeBaseKey(base);
+        const mounts = getMounts(normalizedBase, true);
+        let maskedMounts: string[] = [];
+        const allKeys: string[] = [];
+        let allMountsSupportMaxDepth = true;
+        for (const mount of mounts) {
+          if (!mount.driver.flags?.maxDepth) {
+            allMountsSupportMaxDepth = false;
           }
-          const shouldFilterByDepth =
-            opts.maxDepth !== undefined && !allMountsSupportMaxDepth;
-          return allKeys.filter(
-            (key) =>
-              (!shouldFilterByDepth || filterKeyByDepth(key, opts.maxDepth)) &&
-              filterKeyByBase(key, base)
+          const rawKeys = await asyncCall(
+            mount.driver.getKeys,
+            mount.relativeBase,
+            opts
           );
-        },
-        { keys: [base], base }
-      );
+          for (const key of rawKeys) {
+            const fullKey = mount.mountpoint + normalizeKey(key);
+            if (!maskedMounts.some((p) => fullKey.startsWith(p))) {
+              allKeys.push(fullKey);
+            }
+          }
+
+          // When /mnt/foo is processed, any key in /mnt with /mnt/foo prefix should be masked
+          // Using filter to improve performance. /mnt mask already covers /mnt/foo
+          maskedMounts = [
+            mount.mountpoint,
+            ...maskedMounts.filter((p) => !p.startsWith(mount.mountpoint)),
+          ];
+        }
+        const shouldFilterByDepth =
+          opts.maxDepth !== undefined && !allMountsSupportMaxDepth;
+        return allKeys.filter(
+          (key) =>
+            (!shouldFilterByDepth || filterKeyByDepth(key, opts.maxDepth)) &&
+            filterKeyByBase(key, normalizedBase)
+        );
+      });
     },
     // Utils
     async clear(base, opts = {}) {
-      base = normalizeBaseKey(base);
-
-      return tracePromise(
-        "clear",
-        async () => {
-          await Promise.all(
-            getMounts(base, false).map(async (m) => {
-              if (m.driver.clear) {
-                return asyncCall(m.driver.clear, m.relativeBase, opts);
-              }
-              // Fallback to remove all keys if clear not implemented
-              if (m.driver.removeItem) {
-                const keys = await m.driver.getKeys(m.relativeBase || "", opts);
-                return Promise.all(
-                  keys.map((key) => m.driver.removeItem!(key, opts))
-                );
-              }
-              // Readonly
-            })
-          );
-        },
-        { keys: [base], base }
-      );
+      return withBaseTrace("clear", base, async () => {
+        const normalizedBase = normalizeBaseKey(base);
+        await Promise.all(
+          getMounts(normalizedBase, false).map(async (m) => {
+            if (m.driver.clear) {
+              return asyncCall(m.driver.clear, m.relativeBase, opts);
+            }
+            // Fallback to remove all keys if clear not implemented
+            if (m.driver.removeItem) {
+              const keys = await m.driver.getKeys(m.relativeBase || "", opts);
+              return Promise.all(
+                keys.map((key) => m.driver.removeItem!(key, opts))
+              );
+            }
+            // Readonly
+          })
+        );
+      });
     },
     async dispose() {
       await Promise.all(

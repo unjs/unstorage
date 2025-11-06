@@ -664,4 +664,18 @@ describe("tracing", () => {
       listener.cleanup();
     });
   });
+
+  describe("driver information tracking", () => {
+    it("should include driver name in tracing context", async () => {
+      const listener = createTracingListener("getItem");
+
+      await storage.setItem("test:key", "value");
+      await storage.getItem("test:key");
+
+      expect(listener.events.start?.data.driver).toBeDefined();
+      expect(listener.events.start?.data.driver?.name).toBe("memory");
+
+      listener.cleanup();
+    });
+  });
 });

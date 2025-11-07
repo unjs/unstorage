@@ -82,6 +82,25 @@ describe("tracing", () => {
     storage = withTracing(createStorage({ driver: memory() }));
   });
 
+  describe("opt-in behavior", () => {
+    it("should not emit tracing events without withTracing wrapper", async () => {
+      const plainStorage = createStorage({ driver: memory() });
+      const listener = createTracingListener("getItem");
+
+      await plainStorage.setItem("test:key", "value");
+      await plainStorage.getItem("test:key");
+
+      // No tracing events should be emitted
+      expect(listener.handlers.start).not.toHaveBeenCalled();
+      expect(listener.handlers.end).not.toHaveBeenCalled();
+      expect(listener.handlers.asyncStart).not.toHaveBeenCalled();
+      expect(listener.handlers.asyncEnd).not.toHaveBeenCalled();
+      expect(listener.handlers.error).not.toHaveBeenCalled();
+
+      listener.cleanup();
+    });
+  });
+
   describe("hasItem", () => {
     it("should emit correct tracing events on success", async () => {
       const listener = createTracingListener("hasItem");

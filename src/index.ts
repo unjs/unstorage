@@ -12,6 +12,6 @@ export {
 
 export {
   withTracing,
-  type TracingOperation,
-  type UnstorageTracingData,
+  type TracedOperation,
+  type TraceContext,
 } from "./tracing.ts";

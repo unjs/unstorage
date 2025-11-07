@@ -4,17 +4,17 @@ import { createStorage } from "../src/storage.ts";
 import { withTracing } from "../src/tracing.ts";
 import type { Storage } from "../src/types.ts";
 import memory from "../src/drivers/memory.ts";
-import type { TracingOperation, UnstorageTracingData } from "../src/tracing.ts";
+import type { TracedOperation, TraceContext } from "../src/tracing.ts";
 
 type TracingEvent = {
-  start?: { data: UnstorageTracingData };
-  end?: { data: UnstorageTracingData };
-  asyncStart?: { data: UnstorageTracingData };
-  asyncEnd?: { data: UnstorageTracingData; result?: any; error?: Error };
-  error?: { data: UnstorageTracingData; error: Error };
+  start?: { data: TraceContext };
+  end?: { data: TraceContext };
+  asyncStart?: { data: TraceContext };
+  asyncEnd?: { data: TraceContext; result?: any; error?: Error };
+  error?: { data: TraceContext; error: Error };
 };
 
-function createTracingListener(operationName: TracingOperation) {
+function createTracingListener(operationName: TracedOperation) {
   const events: TracingEvent = {};
 
   // Create tracing channel

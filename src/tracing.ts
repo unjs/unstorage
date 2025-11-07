@@ -7,7 +7,7 @@ import { normalizeBaseKey, normalizeKey } from "./utils.ts";
  * Meta operations (setMeta, removeMeta, getMeta) use the underlying operation channels
  * with meta: true in the tracing data context.
  */
-export type TracingOperation =
+export type TracedOperation =
   | "hasItem"
   | "getItem"
   | "setItem"
@@ -19,7 +19,7 @@ export type TracingOperation =
   | "setItemRaw"
   | "clear";
 
-const channels: Record<TracingOperation, TracingChannel> = {
+const channels: Record<TracedOperation, TracingChannel> = {
   hasItem: createChannel("hasItem"),
   getItem: createChannel("getItem"),
   setItem: createChannel("setItem"),
@@ -32,7 +32,7 @@ const channels: Record<TracingOperation, TracingChannel> = {
   clear: createChannel("clear"),
 };
 
-export interface UnstorageTracingData {
+export interface TraceContext {
   keys: string[];
   /**
    * Whether this operation is working with metadata.
@@ -62,7 +62,7 @@ export interface UnstorageTracingData {
 /**
  * Create a tracing channel for a given operation.
  */
-function createChannel(operation: TracingOperation): TracingChannel {
+function createChannel(operation: TracedOperation): TracingChannel {
   return tracingChannel(`unstorage.${operation}`);
 }
 
@@ -70,9 +70,9 @@ function createChannel(operation: TracingOperation): TracingChannel {
  * Trace a promise with a given operation and data.
  */
 export async function tracePromise<T>(
-  operation: TracingOperation,
+  operation: TracedOperation,
   exec: () => Promise<T>,
-  data: UnstorageTracingData
+  data: TraceContext
 ): Promise<T> {
   const channel = channels[operation];
 

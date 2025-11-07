@@ -1,5 +1,5 @@
 import { TracingChannel, tracingChannel } from "node:diagnostics_channel";
-import type { Driver } from "./types.ts";
+import type { Storage, StorageValue } from "./types.ts";
 import { normalizeBaseKey, normalizeKey } from "./utils.ts";
 
 /**
@@ -79,78 +79,168 @@ export async function tracePromise<T>(
   return channel.tracePromise(exec, data);
 }
 
-interface TracerInit {
-  getMount: (key: string) => {
-    base: string;
-    relativeKey: string;
-    driver: Driver;
-  };
-}
-
 /**
- * Create a tracer object with helper functions to wrap operations with tracing.
+ * Wraps a storage instance with tracing capabilities.
+ * All storage operations will emit tracing events through Node.js diagnostics channels.
  */
-export function createTracer({ getMount }: TracerInit) {
-  /**
-   * Helper to wrap single-key operations with tracing
-   * Note: single-key operations can only span one mount,
-   * so driver info is included as there is only one driver involved
-   */
-  const withTrace = <T>(
-    operation: TracingOperation,
-    key: string,
-    fn: (mount: ReturnType<typeof getMount>) => Promise<T>,
-    extraData?: { meta?: boolean }
-  ) => {
-    key = normalizeKey(key);
-    const mount = getMount(key);
+export function withTracing<T extends StorageValue>(
+  storage: Storage<T>
+): Storage<T> {
+  const tracedStorage: Storage<T> = { ...storage };
 
-    return tracePromise(operation, () => fn(mount), {
-      keys: [key],
+  // Helper to get mount info for a key
+  const getMountInfo = (key: string) => {
+    const mount = storage.getMount(key);
+    return {
       base: mount.base,
       driver: {
         name: mount.driver.name,
         options: mount.driver.options,
       },
-      ...extraData,
+    };
+  };
+
+  // Wrap hasItem
+  tracedStorage.hasItem = (key, opts) => {
+    key = normalizeKey(key);
+    const mountInfo = getMountInfo(key);
+
+    return tracePromise("hasItem", () => storage.hasItem(key, opts), {
+      keys: [key],
+      ...mountInfo,
     });
   };
 
-  /**
-   * Helper to wrap base-path operations with tracing
-   * Note: base operations (getKeys, clear) can span multiple mounts,
-   * so driver info is not included as there may be multiple drivers involved
-   */
-  const withBaseTrace = <T>(
-    operation: TracingOperation,
-    base: string | undefined,
-    fn: () => Promise<T>
-  ) => {
-    base = normalizeBaseKey(base);
+  // Wrap getItem
+  tracedStorage.getItem = (key, opts) => {
+    key = normalizeKey(key);
+    const isMeta = key.endsWith("$");
+    const mountInfo = getMountInfo(key);
 
-    return tracePromise(operation, fn, { keys: [base], base });
+    return tracePromise("getItem", () => storage.getItem(key, opts), {
+      keys: [key],
+      meta: isMeta,
+      ...mountInfo,
+    });
   };
 
-  /**
-   * Helper to wrap batch operations (getItems, setItems) with tracing
-   * Note: batch operations can span multiple mounts,
-   * so driver info is not included as there may be multiple drivers involved
-   */
-  const withBatchTrace = <T>(
-    operation: TracingOperation,
-    items: (string | { key: string; [key: string]: any })[],
-    fn: () => Promise<T>
-  ) => {
+  // Wrap getItemRaw
+  tracedStorage.getItemRaw = (key, opts) => {
+    key = normalizeKey(key);
+    const mountInfo = getMountInfo(key);
+
+    return tracePromise("getItemRaw", () => storage.getItemRaw(key, opts), {
+      keys: [key],
+      ...mountInfo,
+    });
+  };
+
+  // Wrap setItem
+  tracedStorage.setItem = (key, value, opts) => {
+    key = normalizeKey(key);
+    const isMeta = key.endsWith("$");
+    const mountInfo = getMountInfo(key);
+
+    return tracePromise("setItem", () => storage.setItem(key, value, opts), {
+      keys: [key],
+      meta: isMeta,
+      ...mountInfo,
+    });
+  };
+
+  // Wrap setItemRaw
+  tracedStorage.setItemRaw = (key, value, opts) => {
+    key = normalizeKey(key);
+    const mountInfo = getMountInfo(key);
+
+    return tracePromise(
+      "setItemRaw",
+      () => storage.setItemRaw(key, value, opts),
+      { keys: [key], ...mountInfo }
+    );
+  };
+
+  // Wrap removeItem
+  tracedStorage.removeItem = (key, opts) => {
+    key = normalizeKey(key);
+    const isMeta = key.endsWith("$");
+    const mountInfo = getMountInfo(key);
+
+    return tracePromise("removeItem", () => storage.removeItem(key, opts), {
+      keys: [key],
+      meta: isMeta,
+      ...mountInfo,
+    });
+  };
+
+  // Wrap getMeta (uses getItem channel)
+  tracedStorage.getMeta = (key, opts) => {
+    key = normalizeKey(key);
+    const mountInfo = getMountInfo(key);
+
+    return tracePromise(
+      "getItem",
+      () => Promise.resolve(storage.getMeta(key, opts)),
+      {
+        keys: [key],
+        meta: true,
+        ...mountInfo,
+      }
+    );
+  };
+
+  // Wrap getKeys (can span multiple mounts, no driver info)
+  tracedStorage.getKeys = (base, opts) => {
+    base = normalizeBaseKey(base);
+
+    return tracePromise("getKeys", () => storage.getKeys(base, opts), {
+      keys: [base],
+      base,
+    });
+  };
+
+  // Wrap clear (can span multiple mounts, no driver info)
+  tracedStorage.clear = (base, opts) => {
+    base = normalizeBaseKey(base);
+
+    return tracePromise("clear", () => storage.clear(base, opts), {
+      keys: [base],
+      base,
+    });
+  };
+
+  // Wrap getItems (batch operation, can span multiple mounts)
+  tracedStorage.getItems = (items, commonOptions) => {
     const keys = items.map((item) =>
       normalizeKey(typeof item === "string" ? item : item.key)
     );
 
-    return tracePromise(operation, fn, { keys });
+    return tracePromise(
+      "getItems",
+      () => storage.getItems(items, commonOptions),
+      { keys }
+    );
   };
 
-  return {
-    withTrace,
-    withBaseTrace,
-    withBatchTrace,
+  // Wrap setItems (batch operation, can span multiple mounts)
+  tracedStorage.setItems = (items, commonOptions) => {
+    const keys = items.map((item) =>
+      normalizeKey(typeof item === "string" ? item : item.key)
+    );
+    return tracePromise(
+      "setItems",
+      () => storage.setItems(items, commonOptions),
+      { keys }
+    );
   };
+
+  // Wrap aliases
+  tracedStorage.has = tracedStorage.hasItem;
+  tracedStorage.get = tracedStorage.getItem;
+  tracedStorage.set = tracedStorage.setItem;
+  tracedStorage.del = tracedStorage.removeItem;
+  tracedStorage.remove = tracedStorage.removeItem;
+  tracedStorage.keys = tracedStorage.getKeys;
+
+  return tracedStorage;
 }

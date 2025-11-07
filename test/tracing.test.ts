@@ -640,9 +640,10 @@ describe("tracing", () => {
       const listener = createTracingListener("getItem");
 
       // Create storage with multiple mounts
-      const multiStorage = createStorage({ driver: memory() });
-      multiStorage.mount("/cache", memory());
-      multiStorage.mount("/db", memory());
+      const baseStorage = createStorage({ driver: memory() });
+      baseStorage.mount("/cache", memory());
+      baseStorage.mount("/db", memory());
+      const multiStorage = baseStorage;
 
       // Set items in different mounts
       await multiStorage.setItem("root:key", "root value");

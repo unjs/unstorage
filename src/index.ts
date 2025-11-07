@@ -10,4 +10,8 @@ export {
   type BuiltinDriverOptions,
 } from "./_drivers.ts";
 
-export type { TracingOperation, UnstorageTracingData } from "./tracing.ts";
+export {
+  withTracing,
+  type TracingOperation,
+  type UnstorageTracingData,
+} from "./tracing.ts";

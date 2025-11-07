@@ -1,4 +1,4 @@
-import { TracingChannel, tracingChannel } from "node:diagnostics_channel";
+import { type TracingChannel, tracingChannel } from "node:diagnostics_channel";
 import type { Storage, StorageValue } from "./types.ts";
 import { normalizeBaseKey, normalizeKey } from "./utils.ts";
 

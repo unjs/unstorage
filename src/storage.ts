@@ -22,7 +22,6 @@ import {
   filterKeyByDepth,
   filterKeyByBase,
 } from "./utils.ts";
-import { withTracing } from "./tracing.ts";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -487,7 +486,7 @@ export function createStorage<T extends StorageValue>(
     remove: (key: string, opts = {}) => storage.removeItem(key, opts),
   };
 
-  return withTracing(storage as unknown as Storage<T>);
+  return storage as unknown as Storage<T>;
 }
 
 export type Snapshot<T = string> = Record<string, T>;

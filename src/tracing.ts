@@ -79,14 +79,23 @@ export async function tracePromise<T>(
   return channel.tracePromise(exec, data);
 }
 
+type MaybeTracedStorage<T extends StorageValue> = Storage<T> & {
+  __traced?: boolean;
+};
+
 /**
  * Wraps a storage instance with tracing capabilities.
  * All storage operations will emit tracing events through Node.js diagnostics channels.
  */
 export function withTracing<T extends StorageValue>(
-  storage: Storage<T>
+  storage: MaybeTracedStorage<T>
 ): Storage<T> {
-  const tracedStorage: Storage<T> = { ...storage };
+  // Avoid wrapping already traced storages
+  if (storage.__traced) {
+    return storage;
+  }
+
+  const tracedStorage: MaybeTracedStorage<T> = { ...storage, __traced: true };
 
   // Helper to get mount info for a key
   const getMountInfo = (key: string) => {

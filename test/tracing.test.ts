@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { tracingChannel } from "node:diagnostics_channel";
 import { createStorage } from "../src/storage.ts";
+import { withTracing } from "../src/tracing.ts";
+import type { Storage } from "../src/types.ts";
 import memory from "../src/drivers/memory.ts";
 import type { TracingOperation, UnstorageTracingData } from "../src/tracing.ts";
 
@@ -74,10 +76,10 @@ function createTracingListener(operationName: TracingOperation) {
 }
 
 describe("tracing", () => {
-  let storage: ReturnType<typeof createStorage>;
+  let storage: Storage;
 
   beforeEach(() => {
-    storage = createStorage({ driver: memory() });
+    storage = withTracing(createStorage({ driver: memory() }));
   });
 
   describe("hasItem", () => {
@@ -640,7 +642,7 @@ describe("tracing", () => {
       const listener = createTracingListener("getItem");
 
       // Create storage with multiple mounts
-      const baseStorage = createStorage({ driver: memory() });
+      const baseStorage = withTracing(createStorage({ driver: memory() }));
       baseStorage.mount("/cache", memory());
       baseStorage.mount("/db", memory());
       const multiStorage = baseStorage;

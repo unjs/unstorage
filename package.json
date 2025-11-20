@@ -72,7 +72,7 @@
     "lru-cache": "^11.2.2",
     "mitata": "^1.0.34",
     "mlly": "^1.8.0",
-    "mongodb": "^6.20.0",
+    "mongodb": "^7.0.0",
     "mongodb-memory-server": "^10.2.3",
     "obuild": "^0.3.2",
     "ofetch": "^1.5.0",
@@ -106,7 +106,7 @@
     "idb-keyval": "^6.2.2",
     "ioredis": "^5.8.2",
     "lru-cache": "^11.2.2",
-    "mongodb": "^6.20.0",
+    "mongodb": "^7.0.0",
     "ofetch": "*",
     "uploadthing": "^7.7.4"
   },

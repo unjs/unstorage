@@ -44,7 +44,6 @@ const scan = async (dir: string) => {
       const content = await fs.readFile(filePath, "utf8");
       await fs.writeFile(filePath.replace(".d.ts", ".d.cts"), content);
       await fs.writeFile(filePath.replace(".d.ts", ".d.mts"), content);
-      await fs.unlink(filePath);
     }
   }
 };

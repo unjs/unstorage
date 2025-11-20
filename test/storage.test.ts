@@ -56,6 +56,22 @@ describe("storage", () => {
       ]
     `);
 
+    expect(storage.getMounts("/non-exist-mountpoint").map((m) => m.base))
+      .toMatchInlineSnapshot(`
+      [
+        "",
+      ]
+    `);
+    expect(
+      storage
+        .getMounts("/non-exist-mountpoint", { parents: true })
+        .map((m) => m.base)
+    ).toMatchInlineSnapshot(`
+      [
+        "",
+      ]
+    `);
+
     expect(storage.getMounts().map((m) => m.base)).toMatchInlineSnapshot(`
       [
         "cache:sub:",

@@ -9,9 +9,3 @@ export {
   type BuiltinDriverName,
   type BuiltinDriverOptions,
 } from "./_drivers.ts";
-
-export {
-  withTracing,
-  type TracedOperation,
-  type TraceContext,
-} from "./tracing.ts";

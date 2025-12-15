@@ -6,6 +6,7 @@ import type { AzureCosmosOptions as AzureCosmosOptions } from "unstorage/drivers
 import type { AzureKeyVaultOptions as AzureKeyVaultOptions } from "unstorage/drivers/azure-key-vault";
 import type { AzureStorageBlobOptions as AzureStorageBlobOptions } from "unstorage/drivers/azure-storage-blob";
 import type { AzureStorageTableOptions as AzureStorageTableOptions } from "unstorage/drivers/azure-storage-table";
+import type { RedisOptions as BunRedisOptions } from "unstorage/drivers/bun-redis";
 import type { CapacitorPreferencesOptions as CapacitorPreferencesOptions } from "unstorage/drivers/capacitor-preferences";
 import type { KVOptions as CloudflareKVBindingOptions } from "unstorage/drivers/cloudflare-kv-binding";
 import type { KVHTTPOptions as CloudflareKVHttpOptions } from "unstorage/drivers/cloudflare-kv-http";
@@ -33,7 +34,7 @@ import type { VercelBlobOptions as VercelBlobOptions } from "unstorage/drivers/v
 import type { VercelKVOptions as VercelKVOptions } from "unstorage/drivers/vercel-kv";
 import type { VercelCacheOptions as VercelRuntimeCacheOptions } from "unstorage/drivers/vercel-runtime-cache";
 
-export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-kv" | "vercelKV" | "vercel-runtime-cache" | "vercelRuntimeCache";
+export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "bun-redis" | "bunRedis" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-kv" | "vercelKV" | "vercel-runtime-cache" | "vercelRuntimeCache";
 
 export type BuiltinDriverOptions = {
   "azure-app-configuration": AzureAppConfigurationOptions;
@@ -46,6 +47,8 @@ export type BuiltinDriverOptions = {
   "azureStorageBlob": AzureStorageBlobOptions;
   "azure-storage-table": AzureStorageTableOptions;
   "azureStorageTable": AzureStorageTableOptions;
+  "bun-redis": BunRedisOptions;
+  "bunRedis": BunRedisOptions;
   "capacitor-preferences": CapacitorPreferencesOptions;
   "capacitorPreferences": CapacitorPreferencesOptions;
   "cloudflare-kv-binding": CloudflareKVBindingOptions;
@@ -98,6 +101,8 @@ export const builtinDrivers = {
   "azureStorageBlob": "unstorage/drivers/azure-storage-blob",
   "azure-storage-table": "unstorage/drivers/azure-storage-table",
   "azureStorageTable": "unstorage/drivers/azure-storage-table",
+  "bun-redis": "unstorage/drivers/bun-redis",
+  "bunRedis": "unstorage/drivers/bun-redis",
   "capacitor-preferences": "unstorage/drivers/capacitor-preferences",
   "capacitorPreferences": "unstorage/drivers/capacitor-preferences",
   "cloudflare-kv-binding": "unstorage/drivers/cloudflare-kv-binding",

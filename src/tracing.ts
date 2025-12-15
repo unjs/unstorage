@@ -9,6 +9,7 @@ import { normalizeBaseKey, normalizeKey } from "./utils.ts";
 export type TracedOperation =
   | "hasItem"
   | "getItem"
+  | "getMeta"
   | "setItem"
   | "setItems"
   | "removeItem"
@@ -67,19 +68,30 @@ export function withTracing<T extends StorageValue>(
     return storage;
   }
 
+  type TracingConfig = {
+    meta?: boolean;
+    forceMeta?: boolean;
+    base?: boolean;
+    channel?: TracedOperation;
+  };
+
+  // Map of operations to their tracing configuration
+  const operations: Record<TracedOperation, TracingConfig | undefined> = {
+    getItem: { meta: true },
+    getMeta: { forceMeta: true, channel: "getItem" },
+    setItem: { meta: true },
+    removeItem: { meta: true },
+    getKeys: { base: true },
+    clear: { base: true },
+    hasItem: undefined,
+    setItems: undefined,
+    getItems: undefined,
+    getItemRaw: undefined,
+    setItemRaw: undefined,
+  };
+
   const channels = Object.fromEntries(
-    [
-      "hasItem",
-      "getItem",
-      "setItem",
-      "setItems",
-      "removeItem",
-      "getKeys",
-      "getItems",
-      "getItemRaw",
-      "setItemRaw",
-      "clear",
-    ].map(
+    Object.keys(operations).map(
       (operation) =>
         [operation, tracingChannel(`unstorage.${operation}`)] as const
     )
@@ -112,139 +124,53 @@ export function withTracing<T extends StorageValue>(
     };
   };
 
-  // Wrap hasItem
-  tracedStorage.hasItem = (key, opts) => {
-    key = normalizeKey(key);
-    const mountInfo = getMountInfo(key);
+  const prepKeys = (
+    keyArg: Parameters<(typeof storage)[TracedOperation]>[0],
+    operation: TracedOperation
+  ) => {
+    if (!keyArg) return [];
 
-    return tracePromise("hasItem", () => storage.hasItem(key, opts), {
-      keys: [key],
-      ...mountInfo,
-    });
+    const getKeyValue = (i: string | { key: string }) => {
+      const normalizer = operations[operation]?.base
+        ? normalizeBaseKey
+        : normalizeKey;
+
+      return normalizer(typeof i === "string" ? i : i.key);
+    };
+
+    return Array.isArray(keyArg)
+      ? keyArg.map((i) => getKeyValue(i))
+      : [getKeyValue(keyArg)];
   };
 
-  // Wrap getItem
-  tracedStorage.getItem = (key, opts) => {
-    key = normalizeKey(key);
-    const isMeta = key.endsWith("$");
-    const mountInfo = getMountInfo(key);
+  function wrapOperation<
+    OP extends TracedOperation,
+    M extends (
+      ...args: Parameters<(typeof storage)[OP]>
+    ) => ReturnType<(typeof storage)[OP]>,
+  >(operation: OP) {
+    return ((...args) => {
+      const keys = prepKeys(args[0], operation);
+      const isMeta =
+        operations[operation]?.forceMeta ||
+        (operations[operation]?.meta ? keys[0]?.endsWith("$") : undefined);
+      const mountInfo = keys[0] ? getMountInfo(keys[0]) : undefined;
 
-    return tracePromise("getItem", () => storage.getItem(key, opts), {
-      keys: [key],
-      meta: isMeta,
-      ...mountInfo,
-    });
-  };
+      return tracePromise(
+        operations[operation]?.channel ?? operation,
+        () => (storage[operation] as any)(...args),
+        {
+          keys,
+          meta: isMeta,
+          ...mountInfo,
+        }
+      );
+    }) as M;
+  }
 
-  // Wrap getItemRaw
-  tracedStorage.getItemRaw = (key, opts) => {
-    key = normalizeKey(key);
-    const mountInfo = getMountInfo(key);
-
-    return tracePromise("getItemRaw", () => storage.getItemRaw(key, opts), {
-      keys: [key],
-      ...mountInfo,
-    });
-  };
-
-  // Wrap setItem
-  tracedStorage.setItem = (key, value, opts) => {
-    key = normalizeKey(key);
-    const isMeta = key.endsWith("$");
-    const mountInfo = getMountInfo(key);
-
-    return tracePromise("setItem", () => storage.setItem(key, value, opts), {
-      keys: [key],
-      meta: isMeta,
-      ...mountInfo,
-    });
-  };
-
-  // Wrap setItemRaw
-  tracedStorage.setItemRaw = (key, value, opts) => {
-    key = normalizeKey(key);
-    const mountInfo = getMountInfo(key);
-
-    return tracePromise(
-      "setItemRaw",
-      () => storage.setItemRaw(key, value, opts),
-      { keys: [key], ...mountInfo }
-    );
-  };
-
-  // Wrap removeItem
-  tracedStorage.removeItem = (key, opts) => {
-    key = normalizeKey(key);
-    const isMeta = key.endsWith("$");
-    const mountInfo = getMountInfo(key);
-
-    return tracePromise("removeItem", () => storage.removeItem(key, opts), {
-      keys: [key],
-      meta: isMeta,
-      ...mountInfo,
-    });
-  };
-
-  // Wrap getMeta (uses getItem channel)
-  tracedStorage.getMeta = (key, opts) => {
-    key = normalizeKey(key);
-    const mountInfo = getMountInfo(key);
-
-    return tracePromise(
-      "getItem",
-      () => Promise.resolve(storage.getMeta(key, opts)),
-      {
-        keys: [key],
-        meta: true,
-        ...mountInfo,
-      }
-    );
-  };
-
-  // Wrap getKeys (can span multiple mounts, no driver info)
-  tracedStorage.getKeys = (base, opts) => {
-    base = normalizeBaseKey(base);
-
-    return tracePromise("getKeys", () => storage.getKeys(base, opts), {
-      keys: [base],
-      base,
-    });
-  };
-
-  // Wrap clear (can span multiple mounts, no driver info)
-  tracedStorage.clear = (base, opts) => {
-    base = normalizeBaseKey(base);
-
-    return tracePromise("clear", () => storage.clear(base, opts), {
-      keys: [base],
-      base,
-    });
-  };
-
-  // Wrap getItems (batch operation, can span multiple mounts)
-  tracedStorage.getItems = (items, commonOptions) => {
-    const keys = items.map((item) =>
-      normalizeKey(typeof item === "string" ? item : item.key)
-    );
-
-    return tracePromise(
-      "getItems",
-      () => storage.getItems(items, commonOptions),
-      { keys }
-    );
-  };
-
-  // Wrap setItems (batch operation, can span multiple mounts)
-  tracedStorage.setItems = (items, commonOptions) => {
-    const keys = items.map((item) =>
-      normalizeKey(typeof item === "string" ? item : item.key)
-    );
-    return tracePromise(
-      "setItems",
-      () => storage.setItems(items, commonOptions),
-      { keys }
-    );
-  };
+  for (const operation in operations) {
+    tracedStorage[operation] = wrapOperation(operation as TracedOperation);
+  }
 
   // Wrap aliases
   tracedStorage.has = tracedStorage.hasItem;

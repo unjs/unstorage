@@ -12,6 +12,8 @@ icon: devicon-plain:cloudflareworkers
 
 ### Usage
 
+**Driver name:** `cloudflare-kv-binding`
+
 ::read-more{to="https://developers.cloudflare.com/workers/runtime-apis/kv"}
 Learn more about Cloudflare KV.
 ::
@@ -24,12 +26,12 @@ You need to create and assign a KV. See [KV Bindings](https://developers.cloudfl
 import { createStorage } from "unstorage";
 import cloudflareKVBindingDriver from "unstorage/drivers/cloudflare-kv-binding";
 
-// Using binding name to be picked from globalThis
+// Directly setting binding
 const storage = createStorage({
   driver: cloudflareKVBindingDriver({ binding: "STORAGE" }),
 });
 
-// Directly setting binding
+// Using binding name to be picked from globalThis
 const storage = createStorage({
   driver: cloudflareKVBindingDriver({ binding: globalThis.STORAGE }),
 });
@@ -53,6 +55,8 @@ const storage = createStorage({
 > Store data in Cloudflare KV using the Cloudflare API v4.
 
 ### Usage
+
+**Driver name:** `cloudflare-kv-http`
 
 ::read-more{to="https://developers.cloudflare.com/api/operations/workers-kv-namespace-list-namespaces"}
 Learn more about Cloudflare KV API.
@@ -127,6 +131,10 @@ const storage = createStorage({
 This is an experimental driver! This driver only works in a cloudflare worker environment and cannot be used in other runtime environments such as Node.js (r2-http driver is coming soon)
 ::
 
+### Usage
+
+**Driver name:** `cloudflare-r2-binding`
+
 ::read-more{to="https://developers.cloudflare.com/r2/api/workers/workers-api-reference/"}
 Learn more about Cloudflare R2 buckets.
 ::
@@ -157,3 +165,19 @@ const storage = createStorage({
 
 - `binding`: Bucket binding or name. Default is `BUCKET`.
 - `base`: Prefix all keys with base.
+
+**Transaction options:**
+
+- `getItemRaw(key, { type: "..." })`
+  - `type: "object"`: Return the [R2 object body](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/#r2objectbody-definition).
+  - `type: "stream"`: Return body stream.
+  - `type: "blob"`: Return a `Blob`.
+  - `type: "bytes"`: Return an `Uint8Array`.
+  - `type: "arrayBuffer"`: Return an `ArrayBuffer` (default)
+
+## Cloudflare R2 (http)
+
+To use Cloudflare R2 over HTTP, you can use [s3 driver](/drivers/s3).
+
+> [!NOTE]
+> Make sure to set `region` to `auto`

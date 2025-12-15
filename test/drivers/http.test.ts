@@ -1,29 +1,30 @@
 import { describe, afterAll, expect, it } from "vitest";
-import driver from "../../src/drivers/http";
-import { createStorage } from "../../src";
-import { createStorageServer } from "../../src/server";
-import { listen } from "listhen";
-import { testDriver } from "./utils";
+import { serve } from "srvx";
+import driver from "../../src/drivers/http.ts";
+import { createStorage } from "../../src/index.ts";
+import { createStorageHandler } from "../../src/server.ts";
+import { testDriver } from "./utils.ts";
 
 describe("drivers: http", async () => {
   const remoteStorage = createStorage();
-  const server = createStorageServer(remoteStorage, {
-    authorize(req) {
-      if (req.event.node.req.headers["x-global-header"] !== "1") {
+  const server = createStorageHandler(remoteStorage, {
+    authorize({ key, request }) {
+      if (request.headers.get("x-global-header") !== "1") {
         // console.log(req.key, req.type, req.event.node.req.headers);
         throw new Error("Missing global test header!");
       }
       if (
-        req.key === "authorized" &&
-        req.event.node.req.headers["x-auth-header"] !== "1"
+        key === "authorized" &&
+        request.headers.get("x-auth-header") !== "1"
       ) {
         // console.log(req.key, req.type, req.event.node.req.headers);
         throw new Error("Missing auth test header!");
       }
     },
   });
-  const listener = await listen(server.handle, {
-    port: { random: true },
+  const listener = await serve({
+    fetch: server,
+    port: 0,
   });
 
   afterAll(async () => {
@@ -32,21 +33,21 @@ describe("drivers: http", async () => {
 
   testDriver({
     driver: driver({
-      base: listener!.url,
+      base: listener!.url!,
       headers: { "x-global-header": "1" },
     }),
-    async additionalTests({ storage }) {
+    async additionalTests(ctx) {
       it("custom headers", async () => {
-        await storage.setItem("authorized", "test", {
+        await ctx.storage.setItem("authorized", "test", {
           headers: { "x-auth-header": "1" },
         });
       });
       it("null item", async () => {
-        await storage.setItem("nullItem", null);
-        await storage.setItem("nullStringItem", "null");
-        expect(await storage.getItem("nullItem")).toBeNull();
-        expect(await storage.getItem("nanItem")).toBeNull();
-        expect(await storage.getItem("nullStringItem")).toBeNull();
+        await ctx.storage.setItem("nullItem", null);
+        await ctx.storage.setItem("nullStringItem", "null");
+        expect(await ctx.storage.getItem("nullItem")).toBeNull();
+        expect(await ctx.storage.getItem("nanItem")).toBeNull();
+        expect(await ctx.storage.getItem("nullStringItem")).toBeNull();
       });
     },
   });

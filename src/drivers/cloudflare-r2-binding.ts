@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
-import { defineDriver, joinKeys } from "./utils";
-import { getR2Binding } from "./utils/cloudflare";
+import { defineDriver, joinKeys } from "./utils/index.ts";
+import { getR2Binding } from "./utils/cloudflare.ts";
 
 export interface CloudflareR2Options {
   binding?: string | R2Bucket;
@@ -45,12 +45,13 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
     getItem(key, topts) {
       key = r(key);
       const binding = getR2Binding(opts.binding);
-      return binding.get(key, topts).then((r) => r?.text());
+      return binding.get(key, topts).then((r) => r?.text() ?? null);
     },
-    getItemRaw(key, topts) {
+    async getItemRaw(key, topts) {
       key = r(key);
       const binding = getR2Binding(opts.binding);
-      return binding.get(key, topts).then((r) => r?.arrayBuffer());
+      const object = await binding.get(key, topts);
+      return object ? getObjBody(object, topts?.type) : null;
     },
     async setItem(key, value, topts) {
       key = r(key);
@@ -79,3 +80,30 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
     },
   };
 });
+
+function getObjBody(
+  object: R2ObjectBody,
+  type: "object" | "stream" | "blob" | "arrayBuffer" | "bytes"
+) {
+  switch (type) {
+    case "object": {
+      return object;
+    }
+    case "stream": {
+      return object.body;
+    }
+    case "blob": {
+      return object.blob();
+    }
+    case "arrayBuffer": {
+      return object.arrayBuffer();
+    }
+    case "bytes": {
+      return object.arrayBuffer().then((buffer) => new Uint8Array(buffer));
+    }
+    // TODO: Default to bytes in v2
+    default: {
+      return object.arrayBuffer();
+    }
+  }
+}

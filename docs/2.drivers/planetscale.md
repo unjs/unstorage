@@ -8,7 +8,9 @@ icon: simple-icons:planetscale
 
 ## Usage
 
-::read-more{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
+**Driver name:** `planetscale`
+
+::read-more{to="https://planetscale.com/"}
 Learn more about PlanetScale.
 ::
 

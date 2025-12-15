@@ -1,25 +1,13 @@
-import { defineBuildConfig } from "unbuild";
+import { defineBuildConfig } from "obuild/config";
 
 export default defineBuildConfig({
-  declaration: true,
-  rollup: {
-    emitCJS: true,
-  },
   entries: [
     "src/index",
     "src/server",
     {
+      type: "transform",
       input: "src/drivers/",
-      outDir: "drivers",
-      format: "esm",
-    },
-    {
-      input: "src/drivers/",
-      outDir: "drivers",
-      format: "cjs",
-      ext: "cjs",
-      declaration: false,
+      outDir: "dist/drivers",
     },
   ],
-  externals: ["mongodb"],
 });

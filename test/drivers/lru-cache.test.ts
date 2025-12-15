@@ -1,11 +1,11 @@
-import { it, describe, expect, vi, beforeEach, afterEach } from "vitest";
-import driver from "../../src/drivers/lru-cache";
-import { testDriver } from "./utils";
-import { createStorage } from "../../src";
+import { it, describe, expect, vi } from "vitest";
+import driver from "../../src/drivers/lru-cache.ts";
+import { testDriver } from "./utils.ts";
+import { createStorage } from "../../src/index.ts";
 
 describe("drivers: lru-cache", () => {
   testDriver({
-    driver: driver(),
+    driver: driver({}),
   });
 });
 
@@ -14,16 +14,16 @@ describe("drivers: lru-cache with size", () => {
     driver: driver({
       maxEntrySize: 50,
     }),
-    additionalTests({ storage }) {
+    additionalTests(ctx) {
       it("should not store large items", async () => {
-        await storage.setItem(
+        await ctx.storage.setItem(
           "big",
           "0123456789012345678901234567890123456789012345678901234567890123456789"
         );
-        expect(await storage.getItem("big")).toBe(null);
+        expect(await ctx.storage.getItem("big")).toBe(null);
 
-        await storage.setItemRaw("bigBuff", Buffer.alloc(100));
-        expect(await storage.getItemRaw("bigBuff")).toBe(null);
+        await ctx.storage.setItemRaw("bigBuff", Buffer.alloc(100));
+        expect(await ctx.storage.getItemRaw("bigBuff")).toBe(null);
       });
     },
   });
@@ -37,7 +37,7 @@ describe("drivers: lru-cache with TTL and stale-while-revalidate cache", () => {
         max: 10,
         ttl: 50,
         allowStale: true,
-        fetchMethod: async (key, value, options) => {
+        fetchMethod: async (key, value) => {
           fetchMethodTestSpy(key, value);
           return "ourTestValue";
         },
@@ -59,7 +59,7 @@ describe("drivers: lru-cache with TTL and stale-while-revalidate cache", () => {
         max: 10,
         ttl: 50,
         allowStale: true,
-        fetchMethod: async (key, value, options) => {
+        fetchMethod: async (key, value) => {
           fetchMethodTestSpy(key, value);
           // first time when there is no cached value we return the first string
           if (!value) {

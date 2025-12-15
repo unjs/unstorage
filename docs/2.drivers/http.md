@@ -8,6 +8,8 @@ icon: ic:baseline-http
 
 ## Usage
 
+**Driver name:** `http`
+
 ::note
 Supports built-in [http server](/guide/http-server) methods.
 ::

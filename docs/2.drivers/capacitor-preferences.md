@@ -12,6 +12,8 @@ Learn more about Capacitor Preferences API.
 
 ## Usage
 
+**Driver name:** `capacitor-preferences`
+
 To use this driver, you need to install and sync `@capacitor/preferences` inside your capacitor project:
 
 :pm-install{name="@capacitor/preferences"}

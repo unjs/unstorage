@@ -1,9 +1,13 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
 import {
   TableClient,
   AzureNamedKeyCredential,
   AzureSASCredential,
-  TableEntity,
+  type TableEntity,
 } from "@azure/data-tables";
 import { DefaultAzureCredential } from "@azure/identity";
 

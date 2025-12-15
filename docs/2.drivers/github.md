@@ -4,9 +4,11 @@ icon: mdi:github
 
 # GitHub
 
-> Map files from a remote github repository (readonly).
+> Map files from a remote GitHub repository (readonly).
 
 ## Usage
+
+**Driver name:** `github`
 
 This driver fetches all possible keys once and keep it in cache for 10 minutes. Due to GitHub rate limit, it is highly recommended to provide a token. It only applies to fetching keys.
 
@@ -25,10 +27,10 @@ const storage = createStorage({
 
 **Options:**
 
-- `repo`: Github repository. Format is `username/repo` or `org/repo` **(required)**
-- `token`: Github API token. **(recommended)**
+- `repo`: GitHub repository. Format is `username/repo` or `org/repo` **(required)**
+- `token`: GitHub API token. **(recommended)**
 - `branch`: Target branch. Default is `main`
 - `dir`: Use a directory as driver root.
 - `ttl`: Filenames cache revalidate time. Default is `600` seconds (10 minutes)
-- `apiURL`: Github API domain. Default is `https://api.github.com`
-- `cdnURL`: Github RAW CDN Url. Default is `https://raw.githubusercontent.com`
+- `apiURL`: GitHub API domain. Default is `https://api.github.com`
+- `cdnURL`: GitHub RAW CDN Url. Default is `https://raw.githubusercontent.com`

@@ -1,5 +1,10 @@
-import { it, expect } from "vitest";
-import { Storage, Driver, createStorage, restoreSnapshot } from "../../src";
+import { it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import {
+  type Storage,
+  type Driver,
+  createStorage,
+  restoreSnapshot,
+} from "../../src/index.ts";
 
 export interface TestContext {
   storage: Storage;
@@ -7,15 +12,31 @@ export interface TestContext {
 }
 
 export interface TestOptions {
-  driver: Driver;
+  driver: Driver | (() => Driver);
+  noKeysSupport?: boolean;
   additionalTests?: (ctx: TestContext) => void;
 }
 
 export function testDriver(opts: TestOptions) {
-  const ctx: TestContext = {
-    storage: createStorage({ driver: opts.driver }),
-    driver: opts.driver,
-  };
+  const ctx = {} as TestContext;
+
+  beforeAll(() => {
+    ctx.driver =
+      typeof opts.driver === "function" ? opts.driver() : opts.driver;
+
+    ctx.storage = createStorage({
+      driver: ctx.driver,
+    });
+  });
+
+  afterAll(async () => {
+    await ctx.driver?.dispose?.();
+    await ctx.storage?.dispose?.();
+  });
+
+  afterEach(async () => {
+    await ctx.storage.clear();
+  });
 
   it("init", async () => {
     await restoreSnapshot(ctx.storage, { initial: "works" });
@@ -38,13 +59,39 @@ export function testDriver(opts: TestOptions) {
     expect(await ctx.storage.getItem("s3:a?q=2")).toBe("test_data");
   });
 
-  it("getKeys", async () => {
+  it.skipIf(opts.noKeysSupport)("getKeys", async () => {
+    await ctx.storage.setItem("s1:a", "test_data");
+    await ctx.storage.setItem("s2:a", "test_data");
+    await ctx.storage.setItem("s3:a?q=1", "test_data");
     expect(await ctx.storage.getKeys().then((k) => k.sort())).toMatchObject(
       ["s1:a", "s2:a", "s3:a"].sort()
     );
     expect(await ctx.storage.getKeys("s1").then((k) => k.sort())).toMatchObject(
       ["s1:a"].sort()
     );
+  });
+
+  it.skipIf(opts.noKeysSupport)("getKeys with depth", async () => {
+    await ctx.storage.setItem("depth0_0", "test_data");
+    await ctx.storage.setItem("depth0:depth1:depth2_0", "test_data");
+    await ctx.storage.setItem("depth0:depth1:depth2_1", "test_data");
+    await ctx.storage.setItem("depth0:depth1_0", "test_data");
+    await ctx.storage.setItem("depth0:depth1_1", "test_data");
+    expect(await ctx.storage.getKeys(undefined, { maxDepth: 0 })).toMatchObject(
+      ["depth0_0"]
+    );
+    expect(
+      (await ctx.storage.getKeys(undefined, { maxDepth: 1 })).sort()
+    ).toMatchObject(["depth0:depth1_0", "depth0:depth1_1", "depth0_0"]);
+    expect(
+      (await ctx.storage.getKeys(undefined, { maxDepth: 2 })).sort()
+    ).toMatchObject([
+      "depth0:depth1:depth2_0",
+      "depth0:depth1:depth2_1",
+      "depth0:depth1_0",
+      "depth0:depth1_1",
+      "depth0_0",
+    ]);
   });
 
   it("serialize (object)", async () => {
@@ -82,7 +129,7 @@ export function testDriver(opts: TestOptions) {
 
   it("serialize (error for non primitives)", async () => {
     class Test {}
-    expect(
+    await expect(
       ctx.storage.setItem("/data/badvalue.json", new Test())
     ).rejects.toThrow("[unstorage] Cannot stringify value!");
   });
@@ -114,12 +161,17 @@ export function testDriver(opts: TestOptions) {
   });
 
   it("getItems", async () => {
-    await ctx.storage.setItem("v1:a", "test_data_v1:a");
-    await ctx.storage.setItem("v2:a", "test_data_v2:a");
     await ctx.storage.setItem("v3:a?q=1", "test_data_v3:a?q=1");
+    await ctx.storage.setItem("v2:a", "test_data_v2:a");
+    await ctx.storage.setItem("v1:a", "test_data_v1:a");
 
     expect(
-      await ctx.storage.getItems([{ key: "v1:a" }, "v2:a", { key: "v3:a?q=1" }])
+      await ctx.storage.getItems([
+        { key: "v1:a" },
+        "v2:a",
+        { key: "v3:a?q=1" },
+        "v4:undefined",
+      ])
     ).toMatchObject([
       {
         key: "v1:a",
@@ -132,6 +184,10 @@ export function testDriver(opts: TestOptions) {
       {
         key: "v3:a", // key should lose the querystring
         value: "test_data_v3:a?q=1",
+      },
+      {
+        key: "v4:undefined",
+        value: null,
       },
     ]);
   });
@@ -161,9 +217,5 @@ export function testDriver(opts: TestOptions) {
     // ensure we can clear empty storage as well: #162
     await ctx.storage.clear();
     expect(await ctx.storage.getKeys()).toMatchObject([]);
-  });
-
-  it("dispose", async () => {
-    await ctx.storage.dispose();
   });
 }

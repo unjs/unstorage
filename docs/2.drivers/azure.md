@@ -10,6 +10,8 @@ Store data in the key-value store of Azure App Configuration.
 
 ### Usage
 
+**Driver name:** `azure-app-configuration`
+
 ::note{to="https://learn.microsoft.com/en-us/azure/azure-app-configuration/overview"}
 Learn more about Azure App Configuration.
 ::
@@ -57,6 +59,8 @@ Store data in Azure Cosmos DB NoSQL API documents.
 
 ### Usage
 
+**Driver name:** `azure-cosmos`
+
 ::note{to="https://azure.microsoft.com/en-us/services/cosmos-db/"}
 Learn more about Azure Cosmos DB.
 ::
@@ -99,6 +103,8 @@ const storage = createStorage({
 Store data in a Azure Key Vault secrets.
 
 ### Usage
+
+**Driver name:** `azure-key-vault`
 
 ::note{to="https://docs.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"}
 Learn more about Azure Key Vault secrets.
@@ -146,6 +152,8 @@ Store data in a Azure blob storage.
 
 ### Usage
 
+**Driver name:** `azure-storage-blob`
+
 ::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob"}
 Learn more about Azure blob storage.
 ::
@@ -185,13 +193,19 @@ The driver supports the following authentication methods:
 - `containerName`: The name of the blob container to use. Defaults to `unstorage`.
 - `accountKey`: The account key to use for authentication. This is only required if you are using `AzureNamedKeyCredential`.
 - `sasKey`: The SAS token to use for authentication. This is only required if you are using `AzureSASCredential`.
+- `sasUrl`: The SAS URL of the storage account. This is an alternative to providing `accountName` and `sasKey` separately. The URL can be either:
+  - A storage account URL: `https://<account>.blob.core.windows.net?<sas-token>`
+  - A container URL: `https://<account>.blob.core.windows.net/<container>?<sas-token>` you must specify the `containerName` option
 - `connectionString`: The storage accounts' connection string. `accountKey` and `sasKey` take precedence.
+- `endpointSuffix`: Storage account endpoint suffix. Needs to be changed for Microsoft Azure operated by 21Vianet, Azure Government or Azurite. Defaults to `.blob.core.windows.net`.
 
 ## Azure Table Storage
 
 Store data in a Azure table storage.
 
 ### Usage
+
+**Driver name:** `azure-storage-table`
 
 ::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables"}
 Learn more about Azure table storage.

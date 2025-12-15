@@ -13,6 +13,8 @@ Store data in a [Netlify Blobs](https://docs.netlify.com/blobs/overview/) store.
 
 ## Usage
 
+**Driver name:** `netlify-blobs`
+
 ```js
 import { createStorage } from "unstorage";
 import netlifyBlobsDriver from "unstorage/drivers/netlify-blobs";
@@ -51,6 +53,7 @@ To use, you will need to install `@netlify/blobs` as dependency or devDependency
 
 - `name` - The name of the store to use. It is created if needed. This is required except for deploy-scoped stores.
 - `deployScoped` - If set to `true`, the store is scoped to the deploy. This means that it is only available from that deploy, and will be deleted or rolled-back alongside it.
+- `consistency` - The [consistency model](https://docs.netlify.com/blobs/overview/#consistency) to use for the store. This can be `eventual` or `strong`. Default is `eventual`.
 - `siteID` - Required during builds, where it is available as `constants.SITE_ID`. At runtime this is set automatically.
 - `token` - Required during builds, where it is available as `constants.NETLIFY_API_TOKEN`. At runtime this is set automatically.
 
@@ -60,8 +63,9 @@ These are not normally needed, but are available for advanced use cases or for u
 
 - `apiURL`
 - `edgeURL`
+- `uncachedEdgeURL`
 
-## Using in netlify edge
+## Using in Netlify edge functions
 
 When using Unstorage in a Netlify edge function you should use a URL import. This does not apply if you are compiling your code in a framework - just if you are creating your own edge functions.
 

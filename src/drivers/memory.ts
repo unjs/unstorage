@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { defineDriver } from "./utils/index.ts";
 
 const DRIVER_NAME = "memory";
 

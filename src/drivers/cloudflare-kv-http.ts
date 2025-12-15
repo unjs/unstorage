@@ -4,7 +4,7 @@ import {
   createRequiredError,
   defineDriver,
   joinKeys,
-} from "./utils";
+} from "./utils/index.ts";
 
 interface KVAuthAPIToken {
   /**
@@ -198,7 +198,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
         if (i % 10_000 === 0) {
           acc.push([]);
         }
-        acc[acc.length - 1].push(key);
+        acc[acc.length - 1]!.push(key);
         return acc;
       },
       [[]]
@@ -206,10 +206,12 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     // Call bulk delete endpoint with each chunk
     await Promise.all(
       chunks.map((chunk) => {
-        return kvFetch("/bulk", {
-          method: "DELETE",
-          body: { keys: chunk },
-        });
+        if (chunk.length > 0) {
+          return kvFetch("/bulk/delete", {
+            method: "POST",
+            body: chunk,
+          });
+        }
       })
     );
   };

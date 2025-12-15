@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { defineDriver } from "./utils/index.ts";
 import {
   get,
   set,
@@ -37,7 +37,14 @@ export default defineDriver((opts: IDBKeyvalOptions = {}) => {
       const item = await get(makeKey(key), customStore);
       return item ?? null;
     },
+    async getItemRaw(key) {
+      const item = await get(makeKey(key), customStore);
+      return item ?? null;
+    },
     setItem(key, value) {
+      return set(makeKey(key), value, customStore);
+    },
+    setItemRaw(key, value) {
       return set(makeKey(key), value, customStore);
     },
     removeItem(key) {

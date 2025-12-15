@@ -1,18 +1,28 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
+import type { GetKeysOptions } from "../types.ts";
 import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
   Store,
   BlobResponseType,
+  // NOTE: this type is different in v10+ vs. pre-v10
   SetOptions,
   ListOptions,
   GetStoreOptions,
   GetDeployStoreOptions,
 } from "@netlify/blobs";
-import { fetch } from "ofetch";
 
 const DRIVER_NAME = "netlify-blobs";
 
 type GetOptions = { type?: BlobResponseType };
+
+export type NetlifyStoreOptions =
+  | NetlifyDeployStoreLegacyOptions
+  | NetlifyDeployStoreOptions
+  | NetlifyNamedStoreOptions;
 
 export interface ExtraOptions {
   /** If set to `true`, the store is scoped to the deploy. This means that it is only available from that deploy, and will be deleted or rolled-back alongside it. */
@@ -38,11 +48,6 @@ export interface NetlifyNamedStoreOptions
   name: string;
   deployScoped?: false;
 }
-
-export type NetlifyStoreOptions =
-  | NetlifyDeployStoreLegacyOptions
-  | NetlifyDeployStoreOptions
-  | NetlifyNamedStoreOptions;
 
 export default defineDriver((options: NetlifyStoreOptions) => {
   const { deployScoped, name, ...opts } = options;
@@ -87,18 +92,27 @@ export default defineDriver((options: NetlifyStoreOptions) => {
       // @ts-expect-error has trouble with the overloaded types
       return getClient().get(key, { type: topts?.type ?? "arrayBuffer" });
     },
-    setItem(key, value, topts?: SetOptions) {
-      return getClient().set(key, value, topts);
+    async setItem(key, value, topts?: SetOptions) {
+      // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
+      // TODO(serhalp): Allow drivers to return a value from `setItem`. The @netlify/blobs v10
+      // functionality isn't usable without this.
+      await getClient().set(key, value, topts);
     },
-    setItemRaw(key, value: string | ArrayBuffer | Blob, topts?: SetOptions) {
-      return getClient().set(key, value, topts);
+    async setItemRaw(
+      key,
+      value: string | ArrayBuffer | Blob,
+      topts?: SetOptions
+    ) {
+      // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
+      // See TODO above.
+      await getClient().set(key, value, topts);
     },
     removeItem(key) {
       return getClient().delete(key);
     },
     async getKeys(
       base?: string,
-      tops?: Omit<ListOptions, "prefix" | "paginate">
+      tops?: GetKeysOptions & Omit<ListOptions, "prefix" | "paginate">
     ) {
       return (await getClient().list({ ...tops, prefix: base })).blobs.map(
         (item) => item.key

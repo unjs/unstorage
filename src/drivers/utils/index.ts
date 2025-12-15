@@ -1,4 +1,4 @@
-import type { Driver } from "../..";
+import type { Driver } from "../../types.ts";
 
 type DriverFactory<OptionsT, InstanceT> = (
   opts: OptionsT
@@ -11,11 +11,14 @@ export function defineDriver<OptionsT = any, InstanceT = never>(
   return factory;
 }
 
-export function normalizeKey(key: string | undefined): string {
+export function normalizeKey(
+  key: string | undefined,
+  sep: ":" | "/" = ":"
+): string {
   if (!key) {
     return "";
   }
-  return key.replace(/[/\\]/g, ":").replace(/^:|:$/g, "");
+  return key.replace(/[:/\\]/g, sep).replace(/^[:/\\]|[:/\\]$/g, "");
 }
 
 export function joinKeys(...keys: string[]) {
@@ -31,6 +34,9 @@ export function createError(
   opts?: ErrorOptions
 ) {
   const err = new Error(`[unstorage] [${driver}] ${message}`, opts);
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(err, createError);
+  }
   return err;
 }
 

@@ -1,5 +1,12 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
-import { SecretClient, SecretClientOptions } from "@azure/keyvault-secrets";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
+import {
+  SecretClient,
+  type SecretClientOptions,
+} from "@azure/keyvault-secrets";
 import { DefaultAzureCredential } from "@azure/identity";
 
 export interface AzureKeyVaultOptions {
@@ -74,7 +81,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
       const secrets = getKeyVaultClient()
         .listPropertiesOfSecrets()
         .byPage({ maxPageSize: opts.pageSize || 25 });
-      const keys = [];
+      const keys: string[] = [];
       for await (const page of secrets) {
         const pageKeys = page.map((secret) => decode(secret.name));
         keys.push(...pageKeys);
@@ -118,7 +125,7 @@ function encode(value: string): string {
   for (const key in base64Map) {
     encoded = encoded.replace(
       new RegExp(key.replace(/[$()*+.?[\\\]^{|}]/g, "\\$&"), "g"),
-      base64Map[key]
+      base64Map[key]!
     );
   }
   return encoded;

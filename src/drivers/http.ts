@@ -1,7 +1,7 @@
-import type { TransactionOptions } from "../types";
-import { defineDriver } from "./utils";
+import type { TransactionOptions } from "../types.ts";
+import { defineDriver } from "./utils/index.ts";
 import { type FetchError, $fetch as _fetch } from "ofetch";
-import { joinURL } from "ufo";
+import { joinURL } from "./utils/path.ts";
 
 export interface HTTPOptions {
   base: string;
@@ -14,7 +14,7 @@ export default defineDriver((opts: HTTPOptions) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
 
   const rBase = (key: string = "") =>
-    joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
+    joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
 
   const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
     if (error?.response?.status === 404) {
@@ -56,18 +56,21 @@ export default defineDriver((opts: HTTPOptions) => {
       return value;
     },
     async getItemRaw(key, topts) {
-      const value = await _fetch(r(key), {
-        headers: getHeaders(topts, { accept: "application/octet-stream" }),
-      }).catch(catchFetchError);
-      return value;
+      const response = await _fetch
+        .raw(r(key), {
+          responseType: "arrayBuffer",
+          headers: getHeaders(topts, { accept: "application/octet-stream" }),
+        })
+        .catch(catchFetchError);
+      return response._data;
     },
     async getMeta(key, topts) {
       const res = await _fetch.raw(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
       });
-      let mtime = undefined;
-      let ttl = undefined;
+      let mtime: Date | undefined;
+      let ttl: number | undefined;
       const _lastModified = res.headers.get("last-modified");
       if (_lastModified) {
         mtime = new Date(_lastModified);

@@ -1,4 +1,3 @@
-import { type TracingChannel, tracingChannel } from "node:diagnostics_channel";
 import type { Storage, StorageValue } from "./types.ts";
 import { normalizeBaseKey, normalizeKey } from "./utils.ts";
 
@@ -18,19 +17,6 @@ export type TracedOperation =
   | "getItemRaw"
   | "setItemRaw"
   | "clear";
-
-const channels: Record<TracedOperation, TracingChannel> = {
-  hasItem: createChannel("hasItem"),
-  getItem: createChannel("getItem"),
-  setItem: createChannel("setItem"),
-  setItems: createChannel("setItems"),
-  removeItem: createChannel("removeItem"),
-  getKeys: createChannel("getKeys"),
-  getItems: createChannel("getItems"),
-  getItemRaw: createChannel("getItemRaw"),
-  setItemRaw: createChannel("setItemRaw"),
-  clear: createChannel("clear"),
-};
 
 export interface TraceContext {
   keys: string[];
@@ -59,26 +45,6 @@ export interface TraceContext {
   };
 }
 
-/**
- * Create a tracing channel for a given operation.
- */
-function createChannel(operation: TracedOperation): TracingChannel {
-  return tracingChannel(`unstorage.${operation}`);
-}
-
-/**
- * Trace a promise with a given operation and data.
- */
-export async function tracePromise<T>(
-  operation: TracedOperation,
-  exec: () => Promise<T>,
-  data: TraceContext
-): Promise<T> {
-  const channel = channels[operation];
-
-  return channel.tracePromise(exec, data);
-}
-
 type MaybeTracedStorage<T extends StorageValue> = Storage<T> & {
   __traced?: boolean;
 };
@@ -93,6 +59,43 @@ export function withTracing<T extends StorageValue>(
   // Avoid wrapping already traced storages
   if (storage.__traced) {
     return storage;
+  }
+
+  const { tracingChannel } =
+    globalThis.process.getBuiltinModule?.("node:diagnostics_channel") ?? {};
+  if (!tracingChannel) {
+    return storage;
+  }
+
+  const channels = Object.fromEntries(
+    [
+      "hasItem",
+      "getItem",
+      "setItem",
+      "setItems",
+      "removeItem",
+      "getKeys",
+      "getItems",
+      "getItemRaw",
+      "setItemRaw",
+      "clear",
+    ].map(
+      (operation) =>
+        [operation, tracingChannel(`unstorage.${operation}`)] as const
+    )
+  );
+
+  /**
+   * Trace a promise with a given operation and data.
+   */
+  async function tracePromise<T>(
+    operation: TracedOperation,
+    exec: () => Promise<T>,
+    data: TraceContext
+  ): Promise<T> {
+    const channel = channels[operation];
+
+    return channel ? channel.tracePromise(exec, data) : exec();
   }
 
   const tracedStorage: MaybeTracedStorage<T> = { ...storage, __traced: true };

@@ -79,7 +79,7 @@ describe("tracing", () => {
   let storage: Storage;
 
   beforeEach(() => {
-    storage = withTracing(createStorage({ driver: memory() }));
+    storage = withTracing(createStorage<any>({ driver: memory() }));
   });
 
   describe("opt-in behavior", () => {
@@ -661,7 +661,7 @@ describe("tracing", () => {
       const listener = createTracingListener("getItem");
 
       // Create storage with multiple mounts
-      const baseStorage = withTracing(createStorage({ driver: memory() }));
+      const baseStorage = withTracing(createStorage<any>({ driver: memory() }));
       baseStorage.mount("/cache", memory());
       baseStorage.mount("/db", memory());
       const multiStorage = baseStorage;

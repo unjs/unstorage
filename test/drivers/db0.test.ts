@@ -1,13 +1,13 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { createDatabase } from "db0";
-import db0Driver from "../../src/drivers/db0";
-import { testDriver } from "./utils";
+import db0Driver from "../../src/drivers/db0.ts";
+import { testDriver } from "./utils.ts";
 
 const drivers = [
   {
     name: "sqlite",
     async getDB() {
-      const sqlite = await import("db0/connectors/better-sqlite3").then(
+      const sqlite = await import("db0/connectors/node-sqlite").then(
         (m) => m.default
       );
       return createDatabase(sqlite({ name: ":memory:" }));

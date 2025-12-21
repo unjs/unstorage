@@ -1,8 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
 import { describe, expect, test, afterAll } from "vitest";
-import { createStorage, snapshot } from "../../src";
-import CloudflareKVBinding from "../../src/drivers/cloudflare-kv-binding";
-import { testDriver } from "./utils";
+import { createStorage, snapshot } from "../../src/index.ts";
+import CloudflareKVBinding from "../../src/drivers/cloudflare-kv-binding.ts";
+import { testDriver } from "./utils.ts";
 import { getPlatformProxy } from "wrangler";
 
 describe("drivers: cloudflare-kv", async () => {

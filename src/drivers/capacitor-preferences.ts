@@ -1,6 +1,6 @@
 import { Preferences } from "@capacitor/preferences";
 
-import { defineDriver, joinKeys, normalizeKey } from "./utils";
+import { defineDriver, joinKeys, normalizeKey } from "./utils/index.ts";
 
 const DRIVER_NAME = "capacitor-preferences";
 

@@ -1,4 +1,4 @@
-import { defineDriver, normalizeKey, joinKeys } from "./utils";
+import { defineDriver, normalizeKey, joinKeys } from "./utils/index.ts";
 import type { RuntimeCache } from "@vercel/functions";
 
 export interface VercelCacheOptions {

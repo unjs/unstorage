@@ -4,7 +4,7 @@ import {
   type Driver,
   createStorage,
   restoreSnapshot,
-} from "../../src";
+} from "../../src/index.ts";
 
 export interface TestContext {
   storage: Storage;

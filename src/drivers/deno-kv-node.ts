@@ -1,6 +1,6 @@
 import { openKv, type Kv } from "@deno/kv";
-import { defineDriver } from "./utils/index";
-import denoKV from "./deno-kv";
+import { defineDriver } from "./utils/index.ts";
+import denoKV from "./deno-kv.ts";
 
 // https://docs.deno.com/deploy/kv/manual/node/
 

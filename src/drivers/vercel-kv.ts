@@ -2,7 +2,12 @@ import { createClient } from "@vercel/kv";
 import type { VercelKV } from "@vercel/kv";
 import type { RedisConfigNodejs } from "@upstash/redis";
 
-import { defineDriver, normalizeKey, joinKeys, createError } from "./utils";
+import {
+  defineDriver,
+  normalizeKey,
+  joinKeys,
+  createError,
+} from "./utils/index.ts";
 
 export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
   /**

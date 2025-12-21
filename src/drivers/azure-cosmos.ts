@@ -1,4 +1,4 @@
-import { createRequiredError, defineDriver } from "./utils";
+import { createRequiredError, defineDriver } from "./utils/index.ts";
 import { Container, CosmosClient } from "@azure/cosmos";
 import { DefaultAzureCredential } from "@azure/identity";
 

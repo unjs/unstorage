@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { defineDriver } from "./utils/index.ts";
 import { LRUCache } from "lru-cache";
 
 type LRUCacheOptions = LRUCache.OptionsBase<string, any, any> &

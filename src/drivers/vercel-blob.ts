@@ -1,5 +1,10 @@
 import { del, head, list, put } from "@vercel/blob";
-import { defineDriver, normalizeKey, joinKeys, createError } from "./utils";
+import {
+  defineDriver,
+  normalizeKey,
+  joinKeys,
+  createError,
+} from "./utils/index.ts";
 
 export interface VercelBlobOptions {
   /**
@@ -106,7 +111,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       if (blob) await del(blob.url, { token: getToken() });
     },
     async getKeys(base: string) {
-      const blobs = [];
+      const blobs: any[] = [];
       let cursor: string | undefined = undefined;
       do {
         const listBlobResult: Awaited<ReturnType<typeof list>> = await list({
@@ -128,7 +133,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
     },
     async clear(base) {
       let cursor: string | undefined = undefined;
-      const blobs = [];
+      const blobs: any[] = [];
       do {
         const listBlobResult: Awaited<ReturnType<typeof list>> = await list({
           token: getToken(),

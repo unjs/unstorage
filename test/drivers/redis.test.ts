@@ -1,9 +1,9 @@
 import { describe, vi, it, expect } from "vitest";
-import * as ioredis from "ioredis-mock";
-import redisDriver from "../../src/drivers/redis";
-import { testDriver } from "./utils";
+import * as ioredisMock from "ioredis-mock";
+import redisDriver from "../../src/drivers/redis.ts";
+import { testDriver } from "./utils.ts";
 
-vi.mock("ioredis", () => ioredis);
+vi.mock("ioredis", () => ({ ...ioredisMock, Redis: ioredisMock.default }));
 
 describe("drivers: redis", () => {
   const driver = redisDriver({
@@ -20,7 +20,9 @@ describe("drivers: redis", () => {
         await ctx.storage.setItem("s2:a", "test_data");
         await ctx.storage.setItem("s3:a?q=1", "test_data");
 
-        const client = new ioredis.default("ioredis://localhost:6379/0");
+        const client = new (ioredisMock as any).default(
+          "ioredis://localhost:6379/0"
+        );
         const keys = await client.keys("*");
         expect(keys).toMatchInlineSnapshot(`
           [
@@ -33,7 +35,9 @@ describe("drivers: redis", () => {
       });
 
       it("exposes instance", () => {
-        expect(driver.getInstance?.()).toBeInstanceOf(ioredis.default);
+        expect(driver.getInstance?.()).toBeInstanceOf(
+          (ioredisMock as any).default
+        );
       });
     },
   });

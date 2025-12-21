@@ -1,6 +1,10 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
 import { $fetch } from "ofetch";
-import { withTrailingSlash, joinURL } from "ufo";
+import { withTrailingSlash, joinURL } from "./utils/path.ts";
 
 export interface GithubOptions {
   /**
@@ -57,7 +61,10 @@ const DRIVER_NAME = "github";
 
 export default defineDriver<GithubOptions>((_opts) => {
   const opts: GithubOptions = { ...defaultOptions, ..._opts };
-  const rawUrl = joinURL(opts.cdnURL!, opts.repo, opts.branch!, opts.dir!);
+  const rawUrl = joinURL(
+    opts.cdnURL!,
+    [opts.repo, opts.branch!, opts.dir!].join("/")
+  );
 
   let files: Record<string, GithubFile> = {};
   let lastCheck = 0;

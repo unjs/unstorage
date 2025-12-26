@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-alpha.4
+
+[compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.3...v2.0.0-alpha.4)
+
+### 🏡 Chore
+
+- Update dependencies ([638e0ff](https://github.com/unjs/unstorage/commit/638e0ff))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v2.0.0-alpha.3
 
 [compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.2...v2.0.0-alpha.3)

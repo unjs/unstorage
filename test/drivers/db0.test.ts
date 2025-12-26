@@ -7,7 +7,7 @@ const drivers = [
   {
     name: "sqlite",
     async getDB() {
-      const sqlite = await import("db0/connectors/better-sqlite3").then(
+      const sqlite = await import("db0/connectors/node-sqlite").then(
         (m) => m.default
       );
       return createDatabase(sqlite({ name: ":memory:" }));

@@ -31,89 +31,96 @@ export interface AzureKeyVaultOptions {
 
 const DRIVER_NAME = "azure-key-vault";
 
-export default defineDriver((opts: AzureKeyVaultOptions) => {
-  let keyVaultClient: SecretClient;
-  const getKeyVaultClient = () => {
-    if (keyVaultClient) {
+const driver: DriverFactory<AzureKeyVaultOptions, SecretClient> = defineDriver(
+  (opts: AzureKeyVaultOptions) => {
+    let keyVaultClient: SecretClient;
+    const getKeyVaultClient = () => {
+      if (keyVaultClient) {
+        return keyVaultClient;
+      }
+      const { vaultName = null, serviceVersion = "7.3", pageSize = 25 } = opts;
+      if (!vaultName) {
+        throw createRequiredError(DRIVER_NAME, "vaultName");
+      }
+      if (pageSize > 25) {
+        throw createError(
+          DRIVER_NAME,
+          "`pageSize` cannot be greater than `25`"
+        );
+      }
+      const credential = new DefaultAzureCredential();
+      const url = `https://${vaultName}.vault.azure.net`;
+      keyVaultClient = new SecretClient(url, credential, { serviceVersion });
       return keyVaultClient;
-    }
-    const { vaultName = null, serviceVersion = "7.3", pageSize = 25 } = opts;
-    if (!vaultName) {
-      throw createRequiredError(DRIVER_NAME, "vaultName");
-    }
-    if (pageSize > 25) {
-      throw createError(DRIVER_NAME, "`pageSize` cannot be greater than `25`");
-    }
-    const credential = new DefaultAzureCredential();
-    const url = `https://${vaultName}.vault.azure.net`;
-    keyVaultClient = new SecretClient(url, credential, { serviceVersion });
-    return keyVaultClient;
-  };
+    };
 
-  return {
-    name: DRIVER_NAME,
-    options: opts,
-    getInstance: getKeyVaultClient,
-    async hasItem(key) {
-      try {
-        await getKeyVaultClient().getSecret(encode(key));
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    async getItem(key) {
-      try {
+    return {
+      name: DRIVER_NAME,
+      options: opts,
+      getInstance: getKeyVaultClient,
+      async hasItem(key) {
+        try {
+          await getKeyVaultClient().getSecret(encode(key));
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      async getItem(key) {
+        try {
+          const secret = await getKeyVaultClient().getSecret(encode(key));
+          return secret.value;
+        } catch {
+          return null;
+        }
+      },
+      async setItem(key, value) {
+        await getKeyVaultClient().setSecret(encode(key), value);
+      },
+      async removeItem(key) {
+        const poller = await getKeyVaultClient().beginDeleteSecret(encode(key));
+        await poller.pollUntilDone();
+        await getKeyVaultClient().purgeDeletedSecret(encode(key));
+      },
+      async getKeys() {
+        const secrets = getKeyVaultClient()
+          .listPropertiesOfSecrets()
+          .byPage({ maxPageSize: opts.pageSize || 25 });
+        const keys: string[] = [];
+        for await (const page of secrets) {
+          const pageKeys = page.map((secret) => decode(secret.name));
+          keys.push(...pageKeys);
+        }
+        return keys;
+      },
+      async getMeta(key) {
         const secret = await getKeyVaultClient().getSecret(encode(key));
-        return secret.value;
-      } catch {
-        return null;
-      }
-    },
-    async setItem(key, value) {
-      await getKeyVaultClient().setSecret(encode(key), value);
-    },
-    async removeItem(key) {
-      const poller = await getKeyVaultClient().beginDeleteSecret(encode(key));
-      await poller.pollUntilDone();
-      await getKeyVaultClient().purgeDeletedSecret(encode(key));
-    },
-    async getKeys() {
-      const secrets = getKeyVaultClient()
-        .listPropertiesOfSecrets()
-        .byPage({ maxPageSize: opts.pageSize || 25 });
-      const keys: string[] = [];
-      for await (const page of secrets) {
-        const pageKeys = page.map((secret) => decode(secret.name));
-        keys.push(...pageKeys);
-      }
-      return keys;
-    },
-    async getMeta(key) {
-      const secret = await getKeyVaultClient().getSecret(encode(key));
-      return {
-        mtime: secret.properties.updatedOn,
-        birthtime: secret.properties.createdOn,
-        expireTime: secret.properties.expiresOn,
-      };
-    },
-    async clear() {
-      const secrets = getKeyVaultClient()
-        .listPropertiesOfSecrets()
-        .byPage({ maxPageSize: opts.pageSize || 25 });
-      for await (const page of secrets) {
-        const deletionPromises = page.map(async (secret) => {
-          const poller = await getKeyVaultClient().beginDeleteSecret(
-            secret.name
-          );
-          await poller.pollUntilDone();
-          await getKeyVaultClient().purgeDeletedSecret(secret.name);
-        });
-        await Promise.all(deletionPromises);
-      }
-    },
-  };
-}) as DriverFactory<AzureKeyVaultOptions, SecretClient>;
+        return {
+          mtime: secret.properties.updatedOn,
+          birthtime: secret.properties.createdOn,
+          expireTime: secret.properties.expiresOn,
+        };
+      },
+      async clear() {
+        const secrets = getKeyVaultClient()
+          .listPropertiesOfSecrets()
+          .byPage({ maxPageSize: opts.pageSize || 25 });
+        for await (const page of secrets) {
+          const deletionPromises = page.map(async (secret) => {
+            const poller = await getKeyVaultClient().beginDeleteSecret(
+              secret.name
+            );
+            await poller.pollUntilDone();
+            await getKeyVaultClient().purgeDeletedSecret(secret.name);
+          });
+          await Promise.all(deletionPromises);
+        }
+      },
+    };
+  }
+);
+
+export default driver;
 
 const base64Map: { [key: string]: string } = {
   "=": "-e-",

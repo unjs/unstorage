@@ -9,8 +9,8 @@ export interface CapacitorPreferencesOptions {
   base?: string;
 }
 
-export default defineDriver<CapacitorPreferencesOptions, PreferencesPlugin>(
-  (opts) => {
+const driver: DriverFactory<CapacitorPreferencesOptions, PreferencesPlugin> =
+  defineDriver((opts) => {
     const base = normalizeKey(opts?.base || "");
     const resolveKey = (key: string) => joinKeys(base, key);
 
@@ -50,5 +50,6 @@ export default defineDriver<CapacitorPreferencesOptions, PreferencesPlugin>(
         );
       },
     };
-  }
-) as DriverFactory<CapacitorPreferencesOptions, PreferencesPlugin>;
+  });
+
+export default driver;

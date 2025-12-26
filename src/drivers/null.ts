@@ -3,7 +3,7 @@ import type { DriverFactory } from "./utils/index.ts";
 
 const DRIVER_NAME = "null";
 
-export default defineDriver<void>(() => {
+const driver: DriverFactory<void, void> = defineDriver(() => {
   return {
     name: DRIVER_NAME,
     hasItem() {
@@ -30,4 +30,6 @@ export default defineDriver<void>(() => {
     removeItem() {},
     clear() {},
   };
-}) as DriverFactory<void, void>;
+});
+
+export default driver;

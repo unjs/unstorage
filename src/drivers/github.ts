@@ -60,7 +60,7 @@ const defaultOptions: GithubOptions = {
 
 const DRIVER_NAME = "github";
 
-export default defineDriver<GithubOptions>((_opts) => {
+const driver: DriverFactory<GithubOptions, void> = defineDriver((_opts) => {
   const opts: GithubOptions = { ...defaultOptions, ..._opts };
   const rawUrl = joinURL(
     opts.cdnURL!,
@@ -135,7 +135,9 @@ export default defineDriver<GithubOptions>((_opts) => {
       return item ? item.meta : null;
     },
   };
-}) as DriverFactory<GithubOptions, void>;
+});
+
+export default driver;
 
 async function fetchFiles(opts: GithubOptions) {
   const prefix = withTrailingSlash(opts.dir).replace(/^\//, "");

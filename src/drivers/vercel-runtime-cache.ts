@@ -21,57 +21,61 @@ export interface VercelCacheOptions {
 
 const DRIVER_NAME = "vercel-runtime-cache";
 
-export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
-  const base = normalizeKey(opts?.base);
-  const r = (...keys: string[]) => joinKeys(base, ...keys);
+const driver: DriverFactory<VercelCacheOptions, RuntimeCache> = defineDriver(
+  (opts) => {
+    const base = normalizeKey(opts?.base);
+    const r = (...keys: string[]) => joinKeys(base, ...keys);
 
-  let _cache: RuntimeCache;
+    let _cache: RuntimeCache;
 
-  const getClient = () => {
-    if (!_cache) {
-      _cache = getCache();
-    }
-    return _cache;
-  };
-
-  return {
-    name: DRIVER_NAME,
-    getInstance: getClient,
-    async hasItem(key) {
-      const value = await getClient().get(r(key));
-      return value !== undefined && value !== null;
-    },
-    async getItem(key) {
-      const value = await getClient().get(r(key));
-      return value === undefined ? null : value;
-    },
-    async setItem(key, value, tOptions) {
-      const ttl = tOptions?.ttl ?? opts?.ttl;
-      const tags = [...(tOptions?.tags || []), ...(opts?.tags || [])].filter(
-        Boolean
-      );
-
-      await getClient().set(r(key), value, {
-        ttl,
-        tags,
-      });
-    },
-    async removeItem(key) {
-      await getClient().delete(r(key));
-    },
-    async getKeys(_base) {
-      // Runtime Cache doesn't provide a way to list keys
-      return [];
-    },
-    async clear(_base) {
-      // Runtime Cache doesn't provide a way to clear all keys
-      // You can only expire by tags
-      if (opts?.tags && opts.tags.length > 0) {
-        await getClient().expireTag(opts.tags);
+    const getClient = () => {
+      if (!_cache) {
+        _cache = getCache();
       }
-    },
-  };
-}) as DriverFactory<VercelCacheOptions, RuntimeCache>;
+      return _cache;
+    };
+
+    return {
+      name: DRIVER_NAME,
+      getInstance: getClient,
+      async hasItem(key) {
+        const value = await getClient().get(r(key));
+        return value !== undefined && value !== null;
+      },
+      async getItem(key) {
+        const value = await getClient().get(r(key));
+        return value === undefined ? null : value;
+      },
+      async setItem(key, value, tOptions) {
+        const ttl = tOptions?.ttl ?? opts?.ttl;
+        const tags = [...(tOptions?.tags || []), ...(opts?.tags || [])].filter(
+          Boolean
+        );
+
+        await getClient().set(r(key), value, {
+          ttl,
+          tags,
+        });
+      },
+      async removeItem(key) {
+        await getClient().delete(r(key));
+      },
+      async getKeys(_base) {
+        // Runtime Cache doesn't provide a way to list keys
+        return [];
+      },
+      async clear(_base) {
+        // Runtime Cache doesn't provide a way to clear all keys
+        // You can only expire by tags
+        if (opts?.tags && opts.tags.length > 0) {
+          await getClient().expireTag(opts.tags);
+        }
+      },
+    };
+  }
+);
+
+export default driver;
 
 // --- internal ---
 

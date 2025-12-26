@@ -6,12 +6,16 @@ export interface SessionStorageOptions extends LocalStorageOptions {}
 
 const DRIVER_NAME = "session-storage";
 
-export default defineDriver((opts: SessionStorageOptions = {}) => {
-  return {
-    ...localstorage({
-      windowKey: "sessionStorage",
-      ...opts,
-    }),
-    name: DRIVER_NAME,
-  };
-}) as DriverFactory<SessionStorageOptions, Storage>;
+const driver: DriverFactory<SessionStorageOptions, Storage> = defineDriver(
+  (opts: SessionStorageOptions = {}) => {
+    return {
+      ...localstorage({
+        windowKey: "sessionStorage",
+        ...opts,
+      }),
+      name: DRIVER_NAME,
+    };
+  }
+);
+
+export default driver;

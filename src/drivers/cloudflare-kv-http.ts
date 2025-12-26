@@ -87,7 +87,7 @@ type CloudflareAuthorizationHeaders =
 
 const DRIVER_NAME = "cloudflare-kv-http";
 
-export default defineDriver<KVHTTPOptions>((opts) => {
+const driver: DriverFactory<KVHTTPOptions, void> = defineDriver((opts) => {
   if (!opts.accountId) {
     throw createRequiredError(DRIVER_NAME, "accountId");
   }
@@ -230,4 +230,6 @@ export default defineDriver<KVHTTPOptions>((opts) => {
       ),
     clear,
   };
-}) as DriverFactory<KVHTTPOptions, void>;
+});
+
+export default driver;

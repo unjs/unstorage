@@ -13,7 +13,7 @@ export interface DenoKvNodeOptions {
 
 const DRIVER_NAME = "deno-kv-node";
 
-export default defineDriver<DenoKvNodeOptions, Kv | Promise<Kv>>(
+const driver: DriverFactory<DenoKvNodeOptions, Kv | Promise<Kv>> = defineDriver(
   (opts: DenoKvNodeOptions = {}) => {
     const baseDriver = denoKV({
       ...opts,
@@ -27,4 +27,6 @@ export default defineDriver<DenoKvNodeOptions, Kv | Promise<Kv>>(
       name: DRIVER_NAME,
     };
   }
-) as DriverFactory<DenoKvNodeOptions, Kv | Promise<Kv>>;
+);
+
+export default driver;

@@ -37,7 +37,10 @@ export interface AzureAppConfigurationOptions {
 
 const DRIVER_NAME = "azure-app-configuration";
 
-export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
+const driver: DriverFactory<
+  AzureAppConfigurationOptions,
+  AppConfigurationClient
+> = defineDriver((opts: AzureAppConfigurationOptions = {}) => {
   const labelFilter = opts.label || "\0";
   const keyFilter = opts.prefix ? `${opts.prefix}:*` : "*";
   const p = (key: string) => (opts.prefix ? `${opts.prefix}:${key}` : key); // Prefix a key
@@ -144,4 +147,6 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
       }
     },
   };
-}) as DriverFactory<AzureAppConfigurationOptions, AppConfigurationClient>;
+});
+
+export default driver;

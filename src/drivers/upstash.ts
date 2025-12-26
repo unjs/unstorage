@@ -23,7 +23,7 @@ export interface UpstashOptions extends Partial<RedisConfigNodejs> {
 
 const DRIVER_NAME = "upstash";
 
-export default defineDriver<UpstashOptions, Redis>(
+const driver: DriverFactory<UpstashOptions, Redis> = defineDriver(
   (options: UpstashOptions = {}) => {
     const base = normalizeKey(options?.base);
     const r = (...keys: string[]) => joinKeys(base, ...keys);
@@ -99,4 +99,6 @@ export default defineDriver<UpstashOptions, Redis>(
       },
     };
   }
-) as DriverFactory<UpstashOptions, Redis>;
+);
+
+export default driver;

@@ -56,7 +56,9 @@ for (const driver of drivers) {
       const db = await driver.getDB();
 
       afterAll(async () => {
-        await db.sql`DROP TABLE IF EXISTS unstorage`;
+        const dbCleanup = await driver.getDB();
+        await dbCleanup.sql`DROP TABLE IF EXISTS unstorage`;
+        await dbCleanup.dispose();
       });
 
       testDriver({

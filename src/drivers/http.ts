@@ -11,7 +11,7 @@ export interface HTTPOptions {
 
 const DRIVER_NAME = "http";
 
-const driver: DriverFactory<HTTPOptions, void> = defineDriver(
+const driver: DriverFactory<HTTPOptions, never> = defineDriver(
   (opts: HTTPOptions) => {
     const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
 

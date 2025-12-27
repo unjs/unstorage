@@ -33,7 +33,7 @@ export interface VercelBlobOptions {
 
 const DRIVER_NAME = "vercel-blob";
 
-const driver: DriverFactory<VercelBlobOptions, void> = defineDriver((opts) => {
+const driver: DriverFactory<VercelBlobOptions, never> = defineDriver((opts) => {
   const optsBase = normalizeKey(opts?.base);
 
   const r = (...keys: string[]) =>

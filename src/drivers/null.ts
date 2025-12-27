@@ -3,7 +3,7 @@ import type { DriverFactory } from "./utils/index.ts";
 
 const DRIVER_NAME = "null";
 
-const driver: DriverFactory<never, never> = defineDriver(() => {
+const driver: DriverFactory<void, never> = defineDriver(() => {
   return {
     name: DRIVER_NAME,
     hasItem() {

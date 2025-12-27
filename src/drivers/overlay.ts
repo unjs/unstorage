@@ -11,7 +11,7 @@ const OVERLAY_REMOVED = "__OVERLAY_REMOVED__";
 
 const DRIVER_NAME = "overlay";
 
-const driver: DriverFactory<OverlayStorageOptions, void> = defineDriver(
+const driver: DriverFactory<OverlayStorageOptions, never> = defineDriver(
   (options: OverlayStorageOptions) => {
     return {
       name: DRIVER_NAME,

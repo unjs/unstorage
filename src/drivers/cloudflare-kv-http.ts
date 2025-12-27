@@ -87,7 +87,7 @@ type CloudflareAuthorizationHeaders =
 
 const DRIVER_NAME = "cloudflare-kv-http";
 
-const driver: DriverFactory<KVHTTPOptions, void> = defineDriver((opts) => {
+const driver: DriverFactory<KVHTTPOptions, never> = defineDriver((opts) => {
   if (!opts.accountId) {
     throw createRequiredError(DRIVER_NAME, "accountId");
   }

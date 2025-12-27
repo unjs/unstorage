@@ -25,7 +25,7 @@ const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
 
 const DRIVER_NAME = "fs-lite";
 
-const driver: DriverFactory<FSStorageOptions, void> = defineDriver(
+const driver: DriverFactory<FSStorageOptions, never> = defineDriver(
   (opts: FSStorageOptions = {}) => {
     if (!opts.base) {
       throw createRequiredError(DRIVER_NAME, "base");

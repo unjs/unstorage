@@ -60,7 +60,7 @@ const defaultOptions: GithubOptions = {
 
 const DRIVER_NAME = "github";
 
-const driver: DriverFactory<GithubOptions, void> = defineDriver((_opts) => {
+const driver: DriverFactory<GithubOptions, never> = defineDriver((_opts) => {
   const opts: GithubOptions = { ...defaultOptions, ..._opts };
   const rawUrl = joinURL(
     opts.cdnURL!,

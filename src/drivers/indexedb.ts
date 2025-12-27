@@ -18,7 +18,7 @@ export interface IDBKeyvalOptions {
 
 const DRIVER_NAME = "idb-keyval";
 
-const driver: DriverFactory<IDBKeyvalOptions, void> = defineDriver(
+const driver: DriverFactory<IDBKeyvalOptions, never> = defineDriver(
   (opts: IDBKeyvalOptions = {}) => {
     const base = opts.base && opts.base.length > 0 ? `${opts.base}:` : "";
     const makeKey = (key: string) => base + key;

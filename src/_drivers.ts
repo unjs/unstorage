@@ -1,6 +1,7 @@
 // Auto-generated using scripts/gen-drivers.
 // Do not manually edit!
 
+import type { AppwriteStorageConfigurationOptions as AppwriteStorageConfigurationOptions } from "unstorage/drivers/appwrite-storage";
 import type { AzureAppConfigurationOptions as AzureAppConfigurationOptions } from "unstorage/drivers/azure-app-configuration";
 import type { AzureCosmosOptions as AzureCosmosOptions } from "unstorage/drivers/azure-cosmos";
 import type { AzureKeyVaultOptions as AzureKeyVaultOptions } from "unstorage/drivers/azure-key-vault";
@@ -33,9 +34,11 @@ import type { VercelBlobOptions as VercelBlobOptions } from "unstorage/drivers/v
 import type { VercelKVOptions as VercelKVOptions } from "unstorage/drivers/vercel-kv";
 import type { VercelCacheOptions as VercelRuntimeCacheOptions } from "unstorage/drivers/vercel-runtime-cache";
 
-export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-kv" | "vercelKV" | "vercel-runtime-cache" | "vercelRuntimeCache";
+export type BuiltinDriverName = "appwrite-storage" | "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-kv" | "vercelKV" | "vercel-runtime-cache" | "vercelRuntimeCache";
 
 export type BuiltinDriverOptions = {
+  "appwrite-storage": AppwriteStorageConfigurationOptions;
+  "appwriteStorage": AppwriteStorageConfigurationOptions;
   "azure-app-configuration": AzureAppConfigurationOptions;
   "azureAppConfiguration": AzureAppConfigurationOptions;
   "azure-cosmos": AzureCosmosOptions;
@@ -88,6 +91,8 @@ export type BuiltinDriverOptions = {
 };
 
 export const builtinDrivers = {
+  "appwrite-storage": "unstorage/drivers/appwrite-storage",
+  "appwriteStorage": "unstorage/drivers/appwrite-storage",
   "azure-app-configuration": "unstorage/drivers/azure-app-configuration",
   "azureAppConfiguration": "unstorage/drivers/azure-app-configuration",
   "azure-cosmos": "unstorage/drivers/azure-cosmos",

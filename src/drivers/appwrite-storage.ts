@@ -5,94 +5,37 @@ import type {
   TransactionOptions,
 } from "../types.ts";
 import {
-  createError,
+  callAppwriteApi,
+  provideAppwriteClient,
+  type AppwriteClientOptions,
+  type AppwriteProjectOptions,
+  type AppwriteStorageKeyOptions,
+  type MaybePromise,
+  type RequireAllOrNone,
+} from "./utils/appwrite.ts";
+import {
   createRequiredError,
   defineDriver,
   normalizeKey,
 } from "./utils/index.ts";
 import {
-  AppwriteException,
-  Client as AppwriteClient,
   Storage as AppwriteStorage,
   type Models as AppwriteModels,
   Query as AppwriteQuery,
   ID as AppwriteID,
 } from "node-appwrite";
 
-type AppwriteClientOptions = {
-  /**
-   * Shared Appwrite client instance.
-   * This allows reusing an existing Appwrite client across multiple drivers.
-   */
-  client: AppwriteClient;
-};
-
-type AppwriteProjectOptions = {
-  /**
-   * The Appwrite endpoint URL.
-   * This is the base URL for your Appwrite server.
-   * @example 'https://fra.cloud.appwrite.io/v1'
-   */
-  endpoint: URL | string;
-
-  /**
-   * The Appwrite project ID.
-   * This identifies your specific project within the Appwrite server.
-   */
-  projectId: string;
-
-  /**
-   * Optional API key for authentication with the Appwrite server.
-   */
-  apiKey?: string;
-};
-
-// export type StringTransformer = (value: string) => string | Promise<string>;
-/**
- * Function type for transforming strings, typically used for encoding/decoding file IDs.
- * @param value - The input string to transform
- * @param keySeparator - The separator character used in key paths
- * @returns The transformed string
- */
-export type StringTransformer = (value: string, keySeparator: string) => string;
-
-type Impl<Flag extends boolean, T> = Flag extends true ? T : never;
-
-/**
- * Interface for transforming between storage keys and Appwrite file IDs.
- * This allows custom encoding/decoding logic for file ID generation.
- */
-export type AppwriteStorageKeyOptions<Flag extends boolean> = {
-  /**
-   * Encodes a storage key to an Appwrite file ID.
-   * @param value - The storage key to encode
-   * @param keySeparator - The separator character used in key paths
-   * @returns The encoded file ID
-   */
-  encodeKey: Impl<Flag, StringTransformer>;
-
-  /**
-   * Decodes an Appwrite file ID back to a storage key.
-   * @param value - The file ID to decode
-   * @param keySeparator - The separator character used in key paths
-   * @returns The decoded storage key
-   */
-  decodeKey: Impl<Flag, StringTransformer>;
-};
-
 /**
  * Configuration options for using file ID strategy.
  * This strategy uses file IDs as the primary key for storage operations.
  */
-export type AppwriteStorageFileIdOptions = (
-  | AppwriteStorageKeyOptions<true>
-  | AppwriteStorageKeyOptions<false>
-) & {
-  /**
-   * The key strategy to use - 'id' means using Appwrite file IDs as keys
-   */
-  keyStrategy: "id";
-};
+export type AppwriteStorageFileIdOptions =
+  RequireAllOrNone<AppwriteStorageKeyOptions> & {
+    /**
+     * The key strategy to use - 'id' means using Appwrite file IDs as keys
+     */
+    keyStrategy: "id";
+  };
 
 /**
  * Configuration options for using file name strategy.
@@ -128,56 +71,6 @@ export type AppwriteStorageCommonOptions = (
 export type AppwriteStorageConfigurationOptions = AppwriteStorageCommonOptions &
   (AppwriteStorageFileIdOptions | AppwriteStorageNameOptions);
 
-type MaybePromise<T> = T | Promise<T>;
-type FetchAppwriteStorageOptions<T> = {
-  onNotFound?: () => MaybePromise<T>;
-};
-
-/**
- * Wrapper function for calling Appwrite Storage API with error handling.
- * This function handles API calls and provides a consistent way to handle 404 (not found) errors.
- *
- * @template T - The return type of the API call
- * @param call - The function that makes the actual API call
- * @param options - Optional configuration for handling not found errors
- * @returns A promise that resolves with the API call result or the onNotFound fallback
- * @throws Will throw an error if the API call fails (except when handled by onNotFound)
- */
-async function callAppwriteStorageApi<T>(
-  call: () => MaybePromise<T>,
-  options?: FetchAppwriteStorageOptions<T>
-): Promise<T> {
-  try {
-    return await call();
-  } catch (cause) {
-    if (
-      options?.onNotFound &&
-      isAppwriteException(cause) &&
-      404 == cause.code
-    ) {
-      return await options.onNotFound();
-    }
-
-    throw createError(DRIVER_NAME, "Failed to call Appwrite Storage API", {
-      cause,
-    });
-  }
-}
-
-/**
- * Type guard to check if a value is an AppwriteException.
- * This helps with proper error handling for Appwrite-specific exceptions.
- *
- * @param value - The value to check
- * @returns true if the value is an AppwriteException, false otherwise
- */
-function isAppwriteException(value: unknown): value is AppwriteException {
-  return (
-    value instanceof AppwriteException ||
-    (value instanceof Error && AppwriteException.name == value.name)
-  );
-}
-
 export type AppwritePermissionOptions = {
   /**
    * Optional array of permission strings to apply to files.
@@ -198,31 +91,7 @@ export default defineDriver((options: AppwriteStorageConfigurationOptions) => {
 
   const getStorage = () => {
     if (!storage) {
-      let client: AppwriteClient;
-
-      if ("client" in options) {
-        if (!options.client) {
-          throw createRequiredError(DRIVER_NAME, "client");
-        }
-
-        client = options.client;
-      } else {
-        if (!options.endpoint) {
-          throw createRequiredError(DRIVER_NAME, "endpoint");
-        }
-        if (!options.projectId) {
-          throw createRequiredError(DRIVER_NAME, "project");
-        }
-
-        client = new AppwriteClient()
-          .setEndpoint(options.endpoint.toString())
-          .setProject(options.projectId);
-
-        if (options.apiKey) {
-          client.setKey(options.apiKey);
-        }
-      }
-
+      const client = provideAppwriteClient(options, DRIVER_NAME);
       storage = new AppwriteStorage(client);
     }
 
@@ -303,7 +172,7 @@ abstract class AppwriteStorageDriver<
    * @returns A promise that resolves with the file object, or null if not found
    */
   protected async getFile(fileId: string): Promise<AppwriteModels.File | null> {
-    return await callAppwriteStorageApi(
+    return await callAppwriteApi(
       async () => {
         return await this.getInstance().getFile({
           bucketId: this.options.bucketId,
@@ -311,6 +180,7 @@ abstract class AppwriteStorageDriver<
         });
       },
       {
+        driverName: DRIVER_NAME,
         onNotFound() {
           return null;
         },
@@ -370,7 +240,7 @@ abstract class AppwriteStorageDriver<
     const fileId = await this.resolveKeyToFileId(key);
     if (!fileId) return null;
 
-    return await callAppwriteStorageApi(
+    return await callAppwriteApi(
       async () => {
         const fileContent = await this.getInstance().getFileView({
           bucketId: this.options.bucketId,
@@ -380,6 +250,7 @@ abstract class AppwriteStorageDriver<
         return JSON.parse(await file.text());
       },
       {
+        driverName: DRIVER_NAME,
         onNotFound() {
           return null;
         },
@@ -404,14 +275,19 @@ abstract class AppwriteStorageDriver<
     file: File,
     permissions?: string[]
   ) {
-    await callAppwriteStorageApi(async () => {
-      await this.getInstance().createFile({
-        bucketId: this.options.bucketId,
-        fileId,
-        file,
-        permissions,
-      });
-    });
+    await callAppwriteApi(
+      async () => {
+        await this.getInstance().createFile({
+          bucketId: this.options.bucketId,
+          fileId,
+          file,
+          permissions,
+        });
+      },
+      {
+        driverName: DRIVER_NAME,
+      }
+    );
   }
 
   /**
@@ -487,7 +363,7 @@ abstract class AppwriteStorageDriver<
    * @throws Will throw an error if the Appwrite API call fails (except for 404 errors)
    */
   protected async removeFile(fileId: string) {
-    await callAppwriteStorageApi(
+    await callAppwriteApi(
       async () => {
         await this.getInstance().deleteFile({
           bucketId: this.options.bucketId,
@@ -495,6 +371,7 @@ abstract class AppwriteStorageDriver<
         });
       },
       {
+        driverName: DRIVER_NAME,
         onNotFound() {},
       }
     );
@@ -522,12 +399,17 @@ abstract class AppwriteStorageDriver<
    */
   async getKeys(base: string | undefined) {
     const queries = this.createQueriesForBase(base);
-    const fileList = await callAppwriteStorageApi(async () => {
-      return await this.getInstance().listFiles({
-        bucketId: this.options.bucketId,
-        queries,
-      });
-    });
+    const fileList = await callAppwriteApi(
+      async () => {
+        return await this.getInstance().listFiles({
+          bucketId: this.options.bucketId,
+          queries,
+        });
+      },
+      {
+        driverName: DRIVER_NAME,
+      }
+    );
     return fileList.files.map((file) => {
       return this.decodeFileToKey(file);
     });
@@ -541,21 +423,26 @@ abstract class AppwriteStorageDriver<
    */
   async clear(base: string | undefined) {
     const queries = this.createQueriesForBase(base);
-    await callAppwriteStorageApi(async () => {
-      const files = await this.getInstance().listFiles({
-        bucketId: this.options.bucketId,
-        queries,
-      });
+    await callAppwriteApi(
+      async () => {
+        const files = await this.getInstance().listFiles({
+          bucketId: this.options.bucketId,
+          queries,
+        });
 
-      await Promise.all(
-        files.files.map((file: AppwriteModels.File) =>
-          this.getInstance().deleteFile({
-            bucketId: this.options.bucketId,
-            fileId: file.$id,
-          })
-        )
-      );
-    });
+        await Promise.all(
+          files.files.map((file: AppwriteModels.File) =>
+            this.getInstance().deleteFile({
+              bucketId: this.options.bucketId,
+              fileId: file.$id,
+            })
+          )
+        );
+      },
+      {
+        driverName: DRIVER_NAME,
+      }
+    );
   }
   // dispose?: (() => void | Promise<void>) | undefined;
   /**
@@ -664,7 +551,7 @@ class FileNameAppwriteStorageDriver extends AppwriteStorageDriver<
   protected override async resolveKeyToFile(
     key: string
   ): Promise<AppwriteModels.File | null> {
-    const fileList = await callAppwriteStorageApi(
+    const fileList = await callAppwriteApi(
       async () => {
         return await this.getInstance().listFiles({
           bucketId: this.options.bucketId,
@@ -676,6 +563,7 @@ class FileNameAppwriteStorageDriver extends AppwriteStorageDriver<
         });
       },
       {
+        driverName: DRIVER_NAME,
         onNotFound() {
           return null;
         },

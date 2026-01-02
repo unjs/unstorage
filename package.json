@@ -55,6 +55,7 @@
     "@vitest/coverage-v8": "^4.0.12",
     "aws4fetch": "^1.0.20",
     "azurite": "^3.35.0",
+    "base-x": "^5.0.1",
     "changelogen": "^0.6.2",
     "chokidar": "^4.0.3",
     "citty": "^0.1.6",
@@ -74,6 +75,7 @@
     "mlly": "^1.8.0",
     "mongodb": "^7.0.0",
     "mongodb-memory-server": "^10.3.0",
+    "node-appwrite": "^21.1.0",
     "obuild": "^0.4.2",
     "ofetch": "^1.5.1",
     "prettier": "^3.6.2",
@@ -107,6 +109,7 @@
     "ioredis": "^5.8.2",
     "lru-cache": "^11.2.2",
     "mongodb": "^6|^7",
+    "node-appwrite": "^21.1.0",
     "ofetch": "*",
     "uploadthing": "^7.7.4"
   },
@@ -151,6 +154,9 @@
       "optional": true
     },
     "@vercel/kv": {
+      "optional": true
+    },
+    "node-appwrite": {
       "optional": true
     },
     "aws4fetch": {

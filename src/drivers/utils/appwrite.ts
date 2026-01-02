@@ -37,7 +37,7 @@ export type FetchAppwriteStorageOptions<T> = {
 };
 
 /**
- * Function type for transforming strings, typically used for encoding/decoding file IDs.
+ * Function type for transforming strings, typically used for encoding/decoding file/row IDs.
  * @param value - The input string to transform
  * @param keySeparator - The separator character used in key paths
  * @returns The transformed string
@@ -46,21 +46,21 @@ export type StringTransformer = (value: string, keySeparator: string) => string;
 
 export type RequireAllOrNone<T> = T | { [K in keyof T]?: never };
 /**
- * Type for transforming between storage keys and Appwrite file IDs.
- * This allows custom encoding/decoding logic for file ID generation.
+ * Type for transforming between storage keys and Appwrite file/row IDs.
+ * This allows custom encoding/decoding logic for file/row ID generation.
  */
 export type AppwriteStorageKeyOptions = {
   /**
-   * Encodes a storage key to an Appwrite file ID.
+   * Encodes a storage key to an Appwrite file/row ID.
    * @param value - The storage key to encode
    * @param keySeparator - The separator character used in key paths
-   * @returns The encoded file ID
+   * @returns The encoded file/row ID
    */
   encodeKey: StringTransformer;
 
   /**
-   * Decodes an Appwrite file ID back to a storage key.
-   * @param value - The file ID to decode
+   * Decodes an Appwrite file/row ID back to a storage key.
+   * @param value - The file/row ID to decode
    * @param keySeparator - The separator character used in key paths
    * @returns The decoded storage key
    */
@@ -115,6 +115,30 @@ export function isAppwriteException(
 }
 
 /**
+ * Creates and configures an Appwrite client instance.
+ * This function initializes a new Appwrite client with the provided project configuration,
+ * including endpoint, project ID, and optional API key for authentication.
+ *
+ * @param options - Configuration options for the Appwrite client
+ * @param options.endpoint - The Appwrite endpoint URL (will be converted to string)
+ * @param options.projectId - The Appwrite project ID
+ * @param options.apiKey - Optional API key for authentication
+ * @returns A configured Appwrite client instance ready for use
+ * @see AppwriteProjectOptions for detailed parameter descriptions
+ */
+export function createAppwriteClient(options: AppwriteProjectOptions) {
+  const client = new AppwriteClient()
+    .setEndpoint(options.endpoint.toString())
+    .setProject(options.projectId);
+
+  if (options.apiKey) {
+    client.setKey(options.apiKey);
+  }
+
+  return client;
+}
+
+/**
  * Provides an Appwrite client instance based on the provided options.
  * This function either reuses an existing client or creates a new one using the provided configuration.
  *
@@ -143,13 +167,7 @@ export function provideAppwriteClient(
       throw createRequiredError(driverName, "project");
     }
 
-    client = new AppwriteClient()
-      .setEndpoint(options.endpoint.toString())
-      .setProject(options.projectId);
-
-    if (options.apiKey) {
-      client.setKey(options.apiKey);
-    }
+    client = createAppwriteClient(options);
   }
 
   return client;

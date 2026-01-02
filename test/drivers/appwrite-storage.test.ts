@@ -1,7 +1,7 @@
 import { describe } from "vitest";
 import appwriteStorageDriver from "../../src/drivers/appwrite-storage.ts";
 import { testDriver } from "./utils.ts";
-import { keyOptions } from "./appwrite-utils.ts";
+import { keyOptions } from "./appwrite.fixture.ts";
 
 const endpoint = process.env.VITE_APPWRITE_ENDPOINT;
 const projectId = process.env.VITE_APPWRITE_PROJECT_ID;

@@ -27,7 +27,7 @@ export type AppwriteTablesDbConfigurationOptions = (
     tableId: string;
   };
 
-const DRIVER_NAME = "appwrite-tablesdb";
+const DRIVER_NAME = "appwrite-tables-db";
 
 export default defineDriver((options: AppwriteTablesDbConfigurationOptions) => {
   let tablesDB: TablesDB;

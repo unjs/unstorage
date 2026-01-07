@@ -5,6 +5,7 @@ import {
   joinKeys,
   createError,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 
 export interface VercelBlobOptions {
   /**
@@ -32,7 +33,7 @@ export interface VercelBlobOptions {
 
 const DRIVER_NAME = "vercel-blob";
 
-export default defineDriver<VercelBlobOptions>((opts) => {
+const driver: DriverFactory<VercelBlobOptions, never> = defineDriver((opts) => {
   const optsBase = normalizeKey(opts?.base);
 
   const r = (...keys: string[]) =>
@@ -155,3 +156,5 @@ export default defineDriver<VercelBlobOptions>((opts) => {
     },
   };
 });
+
+export default driver;

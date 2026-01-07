@@ -1,7 +1,7 @@
 type Awaited<T> = T extends Promise<infer U> ? Awaited<U> : T;
 type Promisified<T> = Promise<Awaited<T>>;
 
-export function wrapToPromise<T>(value: T) {
+export function wrapToPromise<T>(value: T): Promisified<T> {
   if (!value || typeof (value as any).then !== "function") {
     return Promise.resolve(value) as Promisified<T>;
   }
@@ -48,14 +48,14 @@ export function stringify(value: any): string {
 
 export const BASE64_PREFIX = "base64:";
 
-export function serializeRaw(value: any) {
+export function serializeRaw(value: any): string {
   if (typeof value === "string") {
     return value;
   }
   return BASE64_PREFIX + base64Encode(value);
 }
 
-export function deserializeRaw(value: any) {
+export function deserializeRaw(value: any): unknown {
   if (typeof value !== "string") {
     // Return non-strings as-is
     return value;

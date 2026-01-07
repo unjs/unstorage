@@ -1,8 +1,9 @@
 import { defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 
 const DRIVER_NAME = "null";
 
-export default defineDriver<void>(() => {
+const driver: DriverFactory<void, never> = defineDriver(() => {
   return {
     name: DRIVER_NAME,
     hasItem() {
@@ -30,3 +31,5 @@ export default defineDriver<void>(() => {
     clear() {},
   };
 });
+
+export default driver;

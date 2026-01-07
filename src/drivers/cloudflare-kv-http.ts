@@ -5,6 +5,7 @@ import {
   defineDriver,
   joinKeys,
 } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 
 interface KVAuthAPIToken {
   /**
@@ -86,7 +87,7 @@ type CloudflareAuthorizationHeaders =
 
 const DRIVER_NAME = "cloudflare-kv-http";
 
-export default defineDriver<KVHTTPOptions>((opts) => {
+const driver: DriverFactory<KVHTTPOptions, never> = defineDriver((opts) => {
   if (!opts.accountId) {
     throw createRequiredError(DRIVER_NAME, "accountId");
   }
@@ -230,3 +231,5 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     clear,
   };
 });
+
+export default driver;

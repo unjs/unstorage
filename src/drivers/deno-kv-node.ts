@@ -1,5 +1,6 @@
 import { openKv, type Kv } from "@deno/kv";
 import { defineDriver } from "./utils/index.ts";
+import type { DriverFactory } from "./utils/index.ts";
 import denoKV from "./deno-kv.ts";
 
 // https://docs.deno.com/deploy/kv/manual/node/
@@ -12,7 +13,7 @@ export interface DenoKvNodeOptions {
 
 const DRIVER_NAME = "deno-kv-node";
 
-export default defineDriver<DenoKvNodeOptions, Kv | Promise<Kv>>(
+const driver: DriverFactory<DenoKvNodeOptions, Kv | Promise<Kv>> = defineDriver(
   (opts: DenoKvNodeOptions = {}) => {
     const baseDriver = denoKV({
       ...opts,
@@ -27,3 +28,5 @@ export default defineDriver<DenoKvNodeOptions, Kv | Promise<Kv>>(
     };
   }
 );
+
+export default driver;

@@ -7,3 +7,6 @@ node_modules
 CHANGELOG.md
 pnpm-lock.yaml
 docs/2.drivers/0.index.md
+test/browser-extension/node_modules
+test/browser-extension/.output
+test/browser-extension/.wxt

@@ -1,7 +1,7 @@
 import unjs from "eslint-config-unjs";
 
 export default unjs({
-  ignores: ["drivers", "/server*", "docs/.*"],
+  ignores: ["drivers", "/server*", "docs/.*", "test/browser-extension"],
   rules: {
     "unicorn/no-null": 0,
     "unicorn/prevent-abbreviations": 0,

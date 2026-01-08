@@ -47,7 +47,8 @@ export interface AzureStorageBlobOptions {
 
 const DRIVER_NAME = "azure-storage-blob";
 
-export default defineDriver((opts: AzureStorageBlobOptions) => {
+export default defineDriver((optsInput: AzureStorageBlobOptions) => {
+  const opts = { ...optsInput };
   let containerClient: ContainerClient;
   const endpointSuffix = opts.endpointSuffix || ".blob.core.windows.net";
   const getContainerClient = () => {

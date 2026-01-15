@@ -1,6 +1,6 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, relative, join } from "node:path";
-import { FSWatcher, type ChokidarOptions, watch } from "chokidar";
+import type { FSWatcher, ChokidarOptions } from "chokidar";
 import anymatch from "anymatch";
 import { createError, createRequiredError, defineDriver } from "./utils";
 import {
@@ -110,6 +110,7 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
       if (_watcher) {
         return _unwatch;
       }
+      const { watch } = await import("chokidar");
       await new Promise<void>((resolve, reject) => {
         const watchOptions: ChokidarOptions = {
           ignoreInitial: true,

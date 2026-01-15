@@ -27,21 +27,18 @@ export interface ExtraOptions {
 }
 
 export interface NetlifyDeployStoreOptions
-  extends GetDeployStoreOptions,
-    ExtraOptions {
+  extends GetDeployStoreOptions, ExtraOptions {
   name?: never;
   deployScoped: true;
 }
 
-export interface NetlifyDeployStoreLegacyOptions
-  extends NetlifyDeployStoreOptions {
+export interface NetlifyDeployStoreLegacyOptions extends NetlifyDeployStoreOptions {
   // Added in v8.0.0. This ensures TS compatibility for older versions.
   region?: never;
 }
 
 export interface NetlifyNamedStoreOptions
-  extends GetStoreOptions,
-    ExtraOptions {
+  extends GetStoreOptions, ExtraOptions {
   name: string;
   deployScoped?: false;
 }

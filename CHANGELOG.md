@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.17.4
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.17.3...v1.17.4)
+
+### 💅 Refactors
+
+- **fs:** Upgrade chokidar to v5 ([454a024](https://github.com/unjs/unstorage/commit/454a024))
+
+### 🏡 Chore
+
+- Lint ([667db75](https://github.com/unjs/unstorage/commit/667db75))
+- Update dependencies ([0444882](https://github.com/unjs/unstorage/commit/0444882))
+- Fix `@vercel/kv` peer dependency range ([b3dc1cf](https://github.com/unjs/unstorage/commit/b3dc1cf))
+- Update lru-cache to v11 ([b867a09](https://github.com/unjs/unstorage/commit/b867a09))
+- Update lockfile ([d6c0f2e](https://github.com/unjs/unstorage/commit/d6c0f2e))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v1.17.3
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.17.2...v1.17.3)

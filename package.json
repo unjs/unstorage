@@ -27,7 +27,7 @@
     "prepack": "pnpm build",
     "release": "pnpm test && pnpm build && changelogen --release --prerelease --publish --publishTag alpha --push",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
-    "test:types": "tsc --noEmit --skipLibCheck",
+    "test:types": "tsgo --noEmit --skipLibCheck",
     "unstorage": "node jiti src/cli.ts"
   },
   "devDependencies": {
@@ -48,6 +48,7 @@
     "@types/ioredis-mock": "^8.2.6",
     "@types/jsdom": "^27.0.0",
     "@types/node": "^25.0.8",
+    "@typescript/native-preview": "7.0.0-dev.20260115.1",
     "@upstash/redis": "^1.36.1",
     "@vercel/blob": "^2.0.0",
     "@vercel/functions": "^3.3.6",

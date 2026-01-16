@@ -93,7 +93,7 @@
     "@azure/identity": "^4.13.0",
     "@azure/keyvault-secrets": "^4.10.0",
     "@azure/storage-blob": "^12.29.1",
-    "@capacitor/preferences": "*",
+    "@capacitor/preferences": "^6 || ^7 || ^8",
     "@deno/kv": ">=0.13.0",
     "@netlify/blobs": "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0",
     "@planetscale/database": "^1.19.0",

@@ -1,7 +1,6 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
-import { resolve, relative, join } from "node:path";
+import { resolve, relative, join, matchesGlob } from "node:path";
 import type { FSWatcher, ChokidarOptions } from "chokidar";
-import anymatch from "anymatch";
 import { createError, createRequiredError, defineDriver } from "./utils";
 import {
   readFile,
@@ -30,9 +29,14 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
 
   const base = resolve(userOptions.base);
 
-  const ignore = anymatch(
-    userOptions.ignore || ["**/node_modules/**", "**/.git/**"]
-  );
+  const ignorePatterns = userOptions.ignore || [
+    "**/node_modules/**",
+    "**/.git/**",
+  ];
+
+  const ignore = (path: string) => {
+    return ignorePatterns.some((pattern) => matchesGlob(path, pattern));
+  };
 
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {

@@ -30,7 +30,8 @@ export interface AzureKeyVaultOptions {
 
 const DRIVER_NAME = "azure-key-vault";
 
-export default defineDriver((opts: AzureKeyVaultOptions) => {
+export default defineDriver((optsInput: AzureKeyVaultOptions) => {
+  const opts = { ...optsInput };
   let keyVaultClient: SecretClient;
   const getKeyVaultClient = () => {
     if (keyVaultClient) {

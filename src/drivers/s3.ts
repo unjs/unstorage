@@ -162,6 +162,7 @@ export default defineDriver((options: S3DriverOptions) => {
   return {
     name: DRIVER_NAME,
     options,
+    getInstance: getAwsClient,
     getItem(key) {
       return getObject(key).then((res) => (res ? res.text() : null));
     },

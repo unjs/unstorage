@@ -32,7 +32,7 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
     getItemRaw(key) {
       return cache.get(key);
     },
-    setItem(key, value,setItemOptions) {
+    setItem(key, value, setItemOptions) {
       cache.set(key, value, setItemOptions);
     },
     setItemRaw(key, value) {

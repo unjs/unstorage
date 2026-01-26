@@ -1,19 +1,8 @@
 import type { RequestListener } from "node:http";
-import {
-  createApp,
-  createError,
-  isError,
-  readBody,
-  eventHandler,
-  toNodeListener,
-  getMethod,
-  getRequestHeader,
-  setResponseHeader,
-  readRawBody,
-  EventHandler,
-  H3Event,
-} from "h3";
-import { Storage } from "./types";
+import { H3, HTTPError, eventHandler, EventHandler, H3Event } from "h3";
+import { toNodeHandler } from "h3/node";
+import destr from "destr";
+import { Storage, StorageValue } from "./types";
 import { stringify } from "./_utils";
 import { normalizeKey, normalizeBaseKey } from "./utils";
 
@@ -41,7 +30,7 @@ export function createH3StorageHandler(
   opts: StorageServerOptions = {}
 ): EventHandler {
   return eventHandler(async (event) => {
-    const method = getMethod(event);
+    const method = event.req.method;
     const _path = opts.resolvePath?.(event) ?? event.path;
     const isBaseKey = _path.endsWith(":") || _path.endsWith("/");
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
@@ -54,11 +43,11 @@ export function createH3StorageHandler(
         key,
       });
     } catch (error) {
-      const _httpError = isError(error)
+      const _httpError = HTTPError.isError(error)
         ? error
-        : createError({
-            statusMessage: error.message,
-            statusCode: 401,
+        : new HTTPError({
+            statusText: error.message,
+            status: 401,
             ...error,
           });
       throw _httpError;
@@ -72,7 +61,7 @@ export function createH3StorageHandler(
       }
 
       const isRaw =
-        getRequestHeader(event, "accept") === "application/octet-stream";
+        event.req.headers.get("accept") === "application/octet-stream";
       if (isRaw) {
         const value = await storage.getItemRaw(key);
         return value;
@@ -85,12 +74,11 @@ export function createH3StorageHandler(
     // HEAD => hasItem + meta (mtime)
     if (method === "HEAD") {
       const _hasItem = await storage.hasItem(key);
-      event.node.res.statusCode = _hasItem ? 200 : 404;
+      event.res.status = _hasItem ? 200 : 404;
       if (_hasItem) {
         const meta = await storage.getMeta(key);
         if (meta.mtime) {
-          setResponseHeader(
-            event,
+          event.res.headers.set(
             "last-modified",
             new Date(meta.mtime).toUTCString()
           );
@@ -102,13 +90,14 @@ export function createH3StorageHandler(
     // PUT => setItem
     if (method === "PUT") {
       const isRaw =
-        getRequestHeader(event, "content-type") === "application/octet-stream";
+        event.req.headers.get("content-type") === "application/octet-stream";
       if (isRaw) {
-        const value = await readRawBody(event);
+        const value = await event.req.arrayBuffer();
         await storage.setItemRaw(key, value);
       } else {
-        const value = await readBody(event);
-        await storage.setItem(key, value);
+        const body = await event.req.text();
+        const value = destr(body);
+        await storage.setItem(key, value as StorageValue);
       }
       return "OK";
     }
@@ -119,9 +108,9 @@ export function createH3StorageHandler(
       return "OK";
     }
 
-    throw createError({
-      statusCode: 405,
-      statusMessage: `Method Not Allowed: ${method}`,
+    throw new HTTPError({
+      status: 405,
+      statusText: `Method Not Allowed: ${method}`,
     });
   });
 }
@@ -130,10 +119,10 @@ export function createStorageServer(
   storage: Storage,
   options: StorageServerOptions = {}
 ): { handle: RequestListener } {
-  const app = createApp();
+  const app = new H3();
   const handler = createH3StorageHandler(storage, options);
   app.use(handler);
   return {
-    handle: toNodeListener(app),
+    handle: toNodeHandler(app),
   };
 }

@@ -1,9 +1,6 @@
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { createStorage } from "../src";
-import { createStorageServer } from "../src/server";
-import fsdriver from "../src/drivers/fs";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -16,7 +13,10 @@ export default defineConfig({
     vue(),
     {
       name: "app",
-      configureServer(server) {
+      async configureServer(server) {
+        const { createStorage } = await import("../src");
+        const { createStorageServer } = await import("../src/server");
+        const { default: fsdriver } = await import("../src/drivers/fs");
         const storage = createStorage();
         const storageServer = createStorageServer(storage);
         // eslint-disable-next-line unicorn/prefer-module

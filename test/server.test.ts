@@ -41,8 +41,8 @@ describe("server", () => {
         throw error.data;
       })
     ).rejects.toMatchObject({
-      statusCode: 401,
-      statusMessage: "Unauthorized Read",
+      status: 401,
+      statusText: "Unauthorized Read",
     });
 
     await close();

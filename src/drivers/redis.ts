@@ -1,5 +1,6 @@
 import { defineDriver, joinKeys } from "./utils/index.ts";
 import { Cluster, Redis } from "ioredis";
+import pkg from "../../package.json" with { type: "json" };
 
 import type {
   ClusterOptions,
@@ -46,9 +47,21 @@ export interface RedisOptions extends _RedisOptions {
    * @default false
    */
   preConnect?: boolean;
+
+  /**
+   * Tag to append to the library name in CLIENT SETINFO (ioredis(tag)).
+   * This helps identify the higher-level library using ioredis.
+   * @link https://redis.io/docs/latest/commands/client-setinfo/
+   * @default "unstorage_vX.X.X" (with version) or "unstorage" (fallback)
+   */
+  clientInfoTag?: string;
 }
 
 const DRIVER_NAME = "redis";
+
+function getDefaultClientInfoTag(): string {
+  return `unstorage_v${pkg.version}`;
+}
 
 export default defineDriver((opts: RedisOptions) => {
   let redisClient: Redis | Cluster;
@@ -56,12 +69,26 @@ export default defineDriver((opts: RedisOptions) => {
     if (redisClient) {
       return redisClient;
     }
-    if (opts.cluster) {
-      redisClient = new Redis.Cluster(opts.cluster, opts.clusterOptions);
-    } else if (opts.url) {
-      redisClient = new Redis(opts.url, opts);
+
+    // Set default clientInfoTag to "unstorage_vX.X.X" if not explicitly set
+    const options = {
+      ...opts,
+      clientInfoTag: opts.clientInfoTag ?? getDefaultClientInfoTag(),
+    };
+
+    if (options.cluster) {
+      const clusterOptions = {
+        ...options.clusterOptions,
+        redisOptions: {
+          clientInfoTag: options.clientInfoTag,
+          ...options.clusterOptions?.redisOptions,
+        },
+      };
+      redisClient = new Redis.Cluster(options.cluster, clusterOptions);
+    } else if (options.url) {
+      redisClient = new Redis(options.url, options);
     } else {
-      redisClient = new Redis(opts);
+      redisClient = new Redis(options);
     }
     return redisClient;
   };

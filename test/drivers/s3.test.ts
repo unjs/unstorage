@@ -40,6 +40,39 @@ describe.skipIf(
         expect(response.status).toBe(200);
         expect(await response.text()).toBe("ok");
       });
+
+      it("supports Content-Type header in setItemRaw", async () => {
+        const buffer = new Uint8Array([0x89, 0x50, 0x4e, 0x47]); // PNG magic bytes
+        await ctx.storage.setItemRaw("test-image.png", buffer, {
+          headers: {
+            "Content-Type": "image/png",
+            "Cache-Control": "max-age=31536000",
+          },
+        });
+
+        const meta = await ctx.storage.getMeta("test-image.png");
+        expect(meta?.contentType).toBe("image/png");
+        expect(meta?.cacheControl).toBe("max-age=31536000");
+      });
+
+      it("supports custom x-amz-meta headers", async () => {
+        await ctx.storage.setItem("meta-test.txt", "hello", {
+          headers: {
+            "Content-Type": "text/plain",
+            "x-amz-meta-custom-field": "custom-value",
+          },
+        });
+
+        const meta = await ctx.storage.getMeta("meta-test.txt");
+        expect(meta?.contentType).toBe("text/plain");
+        expect(meta?.["custom-field"]).toBe("custom-value");
+      });
+
+      it("works without options (backward compatibility)", async () => {
+        await ctx.storage.setItem("compat-test.txt", "content");
+        const value = await ctx.storage.getItem("compat-test.txt");
+        expect(value).toBe("content");
+      });
     },
   });
 });

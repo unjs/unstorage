@@ -44,6 +44,24 @@ export interface S3DriverOptions {
   bulkDelete?: boolean;
 }
 
+export interface S3ItemOptions {
+  /**
+   * HTTP headers to set when uploading the object.
+   * Supports standard S3 headers like Content-Type, Cache-Control, etc.
+   * and custom metadata via x-amz-meta-* prefixed headers.
+   */
+  headers?: {
+    "Content-Type"?: string;
+    "Cache-Control"?: string;
+    "Content-Disposition"?: string;
+    "Content-Encoding"?: string;
+    "Content-Language"?: string;
+    Expires?: string;
+    [key: `x-amz-meta-${string}`]: string | undefined;
+    [key: string]: string | undefined;
+  };
+}
+
 const DRIVER_NAME = "s3";
 
 export default defineDriver((options: S3DriverOptions) => {
@@ -97,14 +115,39 @@ export default defineDriver((options: S3DriverOptions) => {
     if (!res) {
       return null;
     }
-    const metaHeaders: HeadersInit = {};
-    for (const [key, value] of res.headers.entries()) {
-      const match = /x-amz-meta-(.*)/.exec(key);
+    const meta: Record<string, string | number | Date> = {};
+
+    // Standard headers
+    const contentType = res.headers.get("content-type");
+    if (contentType) meta.contentType = contentType;
+
+    const contentLength = res.headers.get("content-length");
+    if (contentLength) meta.contentLength = Number.parseInt(contentLength, 10);
+
+    const lastModified = res.headers.get("last-modified");
+    if (lastModified) meta.mtime = new Date(lastModified);
+
+    const etag = res.headers.get("etag");
+    if (etag) meta.etag = etag;
+
+    const cacheControl = res.headers.get("cache-control");
+    if (cacheControl) meta.cacheControl = cacheControl;
+
+    const contentDisposition = res.headers.get("content-disposition");
+    if (contentDisposition) meta.contentDisposition = contentDisposition;
+
+    const contentEncoding = res.headers.get("content-encoding");
+    if (contentEncoding) meta.contentEncoding = contentEncoding;
+
+    // Custom x-amz-meta-* headers
+    for (const [headerKey, value] of res.headers.entries()) {
+      const match = /^x-amz-meta-(.+)$/i.exec(headerKey);
       if (match?.[1]) {
-        metaHeaders[match[1]] = value;
+        meta[match[1]] = value;
       }
     }
-    return metaHeaders;
+
+    return meta;
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
@@ -123,9 +166,18 @@ export default defineDriver((options: S3DriverOptions) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
-  const putObject = async (key: string, value: string) => {
+  const putObject = async (
+    key: string,
+    value: BufferSource | string,
+    headers?: Record<string, string | undefined>
+  ) => {
     return awsFetch(url(key), {
       method: "PUT",
+      headers: headers
+        ? (Object.fromEntries(
+            Object.entries(headers).filter(([_, v]) => v !== undefined)
+          ) as Record<string, string>)
+        : undefined,
       body: value,
     });
   };
@@ -168,11 +220,11 @@ export default defineDriver((options: S3DriverOptions) => {
     getItemRaw(key) {
       return getObject(key).then((res) => (res ? res.arrayBuffer() : null));
     },
-    async setItem(key, value) {
-      await putObject(key, value);
+    async setItem(key, value, topts) {
+      await putObject(key, value, topts?.headers);
     },
-    async setItemRaw(key, value) {
-      await putObject(key, value);
+    async setItemRaw(key, value, topts) {
+      await putObject(key, value, topts?.headers);
     },
     getMeta(key) {
       return headObject(key);

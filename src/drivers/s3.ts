@@ -139,6 +139,9 @@ export default defineDriver((options: S3DriverOptions) => {
     const contentEncoding = res.headers.get("content-encoding");
     if (contentEncoding) meta.contentEncoding = contentEncoding;
 
+    const contentLanguage = res.headers.get("content-language");
+    if (contentLanguage) meta.contentLanguage = contentLanguage;
+
     // Custom x-amz-meta-* headers
     for (const [headerKey, value] of res.headers.entries()) {
       const match = /^x-amz-meta-(.+)$/i.exec(headerKey);
@@ -220,10 +223,10 @@ export default defineDriver((options: S3DriverOptions) => {
     getItemRaw(key) {
       return getObject(key).then((res) => (res ? res.arrayBuffer() : null));
     },
-    async setItem(key, value, topts) {
+    async setItem(key, value, topts?: S3ItemOptions) {
       await putObject(key, value, topts?.headers);
     },
-    async setItemRaw(key, value, topts) {
+    async setItemRaw(key, value, topts?: S3ItemOptions) {
       await putObject(key, value, topts?.headers);
     },
     getMeta(key) {

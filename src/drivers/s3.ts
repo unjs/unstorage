@@ -57,8 +57,8 @@ export interface S3ItemOptions {
     "Content-Encoding"?: string;
     "Content-Language"?: string;
     Expires?: string;
+  } & {
     [key: `x-amz-meta-${string}`]: string | undefined;
-    [key: string]: string | undefined;
   };
 }
 
@@ -115,42 +115,14 @@ export default defineDriver((options: S3DriverOptions) => {
     if (!res) {
       return null;
     }
-    const meta: Record<string, string | number | Date> = {};
-
-    // Standard headers
-    const contentType = res.headers.get("content-type");
-    if (contentType) meta.contentType = contentType;
-
-    const contentLength = res.headers.get("content-length");
-    if (contentLength) meta.contentLength = Number.parseInt(contentLength, 10);
-
-    const lastModified = res.headers.get("last-modified");
-    if (lastModified) meta.mtime = new Date(lastModified);
-
-    const etag = res.headers.get("etag");
-    if (etag) meta.etag = etag;
-
-    const cacheControl = res.headers.get("cache-control");
-    if (cacheControl) meta.cacheControl = cacheControl;
-
-    const contentDisposition = res.headers.get("content-disposition");
-    if (contentDisposition) meta.contentDisposition = contentDisposition;
-
-    const contentEncoding = res.headers.get("content-encoding");
-    if (contentEncoding) meta.contentEncoding = contentEncoding;
-
-    const contentLanguage = res.headers.get("content-language");
-    if (contentLanguage) meta.contentLanguage = contentLanguage;
-
-    // Custom x-amz-meta-* headers
-    for (const [headerKey, value] of res.headers.entries()) {
-      const match = /^x-amz-meta-(.+)$/i.exec(headerKey);
+    const metaHeaders: HeadersInit = {};
+    for (const [key, value] of res.headers.entries()) {
+      const match = /x-amz-meta-(.*)/.exec(key);
       if (match?.[1]) {
-        meta[match[1]] = value;
+        metaHeaders[match[1]] = value;
       }
     }
-
-    return meta;
+    return metaHeaders;
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html

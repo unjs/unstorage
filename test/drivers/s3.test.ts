@@ -50,9 +50,9 @@ describe.skipIf(
           },
         });
 
-        const meta = await ctx.storage.getMeta("test-image.png");
-        expect(meta?.contentType).toBe("image/png");
-        expect(meta?.cacheControl).toBe("max-age=31536000");
+        const value = await ctx.storage.getItemRaw("test-image.png");
+
+        expect(value).toBeDefined();
       });
 
       it("supports custom x-amz-meta headers", async () => {
@@ -60,12 +60,19 @@ describe.skipIf(
           headers: {
             "Content-Type": "text/plain",
             "x-amz-meta-custom-field": "custom-value",
+            "x-amz-meta-author": "john-doe",
+            "x-amz-meta-version": "1.0",
           },
         });
 
+        // getMeta only returns x-amz-meta-* custom headers (standard headers are not returned)
         const meta = await ctx.storage.getMeta("meta-test.txt");
-        expect(meta?.contentType).toBe("text/plain");
+        expect(meta).toBeDefined();
         expect(meta?.["custom-field"]).toBe("custom-value");
+        expect(meta?.["author"]).toBe("john-doe");
+        expect(meta?.["version"]).toBe("1.0");
+        // Standard headers like Content-Type are NOT returned by getMeta
+        expect(meta?.["contentType"]).toBeUndefined();
       });
 
       it("works without options (backward compatibility)", async () => {

@@ -73,6 +73,24 @@ const storage = createStorage({
 - `scanCount`: How many keys to scan at once ([redis documentation](https://redis.io/docs/latest/commands/scan/#the-count-option)).
 - `preConnect`: Whether to initialize the redis instance immediately. Otherwise, it will be initialized on the first read/write call. Default: `false`.
 
+## Watch support
+
+The Redis driver supports `watch`/`unwatch` by subscribing to Redis keyspace notifications.
+To receive events, your Redis server must have keyspace notifications enabled.
+Unstorage will try to enable them at runtime using `CONFIG SET notify-keyspace-events K$gx`,
+but this may be blocked by your Redis configuration or permissions.
+
+If you manage the Redis server, you can set this in `redis.conf`:
+
+```conf
+notify-keyspace-events K$gx
+```
+
+Events are mapped as follows:
+
+- `del`, `unlink`, `expired`, `evicted` => `remove`
+- everything else => `update`
+
 See [ioredis](https://github.com/redis/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 
 **Transaction options:**

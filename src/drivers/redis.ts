@@ -52,6 +52,8 @@ const DRIVER_NAME = "redis";
 
 export default defineDriver((opts: RedisOptions) => {
   let redisClient: Redis | Cluster;
+  let unwatch: (() => Promise<void> | void) | undefined;
+  let subscribers: Redis[] = [];
   const getRedisClient = () => {
     if (redisClient) {
       return redisClient;
@@ -69,6 +71,10 @@ export default defineDriver((opts: RedisOptions) => {
   const base = (opts.base || "").replace(/:$/, "");
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(`${base}:`, "") : key); // Deprefix a key
+  const dbIndex = opts.db ?? 0;
+  const channelPrefix = `__keyspace@${dbIndex}__:`;
+  const keyPattern = base ? `${base}:*` : "*";
+  const channelPattern = `${channelPrefix}${keyPattern}`;
 
   if (opts.preConnect) {
     try {
@@ -137,7 +143,69 @@ export default defineDriver((opts: RedisOptions) => {
       await getRedisClient().unlink(keys);
     },
     dispose() {
+      if (unwatch) {
+        Promise.resolve(unwatch()).catch(() => {});
+        unwatch = undefined;
+      }
       return getRedisClient().disconnect();
+    },
+    async watch(callback) {
+      if (unwatch) {
+        return unwatch;
+      }
+
+      const removeEvents = new Set(["del", "unlink", "expired", "evicted"]);
+
+      const handleMessage = (channel: string, event: string) => {
+        if (!channel.startsWith(channelPrefix)) {
+          return;
+        }
+        const rawKey = channel.slice(channelPrefix.length);
+        if (base && !rawKey.startsWith(`${base}:`)) {
+          return;
+        }
+        const key = d(rawKey);
+        const type = removeEvents.has(event) ? "remove" : "update";
+        callback(type, key);
+      };
+
+      const createSubscriber = (client: Redis) => {
+        const sub = client.duplicate();
+        sub.on("pmessage", (_pattern, channel, message) => {
+          handleMessage(channel, message);
+        });
+        subscribers.push(sub);
+        return sub;
+      };
+
+      await getRedisClient().config("SET", "notify-keyspace-events", "K$gx");
+
+      const client = getRedisClient();
+      if (client instanceof Cluster) {
+        const nodes = client.nodes("master");
+        await Promise.all(
+          nodes.map(async (node) => {
+            const sub = createSubscriber(node);
+            await sub.psubscribe(channelPattern);
+          })
+        );
+      } else {
+        const sub = createSubscriber(client);
+        await sub.psubscribe(channelPattern);
+      }
+
+      unwatch = async () => {
+        await Promise.all(
+          subscribers.map(async (sub) => {
+            await sub.punsubscribe(channelPattern);
+            await sub.disconnect();
+          })
+        );
+        subscribers = [];
+        unwatch = undefined;
+      };
+
+      return unwatch;
     },
   };
 });

@@ -3,7 +3,15 @@ import * as ioredisMock from "ioredis-mock";
 import redisDriver from "../../src/drivers/redis.ts";
 import { testDriver } from "./utils.ts";
 
-vi.mock("ioredis", () => ({ ...ioredisMock, Redis: ioredisMock.default }));
+vi.mock("ioredis", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("ioredis")>();
+  return {
+    ...actual,
+    ...ioredisMock,
+    Redis: ioredisMock.default,
+    Cluster: (ioredisMock as any).Cluster || actual.Cluster,
+  };
+});
 
 describe("drivers: redis", () => {
   const driver = redisDriver({
@@ -11,6 +19,13 @@ describe("drivers: redis", () => {
     url: "ioredis://localhost:6379/0",
     lazyConnect: false,
   });
+
+  const ensureMockConfig = () => {
+    const client = driver.getInstance?.() as any;
+    if (client && typeof client.config === "function") {
+      client.config = () => Promise.resolve("OK");
+    }
+  };
 
   testDriver({
     driver,
@@ -38,6 +53,51 @@ describe("drivers: redis", () => {
         expect(driver.getInstance?.()).toBeInstanceOf(
           (ioredisMock as any).default
         );
+      });
+
+      it("watch redis", async () => {
+        ensureMockConfig();
+        const watcher = vi.fn();
+        const unwatch = await ctx.storage.watch(watcher);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        const publisher = new (ioredisMock as any).default(
+          "ioredis://localhost:6379/0"
+        );
+        await publisher.publish("__keyspace@0__:test:s1:a", "set");
+        await publisher.publish("__keyspace@0__:test:s2:a", "del");
+        await publisher.publish("__keyspace@0__:other:s3:a", "set");
+        await publisher.disconnect();
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(watcher).toHaveBeenCalledWith("update", "s1:a");
+        expect(watcher).toHaveBeenCalledWith("remove", "s2:a");
+        expect(watcher).toHaveBeenCalledTimes(2);
+        await unwatch();
+      });
+
+      it("unwatch redis", async () => {
+        ensureMockConfig();
+        const watcher = vi.fn();
+        const unwatch = await ctx.storage.watch(watcher);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        const publisher = new (ioredisMock as any).default(
+          "ioredis://localhost:6379/0"
+        );
+        await publisher.publish("__keyspace@0__:test:s1:a", "set");
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        await unwatch();
+
+        await publisher.publish("__keyspace@0__:test:s1:b", "set");
+        await publisher.disconnect();
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(watcher).toHaveBeenCalledTimes(1);
+        expect(watcher).toHaveBeenCalledWith("update", "s1:a");
       });
     },
   });

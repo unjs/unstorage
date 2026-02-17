@@ -1,4 +1,4 @@
-import { del, head, list, put } from "@vercel/blob";
+import { del, get as getBlob, head, list, put } from "@vercel/blob";
 import {
   defineDriver,
   normalizeKey,
@@ -8,9 +8,12 @@ import {
 
 export interface VercelBlobOptions {
   /**
-   * Whether the blob should be publicly accessible. (required, must be "public")
+   * Whether the blob should be publicly or privately accessible.
+   *
+   * - `"public"`: Blobs are accessible via their URL without authentication.
+   * - `"private"`: Blobs require authentication to access.
    */
-  access: "public";
+  access: "public" | "private";
 
   /**
    * Prefix to prepend to all keys. Can be used for namespacing.
@@ -41,9 +44,6 @@ export default defineDriver<VercelBlobOptions>((opts) => {
   const envName = `${opts.envPrefix || "BLOB"}_READ_WRITE_TOKEN`;
 
   const getToken = () => {
-    if (opts.access !== "public") {
-      throw createError(DRIVER_NAME, `You must set { access: "public" }`);
-    }
     const token = opts.token || globalThis.process?.env?.[envName];
     if (!token) {
       throw createError(
@@ -54,61 +54,59 @@ export default defineDriver<VercelBlobOptions>((opts) => {
     return token;
   };
 
-  const get = async (key: string) => {
-    const { blobs } = await list({
-      token: getToken(),
-      prefix: r(key),
-    });
-    const blob = blobs.find((item) => item.pathname === r(key));
-    return blob;
-  };
+  const get = (key: string) =>
+    getBlob(r(key), { token: getToken(), access: opts.access });
 
   return {
     name: DRIVER_NAME,
     options: opts,
     async hasItem(key: string) {
-      const blob = await get(key);
-      return !!blob;
+      try {
+        await head(r(key), { token: getToken() });
+        return true;
+      } catch {
+        return false;
+      }
     },
     async getItem(key) {
-      const blob = await get(key);
-      return blob ? fetch(blob.url).then((res) => res.text()) : null;
+      const result = await get(key);
+      if (!result) return null;
+      return new Response(result.stream).text();
     },
     async getItemRaw(key) {
-      const blob = await get(key);
-      return blob ? fetch(blob.url).then((res) => res.arrayBuffer()) : null;
+      const result = await get(key);
+      if (!result) return null;
+      return new Response(result.stream).arrayBuffer();
     },
     async getMeta(key) {
-      const blob = await get(key);
-      if (!blob) return null;
-      const blobHead = await head(blob.url, {
-        token: getToken(),
-      });
-      if (!blobHead) return null;
-      return {
-        mtime: blobHead.uploadedAt,
-        ...blobHead,
-      };
+      try {
+        const blobHead = await head(r(key), { token: getToken() });
+        return {
+          mtime: blobHead.uploadedAt,
+          ...blobHead,
+        };
+      } catch {
+        return null;
+      }
     },
-    async setItem(key, value, opts) {
+    async setItem(key, value, callOpts) {
       await put(r(key), value, {
-        access: "public",
+        access: opts.access,
         addRandomSuffix: false,
         token: getToken(),
-        ...opts,
+        ...callOpts,
       });
     },
-    async setItemRaw(key, value, opts) {
+    async setItemRaw(key, value, callOpts) {
       await put(r(key), value, {
-        access: "public",
+        access: opts.access,
         addRandomSuffix: false,
         token: getToken(),
-        ...opts,
+        ...callOpts,
       });
     },
     async removeItem(key: string) {
-      const blob = await get(key);
-      if (blob) await del(blob.url, { token: getToken() });
+      await del(r(key), { token: getToken() });
     },
     async getKeys(base: string) {
       const blobs: any[] = [];

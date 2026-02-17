@@ -50,7 +50,7 @@
     "@types/node": "^25.0.8",
     "@typescript/native-preview": "7.0.0-dev.20260115.1",
     "@upstash/redis": "^1.36.1",
-    "@vercel/blob": "^2.0.0",
+    "@vercel/blob": "^2.3.0-cc8f7be-20260217140255",
     "@vercel/functions": "^3.3.6",
     "@vercel/kv": "^3.0.0",
     "@vitest/coverage-v8": "^4.0.17",

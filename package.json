@@ -61,7 +61,7 @@
     "citty": "^0.1.6",
     "db0": "^0.3.4",
     "destr": "^2.0.5",
-    "eslint": "^9.39.2",
+    "eslint": "^10.0.2",
     "eslint-config-unjs": "^0.6.2",
     "fake-indexeddb": "^6.2.5",
     "get-port-please": "^3.2.0",

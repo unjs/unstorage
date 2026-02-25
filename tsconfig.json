@@ -20,10 +20,7 @@
     "composite": true,
     "isolatedDeclarations": true,
     "allowImportingTsExtensions": true,
-    "types": ["node", "deno"],
-    "paths": {
-      "unstorage/drivers/*": ["./src/drivers/*.ts"]
-    }
+    "types": ["node", "deno"]
   },
   "include": ["src", "test"]
 }

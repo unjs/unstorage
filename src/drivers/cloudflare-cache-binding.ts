@@ -2,9 +2,9 @@ import type {
   Cache as CFCache,
   CacheStorage as CFCacheStorage,
   Response as CFResponse,
-} from "@cloudflare/workers-types/experimental";
+} from "@cloudflare/workers-types";
 
-import { defineDriver, joinKeys } from "./utils";
+import { defineDriver, joinKeys } from "./utils/index.ts";
 
 export interface CacheOptions {
   /**

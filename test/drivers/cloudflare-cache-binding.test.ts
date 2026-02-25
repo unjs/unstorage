@@ -1,7 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 import { describe, expect, test, afterAll } from "vitest";
-import CloudflareCacheBinding from "../../src/drivers/cloudflare-cache-binding";
-import { testDriver } from "./utils";
+import CloudflareCacheBinding from "../../src/drivers/cloudflare-cache-binding.ts";
+import { testDriver } from "./utils.ts";
 import { getPlatformProxy } from "wrangler";
 
 /*

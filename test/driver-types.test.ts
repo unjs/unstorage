@@ -33,9 +33,7 @@ describe.skipIf(!existsSync(dtsFile))("dist type declarations", () => {
     } catch (error: any) {
       output = error.stdout || error.stderr || "";
     }
-    const errors = output
-      .split("\n")
-      .filter((line: string) => line.startsWith("dist/"));
+    const errors = output.split("\n").filter((line: string) => line.startsWith("dist/"));
     expect(errors, errors.join("\n")).toHaveLength(0);
   });
 });

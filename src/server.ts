@@ -1,5 +1,5 @@
 import type { Storage, TransactionOptions, StorageMeta } from "./types.ts";
-import { HTTPError, H3Event, defineHandler } from "h3";
+import { H3Event, defineHandler } from "h3";
 import { stringify } from "./_utils.ts";
 import { normalizeKey, normalizeBaseKey } from "./utils.ts";
 
@@ -18,7 +18,7 @@ const MethodToTypeMap = {
 
 export interface StorageServerOptions {
   authorize?: (request: StorageServerRequest) => void | Promise<void>;
-  resolvePath?: (event: H3Event) => string;
+  resolvePath?: (event: { req: Request }) => string;
 }
 
 export type FetchHandler = (

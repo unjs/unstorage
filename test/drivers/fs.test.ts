@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { resolve } from "node:path";
-import { readFile, writeFile } from "../../src/drivers/utils/node-fs";
-import { testDriver, type TestContext } from "./utils";
-import driver from "../../src/drivers/fs";
-import { createStorage } from "../../src";
+import { readFile, writeFile } from "../../src/drivers/utils/node-fs.ts";
+import { testDriver, type TestContext } from "./utils.ts";
+import driver from "../../src/drivers/fs.ts";
+import { createStorage } from "../../src/storage.ts";
 
 describe("drivers: fs", () => {
   const dir = resolve(__dirname, "tmp/fs");

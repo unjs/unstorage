@@ -7,6 +7,7 @@ import type { AzureKeyVaultOptions as AzureKeyVaultOptions } from "unstorage/dri
 import type { AzureStorageBlobOptions as AzureStorageBlobOptions } from "unstorage/drivers/azure-storage-blob";
 import type { AzureStorageTableOptions as AzureStorageTableOptions } from "unstorage/drivers/azure-storage-table";
 import type { CapacitorPreferencesOptions as CapacitorPreferencesOptions } from "unstorage/drivers/capacitor-preferences";
+import type { CacheOptions as CloudflareCacheBindingOptions } from "unstorage/drivers/cloudflare-cache-binding";
 import type { KVOptions as CloudflareKVBindingOptions } from "unstorage/drivers/cloudflare-kv-binding";
 import type { KVHTTPOptions as CloudflareKVHttpOptions } from "unstorage/drivers/cloudflare-kv-http";
 import type { CloudflareR2Options as CloudflareR2BindingOptions } from "unstorage/drivers/cloudflare-r2-binding";
@@ -30,9 +31,9 @@ import type { SessionStorageOptions as SessionStorageOptions } from "unstorage/d
 import type { UploadThingOptions as UploadthingOptions } from "unstorage/drivers/uploadthing";
 import type { UpstashOptions as UpstashOptions } from "unstorage/drivers/upstash";
 import type { VercelBlobOptions as VercelBlobOptions } from "unstorage/drivers/vercel-blob";
-import type { VercelKVOptions as VercelKVOptions } from "unstorage/drivers/vercel-kv";
+import type { VercelCacheOptions as VercelRuntimeCacheOptions } from "unstorage/drivers/vercel-runtime-cache";
 
-export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-kv" | "vercelKV";
+export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-cache-binding" | "cloudflareCacheBinding" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-runtime-cache" | "vercelRuntimeCache";
 
 export type BuiltinDriverOptions = {
   "azure-app-configuration": AzureAppConfigurationOptions;
@@ -47,6 +48,8 @@ export type BuiltinDriverOptions = {
   "azureStorageTable": AzureStorageTableOptions;
   "capacitor-preferences": CapacitorPreferencesOptions;
   "capacitorPreferences": CapacitorPreferencesOptions;
+  "cloudflare-cache-binding": CloudflareCacheBindingOptions;
+  "cloudflareCacheBinding": CloudflareCacheBindingOptions;
   "cloudflare-kv-binding": CloudflareKVBindingOptions;
   "cloudflareKVBinding": CloudflareKVBindingOptions;
   "cloudflare-kv-http": CloudflareKVHttpOptions;
@@ -80,8 +83,8 @@ export type BuiltinDriverOptions = {
   "upstash": UpstashOptions;
   "vercel-blob": VercelBlobOptions;
   "vercelBlob": VercelBlobOptions;
-  "vercel-kv": VercelKVOptions;
-  "vercelKV": VercelKVOptions;
+  "vercel-runtime-cache": VercelRuntimeCacheOptions;
+  "vercelRuntimeCache": VercelRuntimeCacheOptions;
 };
 
 export const builtinDrivers = {
@@ -97,6 +100,8 @@ export const builtinDrivers = {
   "azureStorageTable": "unstorage/drivers/azure-storage-table",
   "capacitor-preferences": "unstorage/drivers/capacitor-preferences",
   "capacitorPreferences": "unstorage/drivers/capacitor-preferences",
+  "cloudflare-cache-binding": "unstorage/drivers/cloudflare-cache-binding",
+  "cloudflareCacheBinding": "unstorage/drivers/cloudflare-cache-binding",
   "cloudflare-kv-binding": "unstorage/drivers/cloudflare-kv-binding",
   "cloudflareKVBinding": "unstorage/drivers/cloudflare-kv-binding",
   "cloudflare-kv-http": "unstorage/drivers/cloudflare-kv-http",
@@ -132,6 +137,6 @@ export const builtinDrivers = {
   "upstash": "unstorage/drivers/upstash",
   "vercel-blob": "unstorage/drivers/vercel-blob",
   "vercelBlob": "unstorage/drivers/vercel-blob",
-  "vercel-kv": "unstorage/drivers/vercel-kv",
-  "vercelKV": "unstorage/drivers/vercel-kv",
+  "vercel-runtime-cache": "unstorage/drivers/vercel-runtime-cache",
+  "vercelRuntimeCache": "unstorage/drivers/vercel-runtime-cache",
 } as const;

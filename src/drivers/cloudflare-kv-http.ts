@@ -4,7 +4,7 @@ import {
   createRequiredError,
   defineDriver,
   joinKeys,
-} from "./utils";
+} from "./utils/index.ts";
 
 interface KVAuthAPIToken {
   /**

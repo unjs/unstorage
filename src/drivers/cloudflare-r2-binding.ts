@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
-import { defineDriver, joinKeys } from "./utils";
-import { getR2Binding } from "./utils/cloudflare";
+import { defineDriver, joinKeys } from "./utils/index.ts";
+import { getR2Binding } from "./utils/cloudflare.ts";
 
 export interface CloudflareR2Options {
   binding?: string | R2Bucket;

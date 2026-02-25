@@ -46,3 +46,4 @@ The driver supports the following authentication methods:
 - **`connectionString`** (required): The connection string to use to connect to the MongoDB database. It should be in the format `mongodb://<username>:<password>@<host>:<port>/<database>`.
 - `databaseName`: The name of the database to use. Defaults to `unstorage`.
 - `collectionName`: The name of the collection to use. Defaults to `unstorage`.
+- `clientOptions`: Optional configuration settings for the MongoClient instance.

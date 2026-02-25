@@ -1,129 +1,115 @@
 {
   "name": "unstorage",
-  "version": "1.15.0",
+  "version": "2.0.0-alpha.5",
   "description": "Universal Storage Layer",
+  "homepage": "https://unstorage.unjs.io",
   "repository": "unjs/unstorage",
   "license": "MIT",
   "sideEffects": false,
+  "type": "module",
   "exports": {
-    "./drivers/*": {
-      "types": "./drivers/*.d.ts",
-      "import": "./drivers/*.mjs",
-      "require": "./drivers/*.cjs"
-    },
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    },
-    "./server": {
-      "types": "./dist/server.d.ts",
-      "import": "./dist/server.mjs",
-      "require": "./dist/server.cjs"
-    }
+    ".": "./dist/index.mjs",
+    "./drivers/*": "./dist/drivers/*.mjs",
+    "./server": "./dist/server.mjs"
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "files": [
-    "dist",
-    "drivers",
-    "server.d.ts"
+    "dist"
   ],
   "scripts": {
-    "bench": "jiti test/server.bench.ts",
-    "build": "pnpm gen-drivers && unbuild",
-    "gen-drivers": "jiti scripts/gen-drivers.ts",
+    "bench": "node test/server.bench.ts",
+    "build": "pnpm gen-drivers && obuild",
     "dev": "vitest",
+    "gen-drivers": "node scripts/gen-drivers.ts",
     "lint": "eslint . && prettier -c .",
     "lint:fix": "eslint . --fix && prettier -w .",
     "prepack": "pnpm build",
-    "release": "pnpm test && changelogen --release && git push --follow-tags && pnpm publish",
+    "release": "pnpm test && pnpm build && changelogen --release --prerelease --publish --publishTag alpha --push",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
-    "test:types": "tsc --noEmit --skipLibCheck",
-    "unstorage": "pnpm jiti src/cli"
-  },
-  "dependencies": {
-    "anymatch": "^3.1.3",
-    "chokidar": "^4.0.3",
-    "destr": "^2.0.5",
-    "h3": "^1.15.1",
-    "lru-cache": "^10.4.3",
-    "node-fetch-native": "^1.6.6",
-    "ofetch": "^1.4.1",
-    "ufo": "^1.6.1"
+    "test:types": "tsgo --noEmit --skipLibCheck",
+    "unstorage": "node jiti src/cli.ts"
   },
   "devDependencies": {
-    "@azure/app-configuration": "^1.9.0",
-    "@azure/cosmos": "^4.3.0",
-    "@azure/data-tables": "^13.3.0",
-    "@azure/identity": "^4.8.0",
-    "@azure/keyvault-secrets": "^4.9.0",
-    "@azure/storage-blob": "^12.27.0",
-    "@capacitor/preferences": "^7.0.1",
-    "@cloudflare/workers-types": "^4.20250410.0",
-    "@deno/kv": "^0.10.0",
-    "@electric-sql/pglite": "^0.2.17",
-    "@libsql/client": "^0.15.2",
-    "@netlify/blobs": "^8.1.2",
+    "@azure/app-configuration": "^1.11.0",
+    "@azure/cosmos": "^4.9.1",
+    "@azure/data-tables": "^13.3.2",
+    "@azure/identity": "^4.13.0",
+    "@azure/keyvault-secrets": "^4.10.0",
+    "@azure/storage-blob": "^12.31.0",
+    "@capacitor/preferences": "^8.0.1",
+    "@cloudflare/workers-types": "^4.20260304.0",
+    "@deno/kv": "^0.13.0",
+    "@electric-sql/pglite": "^0.3.15",
+    "@libsql/client": "^0.17.0",
+    "@netlify/blobs": "^10.7.0",
     "@planetscale/database": "^1.19.0",
-    "@types/deno": "^2.2.0",
-    "@types/ioredis-mock": "^8.2.5",
-    "@types/jsdom": "^21.1.7",
-    "@types/node": "^22.14.0",
-    "@upstash/redis": "^1.34.7",
-    "@vercel/blob": "^1.0.0",
+    "@types/deno": "^2.5.0",
+    "@types/ioredis-mock": "^8.2.6",
+    "@types/jsdom": "^28.0.0",
+    "@types/node": "^25.3.0",
+    "@typescript/native-preview": "7.0.0-dev.20260225.1",
+    "@upstash/redis": "^1.36.2",
+    "@vercel/blob": "^2.3.0",
+    "@vercel/functions": "^3.4.3",
     "@vercel/kv": "^3.0.0",
-    "@vitest/coverage-v8": "^3.1.1",
+    "@vitest/coverage-v8": "^4.0.18",
     "aws4fetch": "^1.0.20",
-    "azurite": "^3.34.0",
-    "better-sqlite3": "^11.9.1",
-    "changelogen": "^0.6.1",
-    "citty": "^0.1.6",
-    "db0": "^0.3.1",
-    "eslint": "^9.24.0",
-    "eslint-config-unjs": "^0.4.2",
-    "fake-indexeddb": "^6.0.0",
-    "get-port-please": "^3.1.2",
-    "idb-keyval": "^6.2.1",
-    "ioredis": "^5.6.0",
-    "ioredis-mock": "^8.9.0",
-    "jiti": "^2.4.2",
-    "jsdom": "^26.0.0",
-    "listhen": "^1.9.0",
+    "azurite": "^3.35.0",
+    "changelogen": "^0.6.2",
+    "chokidar": "^5.0.0",
+    "citty": "^0.2.1",
+    "db0": "^0.3.4",
+    "destr": "^2.0.5",
+    "eslint": "^10.0.2",
+    "eslint-config-unjs": "^0.6.2",
+    "fake-indexeddb": "^6.2.5",
+    "get-port-please": "^3.2.0",
+    "h3": "2.0.1-rc.14",
+    "idb-keyval": "^6.2.2",
+    "ioredis": "^5.9.3",
+    "ioredis-mock": "^8.13.1",
+    "jsdom": "^28.1.0",
+    "lru-cache": "^11.2.6",
     "mitata": "^1.0.34",
-    "mlly": "^1.7.4",
-    "mongodb": "^6.15.0",
-    "mongodb-memory-server": "^10.1.4",
-    "prettier": "^3.5.3",
+    "mlly": "^1.8.0",
+    "mongodb": "^7.1.0",
+    "mongodb-memory-server": "^11.0.1",
+    "obuild": "^0.4.31",
+    "ofetch": "^1.5.1",
+    "prettier": "^3.8.1",
     "scule": "^1.3.0",
-    "types-cloudflare-worker": "^1.2.0",
-    "typescript": "^5.8.3",
-    "unbuild": "^3.5.0",
-    "uploadthing": "^7.6.0",
-    "vite": "^6.2.6",
-    "vitest": "^3.1.1",
-    "wrangler": "^4.9.1"
+    "srvx": "^0.11.7",
+    "typescript": "^5.9.3",
+    "uploadthing": "^7.7.4",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18",
+    "wrangler": "^4.68.1"
   },
   "peerDependencies": {
-    "@azure/app-configuration": "^1.8.0",
-    "@azure/cosmos": "^4.2.0",
-    "@azure/data-tables": "^13.3.0",
-    "@azure/identity": "^4.6.0",
-    "@azure/keyvault-secrets": "^4.9.0",
-    "@azure/storage-blob": "^12.26.0",
-    "@capacitor/preferences": "^6.0.3 || ^7.0.0",
-    "@deno/kv": ">=0.9.0",
-    "@netlify/blobs": "^6.5.0 || ^7.0.0 || ^8.1.0",
+    "@azure/app-configuration": "^1.11.0",
+    "@azure/cosmos": "^4.9.1",
+    "@azure/data-tables": "^13.3.2",
+    "@azure/identity": "^4.13.0",
+    "@azure/keyvault-secrets": "^4.10.0",
+    "@azure/storage-blob": "^12.31.0",
+    "@capacitor/preferences": "^6 || ^7 || ^8",
+    "@deno/kv": ">=0.13.0",
+    "@netlify/blobs": "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0",
     "@planetscale/database": "^1.19.0",
-    "@upstash/redis": "^1.34.3",
-    "@vercel/blob": ">=0.27.1",
+    "@upstash/redis": "^1.36.2",
+    "@vercel/blob": ">=0.27.3",
+    "@vercel/functions": "^2.2.12 || ^3.0.0",
     "@vercel/kv": "^1.0.1",
     "aws4fetch": "^1.0.20",
-    "db0": ">=0.2.1",
-    "idb-keyval": "^6.2.1",
-    "ioredis": "^5.4.2",
-    "uploadthing": "^7.4.4"
+    "chokidar": "^4 || ^5",
+    "db0": ">=0.3.4",
+    "idb-keyval": "^6.2.2",
+    "ioredis": "^5.9.3",
+    "lru-cache": "^11.2.6",
+    "mongodb": "^6 || ^7",
+    "ofetch": "*",
+    "uploadthing": "^7.7.4"
   },
   "peerDependenciesMeta": {
     "@azure/app-configuration": {
@@ -162,10 +148,16 @@
     "@vercel/blob": {
       "optional": true
     },
+    "@vercel/functions": {
+      "optional": true
+    },
     "@vercel/kv": {
       "optional": true
     },
     "aws4fetch": {
+      "optional": true
+    },
+    "chokidar": {
       "optional": true
     },
     "db0": {
@@ -177,21 +169,29 @@
     "ioredis": {
       "optional": true
     },
+    "lru-cache": {
+      "optional": true
+    },
+    "mongodb": {
+      "optional": true
+    },
+    "ofetch": {
+      "optional": true
+    },
     "uploadthing": {
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.8.0",
+  "packageManager": "pnpm@10.30.2",
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "mongodb-memory-server"
+    ],
     "ignoredBuiltDependencies": [
       "@parcel/watcher",
       "sharp",
       "workerd"
-    ],
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "esbuild",
-      "mongodb-memory-server"
     ]
   }
 }

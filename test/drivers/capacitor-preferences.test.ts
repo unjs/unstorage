@@ -1,6 +1,6 @@
 import { describe, vi } from "vitest";
-import driver from "../../src/drivers/capacitor-preferences";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/capacitor-preferences.ts";
+import { testDriver } from "./utils.ts";
 import { afterEach } from "node:test";
 
 vi.mock("@capacitor/preferences", () => {

@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
-import driver from "../../src/drivers/localstorage";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/localstorage.ts";
+import { testDriver } from "./utils.ts";
 import { JSDOM } from "jsdom";
 
 describe("drivers: localstorage", () => {
   const jsdom = new JSDOM("", {
     url: "http://localhost",
   });
-  jsdom.virtualConsole.sendTo(console);
+  // jsdom.virtualConsole.sendTo(console);
 
   jsdom.window.localStorage.setItem("__external_key__", "unrelated_data");
 

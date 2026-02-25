@@ -77,10 +77,6 @@ await storage.clear("", { tags: ["user:123"] });
 Learn more about Vercel Blob.
 ::
 
-::warning
-Currently Vercel Blob stores all data with public access.
-::
-
 ### Usage
 
 **Driver name:** `vercel-blob`
@@ -89,13 +85,17 @@ To use, you will need to install [`@vercel/blob`](https://www.npmjs.com/package/
 
 :pm-install{name="@vercel/blob"}
 
+#### Public access
+
+Public blobs are accessible via their URL without authentication.
+
 ```js
 import { createStorage } from "unstorage";
 import vercelBlobDriver from "unstorage/drivers/vercel-blob";
 
 const storage = createStorage({
   driver: vercelBlobDriver({
-    access: "public", // Required! Beware that stored data is publicly accessible.
+    access: "public",
     // token: "<your secret token>", // or set BLOB_READ_WRITE_TOKEN
     // base: "unstorage",
     // envPrefix: "BLOB",
@@ -103,9 +103,27 @@ const storage = createStorage({
 });
 ```
 
-**Options:**
+#### Private access
 
-- `access`: Whether the blob should be publicly accessible. (required, must be `public`)
+Private blobs require authentication to access. You need to create a private blob store on the Vercel dashboard before using this mode.
+
+```js
+import { createStorage } from "unstorage";
+import vercelBlobDriver from "unstorage/drivers/vercel-blob";
+
+const storage = createStorage({
+  driver: vercelBlobDriver({
+    access: "private",
+    // token: "<your secret token>", // or set BLOB_READ_WRITE_TOKEN
+    // base: "unstorage",
+    // envPrefix: "BLOB",
+  }),
+});
+```
+
+### Options
+
+- `access`: Whether the blob should be publicly or privately accessible. Must be `"public"` or `"private"`.
 - `base`: Prefix to prepend to all keys. Can be used for namespacing.
 - `token`: Rest API token to use for connecting to your Vercel Blob store. If not provided, it will be read from the environment variable `BLOB_READ_WRITE_TOKEN`.
 - `envPrefix`: Prefix to use for token environment variable name. Default is `BLOB` (env name = `BLOB_READ_WRITE_TOKEN`).

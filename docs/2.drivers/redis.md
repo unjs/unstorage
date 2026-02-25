@@ -30,7 +30,6 @@ import redisDriver from "unstorage/drivers/redis";
 
 const storage = createStorage({
   driver: redisDriver({
-    raw: true,
     base: "unstorage",
     host: 'HOSTNAME',
     tls: true as any,
@@ -47,7 +46,6 @@ Usage with a Redis cluster (e.g. AWS ElastiCache or Azure Redis Cache):
 ```js
 const storage = createStorage({
   driver: redisDriver({
-    raw: true,
     base: "{unstorage}",
     cluster: [
       {

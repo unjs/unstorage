@@ -23,7 +23,6 @@ redirects:
   "/drivers/cloudflare-kv-binding": "/drivers/cloudflare"
   "/drivers/cloudflare-kv-http": "/drivers/cloudflare"
   "/drivers/cloudflare-r2-binding": "/drivers/cloudflare"
-  "/drivers/vercel-kv": "/drivers/vercel"
   "/drivers/netlify-blobs": "/drivers/netlify"
   "/drivers/localstorage": "/drivers/browser"
   "/drivers/indexedb": "/drivers/browser"

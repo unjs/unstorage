@@ -137,6 +137,9 @@ const driver: DriverFactory<DB0DriverOptions, Database> = defineDriver(
         await ensureTable();
         await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}}`;
       },
+      dispose: async () => {
+        await opts.database.dispose();
+      },
     };
   }
 );

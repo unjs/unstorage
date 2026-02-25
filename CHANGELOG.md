@@ -2,6 +2,77 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-alpha.6
+
+[compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.5...v2.0.0-alpha.6)
+
+### 🚀 Enhancements
+
+- **vercel-blob:** Support private blob ([#743](https://github.com/unjs/unstorage/pull/743))
+- `cloudflare-cache-binding` driver ([#603](https://github.com/unjs/unstorage/pull/603))
+- **redis:** ⚠️  Native raw support ([#561](https://github.com/unjs/unstorage/pull/561))
+- **s3:** Add Content-Type and headers support for S3 uploads ([#741](https://github.com/unjs/unstorage/pull/741))
+- Experimental tracing channels support ([#707](https://github.com/unjs/unstorage/pull/707))
+
+### 🩹 Fixes
+
+- **db0:** Close database connection after `dispose` ([#693](https://github.com/unjs/unstorage/pull/693))
+- **fs:** Ensure directory exists before watching ([#704](https://github.com/unjs/unstorage/pull/704))
+- **fs:** Exclude ignored file in key listing ([#622](https://github.com/unjs/unstorage/pull/622))
+
+### 💅 Refactors
+
+- Remove deprecated `@vercel/kv` driver ([#744](https://github.com/unjs/unstorage/pull/744))
+- **drivers:** Remove `defineDriver` in favor of `DriverFactory` type ([1a0d3ee](https://github.com/unjs/unstorage/commit/1a0d3ee))
+- Fix driver type issues and lint ([a5cdb6d](https://github.com/unjs/unstorage/commit/a5cdb6d))
+- **server:** Expose minimal http event type only ([2a77d42](https://github.com/unjs/unstorage/commit/2a77d42))
+
+### 📖 Documentation
+
+- Remove duplicate string from feature description ([#648](https://github.com/unjs/unstorage/pull/648))
+
+### 📦 Build
+
+- Allow `@capacitor/preferences` v8 in peer dependencies ([#730](https://github.com/unjs/unstorage/pull/730))
+- Improve dist ([92aefab](https://github.com/unjs/unstorage/commit/92aefab))
+
+### 🏡 Chore
+
+- Update undocs ([fa86024](https://github.com/unjs/unstorage/commit/fa86024))
+- Switch to tsgo ([35953ee](https://github.com/unjs/unstorage/commit/35953ee))
+- Update deps ([00fbf8b](https://github.com/unjs/unstorage/commit/00fbf8b))
+- Lint ([ccb34e0](https://github.com/unjs/unstorage/commit/ccb34e0))
+- Fix more isolated declr issues ([9fc135b](https://github.com/unjs/unstorage/commit/9fc135b))
+- Lint ([4e86f75](https://github.com/unjs/unstorage/commit/4e86f75))
+- Remove old cli script ([2e2ca65](https://github.com/unjs/unstorage/commit/2e2ca65))
+- Fix decl issues for internals ([05e2857](https://github.com/unjs/unstorage/commit/05e2857))
+- Use oxlint and oxfmt ([9c3bc44](https://github.com/unjs/unstorage/commit/9c3bc44))
+
+### ✅ Tests
+
+- Include drivers in coverage ([bbc9990](https://github.com/unjs/unstorage/commit/bbc9990))
+- Run driver type check once against `dist/index.d.mts` ([1c21fd7](https://github.com/unjs/unstorage/commit/1c21fd7))
+
+### 🤖 CI
+
+- Typecheck after build ([dc5ddac](https://github.com/unjs/unstorage/commit/dc5ddac))
+
+#### ⚠️ Breaking Changes
+
+- **redis:** ⚠️  Native raw support ([#561](https://github.com/unjs/unstorage/pull/561))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Abdelrahman Awad ([@logaretm](https://github.com/logaretm))
+- Oleh <oreznichenko@artelogic.net>
+- Connor Pearson ([@cjpearson](https://github.com/cjpearson))
+- Oleksandr Dzhychko <oleksandr@dzhychko.de>
+- Nicolaos Skimas <contact@nicolaos.dev>
+- Kricsleo ([@kricsleo](https://github.com/kricsleo))
+- Rihan Arfan ([@RihanArfan](https://github.com/RihanArfan))
+- Wind <hi@productdevbook.com>
+
 ## v2.0.0-alpha.5
 
 [compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.4...v2.0.0-alpha.5)

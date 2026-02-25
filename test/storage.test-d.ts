@@ -1,6 +1,6 @@
 import { describe, it, expectTypeOf } from "vitest";
-import { createStorage, prefixStorage } from "../src";
-import type { Storage, StorageValue } from "../src";
+import { createStorage, prefixStorage } from "../src/index.ts";
+import type { Storage, StorageValue } from "../src/index.ts";
 
 describe("types", () => {
   it("default types for storage", async () => {

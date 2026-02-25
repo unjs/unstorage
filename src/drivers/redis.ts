@@ -1,10 +1,10 @@
-import { defineDriver, joinKeys } from "./utils";
-// TODO: use named import in v2
-import Redis, {
-  Cluster,
-  type ClusterNode,
-  type ClusterOptions,
-  type RedisOptions as _RedisOptions,
+import { defineDriver, joinKeys } from "./utils/index.ts";
+import { Cluster, Redis } from "ioredis";
+
+import type {
+  ClusterOptions,
+  ClusterNode,
+  RedisOptions as _RedisOptions,
 } from "ioredis";
 
 export interface RedisOptions extends _RedisOptions {
@@ -103,6 +103,10 @@ export default defineDriver((opts: RedisOptions) => {
       const value = await getRedisClient().get(p(key));
       return value ?? null;
     },
+    async getItemRaw(key: string) {
+      const value = await getRedisClient().getBuffer(p(key));
+      return value ?? null;
+    },
     async getItems(items) {
       const keys = items.map((item) => p(item.key));
       const data = await getRedisClient().mget(...keys);
@@ -120,6 +124,15 @@ export default defineDriver((opts: RedisOptions) => {
         await getRedisClient().set(p(key), value, "EX", ttl);
       } else {
         await getRedisClient().set(p(key), value);
+      }
+    },
+    async setItemRaw(key, value, tOptions) {
+      const _value = normalizeValue(value);
+      const ttl = tOptions?.ttl ?? opts.ttl;
+      if (ttl) {
+        await getRedisClient().set(p(key), _value, "EX", ttl);
+      } else {
+        await getRedisClient().set(p(key), _value);
       }
     },
     async removeItem(key) {
@@ -141,3 +154,40 @@ export default defineDriver((opts: RedisOptions) => {
     },
   };
 });
+
+function normalizeValue(value: unknown): Buffer | string | number {
+  const type = typeof value;
+  if (type === "string" || type === "number") {
+    return value as string | number;
+  }
+  if (Buffer.isBuffer(value)) {
+    return value;
+  }
+  if (isTypedArray(value)) {
+    if (Buffer.copyBytesFrom) {
+      return Buffer.copyBytesFrom(value, value.byteOffset, value.byteLength);
+    } else {
+      return Buffer.from(value.buffer, value.byteOffset, value.byteLength);
+    }
+  }
+  if (value instanceof ArrayBuffer) {
+    return Buffer.from(value);
+  }
+  return JSON.stringify(value);
+}
+
+function isTypedArray(value: unknown): value is TypedArray {
+  return (
+    value instanceof Int8Array ||
+    value instanceof Uint8Array ||
+    value instanceof Uint8ClampedArray ||
+    value instanceof Int16Array ||
+    value instanceof Uint16Array ||
+    value instanceof Int32Array ||
+    value instanceof Uint32Array ||
+    value instanceof Float32Array ||
+    value instanceof Float64Array ||
+    value instanceof BigInt64Array ||
+    value instanceof BigUint64Array
+  );
+}

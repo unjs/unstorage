@@ -1,5 +1,5 @@
 import { describe, vi, it, expect } from "vitest";
-import * as ioredisMock from "ioredis-mock";
+import  ioredisMock from "ioredis-mock";
 import redisDriver from "../../src/drivers/redis.ts";
 import { testDriver } from "./utils.ts";
 

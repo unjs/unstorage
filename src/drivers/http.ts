@@ -10,7 +10,7 @@ export interface HTTPOptions {
 
 const DRIVER_NAME = "http";
 
-const driver: DriverFactory<HTTPOptions> = ((opts) => {
+const driver: DriverFactory<HTTPOptions> = (opts) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
 
   const rBase = (key: string = "") =>
@@ -120,7 +120,6 @@ const driver: DriverFactory<HTTPOptions> = ((opts) => {
       });
     },
   };
-});
-
+};
 
 export default driver;

@@ -12,21 +12,18 @@ export interface DenoKvNodeOptions {
 
 const DRIVER_NAME = "deno-kv-node";
 
-const driver: DriverFactory<DenoKvNodeOptions, Kv | Promise<Kv>> = (
-  (opts) => {
-    const baseDriver = denoKV({
-      ...opts,
-      openKv: () => openKv(opts.path, opts.openKvOptions),
-    });
-    return {
-      ...baseDriver,
-      getInstance() {
-        return baseDriver.getInstance!() as Promise<Kv>;
-      },
-      name: DRIVER_NAME,
-    };
-  }
-);
-
+const driver: DriverFactory<DenoKvNodeOptions, Kv | Promise<Kv>> = (opts) => {
+  const baseDriver = denoKV({
+    ...opts,
+    openKv: () => openKv(opts.path, opts.openKvOptions),
+  });
+  return {
+    ...baseDriver,
+    getInstance() {
+      return baseDriver.getInstance!() as Promise<Kv>;
+    },
+    name: DRIVER_NAME,
+  };
+};
 
 export default driver;

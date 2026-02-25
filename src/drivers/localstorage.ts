@@ -17,7 +17,7 @@ export interface LocalStorageOptions {
 
 const DRIVER_NAME = "localstorage";
 
-const driver: DriverFactory<LocalStorageOptions> = ((opts = {}) => {
+const driver: DriverFactory<LocalStorageOptions, Storage> = (opts = {}) => {
   const storage: typeof window.localStorage | typeof window.sessionStorage =
     opts.storage ||
     opts.localStorage ||
@@ -93,7 +93,6 @@ const driver: DriverFactory<LocalStorageOptions> = ((opts = {}) => {
       return _unwatch;
     },
   };
-});
-
+};
 
 export default driver;

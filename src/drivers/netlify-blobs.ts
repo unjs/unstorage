@@ -46,7 +46,7 @@ export interface NetlifyNamedStoreOptions
   deployScoped?: false;
 }
 
-const driver: DriverFactory<NetlifyStoreOptions> = ((options) => {
+const driver: DriverFactory<NetlifyStoreOptions, Store> = (options) => {
   const { deployScoped, name, ...opts } = options;
   let store: Store;
 
@@ -124,7 +124,6 @@ const driver: DriverFactory<NetlifyStoreOptions> = ((options) => {
       ).then(() => {});
     },
   };
-});
-
+};
 
 export default driver;

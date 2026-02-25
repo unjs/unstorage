@@ -10,7 +10,9 @@ export interface LRUDriverOptions extends LRUCacheOptions {}
 
 const DRIVER_NAME = "lru-cache";
 
-const driver: DriverFactory<LRUDriverOptions> = ((opts = {}) => {
+const driver: DriverFactory<LRUDriverOptions, LRUCache<string, any, any>> = (
+  opts = {}
+) => {
   const cache = new LRUCache({
     max: 1000,
     sizeCalculation:
@@ -54,7 +56,7 @@ const driver: DriverFactory<LRUDriverOptions> = ((opts = {}) => {
       cache.clear();
     },
   };
-});
+};
 
 function byteLength(value: any) {
   if (typeof Buffer !== "undefined") {
@@ -73,6 +75,5 @@ function byteLength(value: any) {
   }
   return 0;
 }
-
 
 export default driver;

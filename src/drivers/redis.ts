@@ -50,7 +50,7 @@ export interface RedisOptions extends _RedisOptions {
 
 const DRIVER_NAME = "redis";
 
-const driver: DriverFactory<RedisOptions> = ((opts) => {
+const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts) => {
   let redisClient: Redis | Cluster;
   const getRedisClient = () => {
     if (redisClient) {
@@ -153,7 +153,7 @@ const driver: DriverFactory<RedisOptions> = ((opts) => {
       return getRedisClient().disconnect();
     },
   };
-});
+};
 
 function normalizeValue(value: unknown): Buffer | string | number {
   const type = typeof value;
@@ -191,6 +191,5 @@ function isTypedArray(value: unknown): value is TypedArray {
     value instanceof BigUint64Array
   );
 }
-
 
 export default driver;

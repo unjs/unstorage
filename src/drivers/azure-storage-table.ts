@@ -52,7 +52,7 @@ export interface AzureStorageTableOptions {
 
 const DRIVER_NAME = "azure-storage-table";
 
-const driver: DriverFactory<AzureStorageTableOptions> = ((opts) => {
+const driver: DriverFactory<AzureStorageTableOptions, TableClient> = (opts) => {
   const {
     accountName = null,
     tableName = "unstorage",
@@ -175,7 +175,6 @@ const driver: DriverFactory<AzureStorageTableOptions> = ((opts) => {
       }
     },
   };
-});
-
+};
 
 export default driver;

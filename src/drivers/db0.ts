@@ -1,4 +1,4 @@
-import type { Database } from "db0";
+import type { Connector, Database } from "db0";
 import { createError, type DriverFactory } from "./utils/index.ts";
 
 interface ResultSchema {
@@ -20,7 +20,9 @@ const DEFAULT_TABLE_NAME = "unstorage";
 
 const kExperimentalWarning = "__unstorage_db0_experimental_warning__";
 
-const driver: DriverFactory<DB0DriverOptions> = ((opts) => {
+const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (
+  opts
+) => {
   opts.tableName = opts.tableName || DEFAULT_TABLE_NAME;
 
   let setupPromise: Promise<void> | undefined;
@@ -139,7 +141,7 @@ const driver: DriverFactory<DB0DriverOptions> = ((opts) => {
       await opts.database.dispose();
     },
   };
-});
+};
 
 /** Run database init/migration once */
 async function setupTable(opts: DB0DriverOptions) {
@@ -193,6 +195,5 @@ async function setupTable(opts: DB0DriverOptions) {
 function toDate(timestamp: string | undefined): Date | undefined {
   return timestamp ? new Date(timestamp) : undefined;
 }
-
 
 export default driver;

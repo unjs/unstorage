@@ -17,7 +17,9 @@ interface TableSchema {
 
 const DRIVER_NAME = "planetscale";
 
-const driver: DriverFactory<PlanetscaleDriverOptions> = ((opts = {}) => {
+const driver: DriverFactory<PlanetscaleDriverOptions, Connection> = (
+  opts = {}
+) => {
   opts.table = opts.table || "storage";
 
   let _connection: Connection;
@@ -97,11 +99,10 @@ const driver: DriverFactory<PlanetscaleDriverOptions> = ((opts = {}) => {
       await getConnection().execute(`DELETE FROM ${opts.table};`);
     },
   };
-});
+};
 
 function rows<T = TableSchema[]>(res: ExecutedQuery) {
   return (res.rows as T) || [];
 }
-
 
 export default driver;

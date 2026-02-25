@@ -47,7 +47,9 @@ export interface AzureStorageBlobOptions {
 
 const DRIVER_NAME = "azure-storage-blob";
 
-const driver: DriverFactory<AzureStorageBlobOptions> = ((opts) => {
+const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (
+  opts
+) => {
   let containerClient: ContainerClient;
   const endpointSuffix = opts.endpointSuffix || ".blob.core.windows.net";
   const getContainerClient = () => {
@@ -197,7 +199,7 @@ const driver: DriverFactory<AzureStorageBlobOptions> = ((opts) => {
       }
     },
   };
-});
+};
 
 const isBrowser = typeof window !== "undefined";
 
@@ -230,6 +232,5 @@ async function blobToString(blob: Blob) {
     fileReader.readAsText(blob);
   });
 }
-
 
 export default driver;

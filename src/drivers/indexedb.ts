@@ -17,7 +17,7 @@ export interface IDBKeyvalOptions {
 
 const DRIVER_NAME = "idb-keyval";
 
-const driver: DriverFactory<IDBKeyvalOptions> = ((opts = {}) => {
+const driver: DriverFactory<IDBKeyvalOptions> = (opts = {}) => {
   const base = opts.base && opts.base.length > 0 ? `${opts.base}:` : "";
   const makeKey = (key: string) => base + key;
 
@@ -57,7 +57,6 @@ const driver: DriverFactory<IDBKeyvalOptions> = ((opts = {}) => {
       return clear(customStore);
     },
   };
-});
-
+};
 
 export default driver;

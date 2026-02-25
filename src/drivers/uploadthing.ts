@@ -17,7 +17,7 @@ export interface UploadThingOptions extends UTApiOptions {
 
 const DRIVER_NAME = "uploadthing";
 
-const driver: DriverFactory<UploadThingOptions, UTApi> = ((opts = {}) => {
+const driver: DriverFactory<UploadThingOptions, UTApi> = (opts = {}) => {
   let client: UTApi;
 
   const base = opts.base ? normalizeKey(opts.base) : "";
@@ -101,7 +101,6 @@ const driver: DriverFactory<UploadThingOptions, UTApi> = ((opts = {}) => {
     //   // TODO: We don't currently have an endpoint to fetch metadata, but it does exist
     // },
   };
-});
-
+};
 
 export default driver;

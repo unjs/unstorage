@@ -64,7 +64,7 @@ export interface S3ItemOptions {
 
 const DRIVER_NAME = "s3";
 
-const driver: DriverFactory<S3DriverOptions> = ((options) => {
+const driver: DriverFactory<S3DriverOptions> = (options) => {
   let _awsClient: AwsClient;
   const getAwsClient = () => {
     if (!_awsClient) {
@@ -217,7 +217,7 @@ const driver: DriverFactory<S3DriverOptions> = ((options) => {
       await deleteObjects(base);
     },
   };
-});
+};
 
 // --- utils ---
 
@@ -262,6 +262,5 @@ function parseList(xml: string) {
     })
     .filter(Boolean) as string[];
 }
-
 
 export default driver;

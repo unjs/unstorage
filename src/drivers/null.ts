@@ -2,7 +2,7 @@ import { type DriverFactory } from "./utils/index.ts";
 
 const DRIVER_NAME = "null";
 
-const driver: DriverFactory<void> = (() => {
+const driver: DriverFactory<void> = () => {
   return {
     name: DRIVER_NAME,
     hasItem() {
@@ -29,7 +29,6 @@ const driver: DriverFactory<void> = (() => {
     removeItem() {},
     clear() {},
   };
-});
-
+};
 
 export default driver;

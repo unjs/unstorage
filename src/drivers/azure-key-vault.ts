@@ -30,7 +30,7 @@ export interface AzureKeyVaultOptions {
 
 const DRIVER_NAME = "azure-key-vault";
 
-const driver: DriverFactory<AzureKeyVaultOptions> = ((opts) => {
+const driver: DriverFactory<AzureKeyVaultOptions, SecretClient> = (opts) => {
   let keyVaultClient: SecretClient;
   const getKeyVaultClient = () => {
     if (keyVaultClient) {
@@ -112,7 +112,7 @@ const driver: DriverFactory<AzureKeyVaultOptions> = ((opts) => {
       }
     },
   };
-});
+};
 
 const base64Map: { [key: string]: string } = {
   "=": "-e-",
@@ -139,6 +139,5 @@ function decode(value: string): string {
   });
   return Buffer.from(decoded, "base64").toString();
 }
-
 
 export default driver;

@@ -1,5 +1,5 @@
 import { type DriverFactory } from "./utils/index.ts";
-import type { Driver } from "../types.ts";
+import type { Driver } from "unstorage";
 import { normalizeKey } from "./utils/index.ts";
 
 export interface OverlayStorageOptions {
@@ -10,7 +10,7 @@ const OVERLAY_REMOVED = "__OVERLAY_REMOVED__";
 
 const DRIVER_NAME = "overlay";
 
-const driver: DriverFactory<OverlayStorageOptions> = ((options) => {
+const driver: DriverFactory<OverlayStorageOptions> = (options) => {
   return {
     name: DRIVER_NAME,
     options: options,
@@ -77,7 +77,6 @@ const driver: DriverFactory<OverlayStorageOptions> = ((options) => {
       );
     },
   };
-});
-
+};
 
 export default driver;

@@ -27,7 +27,7 @@ const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
 
 const DRIVER_NAME = "fs";
 
-const driver: DriverFactory<FSStorageOptions> = ((userOptions = {}) => {
+const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
   if (!userOptions.base) {
     throw createRequiredError(DRIVER_NAME, "base");
   }
@@ -98,7 +98,7 @@ const driver: DriverFactory<FSStorageOptions> = ((userOptions = {}) => {
       if (userOptions.readOnly) {
         return;
       }
-      return unlink(r(key));
+      return unlink(r(key)) as Promise<void>;
     },
     getKeys(_base, topts) {
       return readdirRecursive(r("."), ignore, topts?.maxDepth);
@@ -150,7 +150,6 @@ const driver: DriverFactory<FSStorageOptions> = ((userOptions = {}) => {
       return _unwatch;
     },
   };
-});
-
+};
 
 export default driver;

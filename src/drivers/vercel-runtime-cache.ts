@@ -20,7 +20,7 @@ export interface VercelCacheOptions {
 
 const DRIVER_NAME = "vercel-runtime-cache";
 
-const driver: DriverFactory<VercelCacheOptions, RuntimeCache> = ((opts) => {
+const driver: DriverFactory<VercelCacheOptions, RuntimeCache> = (opts) => {
   const base = normalizeKey(opts?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
 
@@ -70,7 +70,7 @@ const driver: DriverFactory<VercelCacheOptions, RuntimeCache> = ((opts) => {
       }
     },
   };
-});
+};
 
 // --- internal ---
 
@@ -114,6 +114,5 @@ function tryRequireVCFunctions() {
   }
   return _vcFunctionsLib;
 }
-
 
 export default driver;

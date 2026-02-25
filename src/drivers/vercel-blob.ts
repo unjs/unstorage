@@ -35,7 +35,7 @@ export interface VercelBlobOptions {
 
 const DRIVER_NAME = "vercel-blob";
 
-const driver: DriverFactory<VercelBlobOptions> = ((opts) => {
+const driver: DriverFactory<VercelBlobOptions> = (opts) => {
   const optsBase = normalizeKey(opts?.base);
 
   const r = (...keys: string[]) =>
@@ -154,7 +154,6 @@ const driver: DriverFactory<VercelBlobOptions> = ((opts) => {
       }
     },
   };
-});
-
+};
 
 export default driver;

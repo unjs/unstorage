@@ -2,7 +2,7 @@ import { type DriverFactory } from "./utils/index.ts";
 
 const DRIVER_NAME = "memory";
 
-const driver: DriverFactory<void, Map<string, any>> = (() => {
+const driver: DriverFactory<void, Map<string, any>> = () => {
   const data = new Map<string, any>();
 
   return {
@@ -36,7 +36,6 @@ const driver: DriverFactory<void, Map<string, any>> = (() => {
       data.clear();
     },
   };
-});
-
+};
 
 export default driver;

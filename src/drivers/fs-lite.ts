@@ -24,7 +24,7 @@ const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
 
 const DRIVER_NAME = "fs-lite";
 
-const driver: DriverFactory<FSStorageOptions> = ((opts = {}) => {
+const driver: DriverFactory<FSStorageOptions> = (opts = {}) => {
   if (!opts.base) {
     throw createRequiredError(DRIVER_NAME, "base");
   }
@@ -78,7 +78,7 @@ const driver: DriverFactory<FSStorageOptions> = ((opts = {}) => {
       if (opts.readOnly) {
         return;
       }
-      return unlink(r(key));
+      return unlink(r(key)) as Promise<void>;
     },
     getKeys(_base, topts) {
       return readdirRecursive(r("."), opts.ignore, topts?.maxDepth);
@@ -90,7 +90,6 @@ const driver: DriverFactory<FSStorageOptions> = ((opts = {}) => {
       await rmRecursive(r("."));
     },
   };
-});
-
+};
 
 export default driver;

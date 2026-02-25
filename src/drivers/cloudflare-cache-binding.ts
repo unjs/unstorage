@@ -29,7 +29,9 @@ export interface CacheOptions {
 
 const DRIVER_NAME = "cloudflare-cache-binding";
 
-const driver: DriverFactory<CacheOptions> = ((opts) => {
+const driver: DriverFactory<CacheOptions, CFCache | Promise<CFCache>> = (
+  opts
+) => {
   const r = (key: string = "") => {
     if (opts.base) {
       key = joinKeys(opts.base, key);
@@ -109,7 +111,6 @@ const driver: DriverFactory<CacheOptions> = ((opts) => {
       return [];
     },
   };
-});
-
+};
 
 export default driver;

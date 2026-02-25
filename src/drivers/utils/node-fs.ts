@@ -19,7 +19,10 @@ export async function writeFile(
   return fsPromises.writeFile(path, data, encoding);
 }
 
-export function readFile(path: string, encoding?: BufferEncoding): Promise<string | Buffer | null> {
+export function readFile(
+  path: string,
+  encoding?: BufferEncoding
+): Promise<string | Buffer | null> {
   return fsPromises.readFile(path, encoding).catch(ignoreNotfound);
 }
 

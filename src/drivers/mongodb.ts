@@ -27,7 +27,7 @@ export interface MongoDbOptions {
 
 const DRIVER_NAME = "mongodb";
 
-const driver: DriverFactory<MongoDbOptions> = ((opts) => {
+const driver: DriverFactory<MongoDbOptions, Collection> = (opts) => {
   let collection: Collection;
   const getMongoCollection = () => {
     if (!collection) {
@@ -117,7 +117,6 @@ const driver: DriverFactory<MongoDbOptions> = ((opts) => {
       await getMongoCollection().deleteMany({});
     },
   };
-});
-
+};
 
 export default driver;

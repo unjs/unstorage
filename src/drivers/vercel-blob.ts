@@ -112,11 +112,12 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       const blobs: any[] = [];
       let cursor: string | undefined = undefined;
       do {
-        const listBlobResult: Awaited<ReturnType<typeof blob.list>> = await blob.list({
-          token: getToken(),
-          cursor,
-          prefix: r(base),
-        });
+        const listBlobResult: Awaited<ReturnType<typeof blob.list>> =
+          await blob.list({
+            token: getToken(),
+            cursor,
+            prefix: r(base),
+          });
         cursor = listBlobResult.cursor;
         for (const blob of listBlobResult.blobs) {
           blobs.push(blob);
@@ -133,11 +134,12 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       let cursor: string | undefined = undefined;
       const blobs: any[] = [];
       do {
-        const listBlobResult: Awaited<ReturnType<typeof blob.list>> = await blob.list({
-          token: getToken(),
-          cursor,
-          prefix: r(base),
-        });
+        const listBlobResult: Awaited<ReturnType<typeof blob.list>> =
+          await blob.list({
+            token: getToken(),
+            cursor,
+            prefix: r(base),
+          });
         blobs.push(...listBlobResult.blobs);
         cursor = listBlobResult.cursor;
       } while (cursor);

@@ -10,9 +10,7 @@ export interface LRUDriverOptions extends LRUCacheOptions {}
 
 const DRIVER_NAME = "lru-cache";
 
-const driver: DriverFactory<LRUDriverOptions, LRUCache<string, any, any>> = (
-  opts = {}
-) => {
+const driver: DriverFactory<LRUDriverOptions, LRUCache<string, any, any>> = (opts = {}) => {
   const cache = new LRUCache({
     max: 1000,
     sizeCalculation:
@@ -67,9 +65,7 @@ function byteLength(value: any) {
     }
   }
   try {
-    return typeof value === "string"
-      ? value.length
-      : JSON.stringify(value).length;
+    return typeof value === "string" ? value.length : JSON.stringify(value).length;
   } catch {
     // ignore
   }

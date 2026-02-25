@@ -35,9 +35,7 @@ describe("server", () => {
     await storage.setMeta("foo/bar", { mtime: new Date() });
     expect(await fetchStorage("foo/bar")).toBe("bar");
 
-    expect(
-      await fetchStorage("foo/bar", { method: "PUT", body: "updated" })
-    ).toBe("OK");
+    expect(await fetchStorage("foo/bar", { method: "PUT", body: "updated" })).toBe("OK");
     expect(await fetchStorage("foo/bar")).toBe("updated");
     expect(await fetchStorage("/")).toMatchObject(["foo/bar"]);
 
@@ -47,7 +45,7 @@ describe("server", () => {
     await expect(
       fetchStorage("/non", { method: "GET" }).catch((error) => {
         throw error.data;
-      })
+      }),
     ).rejects.toMatchObject({
       status: 404,
       message: "KV value not found",
@@ -56,7 +54,7 @@ describe("server", () => {
     await expect(
       fetchStorage("private/foo/bar", { method: "GET" }).catch((error) => {
         throw error.data;
-      })
+      }),
     ).rejects.toMatchObject({
       status: 401,
       statusText: "Unauthorized Read",

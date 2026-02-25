@@ -53,7 +53,7 @@ const driver: DriverFactory<OverlayStorageOptions> = (options) => {
         options.layers.map(async (layer) => {
           const keys = await layer.getKeys(base, opts);
           return keys.map((key) => normalizeKey(key));
-        })
+        }),
       );
       const uniqueKeys = [...new Set(allKeys.flat())];
       const existingKeys = await Promise.all(
@@ -62,7 +62,7 @@ const driver: DriverFactory<OverlayStorageOptions> = (options) => {
             return false;
           }
           return key;
-        })
+        }),
       );
       return existingKeys.filter(Boolean) as string[];
     },
@@ -73,7 +73,7 @@ const driver: DriverFactory<OverlayStorageOptions> = (options) => {
           if (layer.dispose) {
             await layer.dispose();
           }
-        })
+        }),
       );
     },
   };

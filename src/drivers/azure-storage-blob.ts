@@ -47,9 +47,7 @@ export interface AzureStorageBlobOptions {
 
 const DRIVER_NAME = "azure-storage-blob";
 
-const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (
-  opts
-) => {
+const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (opts) => {
   let containerClient: ContainerClient;
   const endpointSuffix = opts.endpointSuffix || ".blob.core.windows.net";
   const getContainerClient = () => {
@@ -62,19 +60,13 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (
     let serviceClient: BlobServiceClient;
     if (opts.accountKey) {
       // StorageSharedKeyCredential is only available in Node.js runtime, not in browsers
-      const credential = new StorageSharedKeyCredential(
-        opts.accountName!,
-        opts.accountKey
-      );
+      const credential = new StorageSharedKeyCredential(opts.accountName!, opts.accountKey);
       serviceClient = new BlobServiceClient(
         `https://${opts.accountName}${endpointSuffix}`,
-        credential
+        credential,
       );
     } else if (opts.sasUrl) {
-      if (
-        opts.containerName &&
-        opts.sasUrl.includes(`${opts.containerName}?`)
-      ) {
+      if (opts.containerName && opts.sasUrl.includes(`${opts.containerName}?`)) {
         // Check if the sas url is a container url
         containerClient = new ContainerClient(`${opts.sasUrl}`);
         return containerClient;
@@ -83,28 +75,24 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (
     } else if (opts.sasKey) {
       if (opts.containerName) {
         containerClient = new ContainerClient(
-          `https://${opts.accountName}${endpointSuffix}/${opts.containerName}?${opts.sasKey}`
+          `https://${opts.accountName}${endpointSuffix}/${opts.containerName}?${opts.sasKey}`,
         );
         return containerClient;
       }
       serviceClient = new BlobServiceClient(
-        `https://${opts.accountName}${endpointSuffix}?${opts.sasKey}`
+        `https://${opts.accountName}${endpointSuffix}?${opts.sasKey}`,
       );
     } else if (opts.connectionString) {
       // fromConnectionString is only available in Node.js runtime, not in browsers
-      serviceClient = BlobServiceClient.fromConnectionString(
-        opts.connectionString
-      );
+      serviceClient = BlobServiceClient.fromConnectionString(opts.connectionString);
     } else {
       const credential = new DefaultAzureCredential();
       serviceClient = new BlobServiceClient(
         `https://${opts.accountName}${endpointSuffix}`,
-        credential
+        credential,
       );
     }
-    containerClient = serviceClient.getContainerClient(
-      opts.containerName || "unstorage"
-    );
+    containerClient = serviceClient.getContainerClient(opts.containerName || "unstorage");
     containerClient.createIfNotExists();
     return containerClient;
   };
@@ -118,9 +106,7 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (
     },
     async getItem(key) {
       try {
-        const blob = await getContainerClient()
-          .getBlockBlobClient(key)
-          .download();
+        const blob = await getContainerClient().getBlockBlobClient(key).download();
         if (isBrowser) {
           return blob.blobBody ? await blobToString(await blob.blobBody) : null;
         }
@@ -133,28 +119,20 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (
     },
     async getItemRaw(key) {
       try {
-        const blob = await getContainerClient()
-          .getBlockBlobClient(key)
-          .download();
+        const blob = await getContainerClient().getBlockBlobClient(key).download();
         if (isBrowser) {
           return blob.blobBody ? await blobToString(await blob.blobBody) : null;
         }
-        return blob.readableStreamBody
-          ? await streamToBuffer(blob.readableStreamBody)
-          : null;
+        return blob.readableStreamBody ? await streamToBuffer(blob.readableStreamBody) : null;
       } catch {
         return null;
       }
     },
     async setItem(key, value) {
-      await getContainerClient()
-        .getBlockBlobClient(key)
-        .upload(value, Buffer.byteLength(value));
+      await getContainerClient().getBlockBlobClient(key).upload(value, Buffer.byteLength(value));
     },
     async setItemRaw(key, value) {
-      await getContainerClient()
-        .getBlockBlobClient(key)
-        .upload(value, Buffer.byteLength(value));
+      await getContainerClient().getBlockBlobClient(key).upload(value, Buffer.byteLength(value));
     },
     async removeItem(key) {
       await getContainerClient()
@@ -162,9 +140,7 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (
         .deleteIfExists({ deleteSnapshots: "include" });
     },
     async getKeys() {
-      const iterator = getContainerClient()
-        .listBlobsFlat()
-        .byPage({ maxPageSize: 1000 });
+      const iterator = getContainerClient().listBlobsFlat().byPage({ maxPageSize: 1000 });
       const keys: string[] = [];
       for await (const page of iterator) {
         const pageKeys = page.segment.blobItems.map((blob) => blob.name);
@@ -173,9 +149,7 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (
       return keys;
     },
     async getMeta(key) {
-      const blobProperties = await getContainerClient()
-        .getBlockBlobClient(key)
-        .getProperties();
+      const blobProperties = await getContainerClient().getBlockBlobClient(key).getProperties();
       return {
         mtime: blobProperties.lastModified,
         atime: blobProperties.lastAccessed,
@@ -184,17 +158,15 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (
       };
     },
     async clear() {
-      const iterator = getContainerClient()
-        .listBlobsFlat()
-        .byPage({ maxPageSize: 1000 });
+      const iterator = getContainerClient().listBlobsFlat().byPage({ maxPageSize: 1000 });
       for await (const page of iterator) {
         await Promise.all(
           page.segment.blobItems.map(
             async (blob) =>
               await getContainerClient().deleteBlob(blob.name, {
                 deleteSnapshots: "include",
-              })
-          )
+              }),
+          ),
         );
       }
     },
@@ -204,9 +176,7 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (
 const isBrowser = typeof window !== "undefined";
 
 // Helper function to read a Node.js readable stream into a Buffer. (https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob)
-async function streamToBuffer(
-  readableStream: NodeJS.ReadableStream
-): Promise<Buffer> {
+async function streamToBuffer(readableStream: NodeJS.ReadableStream): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     readableStream.on("data", (data) => {

@@ -13,8 +13,7 @@ const DRIVER_NAME = "http";
 const driver: DriverFactory<HTTPOptions> = (opts) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
 
-  const rBase = (key: string = "") =>
-    joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
+  const rBase = (key: string = "") => joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
 
   const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
     if (error?.response?.status === 404) {
@@ -25,7 +24,7 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
 
   const getHeaders = (
     topts: TransactionOptions | undefined,
-    defaultHeaders?: Record<string, string>
+    defaultHeaders?: Record<string, string>,
   ) => {
     const headers = {
       ...defaultHeaders,

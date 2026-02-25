@@ -1,8 +1,4 @@
-import {
-  type DriverFactory,
-  createError,
-  normalizeKey,
-} from "./utils/index.ts";
+import { type DriverFactory, createError, normalizeKey } from "./utils/index.ts";
 import type * as DenoKV from "@deno/kv";
 
 // https://docs.deno.com/deploy/kv/manual/
@@ -26,12 +22,9 @@ interface DenoKVSetOptions {
 const DRIVER_NAME = "deno-kv";
 
 const driver: DriverFactory<DenoKvOptions, Promise<DenoKV.Kv>> = (opts) => {
-  const basePrefix: DenoKV.KvKey = opts.base
-    ? normalizeKey(opts.base).split(":")
-    : [];
+  const basePrefix: DenoKV.KvKey = opts.base ? normalizeKey(opts.base).split(":") : [];
 
-  const r = (key: string = ""): DenoKV.KvKey =>
-    [...basePrefix, ...key.split(":")].filter(Boolean);
+  const r = (key: string = ""): DenoKV.KvKey => [...basePrefix, ...key.split(":")].filter(Boolean);
 
   let _kv: Promise<DenoKV.Kv> | undefined;
   const getKv = () => {
@@ -44,13 +37,13 @@ const driver: DriverFactory<DenoKvOptions, Promise<DenoKV.Kv>> = (opts) => {
       if (!globalThis.Deno) {
         throw createError(
           DRIVER_NAME,
-          "Missing global `Deno`. Are you running in Deno? (hint: use `deno-kv-node` driver for Node.js)"
+          "Missing global `Deno`. Are you running in Deno? (hint: use `deno-kv-node` driver for Node.js)",
         );
       }
       if (!Deno.openKv) {
         throw createError(
           DRIVER_NAME,
-          "Missing `Deno.openKv`. Are you running Deno with --unstable-kv?"
+          "Missing `Deno.openKv`. Are you running Deno with --unstable-kv?",
         );
       }
       _kv = Deno.openKv(opts.path) as Promise<DenoKV.Kv>;
@@ -97,10 +90,7 @@ const driver: DriverFactory<DenoKvOptions, Promise<DenoKV.Kv>> = (opts) => {
       const keys: string[] = [];
       for await (const entry of kv.list({ prefix: r(base) })) {
         keys.push(
-          (basePrefix.length > 0
-            ? entry.key.slice(basePrefix.length)
-            : entry.key
-          ).join(":")
+          (basePrefix.length > 0 ? entry.key.slice(basePrefix.length) : entry.key).join(":"),
         );
       }
       return keys;

@@ -16,9 +16,7 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
 
   const getKeys = async (base?: string) => {
     const binding = getR2Binding(opts.binding);
-    const kvList = await binding.list(
-      base || opts.base ? { prefix: r(base) } : undefined
-    );
+    const kvList = await binding.list(base || opts.base ? { prefix: r(base) } : undefined);
     return kvList.objects.map((obj) => obj.key);
   };
 
@@ -70,7 +68,7 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
     },
     getKeys(base) {
       return getKeys(base).then((keys) =>
-        opts.base ? keys.map((key) => key.slice(opts.base!.length)) : keys
+        opts.base ? keys.map((key) => key.slice(opts.base!.length)) : keys,
       );
     },
     async clear(base) {
@@ -83,7 +81,7 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
 
 function getObjBody(
   object: R2ObjectBody,
-  type: "object" | "stream" | "blob" | "arrayBuffer" | "bytes"
+  type: "object" | "stream" | "blob" | "arrayBuffer" | "bytes",
 ) {
   switch (type) {
     case "object": {

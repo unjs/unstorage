@@ -46,9 +46,7 @@ const driver: DriverFactory<VercelCacheOptions, RuntimeCache> = (opts) => {
     },
     async setItem(key, value, tOptions) {
       const ttl = tOptions?.ttl ?? opts?.ttl;
-      const tags = [...(tOptions?.tags || []), ...(opts?.tags || [])].filter(
-        Boolean
-      );
+      const tags = [...(tOptions?.tags || []), ...(opts?.tags || [])].filter(Boolean);
 
       await getClient().set(r(key), value, {
         ttl,
@@ -80,9 +78,7 @@ const driver: DriverFactory<VercelCacheOptions, RuntimeCache> = (opts) => {
 
 type Context = { cache?: RuntimeCache };
 
-const SYMBOL_FOR_REQ_CONTEXT = /*#__PURE__*/ Symbol.for(
-  "@vercel/request-context"
-);
+const SYMBOL_FOR_REQ_CONTEXT = /*#__PURE__*/ Symbol.for("@vercel/request-context");
 
 function getContext(): Context {
   const fromSymbol: typeof globalThis & {
@@ -108,8 +104,7 @@ let _vcFunctionsLib: typeof import("@vercel/functions") | undefined;
 
 function tryRequireVCFunctions() {
   if (!_vcFunctionsLib) {
-    const { createRequire } =
-      globalThis.process?.getBuiltinModule?.("node:module") || {};
+    const { createRequire } = globalThis.process?.getBuiltinModule?.("node:module") || {};
     _vcFunctionsLib = createRequire?.(import.meta.url)("@vercel/functions");
   }
   return _vcFunctionsLib;

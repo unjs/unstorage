@@ -29,9 +29,7 @@ const driver: DriverFactory<KVOptions, CF.KVNamespace<string>> = (opts) => {
       const kvList = await binding.list({ prefix: base || undefined, cursor });
 
       keys.push(...kvList.keys);
-      cursor = (kvList.list_complete ? undefined : kvList.cursor) as
-        | string
-        | undefined;
+      cursor = (kvList.list_complete ? undefined : kvList.cursor) as string | undefined;
     } while (cursor);
 
     return keys.map((key) => key.name);
@@ -59,12 +57,10 @@ const driver: DriverFactory<KVOptions, CF.KVNamespace<string>> = (opts) => {
         value,
         topts
           ? {
-              expirationTtl: topts?.ttl
-                ? Math.max(topts.ttl, opts.minTTL ?? 60)
-                : undefined,
+              expirationTtl: topts?.ttl ? Math.max(topts.ttl, opts.minTTL ?? 60) : undefined,
               ...topts,
             }
-          : undefined
+          : undefined,
       );
     },
     removeItem(key) {
@@ -74,7 +70,7 @@ const driver: DriverFactory<KVOptions, CF.KVNamespace<string>> = (opts) => {
     },
     getKeys(base) {
       return getKeys(base).then((keys) =>
-        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key))
+        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key)),
       );
     },
     async clear(base) {

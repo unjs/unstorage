@@ -33,9 +33,7 @@ const driver: DriverFactory<UploadThingOptions, UTApi> = (opts = {}) => {
   const getKeys = async (base: string) => {
     const client = getClient();
     const { files } = await client.listFiles({});
-    return files
-      .map((file) => file.customId)
-      .filter((k) => k && k.startsWith(base)) as string[];
+    return files.map((file) => file.customId).filter((k) => k && k.startsWith(base)) as string[];
   };
 
   const toFile = (key: string, value: BlobPart) => {
@@ -60,17 +58,13 @@ const driver: DriverFactory<UploadThingOptions, UTApi> = (opts = {}) => {
     },
     async getItem(key) {
       const client = getClient();
-      const url = await client
-        .getFileUrls(r(key))
-        .then((res) => res.data[0]?.url);
+      const url = await client.getFileUrls(r(key)).then((res) => res.data[0]?.url);
       if (!url) return null;
       return fetch(url).then((res) => res.text());
     },
     async getItemRaw(key) {
       const client = getClient();
-      const url = await client
-        .getFileUrls(r(key))
-        .then((res) => res.data[0]?.url);
+      const url = await client.getFileUrls(r(key)).then((res) => res.data[0]?.url);
       if (!url) return null;
       return fetch(url).then((res) => res.arrayBuffer());
     },
@@ -84,9 +78,7 @@ const driver: DriverFactory<UploadThingOptions, UTApi> = (opts = {}) => {
     },
     async setItems(items) {
       const client = getClient();
-      await client.uploadFiles(
-        items.map((item) => toFile(r(item.key), item.value))
-      );
+      await client.uploadFiles(items.map((item) => toFile(r(item.key), item.value)));
     },
     async removeItem(key) {
       const client = getClient();

@@ -38,7 +38,7 @@ import sqlite from "db0/connectors/better-sqlite3";
 const database = createDatabase(
   sqlite({
     /* db0 connector options */
-  })
+  }),
 );
 
 const storage = createStorage({

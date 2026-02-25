@@ -1,13 +1,5 @@
 import { type DriverFactory } from "./utils/index.ts";
-import {
-  get,
-  set,
-  clear,
-  del,
-  keys,
-  createStore,
-  type UseStore,
-} from "idb-keyval";
+import { get, set, clear, del, keys, createStore, type UseStore } from "idb-keyval";
 
 export interface IDBKeyvalOptions {
   base?: string;

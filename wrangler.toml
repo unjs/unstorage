@@ -1,9 +1,5 @@
 compatibility_date = "2024-12-01"
 
-kv_namespaces = [
-  { binding = "STORAGE", id = "<KV_ID>" }
-]
+kv_namespaces = [{ binding = "STORAGE", id = "<KV_ID>" }]
 
-r2_buckets = [
-  { binding = "BUCKET", bucket_name = "default" },
-]
+r2_buckets = [{ binding = "BUCKET", bucket_name = "default" }]

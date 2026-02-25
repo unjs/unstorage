@@ -28,10 +28,8 @@ describe("drivers: mongodb", async () => {
           driver({
             databaseName: "test",
             collectionName: "test",
-          } as any).getItem("")
-        ).rejects.toThrowError(
-          "[unstorage] [mongodb] Missing required option `connectionString`."
-        );
+          } as any).getItem(""),
+        ).rejects.toThrowError("[unstorage] [mongodb] Missing required option `connectionString`.");
       });
       it("should have different dates when an entry was updated", async () => {
         await ctx.storage.setItem("s1:a", "test_data");

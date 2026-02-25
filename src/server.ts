@@ -22,7 +22,7 @@ export interface StorageServerOptions {
 }
 
 export type FetchHandler = (
-  req: globalThis.Request
+  req: globalThis.Request,
 ) => globalThis.Response | Promise<globalThis.Response>;
 
 /**
@@ -42,13 +42,10 @@ export type FetchHandler = (
  */
 export function createStorageHandler(
   storage: Storage,
-  opts: StorageServerOptions = {}
-): (
-  req: globalThis.Request
-) => globalThis.Response | Promise<globalThis.Response> {
+  opts: StorageServerOptions = {},
+): (req: globalThis.Request) => globalThis.Response | Promise<globalThis.Response> {
   const handler = defineHandler(async (event) => {
-    const _path =
-      opts.resolvePath?.(event as { req: Request }) ?? event.url.pathname;
+    const _path = opts.resolvePath?.(event as { req: Request }) ?? event.url.pathname;
     const lastChar = _path[_path.length - 1];
     const isBaseKey = lastChar === ":" || lastChar === "/";
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
@@ -80,11 +77,8 @@ export function createStorageHandler(
         const keys = await storage.getKeys(key);
         return keys.map((key) => key.replace(/:/g, "/"));
       }
-      const isRaw =
-        event.req.headers.get("accept") === "application/octet-stream";
-      const driverValue = await (isRaw
-        ? storage.getItemRaw(key)
-        : storage.getItem(key));
+      const isRaw = event.req.headers.get("accept") === "application/octet-stream";
+      const driverValue = await (isRaw ? storage.getItemRaw(key) : storage.getItem(key));
       if (driverValue === null) {
         throw new HTTPError({
           statusCode: 404,
@@ -109,8 +103,7 @@ export function createStorageHandler(
 
     // PUT => setItem
     if (event.req.method === "PUT") {
-      const isRaw =
-        event.req.headers.get("content-type") === "application/octet-stream";
+      const isRaw = event.req.headers.get("content-type") === "application/octet-stream";
       const topts: TransactionOptions = {
         ttl: Number(event.req.headers.get("x-ttl")) || undefined,
       };

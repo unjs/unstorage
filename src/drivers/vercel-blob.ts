@@ -1,10 +1,5 @@
 import * as blob from "@vercel/blob";
-import {
-  type DriverFactory,
-  normalizeKey,
-  joinKeys,
-  createError,
-} from "./utils/index.ts";
+import { type DriverFactory, normalizeKey, joinKeys, createError } from "./utils/index.ts";
 
 export interface VercelBlobOptions {
   /**
@@ -38,24 +33,19 @@ const DRIVER_NAME = "vercel-blob";
 const driver: DriverFactory<VercelBlobOptions> = (opts) => {
   const optsBase = normalizeKey(opts?.base);
 
-  const r = (...keys: string[]) =>
-    joinKeys(optsBase, ...keys).replace(/:/g, "/");
+  const r = (...keys: string[]) => joinKeys(optsBase, ...keys).replace(/:/g, "/");
 
   const envName = `${opts.envPrefix || "BLOB"}_READ_WRITE_TOKEN`;
 
   const getToken = () => {
     const token = opts.token || globalThis.process?.env?.[envName];
     if (!token) {
-      throw createError(
-        DRIVER_NAME,
-        `Missing token. Set ${envName} env or token config.`
-      );
+      throw createError(DRIVER_NAME, `Missing token. Set ${envName} env or token config.`);
     }
     return token;
   };
 
-  const get = (key: string) =>
-    blob.get(r(key), { token: getToken(), access: opts.access });
+  const get = (key: string) => blob.get(r(key), { token: getToken(), access: opts.access });
 
   return {
     name: DRIVER_NAME,
@@ -112,34 +102,29 @@ const driver: DriverFactory<VercelBlobOptions> = (opts) => {
       const blobs: any[] = [];
       let cursor: string | undefined = undefined;
       do {
-        const listBlobResult: Awaited<ReturnType<typeof blob.list>> =
-          await blob.list({
-            token: getToken(),
-            cursor,
-            prefix: r(base),
-          });
+        const listBlobResult: Awaited<ReturnType<typeof blob.list>> = await blob.list({
+          token: getToken(),
+          cursor,
+          prefix: r(base),
+        });
         cursor = listBlobResult.cursor;
         for (const blob of listBlobResult.blobs) {
           blobs.push(blob);
         }
       } while (cursor);
       return blobs.map((blob) =>
-        blob.pathname.replace(
-          new RegExp(`^${optsBase.replace(/:/g, "/")}/`),
-          ""
-        )
+        blob.pathname.replace(new RegExp(`^${optsBase.replace(/:/g, "/")}/`), ""),
       );
     },
     async clear(base) {
       let cursor: string | undefined = undefined;
       const blobs: any[] = [];
       do {
-        const listBlobResult: Awaited<ReturnType<typeof blob.list>> =
-          await blob.list({
-            token: getToken(),
-            cursor,
-            prefix: r(base),
-          });
+        const listBlobResult: Awaited<ReturnType<typeof blob.list>> = await blob.list({
+          token: getToken(),
+          cursor,
+          prefix: r(base),
+        });
         blobs.push(...listBlobResult.blobs);
         cursor = listBlobResult.cursor;
       } while (cursor);
@@ -149,7 +134,7 @@ const driver: DriverFactory<VercelBlobOptions> = (opts) => {
           blobs.map((blob) => blob.url),
           {
             token: getToken(),
-          }
+          },
         );
       }
     },

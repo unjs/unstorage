@@ -9,10 +9,7 @@ describe.skip("drivers: azure-storage-table", () => {
 
   beforeAll(async () => {
     azuriteProcess = exec("npx azurite-table --silent");
-    const client = TableClient.fromConnectionString(
-      "UseDevelopmentStorage=true",
-      "unstorage"
-    );
+    const client = TableClient.fromConnectionString("UseDevelopmentStorage=true", "unstorage");
     await client.createTable();
   });
 

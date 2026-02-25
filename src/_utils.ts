@@ -71,10 +71,7 @@ function base64Decode(input: string) {
   if (globalThis.Buffer) {
     return Buffer.from(input, "base64");
   }
-  return Uint8Array.from(
-    globalThis.atob(input),
-    (c) => c.codePointAt(0) as number
-  );
+  return Uint8Array.from(globalThis.atob(input), (c) => c.codePointAt(0) as number);
 }
 
 function base64Encode(input: Uint8Array) {

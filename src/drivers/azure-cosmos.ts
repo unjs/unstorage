@@ -45,9 +45,7 @@ export interface AzureCosmosItem {
   modified: string | Date;
 }
 
-const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (
-  opts
-) => {
+const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => {
   let client: Container;
   const getCosmosClient = async () => {
     if (client) {
@@ -90,15 +88,11 @@ const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (
     options: opts,
     getInstance: getCosmosClient,
     async hasItem(key) {
-      const item = await (await getCosmosClient())
-        .item(key)
-        .read<AzureCosmosItem>();
+      const item = await (await getCosmosClient()).item(key).read<AzureCosmosItem>();
       return item.resource ? true : false;
     },
     async getItem(key) {
-      const item = await (await getCosmosClient())
-        .item(key)
-        .read<AzureCosmosItem>();
+      const item = await (await getCosmosClient()).item(key).read<AzureCosmosItem>();
       return item.resource ? item.resource.value : null;
     },
     async setItem(key, value) {
@@ -107,37 +101,37 @@ const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (
         await getCosmosClient()
       ).items.upsert<AzureCosmosItem>(
         { id: key, value, modified },
-        { consistencyLevel: "Session" }
+        { consistencyLevel: "Session" },
       );
     },
     async removeItem(key) {
-      await (await getCosmosClient())
+      await (
+        await getCosmosClient()
+      )
         .item(key)
         .delete<AzureCosmosItem>({ consistencyLevel: "Session" });
     },
     async getKeys() {
       const iterator = (await getCosmosClient()).items.query<AzureCosmosItem>(
-        `SELECT { id } from c`
+        `SELECT { id } from c`,
       );
       return (await iterator.fetchAll()).resources.map((item) => item.id);
     },
     async getMeta(key) {
-      const item = await (await getCosmosClient())
-        .item(key)
-        .read<AzureCosmosItem>();
+      const item = await (await getCosmosClient()).item(key).read<AzureCosmosItem>();
       return {
-        mtime: item.resource?.modified
-          ? new Date(item.resource.modified)
-          : undefined,
+        mtime: item.resource?.modified ? new Date(item.resource.modified) : undefined,
       };
     },
     async clear() {
       const iterator = (await getCosmosClient()).items.query<AzureCosmosItem>(
-        `SELECT { id } from c`
+        `SELECT { id } from c`,
       );
       const items = (await iterator.fetchAll()).resources;
       for (const item of items) {
-        await (await getCosmosClient())
+        await (
+          await getCosmosClient()
+        )
           .item(item.id)
           .delete<AzureCosmosItem>({ consistencyLevel: "Session" });
       }

@@ -34,16 +34,14 @@ describe.skipIf(dtsFiles.length === 0)("dist/drivers type declarations", () => {
             cwd: rootDir,
             encoding: "utf8",
             stdio: ["pipe", "pipe", "pipe"],
-          }
+          },
         );
       } catch (error: any) {
         output = error.stdout || error.stderr || "";
       }
       // Filter errors to only those in the checked file itself
       const relPath = `dist/drivers/${file}`;
-      const fileErrors = output
-        .split("\n")
-        .filter((line: string) => line.startsWith(relPath));
+      const fileErrors = output.split("\n").filter((line: string) => line.startsWith(relPath));
       expect(fileErrors, fileErrors.join("\n")).toHaveLength(0);
     });
   }

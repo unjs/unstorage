@@ -7,27 +7,21 @@ const drivers = [
   {
     name: "sqlite",
     async getDB() {
-      const sqlite = await import("db0/connectors/node-sqlite").then(
-        (m) => m.default
-      );
+      const sqlite = await import("db0/connectors/node-sqlite").then((m) => m.default);
       return createDatabase(sqlite({ name: ":memory:" }));
     },
   },
   {
     name: "libsql",
     async getDB() {
-      const libSQL = await import("db0/connectors/libsql/node").then(
-        (m) => m.default
-      );
+      const libSQL = await import("db0/connectors/libsql/node").then((m) => m.default);
       return createDatabase(libSQL({ url: ":memory:" }));
     },
   },
   {
     name: "pglite",
     async getDB() {
-      const pglite = await import("db0/connectors/pglite").then(
-        (m) => m.default
-      );
+      const pglite = await import("db0/connectors/pglite").then((m) => m.default);
       return createDatabase(pglite());
     },
   },
@@ -37,43 +31,38 @@ const drivers = [
     name: "mysql",
     enabled: !!process.env.VITEST_MYSQL_URI,
     async getDB() {
-      const mysql = await import("db0/connectors/mysql2").then(
-        (m) => m.default
-      );
+      const mysql = await import("db0/connectors/mysql2").then((m) => m.default);
       return createDatabase(
         mysql({
           uri: process.env.VITEST_MYSQL_URI,
-        })
+        }),
       );
     },
   },
 ];
 
 for (const driver of drivers) {
-  describe.skipIf(driver.enabled === false)(
-    `drivers: db0 - ${driver.name}`,
-    async () => {
-      const db = await driver.getDB();
+  describe.skipIf(driver.enabled === false)(`drivers: db0 - ${driver.name}`, async () => {
+    const db = await driver.getDB();
 
-      afterAll(async () => {
-        const dbCleanup = await driver.getDB();
-        await dbCleanup.sql`DROP TABLE IF EXISTS unstorage`;
-        await dbCleanup.dispose();
-      });
+    afterAll(async () => {
+      const dbCleanup = await driver.getDB();
+      await dbCleanup.sql`DROP TABLE IF EXISTS unstorage`;
+      await dbCleanup.dispose();
+    });
 
-      testDriver({
-        driver: () => db0Driver({ database: db }),
-        additionalTests: (ctx) => {
-          it("meta", async () => {
-            await ctx.storage.setItem("meta:test", "test_data");
+    testDriver({
+      driver: () => db0Driver({ database: db }),
+      additionalTests: (ctx) => {
+        it("meta", async () => {
+          await ctx.storage.setItem("meta:test", "test_data");
 
-            expect(await ctx.storage.getMeta("meta:test")).toMatchObject({
-              birthtime: expect.any(Date),
-              mtime: expect.any(Date),
-            });
+          expect(await ctx.storage.getMeta("meta:test")).toMatchObject({
+            birthtime: expect.any(Date),
+            mtime: expect.any(Date),
           });
-        },
-      });
-    }
-  );
+        });
+      },
+    });
+  });
 }

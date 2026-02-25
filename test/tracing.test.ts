@@ -209,9 +209,7 @@ describe("tracing", () => {
 
       storage.mount("/error", errorDriver);
 
-      await expect(storage.setItem("error:key", "value")).rejects.toThrow(
-        "Set error"
-      );
+      await expect(storage.setItem("error:key", "value")).rejects.toThrow("Set error");
 
       expect(listener.handlers.error).toHaveBeenCalledTimes(1);
       expect(listener.events.error?.error).toBe(testError);
@@ -235,10 +233,7 @@ describe("tracing", () => {
       expect(listener.handlers.asyncEnd).toHaveBeenCalledTimes(1);
       expect(listener.handlers.error).not.toHaveBeenCalled();
 
-      expect(listener.events.start?.data.keys).toEqual([
-        "test:key1",
-        "test:key2",
-      ]);
+      expect(listener.events.start?.data.keys).toEqual(["test:key1", "test:key2"]);
 
       listener.cleanup();
     });
@@ -257,7 +252,7 @@ describe("tracing", () => {
         storage.setItems([
           { key: "error:key1", value: "value1" },
           { key: "error:key2", value: "value2" },
-        ])
+        ]),
       ).rejects.toThrow("SetItems error");
 
       expect(listener.handlers.error).toHaveBeenCalledTimes(1);
@@ -295,9 +290,7 @@ describe("tracing", () => {
 
       storage.mount("/error", errorDriver);
 
-      await expect(storage.removeItem("error:key")).rejects.toThrow(
-        "Remove error"
-      );
+      await expect(storage.removeItem("error:key")).rejects.toThrow("Remove error");
 
       expect(listener.handlers.error).toHaveBeenCalledTimes(1);
       expect(listener.events.error?.error).toBe(testError);
@@ -322,10 +315,7 @@ describe("tracing", () => {
       expect(listener.handlers.error).not.toHaveBeenCalled();
 
       expect(listener.events.start?.data.keys).toEqual(["test:"]);
-      expect(listener.events.asyncEnd?.result).toEqual([
-        "test:key1",
-        "test:key2",
-      ]);
+      expect(listener.events.asyncEnd?.result).toEqual(["test:key1", "test:key2"]);
 
       listener.cleanup();
     });
@@ -367,10 +357,7 @@ describe("tracing", () => {
       expect(listener.handlers.asyncEnd).toHaveBeenCalledTimes(1);
       expect(listener.handlers.error).not.toHaveBeenCalled();
 
-      expect(listener.events.start?.data.keys).toEqual([
-        "test:key1",
-        "test:key2",
-      ]);
+      expect(listener.events.start?.data.keys).toEqual(["test:key1", "test:key2"]);
       expect(listener.events.asyncEnd?.result).toEqual([
         { key: "test:key1", value: "value1" },
         { key: "test:key2", value: "value2" },
@@ -389,9 +376,9 @@ describe("tracing", () => {
 
       storage.mount("/error", errorDriver);
 
-      await expect(
-        storage.getItems(["error:key1", "error:key2"])
-      ).rejects.toThrow("GetItems error");
+      await expect(storage.getItems(["error:key1", "error:key2"])).rejects.toThrow(
+        "GetItems error",
+      );
 
       expect(listener.handlers.error).toHaveBeenCalledTimes(1);
       expect(listener.events.error?.error).toBe(testError);
@@ -432,9 +419,7 @@ describe("tracing", () => {
 
       storage.mount("/error", errorDriver);
 
-      await expect(storage.getItemRaw("error:key")).rejects.toThrow(
-        "GetItemRaw error"
-      );
+      await expect(storage.getItemRaw("error:key")).rejects.toThrow("GetItemRaw error");
 
       expect(listener.handlers.error).toHaveBeenCalledTimes(1);
       expect(listener.events.error?.error).toBe(testError);
@@ -473,9 +458,9 @@ describe("tracing", () => {
 
       storage.mount("/error", errorDriver);
 
-      await expect(
-        storage.setItemRaw("error:key", Buffer.from("value"))
-      ).rejects.toThrow("SetItemRaw error");
+      await expect(storage.setItemRaw("error:key", Buffer.from("value"))).rejects.toThrow(
+        "SetItemRaw error",
+      );
 
       expect(listener.handlers.error).toHaveBeenCalledTimes(1);
       expect(listener.events.error?.error).toBe(testError);
@@ -556,9 +541,7 @@ describe("tracing", () => {
 
       storage.mount("/error", errorDriver);
 
-      await expect(storage.getMeta("error:key")).rejects.toThrow(
-        "GetMeta error"
-      );
+      await expect(storage.getMeta("error:key")).rejects.toThrow("GetMeta error");
 
       expect(listener.handlers.error).toHaveBeenCalled();
       expect(listener.events.error?.error).toBe(testError);
@@ -598,9 +581,9 @@ describe("tracing", () => {
 
       storage.mount("/error", errorDriver);
 
-      await expect(
-        storage.setMeta("error:key", { custom: "data" })
-      ).rejects.toThrow("SetMeta error");
+      await expect(storage.setMeta("error:key", { custom: "data" })).rejects.toThrow(
+        "SetMeta error",
+      );
 
       expect(listener.handlers.error).toHaveBeenCalled();
       expect(listener.events.error?.error).toBe(testError);
@@ -642,9 +625,7 @@ describe("tracing", () => {
 
       storage.mount("/error", errorDriver);
 
-      await expect(storage.removeMeta("error:key")).rejects.toThrow(
-        "RemoveMeta error"
-      );
+      await expect(storage.removeMeta("error:key")).rejects.toThrow("RemoveMeta error");
 
       expect(listener.handlers.error).toHaveBeenCalled();
       expect(listener.events.error?.error).toBe(testError);

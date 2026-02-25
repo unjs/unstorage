@@ -8,9 +8,7 @@ export interface CapacitorPreferencesOptions {
   base?: string;
 }
 
-const driver: DriverFactory<CapacitorPreferencesOptions, typeof Preferences> = (
-  opts
-) => {
+const driver: DriverFactory<CapacitorPreferencesOptions, typeof Preferences> = (opts) => {
   const base = normalizeKey(opts?.base || "");
   const resolveKey = (key: string) => joinKeys(base, key);
 
@@ -44,9 +42,7 @@ const driver: DriverFactory<CapacitorPreferencesOptions, typeof Preferences> = (
       const { keys } = await Preferences.keys();
       const _prefix = resolveKey(prefix || "");
       await Promise.all(
-        keys
-          .filter((key) => key.startsWith(_prefix))
-          .map((key) => Preferences.remove({ key }))
+        keys.filter((key) => key.startsWith(_prefix)).map((key) => Preferences.remove({ key })),
       );
     },
   };

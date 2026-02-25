@@ -103,7 +103,7 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
       }
       throw createError(
         DRIVER_NAME,
-        `[${request.method}] ${url}: ${res.status} ${res.statusText} ${await res.text()}`
+        `[${request.method}] ${url}: ${res.status} ${res.statusText} ${await res.text()}`,
       );
     }
     return res;
@@ -144,13 +144,13 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
   const putObject = async (
     key: string,
     value: BufferSource | string,
-    headers?: Record<string, string | undefined>
+    headers?: Record<string, string | undefined>,
   ) => {
     return awsFetch(url(key), {
       method: "PUT",
       headers: headers
         ? (Object.fromEntries(
-            Object.entries(headers).filter(([_, v]) => v !== undefined)
+            Object.entries(headers).filter(([_, v]) => v !== undefined),
           ) as Record<string, string>)
         : undefined,
       body: value,
@@ -243,15 +243,11 @@ function parseList(xml: string) {
   if (!xml.startsWith("<?xml")) {
     throw new Error("Invalid XML");
   }
-  const listBucketResult = xml.match(
-    /<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/
-  )?.[1];
+  const listBucketResult = xml.match(/<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/)?.[1];
   if (!listBucketResult) {
     throw new Error("Missing <ListBucketResult>");
   }
-  const contents = listBucketResult.match(
-    /<Contents[^>]*>([\s\S]*?)<\/Contents>/g
-  );
+  const contents = listBucketResult.match(/<Contents[^>]*>([\s\S]*?)<\/Contents>/g);
   if (!contents?.length) {
     return [];
   }

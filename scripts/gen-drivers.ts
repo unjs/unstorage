@@ -6,13 +6,9 @@ import { camelCase, upperFirst } from "scule";
 
 const driversDir = fileURLToPath(new URL("../src/drivers", import.meta.url));
 
-const driversMetaFile = fileURLToPath(
-  new URL("../src/_drivers.ts", import.meta.url)
-);
+const driversMetaFile = fileURLToPath(new URL("../src/_drivers.ts", import.meta.url));
 
-const driverEntries: string[] = (
-  await readdir(driversDir, { withFileTypes: true })
-)
+const driverEntries: string[] = (await readdir(driversDir, { withFileTypes: true }))
   .filter((entry) => entry.isFile())
   .map((entry) => entry.name);
 
@@ -32,12 +28,10 @@ for (const entry of driverEntries) {
 
   const contents = await readFile(fullPath, "utf8");
   const optionsTExport = findTypeExports(contents).find((type) =>
-    type.name?.endsWith("Options")
+    type.name?.endsWith("Options"),
   )?.name;
 
-  const safeName = camelCase(name)
-    .replace(/kv/i, "KV")
-    .replace("localStorage", "localstorage");
+  const safeName = camelCase(name).replace(/kv/i, "KV").replace("localStorage", "localstorage");
 
   const names = [...new Set([name, safeName])];
 
@@ -59,8 +53,7 @@ const genCode = /* ts */ `// Auto-generated using scripts/gen-drivers.
 ${drivers
   .filter((d) => d.optionsTExport)
   .map(
-    (d) =>
-      /* ts */ `import type { ${d.optionsTExport} as ${d.optionsTName} } from "${d.subpath}";`
+    (d) => /* ts */ `import type { ${d.optionsTExport} as ${d.optionsTName} } from "${d.subpath}";`,
   )
   .join("\n")}
 

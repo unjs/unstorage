@@ -53,7 +53,7 @@ describe("drivers: fs", () => {
             await ctx.driver.getKeys("", {
               maxDepth: 1,
             })
-          ).sort()
+          ).sort(),
         ).toMatchObject(["depth-test/file0.md"]);
 
         expect(
@@ -61,7 +61,7 @@ describe("drivers: fs", () => {
             await ctx.driver.getKeys("", {
               maxDepth: 2,
             })
-          ).sort()
+          ).sort(),
         ).toMatchObject(["depth-test/depth0/file1.md", "depth-test/file0.md"]);
       });
     },

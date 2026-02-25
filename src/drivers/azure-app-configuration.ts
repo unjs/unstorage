@@ -36,10 +36,7 @@ export interface AzureAppConfigurationOptions {
 
 const DRIVER_NAME = "azure-app-configuration";
 
-const driver: DriverFactory<
-  AzureAppConfigurationOptions,
-  AppConfigurationClient
-> = (opts = {}) => {
+const driver: DriverFactory<AzureAppConfigurationOptions, AppConfigurationClient> = (opts = {}) => {
   const labelFilter = opts.label || "\0";
   const keyFilter = opts.prefix ? `${opts.prefix}:*` : "*";
   const p = (key: string) => (opts.prefix ? `${opts.prefix}:${key}` : key); // Prefix a key
@@ -51,14 +48,9 @@ const driver: DriverFactory<
       return client;
     }
     if (!opts.endpoint && !opts.appConfigName && !opts.connectionString) {
-      throw createRequiredError(DRIVER_NAME, [
-        "endpoint",
-        "appConfigName",
-        "connectionString",
-      ]);
+      throw createRequiredError(DRIVER_NAME, ["endpoint", "appConfigName", "connectionString"]);
     }
-    const appConfigEndpoint =
-      opts.endpoint || `https://${opts.appConfigName}.azconfig.io`;
+    const appConfigEndpoint = opts.endpoint || `https://${opts.appConfigName}.azconfig.io`;
     if (opts.connectionString) {
       client = new AppConfigurationClient(opts.connectionString);
     } else {

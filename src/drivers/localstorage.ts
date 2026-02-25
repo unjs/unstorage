@@ -1,8 +1,4 @@
-import {
-  createRequiredError,
-  type DriverFactory,
-  normalizeKey,
-} from "./utils/index.ts";
+import { createRequiredError, type DriverFactory, normalizeKey } from "./utils/index.ts";
 
 export interface LocalStorageOptions {
   base?: string;

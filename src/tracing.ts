@@ -54,9 +54,7 @@ type MaybeTracedStorage<T extends StorageValue> = Storage<T> & {
  * Wraps a storage instance with tracing capabilities.
  * All storage operations will emit tracing events through Node.js diagnostics channels.
  */
-export function withTracing<T extends StorageValue>(
-  storage: MaybeTracedStorage<T>
-): Storage<T> {
+export function withTracing<T extends StorageValue>(storage: MaybeTracedStorage<T>): Storage<T> {
   // Avoid wrapping already traced storages
   if (storage.__traced) {
     return storage;
@@ -92,9 +90,8 @@ export function withTracing<T extends StorageValue>(
 
   const channels = Object.fromEntries(
     Object.keys(operations).map(
-      (operation) =>
-        [operation, tracingChannel(`unstorage.${operation}`)] as const
-    )
+      (operation) => [operation, tracingChannel(`unstorage.${operation}`)] as const,
+    ),
   );
 
   /**
@@ -103,7 +100,7 @@ export function withTracing<T extends StorageValue>(
   async function tracePromise<T>(
     operation: TracedOperation,
     exec: () => Promise<T>,
-    data: TraceContext
+    data: TraceContext,
   ): Promise<T> {
     const channel = channels[operation];
 
@@ -126,28 +123,22 @@ export function withTracing<T extends StorageValue>(
 
   const prepKeys = (
     keyArg: Parameters<(typeof storage)[TracedOperation]>[0],
-    operation: TracedOperation
+    operation: TracedOperation,
   ) => {
     if (!keyArg) return [];
 
     const getKeyValue = (i: string | { key: string }) => {
-      const normalizer = operations[operation]?.base
-        ? normalizeBaseKey
-        : normalizeKey;
+      const normalizer = operations[operation]?.base ? normalizeBaseKey : normalizeKey;
 
       return normalizer(typeof i === "string" ? i : i.key);
     };
 
-    return Array.isArray(keyArg)
-      ? keyArg.map((i) => getKeyValue(i))
-      : [getKeyValue(keyArg)];
+    return Array.isArray(keyArg) ? keyArg.map((i) => getKeyValue(i)) : [getKeyValue(keyArg)];
   };
 
   function wrapOperation<
     OP extends TracedOperation,
-    M extends (
-      ...args: Parameters<(typeof storage)[OP]>
-    ) => ReturnType<(typeof storage)[OP]>,
+    M extends (...args: Parameters<(typeof storage)[OP]>) => ReturnType<(typeof storage)[OP]>,
   >(operation: OP) {
     return ((...args) => {
       const keys = prepKeys(args[0], operation);
@@ -163,7 +154,7 @@ export function withTracing<T extends StorageValue>(
           keys,
           meta: isMeta,
           ...mountInfo,
-        }
+        },
       );
     }) as M;
   }

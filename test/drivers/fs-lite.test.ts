@@ -46,26 +46,22 @@ describe("drivers: fs-lite", () => {
             await ctx.driver.getKeys("", {
               maxDepth: 0,
             })
-          ).sort()
+          ).sort(),
         ).toMatchObject(["file0.md"]);
         expect(
           (
             await ctx.driver.getKeys("", {
               maxDepth: 1,
             })
-          ).sort()
+          ).sort(),
         ).toMatchObject(["depth-test/file1.md", "file0.md"]);
         expect(
           (
             await ctx.driver.getKeys("", {
               maxDepth: 2,
             })
-          ).sort()
-        ).toMatchObject([
-          "depth-test/depth0/file2.md",
-          "depth-test/file1.md",
-          "file0.md",
-        ]);
+          ).sort(),
+        ).toMatchObject(["depth-test/depth0/file2.md", "depth-test/file1.md", "file0.md"]);
       });
     },
   });

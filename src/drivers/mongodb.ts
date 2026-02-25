@@ -34,10 +34,7 @@ const driver: DriverFactory<MongoDbOptions, Collection> = (opts) => {
       if (!opts.connectionString) {
         throw createRequiredError(DRIVER_NAME, "connectionString");
       }
-      const mongoClient = new MongoClient(
-        opts.connectionString,
-        opts.clientOptions
-      );
+      const mongoClient = new MongoClient(opts.connectionString, opts.clientOptions);
       const db = mongoClient.db(opts.databaseName || "unstorage");
       collection = db.collection(opts.collectionName || "unstorage");
     }
@@ -77,7 +74,7 @@ const driver: DriverFactory<MongoDbOptions, Collection> = (opts) => {
           $set: { key, value, modifiedAt: currentDateTime },
           $setOnInsert: { createdAt: currentDateTime },
         },
-        { upsert: true }
+        { upsert: true },
       );
     },
     async setItems(items) {

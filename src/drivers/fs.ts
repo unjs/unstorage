@@ -1,11 +1,7 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, relative, join, matchesGlob } from "node:path";
 import type { FSWatcher, ChokidarOptions } from "chokidar";
-import {
-  createError,
-  createRequiredError,
-  type DriverFactory,
-} from "./utils/index.ts";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
 import {
   readFile,
   writeFile,
@@ -34,10 +30,7 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
 
   const base = resolve(userOptions.base);
 
-  const ignorePatterns = userOptions.ignore || [
-    "**/node_modules/**",
-    "**/.git/**",
-  ];
+  const ignorePatterns = userOptions.ignore || ["**/node_modules/**", "**/.git/**"];
   const ignore = (path: string) => {
     return ignorePatterns.some((pattern) => matchesGlob(path, pattern));
   };
@@ -46,7 +39,7 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(
         DRIVER_NAME,
-        `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`
+        `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`,
       );
     }
     const resolved = join(base, key.replace(/:/g, "/"));

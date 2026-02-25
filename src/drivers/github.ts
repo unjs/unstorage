@@ -1,8 +1,4 @@
-import {
-  createError,
-  createRequiredError,
-  type DriverFactory,
-} from "./utils/index.ts";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
 import { $fetch } from "ofetch";
 import { withTrailingSlash, joinURL } from "./utils/path.ts";
 
@@ -61,10 +57,7 @@ const DRIVER_NAME = "github";
 
 const driver: DriverFactory<GithubOptions> = (_opts) => {
   const opts: GithubOptions = { ...defaultOptions, ..._opts };
-  const rawUrl = joinURL(
-    opts.cdnURL!,
-    [opts.repo, opts.branch!, opts.dir!].join("/")
-  );
+  const rawUrl = joinURL(opts.cdnURL!, [opts.repo, opts.branch!, opts.dir!].join("/"));
 
   let files: Record<string, GithubFile> = {};
   let lastCheck = 0;
@@ -119,11 +112,9 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
               : undefined,
           });
         } catch (error) {
-          throw createError(
-            "github",
-            `Failed to fetch \`${JSON.stringify(key)}\``,
-            { cause: error }
-          );
+          throw createError("github", `Failed to fetch \`${JSON.stringify(key)}\``, {
+            cause: error,
+          });
         }
       }
       return item.body;
@@ -140,16 +131,13 @@ async function fetchFiles(opts: GithubOptions) {
   const prefix = withTrailingSlash(opts.dir).replace(/^\//, "");
   const files: Record<string, GithubFile> = {};
   try {
-    const trees = await $fetch(
-      `/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`,
-      {
-        baseURL: opts.apiURL,
-        headers: {
-          "User-Agent": "unstorage",
-          ...(opts.token && { Authorization: `token ${opts.token}` }),
-        },
-      }
-    );
+    const trees = await $fetch(`/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`, {
+      baseURL: opts.apiURL,
+      headers: {
+        "User-Agent": "unstorage",
+        ...(opts.token && { Authorization: `token ${opts.token}` }),
+      },
+    });
 
     for (const node of trees.tree) {
       if (node.type !== "blob" || !node.path.startsWith(prefix)) {

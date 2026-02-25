@@ -32,8 +32,7 @@ const driver: DriverFactory<UpstashOptions, Redis> = (options) => {
       return redisClient;
     }
     const url = options.url || globalThis.process?.env?.UPSTASH_REDIS_REST_URL;
-    const token =
-      options.token || globalThis.process?.env?.UPSTASH_REDIS_REST_TOKEN;
+    const token = options.token || globalThis.process?.env?.UPSTASH_REDIS_REST_TOKEN;
     redisClient = new Redis({ url, token, ...options });
     return redisClient;
   };
@@ -84,7 +83,7 @@ const driver: DriverFactory<UpstashOptions, Redis> = (options) => {
     },
     async getKeys(_base) {
       return await scan(r(_base, "*")).then((keys) =>
-        base ? keys.map((key) => key.slice(base.length + 1)) : keys
+        base ? keys.map((key) => key.slice(base.length + 1)) : keys,
       );
     },
     async clear(base) {

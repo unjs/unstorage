@@ -1,15 +1,12 @@
 import type { Driver } from "unstorage";
 
 export type DriverFactory<OptionsT, InstanceT = never> = (
-  opts: OptionsT
+  opts: OptionsT,
 ) => Driver<OptionsT, InstanceT>;
 
 export interface ErrorOptions {}
 
-export function normalizeKey(
-  key: string | undefined,
-  sep: ":" | "/" = ":"
-): string {
+export function normalizeKey(key: string | undefined, sep: ":" | "/" = ":"): string {
   if (!key) {
     return "";
   }
@@ -23,11 +20,7 @@ export function joinKeys(...keys: string[]): string {
     .join(":");
 }
 
-export function createError(
-  driver: string,
-  message: string,
-  opts?: ErrorOptions
-): Error {
+export function createError(driver: string, message: string, opts?: ErrorOptions): Error {
   const err = new Error(`[unstorage] [${driver}] ${message}`, opts);
   if (Error.captureStackTrace) {
     Error.captureStackTrace(err, createError);
@@ -35,16 +28,11 @@ export function createError(
   return err;
 }
 
-export function createRequiredError(
-  driver: string,
-  name: string | string[]
-): Error {
+export function createRequiredError(driver: string, name: string | string[]): Error {
   if (Array.isArray(name)) {
     return createError(
       driver,
-      `Missing some of the required options ${name
-        .map((n) => "`" + n + "`")
-        .join(", ")}`
+      `Missing some of the required options ${name.map((n) => "`" + n + "`").join(", ")}`,
     );
   }
   return createError(driver, `Missing required option \`${name}\`.`);

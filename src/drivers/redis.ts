@@ -1,11 +1,7 @@
 import { type DriverFactory, joinKeys } from "./utils/index.ts";
 import { Cluster, Redis } from "ioredis";
 
-import type {
-  ClusterOptions,
-  ClusterNode,
-  RedisOptions as _RedisOptions,
-} from "ioredis";
+import type { ClusterOptions, ClusterNode, RedisOptions as _RedisOptions } from "ioredis";
 
 export interface RedisOptions extends _RedisOptions {
   /**

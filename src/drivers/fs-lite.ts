@@ -1,17 +1,7 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, join } from "node:path";
-import {
-  createError,
-  createRequiredError,
-  type DriverFactory,
-} from "./utils/index.ts";
-import {
-  readFile,
-  writeFile,
-  readdirRecursive,
-  rmRecursive,
-  unlink,
-} from "./utils/node-fs.ts";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
+import { readFile, writeFile, readdirRecursive, rmRecursive, unlink } from "./utils/node-fs.ts";
 
 export interface FSStorageOptions {
   base?: string;
@@ -34,7 +24,7 @@ const driver: DriverFactory<FSStorageOptions> = (opts = {}) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(
         DRIVER_NAME,
-        `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`
+        `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`,
       );
     }
     const resolved = join(opts.base!, key.replace(/:/g, "/"));

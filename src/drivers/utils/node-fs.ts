@@ -13,16 +13,13 @@ type WriteFileData = Parameters<typeof fsPromises.writeFile>[1];
 export async function writeFile(
   path: string,
   data: WriteFileData,
-  encoding?: BufferEncoding
+  encoding?: BufferEncoding,
 ): Promise<void> {
   await ensuredir(dirname(path));
   return fsPromises.writeFile(path, data, encoding);
 }
 
-export function readFile(
-  path: string,
-  encoding?: BufferEncoding
-): Promise<string | Buffer | null> {
+export function readFile(path: string, encoding?: BufferEncoding): Promise<string | Buffer | null> {
   return fsPromises.readFile(path, encoding).catch(ignoreNotfound);
 }
 
@@ -52,7 +49,7 @@ export async function ensuredir(dir: string): Promise<void> {
 export async function readdirRecursive(
   dir: string,
   ignore?: (p: string) => boolean,
-  maxDepth?: number
+  maxDepth?: number,
 ): Promise<string[]> {
   if (ignore && ignore(dir)) {
     return [];
@@ -67,7 +64,7 @@ export async function readdirRecursive(
           const dirFiles = await readdirRecursive(
             entryPath,
             ignore,
-            maxDepth === undefined ? undefined : maxDepth - 1
+            maxDepth === undefined ? undefined : maxDepth - 1,
           );
           files.push(...dirFiles.map((f) => entry.name + "/" + f));
         }
@@ -76,7 +73,7 @@ export async function readdirRecursive(
           files.push(entry.name);
         }
       }
-    })
+    }),
   );
   return files;
 }
@@ -91,6 +88,6 @@ export async function rmRecursive(dir: string): Promise<void> {
       } else {
         return fsPromises.unlink(entryPath);
       }
-    })
+    }),
   );
 }

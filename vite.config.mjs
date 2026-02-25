@@ -8,10 +8,7 @@ export default defineConfig({
       enabled: true,
     },
     coverage: {
-      exclude: [
-        ...configDefaults.coverage.exclude,
-        "./scripts/**",
-      ],
+      exclude: [...configDefaults.coverage.exclude, "./scripts/**"],
     },
   },
 });

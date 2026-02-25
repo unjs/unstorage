@@ -52,9 +52,13 @@ const genCode = /* ts */ `// Auto-generated using scripts/gen-drivers.
 
 ${drivers
   .filter((d) => d.optionsTExport)
-  .map(
-    (d) => /* ts */ `import type { ${d.optionsTExport} as ${d.optionsTName} } from "${d.subpath}";`,
-  )
+  .map((d) => /* ts */ {
+    let exportName = d.optionsTExport;
+    if (exportName !== d.optionsTName) {
+      exportName += ` as ${d.optionsTName}`;
+    }
+    return `import type { ${exportName} } from "${d.subpath}";`;
+  })
   .join("\n")}
 
 export type BuiltinDriverName = ${drivers.flatMap((d) => d.names.map((name) => `"${name}"`)).join(" | ")};

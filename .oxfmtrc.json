@@ -1,3 +1,4 @@
 {
-  "$schema": "https://unpkg.com/oxfmt/configuration_schema.json"
+  "$schema": "https://unpkg.com/oxfmt/configuration_schema.json",
+  "ignorePatterns": ["src/_drivers.ts"]
 }

@@ -27,7 +27,7 @@
     "dev": "vitest",
     "gen-drivers": "node scripts/gen-drivers.ts",
     "lint": "oxlint . && oxfmt --check .",
-    "lint:fix": "oxlint . --fix && oxfmt .",
+    "fmt": "oxlint . --fix && oxfmt .",
     "prepack": "pnpm build",
     "release": "pnpm test && pnpm build && changelogen --release --prerelease --publish --publishTag alpha --push",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",

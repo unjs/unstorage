@@ -31,8 +31,7 @@
     "prepack": "pnpm build",
     "release": "pnpm test && pnpm build && changelogen --release --prerelease --publish --publishTag alpha --push",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
-    "test:types": "tsgo --noEmit --skipLibCheck",
-    "unstorage": "node jiti src/cli.ts"
+    "test:types": "tsgo --noEmit --skipLibCheck"
   },
   "devDependencies": {
     "@azure/app-configuration": "^1.11.0",

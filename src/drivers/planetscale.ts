@@ -1,7 +1,6 @@
-import { createRequiredError, defineDriver } from "./utils";
+import { createRequiredError, defineDriver } from "./utils/index.ts";
 import type { ExecutedQuery, Connection } from "@planetscale/database";
 import { connect } from "@planetscale/database";
-import { fetch } from "node-fetch-native";
 
 export interface PlanetscaleDriverOptions {
   url?: string;

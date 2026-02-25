@@ -3,7 +3,7 @@ import {
   createRequiredError,
   normalizeKey,
   createError,
-} from "./utils";
+} from "./utils/index.ts";
 import { AwsClient } from "aws4fetch";
 
 export interface S3DriverOptions {
@@ -208,7 +208,7 @@ async function sha256Base64(str: string) {
   const buffer = new TextEncoder().encode(str);
   const hash = await crypto.subtle.digest("SHA-256", buffer);
   const bytes = new Uint8Array(hash);
-  const binaryString = String.fromCharCode(...bytes); // eslint-disable-line unicorn/prefer-code-point
+  const binaryString = String.fromCharCode(...bytes);
   return btoa(binaryString);
 }
 

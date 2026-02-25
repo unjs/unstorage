@@ -1,6 +1,6 @@
-import { defineDriver } from "./utils";
-import type { Driver } from "..";
-import { normalizeKey } from "./utils";
+import { defineDriver } from "./utils/index.ts";
+import type { Driver } from "../types.ts";
+import { normalizeKey } from "./utils/index.ts";
 
 export interface OverlayStorageOptions {
   layers: Driver[];

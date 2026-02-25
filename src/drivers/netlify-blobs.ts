@@ -1,5 +1,9 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
-import type { GetKeysOptions } from "..";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
+import type { GetKeysOptions } from "../types.ts";
 import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
   Store,
@@ -10,7 +14,6 @@ import type {
   GetStoreOptions,
   GetDeployStoreOptions,
 } from "@netlify/blobs";
-import { fetch } from "ofetch";
 
 const DRIVER_NAME = "netlify-blobs";
 
@@ -27,21 +30,18 @@ export interface ExtraOptions {
 }
 
 export interface NetlifyDeployStoreOptions
-  extends GetDeployStoreOptions,
-    ExtraOptions {
+  extends GetDeployStoreOptions, ExtraOptions {
   name?: never;
   deployScoped: true;
 }
 
-export interface NetlifyDeployStoreLegacyOptions
-  extends NetlifyDeployStoreOptions {
+export interface NetlifyDeployStoreLegacyOptions extends NetlifyDeployStoreOptions {
   // Added in v8.0.0. This ensures TS compatibility for older versions.
   region?: never;
 }
 
 export interface NetlifyNamedStoreOptions
-  extends GetStoreOptions,
-    ExtraOptions {
+  extends GetStoreOptions, ExtraOptions {
   name: string;
   deployScoped?: false;
 }

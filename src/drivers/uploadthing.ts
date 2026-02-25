@@ -1,4 +1,4 @@
-import { defineDriver, normalizeKey } from "./utils";
+import { defineDriver, normalizeKey } from "./utils/index.ts";
 import { UTApi } from "uploadthing/server";
 
 // Reference: https://docs.uploadthing.com
@@ -39,7 +39,7 @@ export default defineDriver<UploadThingOptions, UTApi>((opts = {}) => {
   };
 
   const toFile = (key: string, value: BlobPart) => {
-    return Object.assign(new Blob([value]), <FileEsque>{
+    return Object.assign(new Blob([value]), {
       name: key,
       customId: key,
     }) satisfies FileEsque;

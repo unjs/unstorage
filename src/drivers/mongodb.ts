@@ -1,4 +1,4 @@
-import { createRequiredError, defineDriver } from "./utils";
+import { createRequiredError, defineDriver } from "./utils/index.ts";
 import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 
 export interface MongoDbOptions {

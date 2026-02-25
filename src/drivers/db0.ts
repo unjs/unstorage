@@ -1,5 +1,5 @@
 import type { Database } from "db0";
-import { createError, defineDriver } from "./utils";
+import { createError, defineDriver } from "./utils/index.ts";
 
 interface ResultSchema {
   rows: Array<{
@@ -134,6 +134,9 @@ export default defineDriver((opts: DB0DriverOptions) => {
     clear: async () => {
       await ensureTable();
       await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}}`;
+    },
+    dispose: async () => {
+      await opts.database.dispose();
     },
   };
 });

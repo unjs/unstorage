@@ -1,9 +1,9 @@
 import { describe, expect, beforeAll, afterAll, test } from "vitest";
-import driver from "../../src/drivers/azure-storage-blob";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/azure-storage-blob.ts";
+import { testDriver } from "./utils.ts";
 import { AccountSASPermissions, BlobServiceClient } from "@azure/storage-blob";
 import { ChildProcess, exec } from "node:child_process";
-import { createStorage } from "../../src";
+import { createStorage } from "../../src/index.ts";
 
 describe.skip("drivers: azure-storage-blob", () => {
   let azuriteProcess: ChildProcess;

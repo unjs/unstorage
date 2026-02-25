@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import driver from "../../src/drivers/github";
-import { createStorage } from "../../src";
+import driver from "../../src/drivers/github.ts";
+import { createStorage } from "../../src/index.ts";
 
 describe("drivers: github", () => {
   const storage = createStorage({

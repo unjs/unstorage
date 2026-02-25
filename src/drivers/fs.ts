@@ -1,15 +1,19 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
-import { resolve, relative, join } from "node:path";
-import { FSWatcher, type ChokidarOptions, watch } from "chokidar";
-import anymatch from "anymatch";
-import { createError, createRequiredError, defineDriver } from "./utils";
+import { resolve, relative, join, matchesGlob } from "node:path";
+import type { FSWatcher, ChokidarOptions } from "chokidar";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
 import {
   readFile,
   writeFile,
   readdirRecursive,
   rmRecursive,
   unlink,
-} from "./utils/node-fs";
+  ensuredir,
+} from "./utils/node-fs.ts";
 
 export interface FSStorageOptions {
   base?: string;
@@ -30,9 +34,13 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
 
   const base = resolve(userOptions.base);
 
-  const ignore = anymatch(
-    userOptions.ignore || ["**/node_modules/**", "**/.git/**"]
-  );
+  const ignorePatterns = userOptions.ignore || [
+    "**/node_modules/**",
+    "**/.git/**",
+  ];
+  const ignore = (path: string) => {
+    return ignorePatterns.some((pattern) => matchesGlob(path, pattern));
+  };
 
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {
@@ -110,6 +118,8 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
       if (_watcher) {
         return _unwatch;
       }
+      await ensuredir(base);
+      const { watch } = await import("chokidar");
       await new Promise<void>((resolve, reject) => {
         const watchOptions: ChokidarOptions = {
           ignoreInitial: true,
@@ -123,7 +133,6 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
           watchOptions.ignored = [watchOptions.ignored];
         }
         watchOptions.ignored.push(ignore);
-
         _watcher = watch(base, watchOptions)
           .on("ready", () => {
             resolve();

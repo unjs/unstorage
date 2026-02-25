@@ -48,14 +48,14 @@ export function stringify(value: any): string {
 
 export const BASE64_PREFIX = "base64:";
 
-export function serializeRaw(value: any) {
+export function serializeRaw(value: any): string {
   if (typeof value === "string") {
     return value;
   }
   return BASE64_PREFIX + base64Encode(value);
 }
 
-export function deserializeRaw(value: any) {
+export function deserializeRaw(value: any): any {
   if (typeof value !== "string") {
     // Return non-strings as-is
     return value;

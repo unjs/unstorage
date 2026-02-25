@@ -17,7 +17,7 @@ export interface TestOptions {
   additionalTests?: (ctx: TestContext) => void;
 }
 
-export function testDriver(opts: TestOptions) {
+export function testDriver(opts: TestOptions): void {
   const ctx = {} as TestContext;
 
   beforeAll(() => {

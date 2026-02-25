@@ -1,8 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
 import { describe, test, expect, afterAll } from "vitest";
-import { createStorage, snapshot } from "../../src";
-import CloudflareR2Binding from "../../src/drivers/cloudflare-r2-binding";
-import { testDriver } from "./utils";
+import { createStorage, snapshot } from "../../src/index.ts";
+import CloudflareR2Binding from "../../src/drivers/cloudflare-r2-binding.ts";
+import { testDriver } from "./utils.ts";
 import { getPlatformProxy } from "wrangler";
 
 describe("drivers: cloudflare-r2-binding", async () => {

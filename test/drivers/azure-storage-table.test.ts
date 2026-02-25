@@ -1,6 +1,6 @@
 import { describe, beforeAll, afterAll } from "vitest";
-import driver from "../../src/drivers/azure-storage-table";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/azure-storage-table.ts";
+import { testDriver } from "./utils.ts";
 import { TableClient } from "@azure/data-tables";
 import { ChildProcess, exec } from "node:child_process";
 

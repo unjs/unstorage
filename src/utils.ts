@@ -1,4 +1,4 @@
-import type { Storage, StorageValue, TransactionOptions } from "./types";
+import type { Storage, StorageValue, TransactionOptions } from "./types.ts";
 
 type StorageKeys = Array<keyof Storage>;
 
@@ -47,6 +47,8 @@ export function prefixStorage<T extends StorageValue>(
       .getKeys(base + key, ...arguments_)
       // Remove Prefix
       .then((keys) => keys.map((key) => key.slice(base.length)));
+
+  nsStorage.keys = nsStorage.getKeys;
 
   nsStorage.getItems = async <U extends T>(
     items: (string | { key: string; options?: TransactionOptions })[],

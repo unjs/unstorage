@@ -1,4 +1,8 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
 import {
   TableClient,
   AzureNamedKeyCredential,

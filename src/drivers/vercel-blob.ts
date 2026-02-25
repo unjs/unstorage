@@ -1,4 +1,4 @@
-import { del, get as getBlob, head, list, put } from "@vercel/blob";
+import * as blob from "@vercel/blob";
 import {
   defineDriver,
   normalizeKey,
@@ -55,14 +55,14 @@ export default defineDriver<VercelBlobOptions>((opts) => {
   };
 
   const get = (key: string) =>
-    getBlob(r(key), { token: getToken(), access: opts.access });
+    blob.get(r(key), { token: getToken(), access: opts.access });
 
   return {
     name: DRIVER_NAME,
     options: opts,
     async hasItem(key: string) {
       try {
-        await head(r(key), { token: getToken() });
+        await blob.head(r(key), { token: getToken() });
         return true;
       } catch {
         return false;
@@ -80,7 +80,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
     },
     async getMeta(key) {
       try {
-        const blobHead = await head(r(key), { token: getToken() });
+        const blobHead = await blob.head(r(key), { token: getToken() });
         return {
           mtime: blobHead.uploadedAt,
           ...blobHead,
@@ -90,7 +90,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       }
     },
     async setItem(key, value, callOpts) {
-      await put(r(key), value, {
+      await blob.put(r(key), value, {
         access: opts.access,
         addRandomSuffix: false,
         token: getToken(),
@@ -98,7 +98,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       });
     },
     async setItemRaw(key, value, callOpts) {
-      await put(r(key), value, {
+      await blob.put(r(key), value, {
         access: opts.access,
         addRandomSuffix: false,
         token: getToken(),
@@ -106,13 +106,13 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       });
     },
     async removeItem(key: string) {
-      await del(r(key), { token: getToken() });
+      await blob.del(r(key), { token: getToken() });
     },
     async getKeys(base: string) {
       const blobs: any[] = [];
       let cursor: string | undefined = undefined;
       do {
-        const listBlobResult: Awaited<ReturnType<typeof list>> = await list({
+        const listBlobResult: Awaited<ReturnType<typeof blob.list>> = await blob.list({
           token: getToken(),
           cursor,
           prefix: r(base),
@@ -133,7 +133,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       let cursor: string | undefined = undefined;
       const blobs: any[] = [];
       do {
-        const listBlobResult: Awaited<ReturnType<typeof list>> = await list({
+        const listBlobResult: Awaited<ReturnType<typeof blob.list>> = await blob.list({
           token: getToken(),
           cursor,
           prefix: r(base),
@@ -143,7 +143,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
       } while (cursor);
 
       if (blobs.length > 0) {
-        await del(
+        await blob.del(
           blobs.map((blob) => blob.url),
           {
             token: getToken(),

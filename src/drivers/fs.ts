@@ -1,19 +1,19 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
-import { resolve, relative, join } from "node:path";
+import { resolve, relative, join, matchesGlob } from "node:path";
+import type { FSWatcher, ChokidarOptions } from "chokidar";
 import {
-  FSWatcher,
-  type WatchOptions as ChokidarOptions,
-  watch,
-} from "chokidar";
-import { createError, createRequiredError, defineDriver } from "./utils";
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
 import {
   readFile,
   writeFile,
   readdirRecursive,
   rmRecursive,
   unlink,
-} from "./utils/node-fs";
-import anymatch from "anymatch";
+  ensuredir,
+} from "./utils/node-fs.ts";
 
 export interface FSStorageOptions {
   base?: string;
@@ -27,16 +27,21 @@ const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
 
 const DRIVER_NAME = "fs";
 
-export default defineDriver((opts: FSStorageOptions = {}) => {
-  if (!opts.base) {
+export default defineDriver((userOptions: FSStorageOptions = {}) => {
+  if (!userOptions.base) {
     throw createRequiredError(DRIVER_NAME, "base");
   }
 
-  if (!opts.ignore) {
-    opts.ignore = ["**/node_modules/**", "**/.git/**"];
-  }
+  const base = resolve(userOptions.base);
 
-  opts.base = resolve(opts.base);
+  const ignorePatterns = userOptions.ignore || [
+    "**/node_modules/**",
+    "**/.git/**",
+  ];
+  const ignore = (path: string) => {
+    return ignorePatterns.some((pattern) => matchesGlob(path, pattern));
+  };
+
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(
@@ -44,7 +49,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
         `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`
       );
     }
-    const resolved = join(opts.base!, key.replace(/:/g, "/"));
+    const resolved = join(base, key.replace(/:/g, "/"));
     return resolved;
   };
 
@@ -58,7 +63,10 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
 
   return {
     name: DRIVER_NAME,
-    options: opts,
+    options: userOptions,
+    flags: {
+      maxDepth: true,
+    },
     hasItem(key) {
       return existsSync(r(key));
     },
@@ -75,32 +83,28 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       return { atime, mtime, size, birthtime, ctime };
     },
     setItem(key, value) {
-      if (opts.readOnly) {
+      if (userOptions.readOnly) {
         return;
       }
       return writeFile(r(key), value, "utf8");
     },
     setItemRaw(key, value) {
-      if (opts.readOnly) {
+      if (userOptions.readOnly) {
         return;
       }
       return writeFile(r(key), value);
     },
     removeItem(key) {
-      if (opts.readOnly) {
+      if (userOptions.readOnly) {
         return;
       }
       return unlink(r(key));
     },
     getKeys(_base, topts) {
-      return readdirRecursive(
-        r("."),
-        anymatch(opts.ignore || []),
-        topts?.maxDepth
-      );
+      return readdirRecursive(r("."), ignore, topts?.maxDepth);
     },
     async clear() {
-      if (opts.readOnly || opts.noClear) {
+      if (userOptions.readOnly || userOptions.noClear) {
         return;
       }
       await rmRecursive(r("."));
@@ -114,18 +118,28 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       if (_watcher) {
         return _unwatch;
       }
+      await ensuredir(base);
+      const { watch } = await import("chokidar");
       await new Promise<void>((resolve, reject) => {
-        _watcher = watch(opts.base!, {
+        const watchOptions: ChokidarOptions = {
           ignoreInitial: true,
-          ignored: opts.ignore,
-          ...opts.watchOptions,
-        })
+          ...userOptions.watchOptions,
+        };
+        if (!watchOptions.ignored) {
+          watchOptions.ignored = [];
+        } else if (Array.isArray(watchOptions.ignored)) {
+          watchOptions.ignored = [...watchOptions.ignored];
+        } else {
+          watchOptions.ignored = [watchOptions.ignored];
+        }
+        watchOptions.ignored.push(ignore);
+        _watcher = watch(base, watchOptions)
           .on("ready", () => {
             resolve();
           })
           .on("error", reject)
           .on("all", (eventName, path) => {
-            path = relative(opts.base!, path);
+            path = relative(base, path);
             if (eventName === "change" || eventName === "add") {
               callback("update", path);
             } else if (eventName === "unlink") {

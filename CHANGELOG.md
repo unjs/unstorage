@@ -2,6 +2,296 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-alpha.5
+
+[compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.4...v2.0.0-alpha.5)
+
+### 🏡 Chore
+
+- Update dependencies ([101aafa](https://github.com/unjs/unstorage/commit/101aafa))
+- Update ci ([53eb0c4](https://github.com/unjs/unstorage/commit/53eb0c4))
+- Update deps ([a52bf75](https://github.com/unjs/unstorage/commit/a52bf75))
+- Update deps ([95e3317](https://github.com/unjs/unstorage/commit/95e3317))
+- Lint ([77cb224](https://github.com/unjs/unstorage/commit/77cb224))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
+## v2.0.0-alpha.4
+
+[compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.3...v2.0.0-alpha.4)
+
+### 🏡 Chore
+
+- Update dependencies ([638e0ff](https://github.com/unjs/unstorage/commit/638e0ff))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
+## v2.0.0-alpha.3
+
+[compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.2...v2.0.0-alpha.3)
+
+### 📦 Build
+
+- Fix `exports` field ([4ce0395](https://github.com/unjs/unstorage/commit/4ce0395))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
+## v2.0.0-alpha.2
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.17.1...v2.0.0-alpha.2)
+
+### 💅 Refactors
+
+- **server, cli:** ⚠️  Migrate to h3  v2 and srvx ([#685](https://github.com/unjs/unstorage/pull/685))
+- ⚠️  Replace `anymatch` with native `path.matchesGlob` ([c7f915f](https://github.com/unjs/unstorage/commit/c7f915f))
+- ⚠️  Remove `ufo` dependency ([071159c](https://github.com/unjs/unstorage/commit/071159c))
+- Make `ofetch` an optional dependency ([456a8fa](https://github.com/unjs/unstorage/commit/456a8fa))
+- ⚠️  Remove cli entry ([c24501f](https://github.com/unjs/unstorage/commit/c24501f))
+
+### 📦 Build
+
+- Esm-only dist ([#686](https://github.com/unjs/unstorage/pull/686))
+- Optional `chokidar` dependency ([461af28](https://github.com/unjs/unstorage/commit/461af28))
+- ⚠️  Optional `lru-cache` dependency ([92a0d61](https://github.com/unjs/unstorage/commit/92a0d61))
+- Bundle `destr` ([f67d987](https://github.com/unjs/unstorage/commit/f67d987))
+
+### 🏡 Chore
+
+- Update undocs ([599af79](https://github.com/unjs/unstorage/commit/599af79))
+- Fix docs deps ([7393346](https://github.com/unjs/unstorage/commit/7393346))
+- Fix docs deps ([b8477a7](https://github.com/unjs/unstorage/commit/b8477a7))
+- Update docs ([52a88e4](https://github.com/unjs/unstorage/commit/52a88e4))
+- Update deps ([21ac94b](https://github.com/unjs/unstorage/commit/21ac94b))
+- Update deps ([d1c7ce0](https://github.com/unjs/unstorage/commit/d1c7ce0))
+- Prepae for alpha release ([cc402c7](https://github.com/unjs/unstorage/commit/cc402c7))
+- Remove `node-fetch-native` direct dependency ([6886740](https://github.com/unjs/unstorage/commit/6886740))
+- Fix release script ([d82a46c](https://github.com/unjs/unstorage/commit/d82a46c))
+
+#### ⚠️ Breaking Changes
+
+- **server, cli:** ⚠️  Migrate to h3  v2 and srvx ([#685](https://github.com/unjs/unstorage/pull/685))
+- ⚠️  Replace `anymatch` with native `path.matchesGlob` ([c7f915f](https://github.com/unjs/unstorage/commit/c7f915f))
+- ⚠️  Remove `ufo` dependency ([071159c](https://github.com/unjs/unstorage/commit/071159c))
+- ⚠️  Remove cli entry ([c24501f](https://github.com/unjs/unstorage/commit/c24501f))
+- ⚠️  Optional `lru-cache` dependency ([92a0d61](https://github.com/unjs/unstorage/commit/92a0d61))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
+## v1.17.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.17.0...v1.17.1)
+
+### 🩹 Fixes
+
+- **prefixStorage:** Strip prefix from `keys()` ([#666](https://github.com/unjs/unstorage/pull/666))
+- **vercel-blob:** Expose driver `options` ([#671](https://github.com/unjs/unstorage/pull/671))
+
+### 📖 Documentation
+
+- **redis:** Update github links and cluster warning ([#667](https://github.com/unjs/unstorage/pull/667))
+
+### 📦 Build
+
+- Allow `@vercel/functions` v3 as peer dep ([8bb9943](https://github.com/unjs/unstorage/commit/8bb9943))
+
+### 🏡 Chore
+
+- Update deps ([a7f09d9](https://github.com/unjs/unstorage/commit/a7f09d9))
+- Update lockfile ([c888a96](https://github.com/unjs/unstorage/commit/c888a96))
+
+### ❤️ Contributors
+
+- Connor Pearson ([@cjpearson](https://github.com/cjpearson))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Sébastien Chopin <seb@nuxt.com>
+- Rihan ([@RihanArfan](https://github.com/RihanArfan))
+
+## v1.17.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.16.1...v1.17.0)
+
+### 🚀 Enhancements
+
+- Add `vercel-runtime-cache` driver ([#656](https://github.com/unjs/unstorage/pull/656))
+- **deno-kv:** Support `ttl` for `setItem` and `setItemRaw` ([#659](https://github.com/unjs/unstorage/pull/659))
+
+### 📖 Documentation
+
+- **database:** Correct `tableName` config key ([#652](https://github.com/unjs/unstorage/pull/652))
+- **database:** Correct `tableName` config key ([#653](https://github.com/unjs/unstorage/pull/653))
+
+### 🏡 Chore
+
+- Update deps ([9839656](https://github.com/unjs/unstorage/commit/9839656))
+- Update pnpm ([59adda3](https://github.com/unjs/unstorage/commit/59adda3))
+- Update ci scripts ([59a1f9e](https://github.com/unjs/unstorage/commit/59a1f9e))
+
+### ❤️ Contributors
+
+- Schplitt ([@schplitt](https://github.com/schplitt))
+- Anthony Shew <anthonyshew@gmail.com>
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Kanashimo ([@Kanashimo](https://github.com/Kanashimo))
+
+## v1.16.1
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.16.0...v1.16.1)
+
+### 🔥 Performance
+
+- **mongoDB:** Use bulk operations for `getItems` and `setItems` ([#641](https://github.com/unjs/unstorage/pull/641))
+- **redis, upstash:** Use bulk operations for `getItems` ([#642](https://github.com/unjs/unstorage/pull/642))
+
+### 🩹 Fixes
+
+- **types:** Fix `prefixStorage` type compatibility ([#630](https://github.com/unjs/unstorage/pull/630))
+- **s3:** Accept `200` for delete response for better compatibility ([#636](https://github.com/unjs/unstorage/pull/636))
+- **github:** Add `user-agent` header ([#644](https://github.com/unjs/unstorage/pull/644))
+
+### 💅 Refactors
+
+- Allow `@netlify/blobs` v9 and v10 as peer dependency ([#640](https://github.com/unjs/unstorage/pull/640))
+
+### 📖 Documentation
+
+- **github:** Update `GitHub` casing ([#632](https://github.com/unjs/unstorage/pull/632))
+
+### 📦 Build
+
+- Fix invalid runtime type ([#631](https://github.com/unjs/unstorage/pull/631))
+
+### 🏡 Chore
+
+- Update deps ([34b90bf](https://github.com/unjs/unstorage/commit/34b90bf))
+- Lint ([d11f908](https://github.com/unjs/unstorage/commit/d11f908))
+- Update deps ([3961589](https://github.com/unjs/unstorage/commit/3961589))
+
+### ✅ Tests
+
+- R2 native meta ([#646](https://github.com/unjs/unstorage/pull/646))
+
+### ❤️ Contributors
+
+- ToBinio ([@ToBinio](https://github.com/ToBinio))
+- James Garbutt ([@43081j](https://github.com/43081j))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Alexandre Hallaine <alexandre.hallaine@icloud.com>
+- Philippe Serhal <philippe.serhal@netlify.com>
+- Quentin <blog@buzut.fr>
+- Abeer0 ([@iiio2](https://github.com/iiio2))
+- Daniel Roe ([@danielroe](https://github.com/danielroe))
+- Kricsleo ([@kricsleo](https://github.com/kricsleo))
+
+## v1.16.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.15.0...v1.16.0)
+
+### 🚀 Enhancements
+
+- **redis, vercel-kv, upstash:** Use non-blocking methods ([#600](https://github.com/unjs/unstorage/pull/600))
+- **redis:** Add support for `preConnect` ([#614](https://github.com/unjs/unstorage/pull/614))
+- **mongodb:** Allow setting additional clientOptions ([#625](https://github.com/unjs/unstorage/pull/625))
+- **azure-storage-blob:** Add raw support ([#565](https://github.com/unjs/unstorage/pull/565))
+
+### 🩹 Fixes
+
+- **deno:** Avoid crossing package boundary in deno-kv driver ([70310f9](https://github.com/unjs/unstorage/commit/70310f9))
+- **prefixStorage:** Prefix `getItems` and `setItems` ([#611](https://github.com/unjs/unstorage/pull/611))
+- **session-storage:** Correct `name` ([#623](https://github.com/unjs/unstorage/pull/623))
+
+### 💅 Refactors
+
+- **redis:** Remove colon from base prefix ([#586](https://github.com/unjs/unstorage/pull/586))
+
+### 📖 Documentation
+
+- Add notes for `.setItemRaw` of IndexedDB driver ([#564](https://github.com/unjs/unstorage/pull/564))
+
+### 📦 Build
+
+- Allow `@capacitor/preferences` v7 in `peerDependencies` ([#620](https://github.com/unjs/unstorage/pull/620))
+- Add `homepage` field to package.json ([#624](https://github.com/unjs/unstorage/pull/624))
+
+### 🏡 Chore
+
+- Fix type ([0d2bee9](https://github.com/unjs/unstorage/commit/0d2bee9))
+- Update deps ([6188da4](https://github.com/unjs/unstorage/commit/6188da4))
+- Test against `@vercel/blob` 1.x ([f33d75b](https://github.com/unjs/unstorage/commit/f33d75b))
+- Update deps ([1e91c1b](https://github.com/unjs/unstorage/commit/1e91c1b))
+- Test against latest pglite ([8be2b78](https://github.com/unjs/unstorage/commit/8be2b78))
+
+### ❤️ Contributors
+
+- Peter Budai <peterbudai@hotmail.com>
+- Alex Bevilacqua ([@alexbevi](http://github.com/alexbevi))
+- Julio Marquez <carretes_geologia0l@icloud.com>
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Maxime Pauvert ([@maximepvrt](http://github.com/maximepvrt))
+- Kricsleo ([@kricsleo](http://github.com/kricsleo))
+- Dmytro ([@dschewchenko](http://github.com/dschewchenko))
+- Typed SIGTERM ([@typed-sigterm](http://github.com/typed-sigterm))
+- Denis Ustiuzhanin ([@denisugo](http://github.com/denisugo))
+- João Lucas De Oliveira Lopes ([@jlucaso1](http://github.com/jlucaso1))
+- 凉风 <yinyu3@xiaohongshu.com>
+
+## v1.15.0
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.14.4...v1.15.0)
+
+### 🚀 Enhancements
+
+- Support `maxDepth` for `getKeys` ([#547](https://github.com/unjs/unstorage/pull/547))
+- Add `flags` key to driver interface ([#552](https://github.com/unjs/unstorage/pull/552))
+- **fs, fs-lite:** Native `maxDepth` support ([#551](https://github.com/unjs/unstorage/pull/551))
+
+### 🔥 Performance
+
+- Skip `maxDepth` filtering if natively supported ([#560](https://github.com/unjs/unstorage/pull/560))
+
+### 🩹 Fixes
+
+- **prefixStorage:** Wrap shorthand aliases ([#556](https://github.com/unjs/unstorage/pull/556))
+
+### 💅 Refactors
+
+- Upgrade to chokidar to v4 ([#596](https://github.com/unjs/unstorage/pull/596))
+- **fs:** Better options handling ([#597](https://github.com/unjs/unstorage/pull/597))
+
+### 📖 Documentation
+
+- Fix link to planetscale ([#576](https://github.com/unjs/unstorage/pull/576))
+- **redis:** Update hashtags note ([#593](https://github.com/unjs/unstorage/pull/593))
+
+### 🏡 Chore
+
+- Add codeowners file ([4ba07a6](https://github.com/unjs/unstorage/commit/4ba07a6))
+- Update deps ([a022baf](https://github.com/unjs/unstorage/commit/a022baf))
+- Add `moduleResolution` field to `tsconfig.json` ([0d55b77](https://github.com/unjs/unstorage/commit/0d55b77))
+- Update ci ([91e2d7d](https://github.com/unjs/unstorage/commit/91e2d7d))
+- Add `pnpm.onlyBuiltDependencies` ([4bd6bfd](https://github.com/unjs/unstorage/commit/4bd6bfd))
+- Update dev deps ([9cf840f](https://github.com/unjs/unstorage/commit/9cf840f))
+
+### ✅ Tests
+
+- Clear storage after each test ([#548](https://github.com/unjs/unstorage/pull/548))
+- Exclude drivers and scripts directories from test coverage ([#562](https://github.com/unjs/unstorage/pull/562))
+
+### ❤️ Contributors
+
+- Connor Pearson ([@cjpearson](http://github.com/cjpearson))
+- Pooya Parsa ([@pi0](http://github.com/pi0))
+- Mohamed Hazem Abbas ([@CVirus](http://github.com/CVirus))
+- James Garbutt ([@43081j](http://github.com/43081j))
+- Corentin THOMASSET ([@CorentinTh](http://github.com/CorentinTh))
+
 ## v1.14.4
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.14.3...v1.14.4)

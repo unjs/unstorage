@@ -1,13 +1,13 @@
 import { JSDOM } from "jsdom";
 import { describe, expect, it, vi } from "vitest";
-import driver from "../../src/drivers/session-storage";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/session-storage.ts";
+import { testDriver } from "./utils.ts";
 
 describe("drivers: session-storage", () => {
   const jsdom = new JSDOM("", {
     url: "http://localhost",
   });
-  jsdom.virtualConsole.sendTo(console);
+  // jsdom.virtualConsole.sendTo(console);
 
   testDriver({
     driver: driver({ window: jsdom.window as unknown as typeof window }),

@@ -1,4 +1,4 @@
-import { defineDriver, createRequiredError } from "./utils";
+import { defineDriver, createRequiredError } from "./utils/index.ts";
 import { AppConfigurationClient } from "@azure/app-configuration";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -112,7 +112,7 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
         labelFilter,
         fields: ["key", "value", "label"],
       });
-      const keys = [];
+      const keys: string[] = [];
       for await (const setting of settings) {
         keys.push(d(setting.key));
       }

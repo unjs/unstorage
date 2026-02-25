@@ -1,13 +1,17 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, join } from "node:path";
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils/index.ts";
 import {
   readFile,
   writeFile,
   readdirRecursive,
   rmRecursive,
   unlink,
-} from "./utils/node-fs";
+} from "./utils/node-fs.ts";
 
 export interface FSStorageOptions {
   base?: string;
@@ -40,6 +44,9 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    flags: {
+      maxDepth: true,
+    },
     hasItem(key) {
       return existsSync(r(key));
     },

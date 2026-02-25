@@ -12,6 +12,7 @@ import {
   readdirRecursive,
   rmRecursive,
   unlink,
+  ensuredir,
 } from "./utils/node-fs.ts";
 
 export interface FSStorageOptions {
@@ -117,6 +118,7 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
       if (_watcher) {
         return _unwatch;
       }
+      await ensuredir(base);
       const { watch } = await import("chokidar");
       await new Promise<void>((resolve, reject) => {
         const watchOptions: ChokidarOptions = {

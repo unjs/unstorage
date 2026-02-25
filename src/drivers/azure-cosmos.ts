@@ -1,4 +1,4 @@
-import { createRequiredError, defineDriver } from "./utils/index.ts";
+import { createRequiredError, type DriverFactory } from "./utils/index.ts";
 import { Container, CosmosClient } from "@azure/cosmos";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -45,7 +45,7 @@ export interface AzureCosmosItem {
   modified: string | Date;
 }
 
-export default defineDriver((opts: AzureCosmosOptions) => {
+const driver: DriverFactory<AzureCosmosOptions> = ((opts) => {
   let client: Container;
   const getCosmosClient = async () => {
     if (client) {
@@ -142,3 +142,6 @@ export default defineDriver((opts: AzureCosmosOptions) => {
     },
   };
 });
+
+
+export default driver;

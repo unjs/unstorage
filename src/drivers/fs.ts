@@ -4,7 +4,7 @@ import type { FSWatcher, ChokidarOptions } from "chokidar";
 import {
   createError,
   createRequiredError,
-  defineDriver,
+  type DriverFactory,
 } from "./utils/index.ts";
 import {
   readFile,
@@ -27,7 +27,7 @@ const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
 
 const DRIVER_NAME = "fs";
 
-export default defineDriver((userOptions: FSStorageOptions = {}) => {
+const driver: DriverFactory<FSStorageOptions> = ((userOptions = {}) => {
   if (!userOptions.base) {
     throw createRequiredError(DRIVER_NAME, "base");
   }
@@ -151,3 +151,6 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
     },
   };
 });
+
+
+export default driver;

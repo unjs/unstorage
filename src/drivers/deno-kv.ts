@@ -1,4 +1,4 @@
-import { defineDriver, createError, normalizeKey } from "./utils/index.ts";
+import { type DriverFactory, createError, normalizeKey } from "./utils/index.ts";
 import type { Kv, KvKey } from "@deno/kv";
 
 // https://docs.deno.com/deploy/kv/manual/
@@ -21,8 +21,8 @@ interface DenoKVSetOptions {
 
 const DRIVER_NAME = "deno-kv";
 
-export default defineDriver<DenoKvOptions, Promise<Deno.Kv | Kv>>(
-  (opts: DenoKvOptions = {}) => {
+const driver: DriverFactory<DenoKvOptions, Promise<Deno.Kv | Kv>> = (
+  (opts) => {
     const basePrefix: KvKey = opts.base
       ? normalizeKey(opts.base).split(":")
       : [];
@@ -130,3 +130,6 @@ export default defineDriver<DenoKvOptions, Promise<Deno.Kv | Kv>>(
 function normalizeTTL(ttl: number | undefined): number | undefined {
   return typeof ttl === "number" && ttl > 0 ? ttl * 1000 : undefined;
 }
+
+
+export default driver;

@@ -1,6 +1,6 @@
 import { Preferences } from "@capacitor/preferences";
 
-import { defineDriver, joinKeys, normalizeKey } from "./utils/index.ts";
+import { type DriverFactory, joinKeys, normalizeKey } from "./utils/index.ts";
 
 const DRIVER_NAME = "capacitor-preferences";
 
@@ -8,7 +8,7 @@ export interface CapacitorPreferencesOptions {
   base?: string;
 }
 
-export default defineDriver<CapacitorPreferencesOptions, typeof Preferences>(
+const driver: DriverFactory<CapacitorPreferencesOptions, typeof Preferences> = (
   (opts) => {
     const base = normalizeKey(opts?.base || "");
     const resolveKey = (key: string) => joinKeys(base, key);
@@ -51,3 +51,6 @@ export default defineDriver<CapacitorPreferencesOptions, typeof Preferences>(
     };
   }
 );
+
+
+export default driver;

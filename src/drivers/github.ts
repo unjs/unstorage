@@ -1,7 +1,7 @@
 import {
   createError,
   createRequiredError,
-  defineDriver,
+  type DriverFactory,
 } from "./utils/index.ts";
 import { $fetch } from "ofetch";
 import { withTrailingSlash, joinURL } from "./utils/path.ts";
@@ -59,7 +59,7 @@ const defaultOptions: GithubOptions = {
 
 const DRIVER_NAME = "github";
 
-export default defineDriver<GithubOptions>((_opts) => {
+const driver: DriverFactory<GithubOptions> = ((_opts) => {
   const opts: GithubOptions = { ...defaultOptions, ..._opts };
   const rawUrl = joinURL(
     opts.cdnURL!,
@@ -172,3 +172,6 @@ async function fetchFiles(opts: GithubOptions) {
     });
   }
 }
+
+
+export default driver;

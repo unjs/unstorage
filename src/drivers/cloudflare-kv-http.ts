@@ -2,7 +2,7 @@ import { $fetch } from "ofetch";
 import {
   createError,
   createRequiredError,
-  defineDriver,
+  type DriverFactory,
   joinKeys,
 } from "./utils/index.ts";
 
@@ -86,7 +86,7 @@ type CloudflareAuthorizationHeaders =
 
 const DRIVER_NAME = "cloudflare-kv-http";
 
-export default defineDriver<KVHTTPOptions>((opts) => {
+const driver: DriverFactory<KVHTTPOptions> = ((opts) => {
   if (!opts.accountId) {
     throw createRequiredError(DRIVER_NAME, "accountId");
   }
@@ -230,3 +230,6 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     clear,
   };
 });
+
+
+export default driver;

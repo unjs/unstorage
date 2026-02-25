@@ -1,5 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
-import { defineDriver, joinKeys } from "./utils/index.ts";
+import { type DriverFactory, joinKeys } from "./utils/index.ts";
 import { getKVBinding } from "./utils/cloudflare.ts";
 export interface KVOptions {
   binding?: string | KVNamespace;
@@ -18,7 +18,7 @@ export interface KVOptions {
 
 const DRIVER_NAME = "cloudflare-kv-binding";
 
-export default defineDriver((opts: KVOptions) => {
+const driver: DriverFactory<KVOptions> = ((opts) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   async function getKeys(base: string = "") {
@@ -85,3 +85,6 @@ export default defineDriver((opts: KVOptions) => {
     },
   };
 });
+
+
+export default driver;

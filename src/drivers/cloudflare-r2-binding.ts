@@ -1,5 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
-import { defineDriver, joinKeys } from "./utils/index.ts";
+import { type DriverFactory, joinKeys } from "./utils/index.ts";
 import { getR2Binding } from "./utils/cloudflare.ts";
 
 export interface CloudflareR2Options {
@@ -11,7 +11,7 @@ export interface CloudflareR2Options {
 
 const DRIVER_NAME = "cloudflare-r2-binding";
 
-export default defineDriver((opts: CloudflareR2Options = {}) => {
+const driver: DriverFactory<CloudflareR2Options> = ((opts = {}) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   const getKeys = async (base?: string) => {
@@ -107,3 +107,6 @@ function getObjBody(
     }
   }
 }
+
+
+export default driver;

@@ -1,4 +1,4 @@
-import { createRequiredError, defineDriver } from "./utils/index.ts";
+import { createRequiredError, type DriverFactory } from "./utils/index.ts";
 import type { ExecutedQuery, Connection } from "@planetscale/database";
 import { connect } from "@planetscale/database";
 
@@ -17,7 +17,7 @@ interface TableSchema {
 
 const DRIVER_NAME = "planetscale";
 
-export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
+const driver: DriverFactory<PlanetscaleDriverOptions> = ((opts = {}) => {
   opts.table = opts.table || "storage";
 
   let _connection: Connection;
@@ -102,3 +102,6 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
 function rows<T = TableSchema[]>(res: ExecutedQuery) {
   return (res.rows as T) || [];
 }
+
+
+export default driver;

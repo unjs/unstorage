@@ -1,4 +1,4 @@
-import { createRequiredError, defineDriver } from "./utils/index.ts";
+import { createRequiredError, type DriverFactory } from "./utils/index.ts";
 import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 
 export interface MongoDbOptions {
@@ -27,7 +27,7 @@ export interface MongoDbOptions {
 
 const DRIVER_NAME = "mongodb";
 
-export default defineDriver((opts: MongoDbOptions) => {
+const driver: DriverFactory<MongoDbOptions> = ((opts) => {
   let collection: Collection;
   const getMongoCollection = () => {
     if (!collection) {
@@ -118,3 +118,6 @@ export default defineDriver((opts: MongoDbOptions) => {
     },
   };
 });
+
+
+export default driver;

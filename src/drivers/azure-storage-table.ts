@@ -1,7 +1,7 @@
 import {
   createError,
   createRequiredError,
-  defineDriver,
+  type DriverFactory,
 } from "./utils/index.ts";
 import {
   TableClient,
@@ -52,7 +52,7 @@ export interface AzureStorageTableOptions {
 
 const DRIVER_NAME = "azure-storage-table";
 
-export default defineDriver((opts: AzureStorageTableOptions) => {
+const driver: DriverFactory<AzureStorageTableOptions> = ((opts) => {
   const {
     accountName = null,
     tableName = "unstorage",
@@ -176,3 +176,6 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
     },
   };
 });
+
+
+export default driver;

@@ -1,7 +1,7 @@
 import {
   createError,
   createRequiredError,
-  defineDriver,
+  type DriverFactory,
 } from "./utils/index.ts";
 import {
   SecretClient,
@@ -30,7 +30,7 @@ export interface AzureKeyVaultOptions {
 
 const DRIVER_NAME = "azure-key-vault";
 
-export default defineDriver((opts: AzureKeyVaultOptions) => {
+const driver: DriverFactory<AzureKeyVaultOptions> = ((opts) => {
   let keyVaultClient: SecretClient;
   const getKeyVaultClient = () => {
     if (keyVaultClient) {
@@ -139,3 +139,6 @@ function decode(value: string): string {
   });
   return Buffer.from(decoded, "base64").toString();
 }
+
+
+export default driver;

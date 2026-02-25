@@ -1,6 +1,6 @@
 import {
   createRequiredError,
-  defineDriver,
+  type DriverFactory,
   normalizeKey,
 } from "./utils/index.ts";
 
@@ -17,7 +17,7 @@ export interface LocalStorageOptions {
 
 const DRIVER_NAME = "localstorage";
 
-export default defineDriver((opts: LocalStorageOptions = {}) => {
+const driver: DriverFactory<LocalStorageOptions> = ((opts = {}) => {
   const storage: typeof window.localStorage | typeof window.sessionStorage =
     opts.storage ||
     opts.localStorage ||
@@ -94,3 +94,6 @@ export default defineDriver((opts: LocalStorageOptions = {}) => {
     },
   };
 });
+
+
+export default driver;

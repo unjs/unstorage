@@ -1,4 +1,4 @@
-import { defineDriver, createRequiredError } from "./utils/index.ts";
+import { type DriverFactory, createRequiredError } from "./utils/index.ts";
 import { AppConfigurationClient } from "@azure/app-configuration";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -36,7 +36,7 @@ export interface AzureAppConfigurationOptions {
 
 const DRIVER_NAME = "azure-app-configuration";
 
-export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
+const driver: DriverFactory<AzureAppConfigurationOptions> = ((opts = {}) => {
   const labelFilter = opts.label || "\0";
   const keyFilter = opts.prefix ? `${opts.prefix}:*` : "*";
   const p = (key: string) => (opts.prefix ? `${opts.prefix}:${key}` : key); // Prefix a key
@@ -144,3 +144,6 @@ export default defineDriver((opts: AzureAppConfigurationOptions = {}) => {
     },
   };
 });
+
+
+export default driver;

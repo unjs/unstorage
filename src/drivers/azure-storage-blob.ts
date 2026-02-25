@@ -1,4 +1,4 @@
-import { createError, defineDriver } from "./utils/index.ts";
+import { createError, type DriverFactory } from "./utils/index.ts";
 import {
   BlobServiceClient,
   ContainerClient,
@@ -47,7 +47,7 @@ export interface AzureStorageBlobOptions {
 
 const DRIVER_NAME = "azure-storage-blob";
 
-export default defineDriver((opts: AzureStorageBlobOptions) => {
+const driver: DriverFactory<AzureStorageBlobOptions> = ((opts) => {
   let containerClient: ContainerClient;
   const endpointSuffix = opts.endpointSuffix || ".blob.core.windows.net";
   const getContainerClient = () => {
@@ -230,3 +230,6 @@ async function blobToString(blob: Blob) {
     fileReader.readAsText(blob);
   });
 }
+
+
+export default driver;

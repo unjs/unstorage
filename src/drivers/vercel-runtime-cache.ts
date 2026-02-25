@@ -1,4 +1,4 @@
-import { defineDriver, normalizeKey, joinKeys } from "./utils/index.ts";
+import { type DriverFactory, normalizeKey, joinKeys } from "./utils/index.ts";
 import type { RuntimeCache } from "@vercel/functions";
 
 export interface VercelCacheOptions {
@@ -20,7 +20,7 @@ export interface VercelCacheOptions {
 
 const DRIVER_NAME = "vercel-runtime-cache";
 
-export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
+const driver: DriverFactory<VercelCacheOptions, RuntimeCache> = ((opts) => {
   const base = normalizeKey(opts?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
 
@@ -114,3 +114,6 @@ function tryRequireVCFunctions() {
   }
   return _vcFunctionsLib;
 }
+
+
+export default driver;

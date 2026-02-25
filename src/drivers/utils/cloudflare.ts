@@ -1,7 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 import { createError } from "./index.ts";
 
-export function getBinding(binding: KVNamespace | R2Bucket | string) {
+export function getBinding(binding: KVNamespace | R2Bucket | string): KVNamespace | R2Bucket {
   let bindingName = "[binding]";
 
   if (typeof binding === "string") {

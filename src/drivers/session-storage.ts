@@ -1,11 +1,11 @@
-import { defineDriver } from "./utils/index.ts";
+import { type DriverFactory } from "./utils/index.ts";
 import localstorage, { type LocalStorageOptions } from "./localstorage.ts";
 
 export interface SessionStorageOptions extends LocalStorageOptions {}
 
 const DRIVER_NAME = "session-storage";
 
-export default defineDriver((opts: SessionStorageOptions = {}) => {
+const driver: DriverFactory<SessionStorageOptions> = ((opts = {}) => {
   return {
     ...localstorage({
       windowKey: "sessionStorage",
@@ -14,3 +14,6 @@ export default defineDriver((opts: SessionStorageOptions = {}) => {
     name: DRIVER_NAME,
   };
 });
+
+
+export default driver;

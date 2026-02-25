@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils/index.ts";
+import { type DriverFactory } from "./utils/index.ts";
 import {
   get,
   set,
@@ -17,7 +17,7 @@ export interface IDBKeyvalOptions {
 
 const DRIVER_NAME = "idb-keyval";
 
-export default defineDriver((opts: IDBKeyvalOptions = {}) => {
+const driver: DriverFactory<IDBKeyvalOptions> = ((opts = {}) => {
   const base = opts.base && opts.base.length > 0 ? `${opts.base}:` : "";
   const makeKey = (key: string) => base + key;
 
@@ -58,3 +58,6 @@ export default defineDriver((opts: IDBKeyvalOptions = {}) => {
     },
   };
 });
+
+
+export default driver;

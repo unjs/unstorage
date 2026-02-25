@@ -3,7 +3,7 @@ import { resolve, join } from "node:path";
 import {
   createError,
   createRequiredError,
-  defineDriver,
+  type DriverFactory,
 } from "./utils/index.ts";
 import {
   readFile,
@@ -24,7 +24,7 @@ const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
 
 const DRIVER_NAME = "fs-lite";
 
-export default defineDriver((opts: FSStorageOptions = {}) => {
+const driver: DriverFactory<FSStorageOptions> = ((opts = {}) => {
   if (!opts.base) {
     throw createRequiredError(DRIVER_NAME, "base");
   }
@@ -91,3 +91,6 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     },
   };
 });
+
+
+export default driver;

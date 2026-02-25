@@ -1,5 +1,5 @@
 import {
-  defineDriver,
+  type DriverFactory,
   createRequiredError,
   normalizeKey,
   createError,
@@ -64,7 +64,7 @@ export interface S3ItemOptions {
 
 const DRIVER_NAME = "s3";
 
-export default defineDriver((options: S3DriverOptions) => {
+const driver: DriverFactory<S3DriverOptions> = ((options) => {
   let _awsClient: AwsClient;
   const getAwsClient = () => {
     if (!_awsClient) {
@@ -262,3 +262,6 @@ function parseList(xml: string) {
     })
     .filter(Boolean) as string[];
 }
+
+
+export default driver;

@@ -1,6 +1,6 @@
 import * as blob from "@vercel/blob";
 import {
-  defineDriver,
+  type DriverFactory,
   normalizeKey,
   joinKeys,
   createError,
@@ -35,7 +35,7 @@ export interface VercelBlobOptions {
 
 const DRIVER_NAME = "vercel-blob";
 
-export default defineDriver<VercelBlobOptions>((opts) => {
+const driver: DriverFactory<VercelBlobOptions> = ((opts) => {
   const optsBase = normalizeKey(opts?.base);
 
   const r = (...keys: string[]) =>
@@ -155,3 +155,6 @@ export default defineDriver<VercelBlobOptions>((opts) => {
     },
   };
 });
+
+
+export default driver;

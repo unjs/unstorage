@@ -4,7 +4,7 @@ import type {
   Response as CFResponse,
 } from "@cloudflare/workers-types";
 
-import { defineDriver, joinKeys } from "./utils/index.ts";
+import { type DriverFactory, joinKeys } from "./utils/index.ts";
 
 export interface CacheOptions {
   /**
@@ -29,7 +29,7 @@ export interface CacheOptions {
 
 const DRIVER_NAME = "cloudflare-cache-binding";
 
-export default defineDriver((opts: CacheOptions) => {
+const driver: DriverFactory<CacheOptions> = ((opts) => {
   const r = (key: string = "") => {
     if (opts.base) {
       key = joinKeys(opts.base, key);
@@ -110,3 +110,6 @@ export default defineDriver((opts: CacheOptions) => {
     },
   };
 });
+
+
+export default driver;

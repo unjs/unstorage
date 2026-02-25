@@ -1,7 +1,7 @@
 import {
   createError,
   createRequiredError,
-  defineDriver,
+  type DriverFactory,
 } from "./utils/index.ts";
 import type { GetKeysOptions } from "../types.ts";
 import { getStore, getDeployStore } from "@netlify/blobs";
@@ -46,7 +46,7 @@ export interface NetlifyNamedStoreOptions
   deployScoped?: false;
 }
 
-export default defineDriver((options: NetlifyStoreOptions) => {
+const driver: DriverFactory<NetlifyStoreOptions> = ((options) => {
   const { deployScoped, name, ...opts } = options;
   let store: Store;
 
@@ -125,3 +125,6 @@ export default defineDriver((options: NetlifyStoreOptions) => {
     },
   };
 });
+
+
+export default driver;

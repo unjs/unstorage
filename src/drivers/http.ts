@@ -1,5 +1,5 @@
 import type { TransactionOptions } from "../types.ts";
-import { defineDriver } from "./utils/index.ts";
+import { type DriverFactory } from "./utils/index.ts";
 import { type FetchError, $fetch as _fetch } from "ofetch";
 import { joinURL } from "./utils/path.ts";
 
@@ -10,7 +10,7 @@ export interface HTTPOptions {
 
 const DRIVER_NAME = "http";
 
-export default defineDriver((opts: HTTPOptions) => {
+const driver: DriverFactory<HTTPOptions> = ((opts) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
 
   const rBase = (key: string = "") =>
@@ -121,3 +121,6 @@ export default defineDriver((opts: HTTPOptions) => {
     },
   };
 });
+
+
+export default driver;

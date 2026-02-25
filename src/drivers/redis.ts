@@ -1,4 +1,4 @@
-import { defineDriver, joinKeys } from "./utils/index.ts";
+import { type DriverFactory, joinKeys } from "./utils/index.ts";
 import { Cluster, Redis } from "ioredis";
 
 import type {
@@ -50,7 +50,7 @@ export interface RedisOptions extends _RedisOptions {
 
 const DRIVER_NAME = "redis";
 
-export default defineDriver((opts: RedisOptions) => {
+const driver: DriverFactory<RedisOptions> = ((opts) => {
   let redisClient: Redis | Cluster;
   const getRedisClient = () => {
     if (redisClient) {
@@ -191,3 +191,6 @@ function isTypedArray(value: unknown): value is TypedArray {
     value instanceof BigUint64Array
   );
 }
+
+
+export default driver;

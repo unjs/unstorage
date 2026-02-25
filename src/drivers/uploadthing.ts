@@ -1,4 +1,4 @@
-import { defineDriver, normalizeKey } from "./utils/index.ts";
+import { type DriverFactory, normalizeKey } from "./utils/index.ts";
 import { UTApi } from "uploadthing/server";
 
 // Reference: https://docs.uploadthing.com
@@ -17,7 +17,7 @@ export interface UploadThingOptions extends UTApiOptions {
 
 const DRIVER_NAME = "uploadthing";
 
-export default defineDriver<UploadThingOptions, UTApi>((opts = {}) => {
+const driver: DriverFactory<UploadThingOptions, UTApi> = ((opts = {}) => {
   let client: UTApi;
 
   const base = opts.base ? normalizeKey(opts.base) : "";
@@ -102,3 +102,6 @@ export default defineDriver<UploadThingOptions, UTApi>((opts = {}) => {
     // },
   };
 });
+
+
+export default driver;

@@ -72,26 +72,26 @@ describe("drivers: fs", () => {
   it("excludes ignored folder in key listing", async () => {
     ctx.driver = driver({
       base: dir,
-      ignore: [resolve(dir, "folder1")]
-    })
+      ignore: [resolve(dir, "folder1")],
+    });
     ctx.storage = createStorage({
       driver: ctx.driver,
-    })
+    });
     await ctx.storage.setItem("folder1/file1", "boop");
-    expect(await ctx.storage.getKeys()).toHaveLength(0)
-  })
+    expect(await ctx.storage.getKeys()).toHaveLength(0);
+  });
 
   it("excludes ignored file in key listing", async () => {
     ctx.driver = driver({
       base: dir,
-      ignore: [resolve(dir, "folder1/file1")]
-    })
+      ignore: [resolve(dir, "folder1/file1")],
+    });
     ctx.storage = createStorage({
       driver: ctx.driver,
-    })
+    });
     await ctx.storage.setItem("folder1/file1", "boop");
-    expect(await ctx.storage.getKeys()).toHaveLength(0)
-  })
+    expect(await ctx.storage.getKeys()).toHaveLength(0);
+  });
 
   afterEach(async () => {
     await ctx.storage?.clear();

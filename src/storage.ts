@@ -510,7 +510,7 @@ export async function restoreSnapshot(
   driver: Storage,
   snapshot: Snapshot<StorageValue>,
   base = ""
-) {
+): Promise<void> {
   base = normalizeBaseKey(base);
   await Promise.all(
     Object.entries(snapshot).map((e) => driver.setItem(base + e[0], e[1]))

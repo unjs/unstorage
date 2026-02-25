@@ -79,7 +79,7 @@ export function prefixStorage<T extends StorageValue>(
   return nsStorage;
 }
 
-export function normalizeKey(key?: string) {
+export function normalizeKey(key?: string): string {
   if (!key) {
     return "";
   }
@@ -92,11 +92,11 @@ export function normalizeKey(key?: string) {
   );
 }
 
-export function joinKeys(...keys: string[]) {
+export function joinKeys(...keys: string[]): string {
   return normalizeKey(keys.join(":"));
 }
 
-export function normalizeBaseKey(base?: string) {
+export function normalizeBaseKey(base?: string): string {
   base = normalizeKey(base);
   return base ? base + ":" : "";
 }

@@ -1,5 +1,5 @@
 import type { Storage, TransactionOptions, StorageMeta } from "./types.ts";
-import { H3Event, defineHandler } from "h3";
+import { H3Event, HTTPError, defineHandler } from "h3";
 import { stringify } from "./_utils.ts";
 import { normalizeKey, normalizeBaseKey } from "./utils.ts";
 
@@ -47,7 +47,7 @@ export function createStorageHandler(
   req: globalThis.Request
 ) => globalThis.Response | Promise<globalThis.Response> {
   const handler = defineHandler(async (event) => {
-    const _path = opts.resolvePath?.(event) ?? event.url.pathname;
+    const _path = opts.resolvePath?.(event as { req: Request }) ?? event.url.pathname;
     const lastChar = _path[_path.length - 1];
     const isBaseKey = lastChar === ":" || lastChar === "/";
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);

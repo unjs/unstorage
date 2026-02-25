@@ -1,7 +1,7 @@
 type Awaited<T> = T extends Promise<infer U> ? Awaited<U> : T;
 type Promisified<T> = Promise<Awaited<T>>;
 
-export function wrapToPromise<T>(value: T) {
+export function wrapToPromise<T>(value: T): Promisified<T> {
   if (!value || typeof (value as any).then !== "function") {
     return Promise.resolve(value) as Promisified<T>;
   }

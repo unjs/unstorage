@@ -1,4 +1,4 @@
-import { createRequiredError, defineDriver } from "./utils/index.ts";
+import { createRequiredError, type DriverFactory } from "./utils/index.ts";
 import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
 
 export interface MongoDbOptions {
@@ -27,17 +27,14 @@ export interface MongoDbOptions {
 
 const DRIVER_NAME = "mongodb";
 
-export default defineDriver((opts: MongoDbOptions) => {
+const driver: DriverFactory<MongoDbOptions, Collection> = (opts) => {
   let collection: Collection;
   const getMongoCollection = () => {
     if (!collection) {
       if (!opts.connectionString) {
         throw createRequiredError(DRIVER_NAME, "connectionString");
       }
-      const mongoClient = new MongoClient(
-        opts.connectionString,
-        opts.clientOptions
-      );
+      const mongoClient = new MongoClient(opts.connectionString, opts.clientOptions);
       const db = mongoClient.db(opts.databaseName || "unstorage");
       collection = db.collection(opts.collectionName || "unstorage");
     }
@@ -77,7 +74,7 @@ export default defineDriver((opts: MongoDbOptions) => {
           $set: { key, value, modifiedAt: currentDateTime },
           $setOnInsert: { createdAt: currentDateTime },
         },
-        { upsert: true }
+        { upsert: true },
       );
     },
     async setItems(items) {
@@ -117,4 +114,6 @@ export default defineDriver((opts: MongoDbOptions) => {
       await getMongoCollection().deleteMany({});
     },
   };
-});
+};
+
+export default driver;

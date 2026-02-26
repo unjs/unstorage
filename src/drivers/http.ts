@@ -1,5 +1,5 @@
 import type { TransactionOptions } from "../types.ts";
-import { defineDriver } from "./utils/index.ts";
+import { type DriverFactory } from "./utils/index.ts";
 import { type FetchError, $fetch as _fetch } from "ofetch";
 import { joinURL } from "./utils/path.ts";
 
@@ -10,11 +10,10 @@ export interface HTTPOptions {
 
 const DRIVER_NAME = "http";
 
-export default defineDriver((opts: HTTPOptions) => {
+const driver: DriverFactory<HTTPOptions> = (opts) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
 
-  const rBase = (key: string = "") =>
-    joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
+  const rBase = (key: string = "") => joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
 
   const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
     if (error?.response?.status === 404) {
@@ -25,7 +24,7 @@ export default defineDriver((opts: HTTPOptions) => {
 
   const getHeaders = (
     topts: TransactionOptions | undefined,
-    defaultHeaders?: Record<string, string>
+    defaultHeaders?: Record<string, string>,
   ) => {
     const headers = {
       ...defaultHeaders,
@@ -120,4 +119,6 @@ export default defineDriver((opts: HTTPOptions) => {
       });
     },
   };
-});
+};
+
+export default driver;

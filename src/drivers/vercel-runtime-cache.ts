@@ -1,4 +1,4 @@
-import { defineDriver, normalizeKey, joinKeys } from "./utils/index.ts";
+import { type DriverFactory, normalizeKey, joinKeys } from "./utils/index.ts";
 import type { RuntimeCache } from "@vercel/functions";
 
 export interface VercelCacheOptions {
@@ -20,7 +20,7 @@ export interface VercelCacheOptions {
 
 const DRIVER_NAME = "vercel-runtime-cache";
 
-export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
+const driver: DriverFactory<VercelCacheOptions, RuntimeCache> = (opts) => {
   const base = normalizeKey(opts?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
 
@@ -46,9 +46,7 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
     },
     async setItem(key, value, tOptions) {
       const ttl = tOptions?.ttl ?? opts?.ttl;
-      const tags = [...(tOptions?.tags || []), ...(opts?.tags || [])].filter(
-        Boolean
-      );
+      const tags = [...(tOptions?.tags || []), ...(opts?.tags || [])].filter(Boolean);
 
       await getClient().set(r(key), value, {
         ttl,
@@ -70,7 +68,7 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
       }
     },
   };
-});
+};
 
 // --- internal ---
 
@@ -80,9 +78,7 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
 
 type Context = { cache?: RuntimeCache };
 
-const SYMBOL_FOR_REQ_CONTEXT = /*#__PURE__*/ Symbol.for(
-  "@vercel/request-context"
-);
+const SYMBOL_FOR_REQ_CONTEXT = /*#__PURE__*/ Symbol.for("@vercel/request-context");
 
 function getContext(): Context {
   const fromSymbol: typeof globalThis & {
@@ -108,9 +104,10 @@ let _vcFunctionsLib: typeof import("@vercel/functions") | undefined;
 
 function tryRequireVCFunctions() {
   if (!_vcFunctionsLib) {
-    const { createRequire } =
-      globalThis.process?.getBuiltinModule?.("node:module") || {};
+    const { createRequire } = globalThis.process?.getBuiltinModule?.("node:module") || {};
     _vcFunctionsLib = createRequire?.(import.meta.url)("@vercel/functions");
   }
   return _vcFunctionsLib;
 }
+
+export default driver;

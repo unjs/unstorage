@@ -13,10 +13,10 @@ jobs:
       - uses: actions/setup-node@v6
         with: { node-version: lts/*, cache: pnpm }
       - run: pnpm install
-      - run: pnpm lint
-      - run: pnpm test:types
       - run: pnpm build
+      - run: pnpm test:types
       - run: pnpm vitest --coverage
+      - run: pnpm lint
       - uses: codecov/codecov-action@v5
         with: { token: "${{ secrets.CODECOV_TOKEN }}" }
   publish:

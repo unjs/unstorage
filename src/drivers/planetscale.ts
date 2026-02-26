@@ -1,4 +1,4 @@
-import { createRequiredError, defineDriver } from "./utils/index.ts";
+import { createRequiredError, type DriverFactory } from "./utils/index.ts";
 import type { ExecutedQuery, Connection } from "@planetscale/database";
 import { connect } from "@planetscale/database";
 
@@ -17,7 +17,7 @@ interface TableSchema {
 
 const DRIVER_NAME = "planetscale";
 
-export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
+const driver: DriverFactory<PlanetscaleDriverOptions, Connection> = (opts = {}) => {
   opts.table = opts.table || "storage";
 
   let _connection: Connection;
@@ -33,14 +33,9 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
       });
       if (opts.boostCache) {
         // This query will be executed in background
-        _connection
-          .execute("SET @@boost_cached_queries = true;")
-          .catch((error) => {
-            console.error(
-              "[unstorage] [planetscale] Failed to enable cached queries:",
-              error
-            );
-          });
+        _connection.execute("SET @@boost_cached_queries = true;").catch((error) => {
+          console.error("[unstorage] [planetscale] Failed to enable cached queries:", error);
+        });
       }
     }
     return _connection;
@@ -53,33 +48,29 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
     hasItem: async (key) => {
       const res = await getConnection().execute(
         `SELECT EXISTS (SELECT 1 FROM ${opts.table} WHERE id = :key) as value;`,
-        { key }
+        { key },
       );
       return rows<{ value: string }[]>(res)[0]?.value == "1";
     },
     getItem: async (key) => {
-      const res = await getConnection().execute(
-        `SELECT value from ${opts.table} WHERE id=:key;`,
-        { key }
-      );
+      const res = await getConnection().execute(`SELECT value from ${opts.table} WHERE id=:key;`, {
+        key,
+      });
       return rows(res)[0]?.value ?? null;
     },
     setItem: async (key, value) => {
       await getConnection().execute(
         `INSERT INTO ${opts.table} (id, value) VALUES (:key, :value) ON DUPLICATE KEY UPDATE value = :value;`,
-        { key, value }
+        { key, value },
       );
     },
     removeItem: async (key) => {
-      await getConnection().execute(
-        `DELETE FROM ${opts.table} WHERE id=:key;`,
-        { key }
-      );
+      await getConnection().execute(`DELETE FROM ${opts.table} WHERE id=:key;`, { key });
     },
     getMeta: async (key) => {
       const res = await getConnection().execute(
         `SELECT created_at, updated_at from ${opts.table} WHERE id=:key;`,
-        { key }
+        { key },
       );
       return {
         birthtime: rows(res)[0]?.created_at,
@@ -89,7 +80,7 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
     getKeys: async (base = "") => {
       const res = await getConnection().execute(
         `SELECT id from ${opts.table} WHERE id LIKE :base;`,
-        { base: `${base}%` }
+        { base: `${base}%` },
       );
       return rows(res).map((r) => r.id);
     },
@@ -97,8 +88,10 @@ export default defineDriver((opts: PlanetscaleDriverOptions = {}) => {
       await getConnection().execute(`DELETE FROM ${opts.table};`);
     },
   };
-});
+};
 
 function rows<T = TableSchema[]>(res: ExecutedQuery) {
   return (res.rows as T) || [];
 }
+
+export default driver;

@@ -1,10 +1,5 @@
 import { $fetch } from "ofetch";
-import {
-  createError,
-  createRequiredError,
-  defineDriver,
-  joinKeys,
-} from "./utils/index.ts";
+import { createError, createRequiredError, type DriverFactory, joinKeys } from "./utils/index.ts";
 
 interface KVAuthAPIToken {
   /**
@@ -86,7 +81,7 @@ type CloudflareAuthorizationHeaders =
 
 const DRIVER_NAME = "cloudflare-kv-http";
 
-export default defineDriver<KVHTTPOptions>((opts) => {
+const driver: DriverFactory<KVHTTPOptions> = (opts) => {
   if (!opts.accountId) {
     throw createRequiredError(DRIVER_NAME, "accountId");
   }
@@ -105,7 +100,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   } else {
     throw createError(
       DRIVER_NAME,
-      "One of the `apiToken`, `userServiceKey`, or a combination of `email` and `apiKey` is required."
+      "One of the `apiToken`, `userServiceKey`, or a combination of `email` and `apiKey` is required.",
     );
   }
 
@@ -149,9 +144,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     return await kvFetch(`/values/${r(key)}`, {
       method: "PUT",
       body: value,
-      query: topts?.ttl
-        ? { expiration_ttl: Math.max(topts?.ttl, opts.minTTL || 60) }
-        : undefined,
+      query: topts?.ttl ? { expiration_ttl: Math.max(topts?.ttl, opts.minTTL || 60) } : undefined,
     });
   };
 
@@ -201,7 +194,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
         acc[acc.length - 1]!.push(key);
         return acc;
       },
-      [[]]
+      [[]],
     );
     // Call bulk delete endpoint with each chunk
     await Promise.all(
@@ -212,7 +205,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
             body: chunk,
           });
         }
-      })
+      }),
     );
   };
 
@@ -225,8 +218,10 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     removeItem,
     getKeys: (base?: string) =>
       getKeys(base).then((keys) =>
-        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key))
+        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key)),
       ),
     clear,
   };
-});
+};
+
+export default driver;

@@ -1,5 +1,5 @@
-import { defineDriver } from "./utils/index.ts";
-import type { Driver } from "../types.ts";
+import { type DriverFactory } from "./utils/index.ts";
+import type { Driver } from "unstorage";
 import { normalizeKey } from "./utils/index.ts";
 
 export interface OverlayStorageOptions {
@@ -10,7 +10,7 @@ const OVERLAY_REMOVED = "__OVERLAY_REMOVED__";
 
 const DRIVER_NAME = "overlay";
 
-export default defineDriver((options: OverlayStorageOptions) => {
+const driver: DriverFactory<OverlayStorageOptions> = (options) => {
   return {
     name: DRIVER_NAME,
     options: options,
@@ -53,7 +53,7 @@ export default defineDriver((options: OverlayStorageOptions) => {
         options.layers.map(async (layer) => {
           const keys = await layer.getKeys(base, opts);
           return keys.map((key) => normalizeKey(key));
-        })
+        }),
       );
       const uniqueKeys = [...new Set(allKeys.flat())];
       const existingKeys = await Promise.all(
@@ -62,7 +62,7 @@ export default defineDriver((options: OverlayStorageOptions) => {
             return false;
           }
           return key;
-        })
+        }),
       );
       return existingKeys.filter(Boolean) as string[];
     },
@@ -73,8 +73,10 @@ export default defineDriver((options: OverlayStorageOptions) => {
           if (layer.dispose) {
             await layer.dispose();
           }
-        })
+        }),
       );
     },
   };
-});
+};
+
+export default driver;

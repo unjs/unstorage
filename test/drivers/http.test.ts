@@ -13,10 +13,7 @@ describe("drivers: http", async () => {
         // console.log(req.key, req.type, req.event.node.req.headers);
         throw new Error("Missing global test header!");
       }
-      if (
-        key === "authorized" &&
-        request.headers.get("x-auth-header") !== "1"
-      ) {
+      if (key === "authorized" && request.headers.get("x-auth-header") !== "1") {
         // console.log(req.key, req.type, req.event.node.req.headers);
         throw new Error("Missing auth test header!");
       }

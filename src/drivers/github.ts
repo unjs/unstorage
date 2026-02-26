@@ -1,8 +1,4 @@
-import {
-  createError,
-  createRequiredError,
-  defineDriver,
-} from "./utils/index.ts";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
 import { $fetch } from "ofetch";
 import { withTrailingSlash, joinURL } from "./utils/path.ts";
 
@@ -59,12 +55,9 @@ const defaultOptions: GithubOptions = {
 
 const DRIVER_NAME = "github";
 
-export default defineDriver<GithubOptions>((_opts) => {
+const driver: DriverFactory<GithubOptions> = (_opts) => {
   const opts: GithubOptions = { ...defaultOptions, ..._opts };
-  const rawUrl = joinURL(
-    opts.cdnURL!,
-    [opts.repo, opts.branch!, opts.dir!].join("/")
-  );
+  const rawUrl = joinURL(opts.cdnURL!, [opts.repo, opts.branch!, opts.dir!].join("/"));
 
   let files: Record<string, GithubFile> = {};
   let lastCheck = 0;
@@ -119,11 +112,9 @@ export default defineDriver<GithubOptions>((_opts) => {
               : undefined,
           });
         } catch (error) {
-          throw createError(
-            "github",
-            `Failed to fetch \`${JSON.stringify(key)}\``,
-            { cause: error }
-          );
+          throw createError("github", `Failed to fetch \`${JSON.stringify(key)}\``, {
+            cause: error,
+          });
         }
       }
       return item.body;
@@ -134,22 +125,19 @@ export default defineDriver<GithubOptions>((_opts) => {
       return item ? item.meta : null;
     },
   };
-});
+};
 
 async function fetchFiles(opts: GithubOptions) {
   const prefix = withTrailingSlash(opts.dir).replace(/^\//, "");
   const files: Record<string, GithubFile> = {};
   try {
-    const trees = await $fetch(
-      `/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`,
-      {
-        baseURL: opts.apiURL,
-        headers: {
-          "User-Agent": "unstorage",
-          ...(opts.token && { Authorization: `token ${opts.token}` }),
-        },
-      }
-    );
+    const trees = await $fetch(`/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`, {
+      baseURL: opts.apiURL,
+      headers: {
+        "User-Agent": "unstorage",
+        ...(opts.token && { Authorization: `token ${opts.token}` }),
+      },
+    });
 
     for (const node of trees.tree) {
       if (node.type !== "blob" || !node.path.startsWith(prefix)) {
@@ -172,3 +160,5 @@ async function fetchFiles(opts: GithubOptions) {
     });
   }
 }
+
+export default driver;

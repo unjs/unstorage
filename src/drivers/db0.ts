@@ -1,5 +1,5 @@
-import type { Database } from "db0";
-import { createError, defineDriver } from "./utils/index.ts";
+import type { Connector, Database } from "db0";
+import { createError, type DriverFactory } from "./utils/index.ts";
 
 interface ResultSchema {
   rows: Array<{
@@ -20,7 +20,7 @@ const DEFAULT_TABLE_NAME = "unstorage";
 
 const kExperimentalWarning = "__unstorage_db0_experimental_warning__";
 
-export default defineDriver((opts: DB0DriverOptions) => {
+const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (opts) => {
   opts.tableName = opts.tableName || DEFAULT_TABLE_NAME;
 
   let setupPromise: Promise<void> | undefined;
@@ -32,7 +32,7 @@ export default defineDriver((opts: DB0DriverOptions) => {
     if (!setupPromise) {
       if (!(globalThis as any)[kExperimentalWarning]) {
         console.warn(
-          "[unstorage]: Database driver is experimental and behavior may change in the future."
+          "[unstorage]: Database driver is experimental and behavior may change in the future.",
         );
         (globalThis as any)[kExperimentalWarning] = true;
       }
@@ -53,68 +53,66 @@ export default defineDriver((opts: DB0DriverOptions) => {
     async hasItem(key) {
       await ensureTable();
       const { rows } = isMysql
-        ? await opts.database
-            .sql<ResultSchema> /* sql */ `SELECT EXISTS (SELECT 1 FROM {${opts.tableName}} WHERE \`key\` = ${key}) AS \`value\``
-        : await opts.database
-            .sql<ResultSchema> /* sql */ `SELECT EXISTS (SELECT 1 FROM {${opts.tableName}} WHERE key = ${key}) AS value`;
+        ? await opts.database.sql<ResultSchema>
+          /* sql */ `SELECT EXISTS (SELECT 1 FROM {${opts.tableName}} WHERE \`key\` = ${key}) AS \`value\``
+        : await opts.database.sql<ResultSchema>
+          /* sql */ `SELECT EXISTS (SELECT 1 FROM {${opts.tableName}} WHERE key = ${key}) AS value`;
       return rows?.[0]?.value == "1";
     },
     getItem: async (key) => {
       await ensureTable();
       const { rows } = isMysql
-        ? await opts.database
-            .sql<ResultSchema> /* sql */ `SELECT value FROM {${opts.tableName}} WHERE \`key\` = ${key}`
-        : await opts.database
-            .sql<ResultSchema> /* sql */ `SELECT value FROM {${opts.tableName}} WHERE key = ${key}`;
+        ? await opts.database.sql<ResultSchema>
+          /* sql */ `SELECT value FROM {${opts.tableName}} WHERE \`key\` = ${key}`
+        : await opts.database.sql<ResultSchema>
+          /* sql */ `SELECT value FROM {${opts.tableName}} WHERE key = ${key}`;
       return rows?.[0]?.value ?? null;
     },
     getItemRaw: async (key) => {
       await ensureTable();
       const { rows } = isMysql
-        ? await opts.database
-            .sql<ResultSchema> /* sql */ `SELECT \`blob\` as value FROM {${opts.tableName}} WHERE \`key\` = ${key}`
-        : await opts.database
-            .sql<ResultSchema> /* sql */ `SELECT blob as value FROM {${opts.tableName}} WHERE key = ${key}`;
+        ? await opts.database.sql<ResultSchema>
+          /* sql */ `SELECT \`blob\` as value FROM {${opts.tableName}} WHERE \`key\` = ${key}`
+        : await opts.database.sql<ResultSchema>
+          /* sql */ `SELECT blob as value FROM {${opts.tableName}} WHERE key = ${key}`;
       return rows?.[0]?.value ?? null;
     },
     setItem: async (key, value) => {
       await ensureTable();
       if (isMysql) {
-        await opts.database
-          .sql /* sql */ `INSERT INTO {${opts.tableName}} (\`key\`, \`value\`, created_at, updated_at) VALUES (${key}, ${value}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE value = ${value}, updated_at = CURRENT_TIMESTAMP`;
+        await opts.database.sql
+        /* sql */ `INSERT INTO {${opts.tableName}} (\`key\`, \`value\`, created_at, updated_at) VALUES (${key}, ${value}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE value = ${value}, updated_at = CURRENT_TIMESTAMP`;
       } else {
-        await opts.database
-          .sql /* sql */ `INSERT INTO {${opts.tableName}} (key, value, created_at, updated_at) VALUES (${key}, ${value}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = ${value}, updated_at = CURRENT_TIMESTAMP`;
+        await opts.database.sql
+        /* sql */ `INSERT INTO {${opts.tableName}} (key, value, created_at, updated_at) VALUES (${key}, ${value}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = ${value}, updated_at = CURRENT_TIMESTAMP`;
       }
     },
     async setItemRaw(key, value) {
       await ensureTable();
       if (isMysql) {
         const blob = Buffer.from(value) as any;
-        await opts.database
-          .sql /* sql */ `INSERT INTO {${opts.tableName}} (\`key\`, \`blob\`, created_at, updated_at) VALUES (${key}, ${blob}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE \`blob\` = ${blob}, updated_at = CURRENT_TIMESTAMP`;
+        await opts.database.sql
+        /* sql */ `INSERT INTO {${opts.tableName}} (\`key\`, \`blob\`, created_at, updated_at) VALUES (${key}, ${blob}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE \`blob\` = ${blob}, updated_at = CURRENT_TIMESTAMP`;
       } else {
-        await opts.database
-          .sql /* sql */ `INSERT INTO {${opts.tableName}} (key, blob, created_at, updated_at) VALUES (${key}, ${value}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET blob = ${value}, updated_at = CURRENT_TIMESTAMP`;
+        await opts.database.sql
+        /* sql */ `INSERT INTO {${opts.tableName}} (key, blob, created_at, updated_at) VALUES (${key}, ${value}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET blob = ${value}, updated_at = CURRENT_TIMESTAMP`;
       }
     },
     removeItem: async (key) => {
       await ensureTable();
       if (isMysql) {
-        await opts.database
-          .sql /* sql */ `DELETE FROM {${opts.tableName}} WHERE \`key\`=${key}`;
+        await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}} WHERE \`key\`=${key}`;
       } else {
-        await opts.database
-          .sql /* sql */ `DELETE FROM {${opts.tableName}} WHERE key=${key}`;
+        await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}} WHERE key=${key}`;
       }
     },
     getMeta: async (key) => {
       await ensureTable();
       const { rows } = isMysql
-        ? await opts.database
-            .sql<ResultSchema> /* sql */ `SELECT created_at, updated_at FROM {${opts.tableName}} WHERE \`key\` = ${key}`
-        : await opts.database
-            .sql<ResultSchema> /* sql */ `SELECT created_at, updated_at FROM {${opts.tableName}} WHERE key = ${key}`;
+        ? await opts.database.sql<ResultSchema>
+          /* sql */ `SELECT created_at, updated_at FROM {${opts.tableName}} WHERE \`key\` = ${key}`
+        : await opts.database.sql<ResultSchema>
+          /* sql */ `SELECT created_at, updated_at FROM {${opts.tableName}} WHERE key = ${key}`;
 
       return {
         birthtime: toDate(rows?.[0]?.created_at),
@@ -124,10 +122,10 @@ export default defineDriver((opts: DB0DriverOptions) => {
     getKeys: async (base = "") => {
       await ensureTable();
       const { rows } = isMysql
-        ? await opts.database
-            .sql<ResultSchema> /* sql */ `SELECT \`key\` FROM {${opts.tableName}} WHERE \`key\` LIKE ${base + "%"}`
-        : await opts.database
-            .sql<ResultSchema> /* sql */ `SELECT key FROM {${opts.tableName}} WHERE key LIKE ${base + "%"}`;
+        ? await opts.database.sql<ResultSchema>
+          /* sql */ `SELECT \`key\` FROM {${opts.tableName}} WHERE \`key\` LIKE ${base + "%"}`
+        : await opts.database.sql<ResultSchema>
+          /* sql */ `SELECT key FROM {${opts.tableName}} WHERE key LIKE ${base + "%"}`;
 
       return rows?.map((r) => r.key);
     },
@@ -135,8 +133,11 @@ export default defineDriver((opts: DB0DriverOptions) => {
       await ensureTable();
       await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}}`;
     },
+    dispose: async () => {
+      await opts.database.dispose();
+    },
   };
-});
+};
 
 /** Run database init/migration once */
 async function setupTable(opts: DB0DriverOptions) {
@@ -179,10 +180,7 @@ async function setupTable(opts: DB0DriverOptions) {
       return;
     }
     default: {
-      throw createError(
-        DRIVER_NAME,
-        `unsuppoted SQL dialect: ${opts.database.dialect}`
-      );
+      throw createError(DRIVER_NAME, `unsuppoted SQL dialect: ${opts.database.dialect}`);
     }
   }
 }
@@ -190,3 +188,5 @@ async function setupTable(opts: DB0DriverOptions) {
 function toDate(timestamp: string | undefined): Date | undefined {
   return timestamp ? new Date(timestamp) : undefined;
 }
+
+export default driver;

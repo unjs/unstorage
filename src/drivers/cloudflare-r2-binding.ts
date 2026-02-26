@@ -1,9 +1,9 @@
-/// <reference types="@cloudflare/workers-types" />
-import { defineDriver, joinKeys } from "./utils/index.ts";
+import type * as CF from "@cloudflare/workers-types";
+import { type DriverFactory, joinKeys } from "./utils/index.ts";
 import { getR2Binding } from "./utils/cloudflare.ts";
 
 export interface CloudflareR2Options {
-  binding?: string | R2Bucket;
+  binding?: string | CF.R2Bucket;
   base?: string;
 }
 
@@ -11,14 +11,12 @@ export interface CloudflareR2Options {
 
 const DRIVER_NAME = "cloudflare-r2-binding";
 
-export default defineDriver((opts: CloudflareR2Options = {}) => {
+const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   const getKeys = async (base?: string) => {
     const binding = getR2Binding(opts.binding);
-    const kvList = await binding.list(
-      base || opts.base ? { prefix: r(base) } : undefined
-    );
+    const kvList = await binding.list(base || opts.base ? { prefix: r(base) } : undefined);
     return kvList.objects.map((obj) => obj.key);
   };
 
@@ -51,7 +49,7 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
       key = r(key);
       const binding = getR2Binding(opts.binding);
       const object = await binding.get(key, topts);
-      return object ? getObjBody(object, topts?.type) : null;
+      return object ? getObjBody(object as any, topts?.type) : null;
     },
     async setItem(key, value, topts) {
       key = r(key);
@@ -70,7 +68,7 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
     },
     getKeys(base) {
       return getKeys(base).then((keys) =>
-        opts.base ? keys.map((key) => key.slice(opts.base!.length)) : keys
+        opts.base ? keys.map((key) => key.slice(opts.base!.length)) : keys,
       );
     },
     async clear(base) {
@@ -79,11 +77,11 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
       await binding.delete(keys);
     },
   };
-});
+};
 
 function getObjBody(
   object: R2ObjectBody,
-  type: "object" | "stream" | "blob" | "arrayBuffer" | "bytes"
+  type: "object" | "stream" | "blob" | "arrayBuffer" | "bytes",
 ) {
   switch (type) {
     case "object": {
@@ -107,3 +105,5 @@ function getObjBody(
     }
   }
 }
+
+export default driver;

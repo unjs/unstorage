@@ -1,13 +1,5 @@
-import { defineDriver } from "./utils/index.ts";
-import {
-  get,
-  set,
-  clear,
-  del,
-  keys,
-  createStore,
-  type UseStore,
-} from "idb-keyval";
+import { type DriverFactory } from "./utils/index.ts";
+import { get, set, clear, del, keys, createStore, type UseStore } from "idb-keyval";
 
 export interface IDBKeyvalOptions {
   base?: string;
@@ -17,7 +9,7 @@ export interface IDBKeyvalOptions {
 
 const DRIVER_NAME = "idb-keyval";
 
-export default defineDriver((opts: IDBKeyvalOptions = {}) => {
+const driver: DriverFactory<IDBKeyvalOptions> = (opts = {}) => {
   const base = opts.base && opts.base.length > 0 ? `${opts.base}:` : "";
   const makeKey = (key: string) => base + key;
 
@@ -57,4 +49,6 @@ export default defineDriver((opts: IDBKeyvalOptions = {}) => {
       return clear(customStore);
     },
   };
-});
+};
+
+export default driver;

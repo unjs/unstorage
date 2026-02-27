@@ -127,12 +127,31 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
   const listObjects = async (prefix?: string) => {
-    const res = await awsFetch(baseURL).then((r) => r?.text());
-    if (!res) {
-      console.log("no list", prefix ? `${baseURL}?prefix=${prefix}` : baseURL);
-      return null;
-    }
-    return parseList(res);
+    const keys: string[] = [];
+    let continuationToken: string | undefined;
+
+    do {
+      const params = new URLSearchParams();
+      params.append("list-type", "2");
+      if (prefix) {
+        params.append("prefix", normalizeKey(prefix, "/"));
+      }
+      if (continuationToken) {
+        params.append("continuation-token", continuationToken);
+      }
+
+      const url = `${baseURL}?${params.toString()}`;
+      const res = await awsFetch(url).then((r) => r?.text());
+      if (!res) {
+        break;
+      }
+
+      const result = parseList(res);
+      keys.push(...result.keys);
+      continuationToken = result.nextToken;
+    } while (continuationToken);
+
+    return keys.length > 0 ? keys : null;
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
@@ -249,14 +268,18 @@ function parseList(xml: string) {
   }
   const contents = listBucketResult.match(/<Contents[^>]*>([\s\S]*?)<\/Contents>/g);
   if (!contents?.length) {
-    return [];
+    return { keys: [] };
   }
-  return contents
+  const keys = contents
     .map((content) => {
       const key = content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1];
       return key;
     })
     .filter(Boolean) as string[];
+  const nextToken = listBucketResult.match(
+    /<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/
+  )?.[1];
+  return { keys, nextToken };
 }
 
 export default driver;

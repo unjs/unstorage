@@ -36,6 +36,24 @@ describe("drivers: redis", () => {
 
         await client.disconnect();
       });
+
+      it("sets default clientInfoTag with version", () => {
+        const instance = driver.getInstance?.();
+        const tag = (instance?.options as any)?.clientInfoTag;
+        // Should be either "unstorage_vX.X.X" or "unstorage" (fallback)
+        expect(tag).toMatch(/^unstorage(_v[\d.]+.*)?$/);
+      });
+
+      it("allows custom clientInfoTag", () => {
+        const customDriver = redisDriver({
+          base: "test:",
+          url: "ioredis://localhost:6379/0",
+          lazyConnect: false,
+          clientInfoTag: "my-custom-app",
+        });
+        const instance = customDriver.getInstance?.();
+        expect((instance?.options as any)?.clientInfoTag).toBe("my-custom-app");
+      });
     },
   });
 });

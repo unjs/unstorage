@@ -1,0 +1,54 @@
+name: Test Compatibility
+
+on:
+  schedule:
+    - cron: "0 0 1 * *" # 1st of every month
+
+permissions:
+  id-token: write
+
+jobs:
+  ci:
+    strategy:
+      matrix:
+        packageName:
+          - "@azure/app-configuration@latest"
+          - "@azure/cosmos@latest"
+          - "@azure/data-tables@latest"
+          - "@azure/identity@latest"
+          - "@azure/keyvault-secrets@latest"
+          - "@azure/storage-blob@latest"
+          - "@capacitor/preferences@latest"
+          - "@deno/kv@latest"
+          - "@netlify/blobs@latest"
+          - "@planetscale/database@latest"
+          - "@upstash/redis@latest"
+          - "@vercel/blob@latest"
+          - "@vercel/kv@latest"
+          - "aws4fetch@latest"
+          - "db0@latest"
+          - "idb-keyval@latest"
+          - "ioredis@latest"
+          - "uploadthing@latest"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: npm i -fg corepack && corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install
+      - run: pnpm i ${{ matrix.packageName }}
+      - run: pnpm build
+      - run: pnpm vitest
+        env:
+          VITE_UPSTASH_REDIS_REST_URL: ${{ secrets.VITE_UPSTASH_REDIS_REST_URL }}
+          VITE_UPSTASH_REDIS_REST_TOKEN: ${{ secrets.VITE_UPSTASH_REDIS_REST_TOKEN }}
+          VITE_VERCEL_BLOB_READ_WRITE_TOKEN: ${{ secrets.VITE_VERCEL_BLOB_READ_WRITE_TOKEN }}
+          VITE_CLOUDFLARE_ACC_ID: ${{ secrets.VITE_CLOUDFLARE_ACC_ID }}
+          VITE_CLOUDFLARE_KV_NS_ID: ${{ secrets.VITE_CLOUDFLARE_KV_NS_ID }}
+          VITE_CLOUDFLARE_TOKEN: ${{ secrets.VITE_CLOUDFLARE_TOKEN }}
+          VITE_UPLOADTHING_TOKEN: ${{ secrets.VITE_UPLOADTHING_TOKEN }}

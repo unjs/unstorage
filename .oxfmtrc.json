@@ -1,4 +1,4 @@
 {
   "$schema": "https://unpkg.com/oxfmt/configuration_schema.json",
-  "ignorePatterns": ["src/_drivers.ts", "CHANGELOG.md"]
+  "ignorePatterns": ["src/_drivers.ts", "CHANGELOG.md", "docs/2.drivers/0.index.md"]
 }

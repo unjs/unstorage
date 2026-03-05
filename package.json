@@ -33,6 +33,9 @@
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
     "test:types": "tsgo --noEmit --skipLibCheck"
   },
+  "dependencies": {
+    "picomatch": "^4.0.3"
+  },
   "devDependencies": {
     "@azure/app-configuration": "^1.11.0",
     "@azure/cosmos": "^4.9.1",

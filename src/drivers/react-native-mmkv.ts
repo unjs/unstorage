@@ -67,7 +67,15 @@ const driver: DriverFactory<ReactNativeMmkvDriverOptions, MMKV> = (opts) => {
     },
     watch(callback) {
       const listener = mmkv.addOnValueChangedListener((key) => {
-        callback("update", key);
+        if (base && key !== base && !key.startsWith(base + ":")) {
+          return;
+        }
+        const scopedKey = base
+          ? key === base
+            ? ""
+            : key.slice(base.length + 1)
+          : key;
+        callback("update", scopedKey);
       });
       return () => listener.remove();
     },

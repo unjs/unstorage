@@ -79,8 +79,8 @@ const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts: RedisOptions
       const clusterOptions = {
         ...options.clusterOptions,
         redisOptions: {
-          clientInfoTag: options.clientInfoTag,
           ...options.clusterOptions?.redisOptions,
+          clientInfoTag: options.clientInfoTag,
         },
       };
       redisClient = new Redis.Cluster(options.cluster, clusterOptions);

@@ -62,8 +62,7 @@ function getDefaultClientInfoTag(): string {
   return "unstorage";
 }
 
-export default defineDriver((opts: RedisOptions) => {
-const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts) => {
+const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts: RedisOptions) => {
   let redisClient: Redis | Cluster;
   const getRedisClient = () => {
     if (redisClient) {

@@ -38,7 +38,7 @@ describe("drivers: redis", () => {
       });
 
       it("sets default clientInfoTag with version", () => {
-        const instance = driver.getInstance?.();
+        const instance = ctx.driver.getInstance?.();
         const tag = (instance?.options as any)?.clientInfoTag;
         // Should be either "unstorage_vX.X.X" or "unstorage" (fallback)
         expect(tag).toMatch(/^unstorage(_v[\d.]+.*)?$/);

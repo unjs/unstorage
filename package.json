@@ -81,6 +81,7 @@
     "ofetch": "^1.5.1",
     "oxfmt": "^0.35.0",
     "oxlint": "^1.50.0",
+    "react-native-mmkv": "^3.3.3",
     "scule": "^1.3.0",
     "srvx": "^0.11.7",
     "typescript": "^5.9.3",
@@ -112,6 +113,7 @@
     "lru-cache": "^11.2.6",
     "mongodb": "^6 || ^7",
     "ofetch": "*",
+    "react-native-mmkv": "^2.0.0 || ^3.0.0",
     "uploadthing": "^7.7.4"
   },
   "peerDependenciesMeta": {
@@ -179,6 +181,9 @@
       "optional": true
     },
     "ofetch": {
+      "optional": true
+    },
+    "react-native-mmkv": {
       "optional": true
     },
     "uploadthing": {

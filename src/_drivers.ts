@@ -25,6 +25,7 @@ import type { MongoDbOptions as MongodbOptions } from "unstorage/drivers/mongodb
 import type { NetlifyStoreOptions as NetlifyBlobsOptions } from "unstorage/drivers/netlify-blobs";
 import type { OverlayStorageOptions as OverlayOptions } from "unstorage/drivers/overlay";
 import type { PlanetscaleDriverOptions as PlanetscaleOptions } from "unstorage/drivers/planetscale";
+import type { ReactNativeMmkvDriverOptions as ReactNativeMmKVOptions } from "unstorage/drivers/react-native-mmkv";
 import type { RedisOptions } from "unstorage/drivers/redis";
 import type { S3DriverOptions as S3Options } from "unstorage/drivers/s3";
 import type { SessionStorageOptions } from "unstorage/drivers/session-storage";
@@ -33,7 +34,7 @@ import type { UpstashOptions } from "unstorage/drivers/upstash";
 import type { VercelBlobOptions } from "unstorage/drivers/vercel-blob";
 import type { VercelCacheOptions as VercelRuntimeCacheOptions } from "unstorage/drivers/vercel-runtime-cache";
 
-export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-cache-binding" | "cloudflareCacheBinding" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-runtime-cache" | "vercelRuntimeCache";
+export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-cache-binding" | "cloudflareCacheBinding" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "react-native-mmkv" | "reactNativeMmKV" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-runtime-cache" | "vercelRuntimeCache";
 
 export type BuiltinDriverOptions = {
   "azure-app-configuration": AzureAppConfigurationOptions;
@@ -75,6 +76,8 @@ export type BuiltinDriverOptions = {
   "netlifyBlobs": NetlifyBlobsOptions;
   "overlay": OverlayOptions;
   "planetscale": PlanetscaleOptions;
+  "react-native-mmkv": ReactNativeMmKVOptions;
+  "reactNativeMmKV": ReactNativeMmKVOptions;
   "redis": RedisOptions;
   "s3": S3Options;
   "session-storage": SessionStorageOptions;
@@ -129,6 +132,8 @@ export const builtinDrivers = {
   "null": "unstorage/drivers/null",
   "overlay": "unstorage/drivers/overlay",
   "planetscale": "unstorage/drivers/planetscale",
+  "react-native-mmkv": "unstorage/drivers/react-native-mmkv",
+  "reactNativeMmKV": "unstorage/drivers/react-native-mmkv",
   "redis": "unstorage/drivers/redis",
   "s3": "unstorage/drivers/s3",
   "session-storage": "unstorage/drivers/session-storage",

@@ -28,4 +28,8 @@ describe("drivers: tauri", () => {
   testDriver({
     driver: driver({ path: "store.json" }),
   });
+
+  testDriver({
+    driver: driver({ path: "store.json", base: "app" }),
+  });
 });

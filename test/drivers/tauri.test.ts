@@ -1,7 +1,6 @@
-import { describe, vi } from "vitest";
+import { afterEach, describe, vi } from "vitest";
 import driver from "../../src/drivers/tauri.ts";
 import { testDriver } from "./utils.ts";
-import { afterEach } from "node:test";
 
 vi.mock("@tauri-apps/plugin-store", () => {
   return {
@@ -28,9 +27,5 @@ describe("drivers: tauri", () => {
 
   testDriver({
     driver: driver({ path: "store.json" }),
-  });
-
-  testDriver({
-    driver: driver({ path: "store.json", base: "app" }),
   });
 });

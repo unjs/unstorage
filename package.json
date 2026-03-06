@@ -147,6 +147,9 @@
     "@planetscale/database": {
       "optional": true
     },
+    "@tauri-apps/plugin-store": {
+      "optional": true
+    },
     "@upstash/redis": {
       "optional": true
     },
@@ -181,9 +184,6 @@
       "optional": true
     },
     "ofetch": {
-      "optional": true
-    },
-    "@tauri-apps/plugin-store": {
       "optional": true
     },
     "uploadthing": {

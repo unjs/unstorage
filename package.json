@@ -47,6 +47,7 @@
     "@libsql/client": "^0.17.0",
     "@netlify/blobs": "^10.7.0",
     "@planetscale/database": "^1.19.0",
+    "@tauri-apps/plugin-store": "^2.4.2",
     "@types/deno": "^2.5.0",
     "@types/ioredis-mock": "^8.2.6",
     "@types/jsdom": "^28.0.0",
@@ -100,6 +101,7 @@
     "@deno/kv": ">=0.13.0",
     "@netlify/blobs": "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0",
     "@planetscale/database": "^1.19.0",
+    "@tauri-apps/plugin-store": "^2.0.0",
     "@upstash/redis": "^1.36.2",
     "@vercel/blob": ">=0.27.3",
     "@vercel/functions": "^2.2.12 || ^3.0.0",
@@ -143,6 +145,9 @@
       "optional": true
     },
     "@planetscale/database": {
+      "optional": true
+    },
+    "@tauri-apps/plugin-store": {
       "optional": true
     },
     "@upstash/redis": {

@@ -56,7 +56,10 @@ export interface RedisOptions extends _RedisOptions {
 const DRIVER_NAME = "redis";
 
 function getDefaultClientInfoTag(): string {
-  return `unstorage_v${pkg.version}`;
+  if (pkg.version) {
+    return `unstorage_v${pkg.version}`;
+  }
+  return "unstorage";
 }
 
 export default defineDriver((opts: RedisOptions) => {

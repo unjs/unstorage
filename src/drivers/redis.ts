@@ -55,6 +55,10 @@ export interface RedisOptions extends _RedisOptions {
 
 const DRIVER_NAME = "redis";
 
+/**
+ * Returns the default client info tag for Redis CLIENT SETINFO.
+ * Uses the package version if available, otherwise falls back to "unstorage".
+ */
 function getDefaultClientInfoTag(): string {
   if (pkg.version) {
     return `unstorage_v${pkg.version}`;

@@ -71,7 +71,7 @@
     "idb-keyval": "^6.2.2",
     "ioredis": "^5.9.3",
     "ioredis-mock": "^8.13.1",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.0.0",
     "lru-cache": "^11.2.6",
     "mitata": "^1.0.34",
     "mlly": "^1.8.0",

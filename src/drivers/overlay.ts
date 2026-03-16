@@ -1,6 +1,6 @@
-import { defineDriver } from "./utils";
-import type { Driver } from "../types";
-import { normalizeKey } from "./utils";
+import { type DriverFactory } from "./utils/index.ts";
+import type { Driver } from "unstorage";
+import { normalizeKey } from "./utils/index.ts";
 
 export interface OverlayStorageOptions {
   layers: Driver[];
@@ -10,17 +10,18 @@ const OVERLAY_REMOVED = "__OVERLAY_REMOVED__";
 
 const DRIVER_NAME = "overlay";
 
-export default defineDriver((options: OverlayStorageOptions) => {
+const driver: DriverFactory<OverlayStorageOptions> = (options) => {
   return {
     name: DRIVER_NAME,
     options: options,
     async hasItem(key, opts) {
       for (const layer of options.layers) {
         if (await layer.hasItem(key, opts)) {
-          if (layer === options.layers[0]) {
-            if ((await options.layers[0]?.getItem(key)) === OVERLAY_REMOVED) {
-              return false;
-            }
+          if (
+            layer === options.layers[0] &&
+            (await options.layers[0]?.getItem(key)) === OVERLAY_REMOVED
+          ) {
+            return false;
           }
           return true;
         }
@@ -52,16 +53,16 @@ export default defineDriver((options: OverlayStorageOptions) => {
         options.layers.map(async (layer) => {
           const keys = await layer.getKeys(base, opts);
           return keys.map((key) => normalizeKey(key));
-        })
+        }),
       );
-      const uniqueKeys = Array.from(new Set(allKeys.flat()));
+      const uniqueKeys = [...new Set(allKeys.flat())];
       const existingKeys = await Promise.all(
         uniqueKeys.map(async (key) => {
           if ((await options.layers[0]?.getItem(key)) === OVERLAY_REMOVED) {
             return false;
           }
           return key;
-        })
+        }),
       );
       return existingKeys.filter(Boolean) as string[];
     },
@@ -72,8 +73,10 @@ export default defineDriver((options: OverlayStorageOptions) => {
           if (layer.dispose) {
             await layer.dispose();
           }
-        })
+        }),
       );
     },
   };
-});
+};
+
+export default driver;

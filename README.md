@@ -22,9 +22,9 @@ Unstorage provides an async Key-Value storage API with conventional features lik
 - Tree-shakable utils and tiny core
 - Auto JSON value serialization and deserialization
 - Binary and raw value support
-- State [snapshots](https://unstorage.unjs.io/utils#snapshots) and hydration
+- State [snapshots](https://unstorage.unjs.io/getting-started/utils#snapshots) and hydration
 - Storage watcher
-- HTTP Storage with [built-in server](https://unstorage.unjs.io/http-server)
+- HTTP Storage with [built-in server](https://unstorage.unjs.io/guide/http-server)
 
 ## Usage
 
@@ -50,6 +50,30 @@ await storage.getItem("foo:bar"); // or storage.getItem('/foo/bar')
 ```
 
 👉 Check out the [the documentation](https://unstorage.unjs.io) for usage information.
+
+## Nightly release channel
+
+You can use the nightly release channel to try the latest changes in the `main` branch via [`unstorage-nightly`](https://www.npmjs.com/package/unstorage-nightly).
+
+If directly using `unstorage` in your project:
+
+```json
+{
+  "devDependencies": {
+    "unstorage": "npm:unstorage-nightly"
+  }
+}
+```
+
+If using `unstorage` via another tool in your project:
+
+```json
+{
+  "resolutions": {
+    "unstorage": "npm:unstorage-nightly"
+  }
+}
+```
 
 ## Contribution
 

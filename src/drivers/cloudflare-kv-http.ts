@@ -1,10 +1,5 @@
 import { $fetch } from "ofetch";
-import {
-  createError,
-  createRequiredError,
-  defineDriver,
-  joinKeys,
-} from "./utils";
+import { createError, createRequiredError, type DriverFactory, joinKeys } from "./utils/index.ts";
 
 interface KVAuthAPIToken {
   /**
@@ -57,6 +52,11 @@ export type KVHTTPOptions = {
    * Adds prefix to all stored keys
    */
   base?: string;
+  /**
+   * The minimum time-to-live (ttl) for setItem in seconds.
+   * The default is 60 seconds as per Cloudflare's [documentation](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
+   */
+  minTTL?: number;
 } & (KVAuthServiceKey | KVAuthAPIToken | KVAuthEmailKey);
 
 type CloudflareAuthorizationHeaders =
@@ -81,7 +81,7 @@ type CloudflareAuthorizationHeaders =
 
 const DRIVER_NAME = "cloudflare-kv-http";
 
-export default defineDriver<KVHTTPOptions>((opts) => {
+const driver: DriverFactory<KVHTTPOptions> = (opts) => {
   if (!opts.accountId) {
     throw createRequiredError(DRIVER_NAME, "accountId");
   }
@@ -100,7 +100,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   } else {
     throw createError(
       DRIVER_NAME,
-      "One of the `apiToken`, `userServiceKey`, or a combination of `email` and `apiKey` is required."
+      "One of the `apiToken`, `userServiceKey`, or a combination of `email` and `apiKey` is required.",
     );
   }
 
@@ -140,8 +140,12 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     }
   };
 
-  const setItem = async (key: string, value: any) => {
-    return await kvFetch(`/values/${r(key)}`, { method: "PUT", body: value });
+  const setItem = async (key: string, value: any, topts: any) => {
+    return await kvFetch(`/values/${r(key)}`, {
+      method: "PUT",
+      body: value,
+      query: topts?.ttl ? { expiration_ttl: Math.max(topts?.ttl, opts.minTTL || 60) } : undefined,
+    });
   };
 
   const removeItem = async (key: string) => {
@@ -157,7 +161,9 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     }
 
     const firstPage = await kvFetch("/keys", { params });
-    firstPage.result.forEach(({ name }: { name: string }) => keys.push(name));
+    for (const item of firstPage.result as { name: string }[]) {
+      keys.push(item.name);
+    }
 
     const cursor = firstPage.result_info.cursor;
     if (cursor) {
@@ -166,15 +172,11 @@ export default defineDriver<KVHTTPOptions>((opts) => {
 
     while (params.cursor) {
       const pageResult = await kvFetch("/keys", { params });
-      pageResult.result.forEach(({ name }: { name: string }) =>
-        keys.push(name)
-      );
-      const pageCursor = pageResult.result_info.cursor;
-      if (pageCursor) {
-        params.cursor = pageCursor;
-      } else {
-        params.cursor = undefined;
+      for (const item of pageResult.result as { name: string }[]) {
+        keys.push(item.name);
       }
+      const pageCursor = pageResult.result_info.cursor;
+      params.cursor = pageCursor ? pageCursor : undefined;
     }
     return keys;
   };
@@ -182,24 +184,28 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const clear = async () => {
     const keys: string[] = await getKeys();
     // Split into chunks of 10000, as the API only allows for 10,000 keys at a time
+    // TODO: Avoid reduce
+    // eslint-disable-next-line unicorn/no-array-reduce
     const chunks = keys.reduce<string[][]>(
       (acc, key, i) => {
-        if (i % 10000 === 0) {
+        if (i % 10_000 === 0) {
           acc.push([]);
         }
-        acc[acc.length - 1].push(key);
+        acc[acc.length - 1]!.push(key);
         return acc;
       },
-      [[]]
+      [[]],
     );
     // Call bulk delete endpoint with each chunk
     await Promise.all(
       chunks.map((chunk) => {
-        return kvFetch("/bulk", {
-          method: "DELETE",
-          body: { keys: chunk },
-        });
-      })
+        if (chunk.length > 0) {
+          return kvFetch("/bulk/delete", {
+            method: "POST",
+            body: chunk,
+          });
+        }
+      }),
     );
   };
 
@@ -212,8 +218,10 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     removeItem,
     getKeys: (base?: string) =>
       getKeys(base).then((keys) =>
-        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key))
+        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key)),
       ),
     clear,
   };
-});
+};
+
+export default driver;

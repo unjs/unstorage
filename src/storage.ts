@@ -1,4 +1,4 @@
-import destr from "destr";
+import { destr } from "destr";
 import type {
   Storage,
   Driver,
@@ -7,10 +7,16 @@ import type {
   StorageValue,
   WatchEvent,
   TransactionOptions,
-} from "./types";
-import memory from "./drivers/memory";
-import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils";
-import { normalizeKey, normalizeBaseKey, joinKeys } from "./utils";
+} from "./types.ts";
+import memory from "./drivers/memory.ts";
+import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils.ts";
+import {
+  normalizeKey,
+  normalizeBaseKey,
+  joinKeys,
+  filterKeyByDepth,
+  filterKeyByBase,
+} from "./utils.ts";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -25,7 +31,7 @@ export interface CreateStorageOptions {
 }
 
 export function createStorage<T extends StorageValue>(
-  options: CreateStorageOptions = {}
+  options: CreateStorageOptions = {},
 ): Storage<T> {
   const context: StorageCTX = {
     mounts: { "": options.driver || memory() },
@@ -41,14 +47,14 @@ export function createStorage<T extends StorageValue>(
         return {
           base,
           relativeKey: key.slice(base.length),
-          driver: context.mounts[base],
+          driver: context.mounts[base]!,
         };
       }
     }
     return {
       base: "",
       relativeKey: key,
-      driver: context.mounts[""],
+      driver: context.mounts[""]!,
     };
   };
 
@@ -56,16 +62,12 @@ export function createStorage<T extends StorageValue>(
     return context.mountpoints
       .filter(
         (mountpoint) =>
-          mountpoint.startsWith(base) ||
-          (includeParent && base!.startsWith(mountpoint))
+          mountpoint.startsWith(base) || (includeParent && base!.startsWith(mountpoint)),
       )
       .map((mountpoint) => ({
-        relativeBase:
-          base.length > mountpoint.length
-            ? base!.slice(mountpoint.length)
-            : undefined,
+        relativeBase: base.length > mountpoint.length ? base!.slice(mountpoint.length) : undefined,
         mountpoint,
-        driver: context.mounts[mountpoint],
+        driver: context.mounts[mountpoint]!,
       }));
   };
 
@@ -85,11 +87,7 @@ export function createStorage<T extends StorageValue>(
     }
     context.watching = true;
     for (const mountpoint in context.mounts) {
-      context.unwatch[mountpoint] = await watch(
-        context.mounts[mountpoint],
-        onChange,
-        mountpoint
-      );
+      context.unwatch[mountpoint] = await watch(context.mounts[mountpoint]!, onChange, mountpoint);
     }
   };
 
@@ -98,7 +96,7 @@ export function createStorage<T extends StorageValue>(
       return;
     }
     for (const mountpoint in context.unwatch) {
-      await context.unwatch[mountpoint]();
+      await context.unwatch[mountpoint]!();
     }
     context.unwatch = {};
     context.watching = false;
@@ -116,12 +114,9 @@ export function createStorage<T extends StorageValue>(
   };
 
   const runBatch = (
-    items: (
-      | string
-      | { key: string; value?: StorageValue; options?: TransactionOptions }
-    )[],
+    items: (string | { key: string; value?: StorageValue; options?: TransactionOptions })[],
     commonOptions: undefined | TransactionOptions,
-    cb: (batch: BatchItem) => Promise<any>
+    cb: (batch: BatchItem) => Promise<any>,
   ) => {
     const batches = new Map<string /* mount base */, BatchItem>();
     const getBatch = (mount: ReturnType<typeof getMount>) => {
@@ -142,9 +137,7 @@ export function createStorage<T extends StorageValue>(
       const key = normalizeKey(isStringItem ? item : item.key);
       const value = isStringItem ? undefined : item.value;
       const options =
-        isStringItem || !item.options
-          ? commonOptions
-          : { ...commonOptions, ...item.options };
+        isStringItem || !item.options ? commonOptions : { ...commonOptions, ...item.options };
       const mount = getMount(key);
       getBatch(mount).items.push({
         key,
@@ -154,26 +147,27 @@ export function createStorage<T extends StorageValue>(
       });
     }
 
-    return Promise.all([...batches.values()].map((batch) => cb(batch))).then(
-      (r) => r.flat()
-    );
+    return Promise.all([...batches.values()].map((batch) => cb(batch))).then((r) => r.flat());
   };
 
   const storage: Storage = {
     // Item
-    hasItem(key, opts = {}) {
+    hasItem(key: string, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem(key, opts = {}) {
+    getItem(key: string, opts = {}) {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
-      return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
-        destr(value)
+      return asyncCall(driver.getItem, relativeKey, opts).then(
+        (value) => destr(value) as StorageValue,
       );
     },
-    getItems(items, commonOptions) {
+    getItems(
+      items: (string | { key: string; options?: TransactionOptions })[],
+      commonOptions = {},
+    ) {
       return runBatch(items, commonOptions, (batch) => {
         if (batch.driver.getItems) {
           return asyncCall(
@@ -182,25 +176,23 @@ export function createStorage<T extends StorageValue>(
               key: item.relativeKey,
               options: item.options,
             })),
-            commonOptions
+            commonOptions,
           ).then((r) =>
             r.map((item) => ({
               key: joinKeys(batch.base, item.key),
               value: destr(item.value),
-            }))
+            })),
           );
         }
         return Promise.all(
           batch.items.map((item) => {
-            return asyncCall(
-              batch.driver.getItem,
-              item.relativeKey,
-              item.options
-            ).then((value) => ({
-              key: item.key,
-              value: destr(value),
-            }));
-          })
+            return asyncCall(batch.driver.getItem, item.relativeKey, item.options).then(
+              (value) => ({
+                key: item.key,
+                value: destr(value),
+              }),
+            );
+          }),
         );
       });
     },
@@ -210,11 +202,9 @@ export function createStorage<T extends StorageValue>(
       if (driver.getItemRaw) {
         return asyncCall(driver.getItemRaw, relativeKey, opts);
       }
-      return asyncCall(driver.getItem, relativeKey, opts).then((value) =>
-        deserializeRaw(value)
-      );
+      return asyncCall(driver.getItem, relativeKey, opts).then((value) => deserializeRaw(value));
     },
-    async setItem(key, value, opts = {}) {
+    async setItem(key: string, value: T, opts = {}) {
       if (value === undefined) {
         return storage.removeItem(key);
       }
@@ -231,14 +221,14 @@ export function createStorage<T extends StorageValue>(
     async setItems(items, commonOptions) {
       await runBatch(items, commonOptions, async (batch) => {
         if (batch.driver.setItems) {
-          await asyncCall(
+          return asyncCall(
             batch.driver.setItems,
             batch.items.map((item) => ({
               key: item.relativeKey,
               value: stringify(item.value),
               options: item.options,
             })),
-            commonOptions
+            commonOptions,
           );
         }
         if (!batch.driver.setItem) {
@@ -250,9 +240,9 @@ export function createStorage<T extends StorageValue>(
               batch.driver.setItem!,
               item.relativeKey,
               stringify(item.value),
-              item.options
+              item.options,
             );
-          })
+          }),
         );
       });
     },
@@ -273,7 +263,10 @@ export function createStorage<T extends StorageValue>(
         onChange("update", key);
       }
     },
-    async removeItem(key, opts = {}) {
+    async removeItem(
+      key: string,
+      opts: (TransactionOptions & { removeMeta?: boolean }) | boolean /* legacy: removeMeta */ = {},
+    ) {
       // TODO: Remove in next major version
       if (typeof opts === "boolean") {
         opts = { removeMeta: opts };
@@ -304,11 +297,9 @@ export function createStorage<T extends StorageValue>(
         Object.assign(meta, await asyncCall(driver.getMeta, relativeKey, opts));
       }
       if (!opts.nativeOnly) {
-        const value = await asyncCall(
-          driver.getItem,
-          relativeKey + "$",
-          opts
-        ).then((value_) => destr<any>(value_));
+        const value = await asyncCall(driver.getItem, relativeKey + "$", opts).then((value_) =>
+          destr<any>(value_),
+        );
         if (value && typeof value === "object") {
           // TODO: Support date by destr?
           if (typeof value.atime === "string") {
@@ -333,17 +324,19 @@ export function createStorage<T extends StorageValue>(
       base = normalizeBaseKey(base);
       const mounts = getMounts(base, true);
       let maskedMounts: string[] = [];
-      const allKeys = [];
+      const allKeys: string[] = [];
+      let allMountsSupportMaxDepth = true;
       for (const mount of mounts) {
-        const rawKeys = await asyncCall(
-          mount.driver.getKeys,
-          mount.relativeBase,
-          opts
-        );
-        const keys = rawKeys
-          .map((key) => mount.mountpoint + normalizeKey(key))
-          .filter((key) => !maskedMounts.some((p) => key.startsWith(p)));
-        allKeys.push(...keys);
+        if (!mount.driver.flags?.maxDepth) {
+          allMountsSupportMaxDepth = false;
+        }
+        const rawKeys = await asyncCall(mount.driver.getKeys, mount.relativeBase, opts);
+        for (const key of rawKeys) {
+          const fullKey = mount.mountpoint + normalizeKey(key);
+          if (!maskedMounts.some((p) => fullKey.startsWith(p))) {
+            allKeys.push(fullKey);
+          }
+        }
 
         // When /mnt/foo is processed, any key in /mnt with /mnt/foo prefix should be masked
         // Using filter to improve performance. /mnt mask already covers /mnt/foo
@@ -352,9 +345,12 @@ export function createStorage<T extends StorageValue>(
           ...maskedMounts.filter((p) => !p.startsWith(mount.mountpoint)),
         ];
       }
-      return base
-        ? allKeys.filter((key) => key.startsWith(base!) && !key.endsWith("$"))
-        : allKeys.filter((key) => !key.endsWith("$"));
+      const shouldFilterByDepth = opts.maxDepth !== undefined && !allMountsSupportMaxDepth;
+      return allKeys.filter(
+        (key) =>
+          (!shouldFilterByDepth || filterKeyByDepth(key, opts.maxDepth)) &&
+          filterKeyByBase(key, base),
+      );
     },
     // Utils
     async clear(base, opts = {}) {
@@ -367,26 +363,20 @@ export function createStorage<T extends StorageValue>(
           // Fallback to remove all keys if clear not implemented
           if (m.driver.removeItem) {
             const keys = await m.driver.getKeys(m.relativeBase || "", opts);
-            return Promise.all(
-              keys.map((key) => m.driver.removeItem!(key, opts))
-            );
+            return Promise.all(keys.map((key) => m.driver.removeItem!(key, opts)));
           }
           // Readonly
-        })
+        }),
       );
     },
     async dispose() {
-      await Promise.all(
-        Object.values(context.mounts).map((driver) => dispose(driver))
-      );
+      await Promise.all(Object.values(context.mounts).map((driver) => dispose(driver)));
     },
     async watch(callback) {
       await startWatch();
       context.watchListeners.push(callback);
       return async () => {
-        context.watchListeners = context.watchListeners.filter(
-          (listener) => listener !== callback
-        );
+        context.watchListeners = context.watchListeners.filter((listener) => listener !== callback);
         if (context.watchListeners.length === 0) {
           await stopWatch();
         }
@@ -412,7 +402,7 @@ export function createStorage<T extends StorageValue>(
           .then((unwatcher) => {
             context.unwatch[base] = unwatcher;
           })
-          .catch(console.error); // eslint-disable-line no-console
+          .catch(console.error);
       }
       return storage;
     },
@@ -422,11 +412,11 @@ export function createStorage<T extends StorageValue>(
         return;
       }
       if (context.watching && base in context.unwatch) {
-        context.unwatch[base]();
+        context.unwatch[base]?.();
         delete context.unwatch[base];
       }
       if (_dispose) {
-        await dispose(context.mounts[base]);
+        await dispose(context.mounts[base]!);
       }
       context.mountpoints = context.mountpoints.filter((key) => key !== base);
       delete context.mounts[base];
@@ -447,24 +437,28 @@ export function createStorage<T extends StorageValue>(
         base: m.mountpoint,
       }));
     },
+    // Aliases
+    keys: (base, opts = {}) => storage.getKeys(base, opts),
+    get: (key: string, opts = {}) => storage.getItem(key, opts),
+    set: (key: string, value: T, opts = {}) => storage.setItem(key, value, opts),
+    has: (key: string, opts = {}) => storage.hasItem(key, opts),
+    del: (key: string, opts = {}) => storage.removeItem(key, opts),
+    remove: (key: string, opts = {}) => storage.removeItem(key, opts),
   };
 
-  return storage;
+  return storage as unknown as Storage<T>;
 }
 
 export type Snapshot<T = string> = Record<string, T>;
 
-export async function snapshot(
-  storage: Storage,
-  base: string
-): Promise<Snapshot<string>> {
+export async function snapshot(storage: Storage, base: string): Promise<Snapshot<string>> {
   base = normalizeBaseKey(base);
   const keys = await storage.getKeys(base);
   const snapshot: any = {};
   await Promise.all(
     keys.map(async (key) => {
       snapshot[key.slice(base.length)] = await storage.getItem(key);
-    })
+    }),
   );
   return snapshot;
 }
@@ -472,18 +466,14 @@ export async function snapshot(
 export async function restoreSnapshot(
   driver: Storage,
   snapshot: Snapshot<StorageValue>,
-  base = ""
-) {
+  base = "",
+): Promise<void> {
   base = normalizeBaseKey(base);
-  await Promise.all(
-    Object.entries(snapshot).map((e) => driver.setItem(base + e[0], e[1]))
-  );
+  await Promise.all(Object.entries(snapshot).map((e) => driver.setItem(base + e[0], e[1])));
 }
 
 function watch(driver: Driver, onChange: WatchCallback, base: string) {
-  return driver.watch
-    ? driver.watch((event, key) => onChange(event, base + key))
-    : () => {};
+  return driver.watch ? driver.watch((event, key) => onChange(event, base + key)) : () => {};
 }
 
 async function dispose(driver: Driver) {

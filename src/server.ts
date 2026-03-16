@@ -1,22 +1,10 @@
-import type { RequestListener } from "node:http";
-import {
-  createApp,
-  createError,
-  isError,
-  eventHandler,
-  toNodeListener,
-  getRequestHeader,
-  setResponseHeader,
-  readRawBody,
-  EventHandler,
-  H3Event,
-} from "h3";
-import { Storage } from "./types";
-import { stringify } from "./_utils";
-import { normalizeKey, normalizeBaseKey } from "./utils";
+import type { Storage, TransactionOptions, StorageMeta } from "./types.ts";
+import { H3Event, HTTPError, defineHandler } from "h3";
+import { stringify } from "./_utils.ts";
+import { normalizeKey, normalizeBaseKey } from "./utils.ts";
 
 export type StorageServerRequest = {
-  event: H3Event;
+  request: globalThis.Request;
   key: string;
   type: "read" | "write";
 };
@@ -30,115 +18,128 @@ const MethodToTypeMap = {
 
 export interface StorageServerOptions {
   authorize?: (request: StorageServerRequest) => void | Promise<void>;
-  resolvePath?: (event: H3Event) => string;
+  resolvePath?: (event: { req: Request }) => string;
 }
 
-export function createH3StorageHandler(
+export type FetchHandler = (
+  req: globalThis.Request,
+) => globalThis.Response | Promise<globalThis.Response>;
+
+/**
+ * This function creates a fetch handler for your custom storage server.
+ *
+ * The storage server will handle HEAD, GET, PUT and DELETE requests.
+ * - HEAD: Return if the request item exists in the storage, including a last-modified header if the storage supports it and the meta is stored
+ * - GET: Return the item if it exists
+ * - PUT: Sets the item
+ * - DELETE: Removes the item (or clears the whole storage if the base key was used)
+ *
+ * If the request sets the `Accept` header to `application/octet-stream`, the server will handle the item as raw data.
+ *
+ * @param storage The storage which should be used for the storage server
+ * @param options Defining functions such as an authorization check and a custom path resolver
+ * @returns An object containing then `handle` function for the handler
+ */
+export function createStorageHandler(
   storage: Storage,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  opts: StorageServerOptions = {}
-): EventHandler {
-  return eventHandler(async (event) => {
-    const _path = opts.resolvePath?.(event) ?? event.path;
-    const isBaseKey = _path.endsWith(":") || _path.endsWith("/");
+  opts: StorageServerOptions = {},
+): (req: globalThis.Request) => globalThis.Response | Promise<globalThis.Response> {
+  const handler = defineHandler(async (event) => {
+    const _path = opts.resolvePath?.(event as { req: Request }) ?? event.url.pathname;
+    const lastChar = _path[_path.length - 1];
+    const isBaseKey = lastChar === ":" || lastChar === "/";
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
 
     // Authorize Request
-    if (!(event.method in MethodToTypeMap)) {
-      throw createError({
-        statusCode: 405,
-        statusMessage: `Method Not Allowed: ${event.method}`,
-      });
+    if (!(event.req.method in MethodToTypeMap)) {
+      throw HTTPError.status(405, `Method Not Allowed: ${event.method}`);
     }
     try {
       await opts.authorize?.({
-        type: MethodToTypeMap[event.method as keyof typeof MethodToTypeMap],
-        event,
+        type: MethodToTypeMap[event.req.method as keyof typeof MethodToTypeMap],
+        request: event.req as Request,
         key,
       });
     } catch (error: any) {
-      const _httpError = isError(error)
+      const _httpError = HTTPError.isError(error)
         ? error
-        : createError({
-            statusMessage: error?.message,
-            statusCode: 401,
-            ...error,
+        : new HTTPError({
+            status: 401,
+            statusText: error?.message,
+            cause: error,
           });
       throw _httpError;
     }
 
-    // GET => getItem
-    if (event.method === "GET") {
+    // GET => getItem / getKeys
+    if (event.req.method === "GET") {
       if (isBaseKey) {
         const keys = await storage.getKeys(key);
         return keys.map((key) => key.replace(/:/g, "/"));
       }
-
-      const isRaw =
-        getRequestHeader(event, "accept") === "application/octet-stream";
-      if (isRaw) {
-        const value = await storage.getItemRaw(key);
-        return value;
-      } else {
-        const value = await storage.getItem(key);
-        return stringify(value);
+      const isRaw = event.req.headers.get("accept") === "application/octet-stream";
+      const driverValue = await (isRaw ? storage.getItemRaw(key) : storage.getItem(key));
+      if (driverValue === null) {
+        throw new HTTPError({
+          statusCode: 404,
+          statusMessage: "KV value not found",
+        });
       }
+      setMetaHeaders(event, await storage.getMeta(key));
+      return isRaw ? driverValue : stringify(driverValue);
     }
 
-    // HEAD => hasItem + meta (mtime)
-    if (event.method === "HEAD") {
-      const _hasItem = await storage.hasItem(key);
-      event.node.res.statusCode = _hasItem ? 200 : 404;
-      if (_hasItem) {
-        const meta = await storage.getMeta(key);
-        if (meta.mtime) {
-          setResponseHeader(
-            event,
-            "last-modified",
-            new Date(meta.mtime).toUTCString()
-          );
-        }
+    // HEAD => hasItem + meta (mtime, ttl)
+    if (event.req.method === "HEAD") {
+      if (!(await storage.hasItem(key))) {
+        throw new HTTPError({
+          statusCode: 404,
+          statusMessage: "KV value not found",
+        });
       }
+      setMetaHeaders(event, await storage.getMeta(key));
       return "";
     }
 
     // PUT => setItem
-    if (event.method === "PUT") {
-      const isRaw =
-        getRequestHeader(event, "content-type") === "application/octet-stream";
+    if (event.req.method === "PUT") {
+      const isRaw = event.req.headers.get("content-type") === "application/octet-stream";
+      const topts: TransactionOptions = {
+        ttl: Number(event.req.headers.get("x-ttl")) || undefined,
+      };
       if (isRaw) {
-        const value = await readRawBody(event);
-        await storage.setItemRaw(key, value);
+        const value = await event.req.bytes();
+        await storage.setItemRaw(key, value, topts);
       } else {
-        const value = await readRawBody(event, "utf8");
+        const value = await event.req.text();
         if (value !== undefined) {
-          await storage.setItem(key, value);
+          await storage.setItem(key, value, topts);
         }
       }
       return "OK";
     }
 
     // DELETE => removeItem
-    if (event.method === "DELETE") {
+    if (event.req.method === "DELETE") {
       await (isBaseKey ? storage.clear(key) : storage.removeItem(key));
       return "OK";
     }
 
-    throw createError({
+    throw new HTTPError({
       statusCode: 405,
       statusMessage: `Method Not Allowed: ${event.method}`,
     });
   });
+
+  return handler.fetch as (req: Request) => Response | Promise<Response>;
 }
 
-export function createStorageServer(
-  storage: Storage,
-  options: StorageServerOptions = {}
-): { handle: RequestListener } {
-  const app = createApp({ debug: true });
-  const handler = createH3StorageHandler(storage, options);
-  app.use(handler);
-  return {
-    handle: toNodeListener(app),
-  };
+function setMetaHeaders(event: H3Event, meta: StorageMeta) {
+  if (meta.mtime) {
+    event.res.headers.set("last-modified", new Date(meta.mtime).toUTCString());
+  }
+  if (meta.ttl) {
+    event.res.headers.set("x-ttl", `${meta.ttl}`);
+    event.res.headers.set("cache-control", `max-age=${meta.ttl}`);
+  }
 }

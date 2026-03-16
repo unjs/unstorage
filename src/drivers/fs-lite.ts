@@ -1,14 +1,7 @@
-import { existsSync, promises as fsp, Stats } from "fs";
-import { resolve, join } from "path";
-import { createError, createRequiredError, defineDriver } from "./utils";
-import {
-  readFile,
-  writeFile,
-  readdirRecursive,
-  rmRecursive,
-  unlink,
-} from "./utils/node-fs";
-import anymatch from "anymatch";
+import { existsSync, promises as fsp, Stats } from "node:fs";
+import { resolve, join } from "node:path";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
+import { readFile, writeFile, readdirRecursive, rmRecursive, unlink } from "./utils/node-fs.ts";
 
 export interface FSStorageOptions {
   base?: string;
@@ -17,11 +10,11 @@ export interface FSStorageOptions {
   noClear?: boolean;
 }
 
-const PATH_TRAVERSE_RE = /\.\.\:|\.\.$/;
+const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
 
 const DRIVER_NAME = "fs-lite";
 
-export default defineDriver((opts: FSStorageOptions = {}) => {
+const driver: DriverFactory<FSStorageOptions> = (opts = {}) => {
   if (!opts.base) {
     throw createRequiredError(DRIVER_NAME, "base");
   }
@@ -31,7 +24,7 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(
         DRIVER_NAME,
-        `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`
+        `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`,
       );
     }
     const resolved = join(opts.base!, key.replace(/:/g, "/"));
@@ -41,6 +34,9 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    flags: {
+      maxDepth: true,
+    },
     hasItem(key) {
       return existsSync(r(key));
     },
@@ -72,10 +68,10 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       if (opts.readOnly) {
         return;
       }
-      return unlink(r(key));
+      return unlink(r(key)) as Promise<void>;
     },
-    getKeys() {
-      return readdirRecursive(r("."), opts.ignore);
+    getKeys(_base, topts) {
+      return readdirRecursive(r("."), opts.ignore, topts?.maxDepth);
     },
     async clear() {
       if (opts.readOnly || opts.noClear) {
@@ -84,4 +80,6 @@ export default defineDriver((opts: FSStorageOptions = {}) => {
       await rmRecursive(r("."));
     },
   };
-});
+};
+
+export default driver;

@@ -1,5 +1,5 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
-import { SecretClient, SecretClientOptions } from "@azure/keyvault-secrets";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
+import { SecretClient, type SecretClientOptions } from "@azure/keyvault-secrets";
 import { DefaultAzureCredential } from "@azure/identity";
 
 export interface AzureKeyVaultOptions {
@@ -23,7 +23,7 @@ export interface AzureKeyVaultOptions {
 
 const DRIVER_NAME = "azure-key-vault";
 
-export default defineDriver((opts: AzureKeyVaultOptions) => {
+const driver: DriverFactory<AzureKeyVaultOptions, SecretClient> = (opts) => {
   let keyVaultClient: SecretClient;
   const getKeyVaultClient = () => {
     if (keyVaultClient) {
@@ -45,6 +45,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: getKeyVaultClient,
     async hasItem(key) {
       try {
         await getKeyVaultClient().getSecret(encode(key));
@@ -73,7 +74,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
       const secrets = getKeyVaultClient()
         .listPropertiesOfSecrets()
         .byPage({ maxPageSize: opts.pageSize || 25 });
-      const keys = [];
+      const keys: string[] = [];
       for await (const page of secrets) {
         const pageKeys = page.map((secret) => decode(secret.name));
         keys.push(...pageKeys);
@@ -94,9 +95,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
         .byPage({ maxPageSize: opts.pageSize || 25 });
       for await (const page of secrets) {
         const deletionPromises = page.map(async (secret) => {
-          const poller = await getKeyVaultClient().beginDeleteSecret(
-            secret.name
-          );
+          const poller = await getKeyVaultClient().beginDeleteSecret(secret.name);
           await poller.pollUntilDone();
           await getKeyVaultClient().purgeDeletedSecret(secret.name);
         });
@@ -104,7 +103,7 @@ export default defineDriver((opts: AzureKeyVaultOptions) => {
       }
     },
   };
-});
+};
 
 const base64Map: { [key: string]: string } = {
   "=": "-e-",
@@ -116,8 +115,8 @@ function encode(value: string): string {
   let encoded = Buffer.from(value).toString("base64");
   for (const key in base64Map) {
     encoded = encoded.replace(
-      new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
-      base64Map[key]
+      new RegExp(key.replace(/[$()*+.?[\\\]^{|}]/g, "\\$&"), "g"),
+      base64Map[key]!,
     );
   }
   return encoded;
@@ -131,3 +130,5 @@ function decode(value: string): string {
   });
   return Buffer.from(decoded, "base64").toString();
 }
+
+export default driver;

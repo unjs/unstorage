@@ -1,6 +1,7 @@
-import { defineDriver } from "./utils";
-import { $fetch as _fetch } from "ofetch";
-import { joinURL } from "ufo";
+import type { TransactionOptions } from "../types.ts";
+import { type DriverFactory } from "./utils/index.ts";
+import { type FetchError, $fetch as _fetch } from "ofetch";
+import { joinURL } from "./utils/path.ts";
 
 export interface HTTPOptions {
   base: string;
@@ -9,11 +10,32 @@ export interface HTTPOptions {
 
 const DRIVER_NAME = "http";
 
-export default defineDriver((opts: HTTPOptions) => {
+const driver: DriverFactory<HTTPOptions> = (opts) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
 
-  const rBase = (key: string = "") =>
-    joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
+  const rBase = (key: string = "") => joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
+
+  const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
+    if (error?.response?.status === 404) {
+      return fallbackVal;
+    }
+    throw error;
+  };
+
+  const getHeaders = (
+    topts: TransactionOptions | undefined,
+    defaultHeaders?: Record<string, string>,
+  ) => {
+    const headers = {
+      ...defaultHeaders,
+      ...opts.headers,
+      ...topts?.headers,
+    };
+    if (topts?.ttl && !headers["x-ttl"]) {
+      headers["x-ttl"] = topts.ttl + "";
+    }
+    return headers;
+  };
 
   return {
     name: DRIVER_NAME,
@@ -21,77 +43,82 @@ export default defineDriver((opts: HTTPOptions) => {
     hasItem(key, topts) {
       return _fetch(r(key), {
         method: "HEAD",
-        headers: { ...opts.headers, ...topts.headers },
+        headers: getHeaders(topts),
       })
         .then(() => true)
-        .catch(() => false);
+        .catch((err) => catchFetchError(err, false));
     },
-    async getItem(key, tops = {}) {
+    async getItem(key, tops) {
       const value = await _fetch(r(key), {
-        headers: { ...opts.headers, ...tops.headers },
-      });
+        headers: getHeaders(tops),
+      }).catch(catchFetchError);
       return value;
     },
     async getItemRaw(key, topts) {
-      const value = await _fetch(r(key), {
-        headers: {
-          accept: "application/octet-stream",
-          ...opts.headers,
-          ...topts.headers,
-        },
-      });
-      return value;
+      const response = await _fetch
+        .raw(r(key), {
+          responseType: "arrayBuffer",
+          headers: getHeaders(topts, { accept: "application/octet-stream" }),
+        })
+        .catch(catchFetchError);
+      return response._data;
     },
     async getMeta(key, topts) {
       const res = await _fetch.raw(r(key), {
         method: "HEAD",
-        headers: { ...opts.headers, ...topts.headers },
+        headers: getHeaders(topts),
       });
-      let mtime = undefined;
+      let mtime: Date | undefined;
+      let ttl: number | undefined;
       const _lastModified = res.headers.get("last-modified");
       if (_lastModified) {
         mtime = new Date(_lastModified);
       }
+      const _ttl = res.headers.get("x-ttl");
+      if (_ttl) {
+        ttl = Number.parseInt(_ttl, 10);
+      }
       return {
         status: res.status,
         mtime,
+        ttl,
       };
     },
     async setItem(key, value, topts) {
       await _fetch(r(key), {
         method: "PUT",
         body: value,
-        headers: { ...opts.headers, ...topts?.headers },
+        headers: getHeaders(topts),
       });
     },
     async setItemRaw(key, value, topts) {
       await _fetch(r(key), {
         method: "PUT",
         body: value,
-        headers: {
+        headers: getHeaders(topts, {
           "content-type": "application/octet-stream",
-          ...opts.headers,
-          ...topts.headers,
-        },
+        }),
       });
     },
     async removeItem(key, topts) {
       await _fetch(r(key), {
         method: "DELETE",
-        headers: { ...opts.headers, ...topts.headers },
+        headers: getHeaders(topts),
       });
     },
     async getKeys(base, topts) {
       const value = await _fetch(rBase(base), {
-        headers: { ...opts.headers, ...topts.headers },
+        headers: getHeaders(topts),
       });
       return Array.isArray(value) ? value : [];
     },
     async clear(base, topts) {
       await _fetch(rBase(base), {
         method: "DELETE",
-        headers: { ...opts.headers, ...topts.headers },
+        headers: getHeaders(topts),
       });
     },
   };
-});
+};
+
+export default driver;

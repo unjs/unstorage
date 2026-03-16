@@ -1,9 +1,9 @@
 import { describe } from "vitest";
 import { resolve } from "node:path";
-import encryptionDriver from "../../src/drivers/encryption";
-import memoryDriver from "../../src/drivers/memory";
-import fsDriver from "../../src/drivers/fs";
-import { testDriver } from "./utils";
+import encryptionDriver from "../../src/drivers/encryption.ts";
+import memoryDriver from "../../src/drivers/memory.ts";
+import fsDriver from "../../src/drivers/fs.ts";
+import { testDriver } from "./utils.ts";
 
 describe("drivers: encryption", () => {
   const dir = resolve(__dirname, "tmp/fs");

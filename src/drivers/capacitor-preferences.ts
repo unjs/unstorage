@@ -1,6 +1,6 @@
 import { Preferences } from "@capacitor/preferences";
 
-import { defineDriver, joinKeys, normalizeKey } from "./utils";
+import { type DriverFactory, joinKeys, normalizeKey } from "./utils/index.ts";
 
 const DRIVER_NAME = "capacitor-preferences";
 
@@ -8,13 +8,14 @@ export interface CapacitorPreferencesOptions {
   base?: string;
 }
 
-export default defineDriver<CapacitorPreferencesOptions>((opts) => {
+const driver: DriverFactory<CapacitorPreferencesOptions, typeof Preferences> = (opts) => {
   const base = normalizeKey(opts?.base || "");
   const resolveKey = (key: string) => joinKeys(base, key);
 
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: () => Preferences,
     hasItem(key) {
       return Preferences.keys().then((r) => r.keys.includes(resolveKey(key)));
     },
@@ -41,10 +42,10 @@ export default defineDriver<CapacitorPreferencesOptions>((opts) => {
       const { keys } = await Preferences.keys();
       const _prefix = resolveKey(prefix || "");
       await Promise.all(
-        keys
-          .filter((key) => key.startsWith(_prefix))
-          .map((key) => Preferences.remove({ key }))
+        keys.filter((key) => key.startsWith(_prefix)).map((key) => Preferences.remove({ key })),
       );
     },
   };
-});
+};
+
+export default driver;

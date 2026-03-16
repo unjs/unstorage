@@ -5,7 +5,7 @@ import { siv } from "@noble/ciphers/aes";
 type Awaited<T> = T extends Promise<infer U> ? Awaited<U> : T;
 type Promisified<T> = Promise<Awaited<T>>;
 
-export function wrapToPromise<T>(value: T) {
+export function wrapToPromise<T>(value: T): Promisified<T> {
   if (!value || typeof (value as any).then !== "function") {
     return Promise.resolve(value) as Promisified<T>;
   }
@@ -50,24 +50,16 @@ export function stringify(value: any): string {
   throw new Error("[unstorage] Cannot stringify value!");
 }
 
-function checkBufferSupport() {
-  if (typeof Buffer === undefined) {
-    throw new TypeError("[unstorage] Buffer is not supported!");
-  }
-}
-
 export const BASE64_PREFIX = "base64:";
 
-export function serializeRaw(value: any) {
+export function serializeRaw(value: any): string {
   if (typeof value === "string") {
     return value;
   }
-  checkBufferSupport();
-  const base64 = Buffer.from(value).toString("base64");
-  return BASE64_PREFIX + base64;
+  return BASE64_PREFIX + base64Encode(value);
 }
 
-export function deserializeRaw(value: any) {
+export function deserializeRaw(value: any): any {
   if (typeof value !== "string") {
     // Return non-strings as-is
     return value;
@@ -76,8 +68,21 @@ export function deserializeRaw(value: any) {
     // Return unknown strings as-is
     return value;
   }
-  checkBufferSupport();
-  return Buffer.from(value.slice(BASE64_PREFIX.length), "base64");
+  return base64Decode(value.slice(BASE64_PREFIX.length));
+}
+
+function base64Decode(input: string) {
+  if (globalThis.Buffer) {
+    return Buffer.from(input, "base64");
+  }
+  return Uint8Array.from(globalThis.atob(input), (c) => c.codePointAt(0) as number);
+}
+
+function base64Encode(input: Uint8Array) {
+  if (globalThis.Buffer) {
+    return Buffer.from(input).toString("base64");
+  }
+  return globalThis.btoa(String.fromCodePoint(...input));
 }
 
 // Encryption
@@ -94,13 +99,13 @@ export interface StorageValueEnvelope {
 export function encryptStorageValue(
   storageValue: any,
   key: string,
-  raw?: boolean
+  raw?: boolean,
 ): StorageValueEnvelope {
   const cryptoKey = genBytesFromBase64(key);
   const nonce = getRandomValues(new Uint8Array(24));
   const chacha = xchacha20poly1305(cryptoKey, nonce);
   const encryptedValue = chacha.encrypt(
-    raw ? storageValue : new TextEncoder().encode(storageValue)
+    raw ? storageValue : new TextEncoder().encode(storageValue),
   );
   return {
     encryptedValue: genBase64FromBytes(new Uint8Array(encryptedValue)),
@@ -111,23 +116,19 @@ export function encryptStorageValue(
 export function decryptStorageValue<T>(
   storageValue: StorageValueEnvelope,
   key: string,
-  raw?: boolean
+  raw?: boolean,
 ): T {
   const { encryptedValue, nonce } = storageValue;
   const cryptoKey = genBytesFromBase64(key);
   const chacha = xchacha20poly1305(cryptoKey, genBytesFromBase64(nonce));
   const decryptedValue = chacha.decrypt(genBytesFromBase64(encryptedValue));
-  return raw
-    ? (decryptedValue as T)
-    : (new TextDecoder().decode(decryptedValue) as T);
+  return raw ? (decryptedValue as T) : (new TextDecoder().decode(decryptedValue) as T);
 }
 
 export function encryptStorageKey(storageKey: string, key: string) {
   const cryptoKey = genBytesFromBase64(key);
   const gcmSiv = siv(cryptoKey, genBytesFromBase64(predefinedSivNonce));
-  const encryptedKey = gcmSiv.encrypt(
-    new Uint8Array(new TextEncoder().encode(storageKey))
-  );
+  const encryptedKey = gcmSiv.encrypt(new Uint8Array(new TextEncoder().encode(storageKey)));
   return encryptionPrefix + genBase64FromBytes(encryptedKey, true);
 }
 
@@ -135,7 +136,7 @@ export function decryptStorageKey(encryptedKey: string, key: string) {
   const cryptoKey = genBytesFromBase64(key);
   const gcmSiv = siv(cryptoKey, genBytesFromBase64(predefinedSivNonce));
   const decryptedKey = gcmSiv.decrypt(
-    genBytesFromBase64(encryptedKey.slice(encryptionPrefix.length), true)
+    genBytesFromBase64(encryptedKey.slice(encryptionPrefix.length), true),
   );
   return new TextDecoder().decode(decryptedKey);
 }
@@ -152,10 +153,7 @@ function genBytesFromBase64(input: string, urlSafe?: boolean) {
       input += "=";
     }
   }
-  return Uint8Array.from(
-    globalThis.atob(input),
-    (c) => c.codePointAt(0) as number
-  );
+  return Uint8Array.from(globalThis.atob(input), (c) => c.codePointAt(0) as number);
 }
 
 function genBase64FromBytes(input: Uint8Array, urlSafe?: boolean) {

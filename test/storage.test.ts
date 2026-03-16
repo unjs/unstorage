@@ -1,12 +1,14 @@
 import { describe, it, expect, vi } from "vitest";
+import { resolve } from "node:path";
 import {
   createStorage,
-  snapshot,
-  restoreSnapshot,
-  prefixStorage,
   encryptedStorage,
-} from "../src";
-import memory from "../src/drivers/memory";
+  prefixStorage,
+  restoreSnapshot,
+  snapshot,
+} from "../src/index.ts";
+import memory from "../src/drivers/memory.ts";
+import fs from "../src/drivers/fs.ts";
 
 const data = {
   "etc:conf": "test",
@@ -32,22 +34,19 @@ describe("storage", () => {
     expect(storage.getMount("/cache:sub").base).toBe("cache:sub:");
     expect(storage.getMount("/cache:sub:foo").base).toBe("cache:sub:");
 
-    expect(storage.getMounts("/cache").map((m) => m.base))
-      .toMatchInlineSnapshot(`
+    expect(storage.getMounts("/cache").map((m) => m.base)).toMatchInlineSnapshot(`
         [
           "cache:sub:",
           "cache:",
         ]
       `);
-    expect(storage.getMounts("/cache:sub").map((m) => m.base))
-      .toMatchInlineSnapshot(`
+    expect(storage.getMounts("/cache:sub").map((m) => m.base)).toMatchInlineSnapshot(`
         [
           "cache:sub:",
         ]
       `);
-    expect(
-      storage.getMounts("/cache:sub", { parents: true }).map((m) => m.base)
-    ).toMatchInlineSnapshot(`
+    expect(storage.getMounts("/cache:sub", { parents: true }).map((m) => m.base))
+      .toMatchInlineSnapshot(`
       [
         "cache:sub:",
         "cache:",
@@ -208,5 +207,126 @@ describe("utils", () => {
   it("stringify", () => {
     const storage = createStorage();
     expect(async () => await storage.setItem("foo", [])).not.toThrow();
+  });
+
+  it("has aliases", async () => {
+    const storage = createStorage();
+
+    await storage.setItem("foo", "bar");
+    expect(await storage.has("foo")).toBe(true);
+    expect(await storage.get("foo")).toBe("bar");
+    expect(await storage.keys()).toEqual(["foo"]);
+    await storage.del("foo");
+    expect(await storage.has("foo")).toBe(false);
+    await storage.setItem("bar", "baz");
+    await storage.remove("bar");
+    expect(await storage.has("bar")).toBe(false);
+  });
+});
+
+describe("Regression", () => {
+  it("setItems doeesn't upload twice", async () => {
+    /**
+     * https://github.com/unjs/unstorage/pull/392
+     */
+
+    const setItem = vi.fn();
+    const setItems = vi.fn();
+
+    const driver = memory();
+    const storage = createStorage({
+      driver: {
+        ...driver,
+        setItem: (...args) => {
+          setItem(...args);
+          return driver.setItem?.(...args);
+        },
+        setItems: (...args) => {
+          setItems(...args);
+          return driver.setItems?.(...args);
+        },
+      },
+    });
+
+    await storage.setItems([{ key: "foo.txt", value: "bar" }]);
+    expect(setItem).toHaveBeenCalledTimes(0);
+    expect(setItems).toHaveBeenCalledTimes(1);
+  });
+
+  it("prefixed storage supports aliases", async () => {
+    const storage = createStorage();
+    const pStorage = prefixStorage(storage, "foo");
+
+    await pStorage.set("x", "foo");
+    await pStorage.set("y", "bar");
+
+    expect(await pStorage.get("x")).toBe("foo");
+    expect(await pStorage.get("x")).toBe("foo");
+    expect(await pStorage.has("x")).toBe(true);
+    expect(await pStorage.get("y")).toBe("bar");
+
+    await pStorage.del("x");
+    expect(await pStorage.has("x")).toBe(false);
+
+    await pStorage.remove("y");
+    expect(await pStorage.has("y")).toBe(false);
+  });
+
+  it("getKeys supports maxDepth with mixed native support", async () => {
+    const base = resolve(__dirname, "tmp/fs");
+    const mainStorage = memory();
+    const secondaryStorage = fs({ base });
+    const storage = createStorage({ driver: mainStorage });
+
+    storage.mount("/storage_b", secondaryStorage);
+
+    try {
+      await storage.setItem("/storage_a/file_depth1", "contents");
+      await storage.setItem("/storage_a/depth1/file_depth2", "contents");
+      await storage.setItem("/storage_b/file_depth1", "contents");
+      await storage.setItem("/storage_b/depth1/file_depth2", "contents");
+
+      const keys = await storage.getKeys(undefined, { maxDepth: 1 });
+
+      expect(keys.sort()).toMatchObject(["storage_a:file_depth1", "storage_b:file_depth1"]);
+    } finally {
+      await storage.clear();
+    }
+  });
+
+  it("prefixStorage getItems to not returns null (issue #396)", async () => {
+    const storage = createStorage();
+    await storage.setItem("namespace:key", "value");
+
+    const plainResult = await storage.getItems(["namespace:key"]);
+    expect(plainResult).toEqual([{ key: "namespace:key", value: "value" }]);
+
+    const prefixed = prefixStorage(storage, "namespace");
+
+    const prefixedResult = await prefixed.getItems(["key"]);
+    expect(prefixedResult).toEqual([{ key: "key", value: "value" }]);
+  });
+
+  it("prefixStorage setItems works correctly (related to issue #396)", async () => {
+    const storage = createStorage();
+
+    const prefixed = prefixStorage(storage, "namespace");
+
+    await prefixed.setItems([
+      { key: "key1", value: "value1" },
+      { key: "key2", value: "value2" },
+    ]);
+
+    const plainResult = await storage.getItems(["namespace:key1", "namespace:key2"]);
+    expect(plainResult).toEqual([
+      { key: "namespace:key1", value: "value1" },
+      { key: "namespace:key2", value: "value2" },
+    ]);
+
+    const prefixedResult = await prefixed.getItems(["key1", "key2"]);
+    expect(prefixedResult).toEqual([
+      { key: "key1", value: "value1" },
+      { key: "key2", value: "value2" },
+    ]);
   });
 });

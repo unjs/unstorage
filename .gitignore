@@ -10,3 +10,7 @@ tmp
 __*
 .vercel
 .netlify
+test/fs-storage/**
+.env
+.wrangler
+tsconfig.tsbuildinfo

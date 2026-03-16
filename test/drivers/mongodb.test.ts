@@ -1,19 +1,14 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import driver from "../../src/drivers/mongodb";
-import { testDriver } from "./utils";
+import { afterAll, describe, expect, it } from "vitest";
+import driver from "../../src/drivers/mongodb.ts";
+import { testDriver } from "./utils.ts";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { promisify } from "util";
+import { promisify } from "node:util";
 
-describe.skip("drivers: mongodb", async () => {
+describe("drivers: mongodb", async () => {
   const sleep = promisify(setTimeout);
 
-  let mongoServer: MongoMemoryServer;
-  let connectionString: string | undefined;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    connectionString = mongoServer.getUri();
-  });
+  const mongoServer = await MongoMemoryServer.create();
+  const connectionString = mongoServer.getUri();
 
   afterAll(async () => {
     if (mongoServer) {
@@ -29,14 +24,12 @@ describe.skip("drivers: mongodb", async () => {
     }),
     additionalTests: (ctx) => {
       it("should throw error if no connection string is provided", async () => {
-        expect(() =>
+        await expect(() =>
           driver({
             databaseName: "test",
             collectionName: "test",
-          } as any).getItem("")
-        ).rejects.toThrowError(
-          "[unstorage] [mongodb] Missing required option `connectionString`."
-        );
+          } as any).getItem(""),
+        ).rejects.toThrowError("[unstorage] [mongodb] Missing required option `connectionString`.");
       });
       it("should have different dates when an entry was updated", async () => {
         await ctx.storage.setItem("s1:a", "test_data");

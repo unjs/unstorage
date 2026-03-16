@@ -1,4 +1,4 @@
-import { defineDriver } from "./utils";
+import { type DriverFactory } from "./utils/index.ts";
 import { LRUCache } from "lru-cache";
 
 type LRUCacheOptions = LRUCache.OptionsBase<string, any, any> &
@@ -10,7 +10,7 @@ export interface LRUDriverOptions extends LRUCacheOptions {}
 
 const DRIVER_NAME = "lru-cache";
 
-export default defineDriver((opts: LRUDriverOptions = {}) => {
+const driver: DriverFactory<LRUDriverOptions, LRUCache<string, any, any>> = (opts = {}) => {
   const cache = new LRUCache({
     max: 1000,
     sizeCalculation:
@@ -25,6 +25,7 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
   return {
     name: DRIVER_NAME,
     options: opts,
+    getInstance: () => cache,
     hasItem(key) {
       return cache.has(key);
     },
@@ -44,7 +45,7 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
       cache.delete(key);
     },
     getKeys() {
-      return Array.from(cache.keys());
+      return [...cache.keys()];
     },
     clear() {
       cache.clear();
@@ -53,18 +54,22 @@ export default defineDriver((opts: LRUDriverOptions = {}) => {
       cache.clear();
     },
   };
-});
+};
 
 function byteLength(value: any) {
-  if (typeof Buffer !== undefined) {
+  if (typeof Buffer !== "undefined") {
     try {
       return Buffer.byteLength(value);
-    } catch {}
+    } catch {
+      // ignore
+    }
   }
   try {
-    return typeof value === "string"
-      ? value.length
-      : JSON.stringify(value).length;
-  } catch {}
+    return typeof value === "string" ? value.length : JSON.stringify(value).length;
+  } catch {
+    // ignore
+  }
   return 0;
 }
+
+export default driver;

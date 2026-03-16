@@ -1,26 +1,35 @@
 name: ci
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
 
 jobs:
-  ci:
+  tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - run: corepack enable
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: "pnpm"
+      - uses: actions/checkout@v6
+      - run: npm i -g --force corepack && corepack enable
+      - uses: actions/setup-node@v6
+        with: { node-version: lts/*, cache: pnpm }
       - run: pnpm install
-      - run: pnpm lint
-      - run: pnpm test:types
       - run: pnpm build
+      - run: pnpm test:types
       - run: pnpm vitest --coverage
-      - uses: codecov/codecov-action@v3
+      - run: pnpm lint
+      - uses: codecov/codecov-action@v5
+        with: { token: "${{ secrets.CODECOV_TOKEN }}" }
+  publish:
+    runs-on: ubuntu-latest
+    permissions: { id-token: write, contents: read }
+    needs: tests
+    if: contains('refs/heads/main', github.ref) && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v6
+        with: { fetch-depth: 0 }
+      - run: npm i -fg corepack && corepack enable
+      - uses: actions/setup-node@v6
+        with: { node-version: lts/*, cache: "pnpm" }
+      - run: pnpm install
+      - run: pnpm changelogen --bump --canary nightly
+      - run: npm i -g npm@latest && npm publish --tag latest

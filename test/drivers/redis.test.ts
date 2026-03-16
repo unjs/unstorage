@@ -1,41 +1,39 @@
 import { describe, vi, it, expect } from "vitest";
-import * as ioredis from "ioredis-mock";
-import driver from "../../src/drivers/redis";
-import { testDriver } from "./utils";
+import ioredisMock from "ioredis-mock";
+import redisDriver from "../../src/drivers/redis.ts";
+import { testDriver } from "./utils.ts";
 
-vi.mock("ioredis", () => ioredis);
+vi.mock("ioredis", () => ({ ...ioredisMock, Redis: ioredisMock.default }));
 
 describe("drivers: redis", () => {
+  const binaryDriver = redisDriver({
+    base: "test:",
+    url: "ioredis://localhost:6379/0",
+    lazyConnect: false,
+  });
+
   testDriver({
-    driver: driver({
-      base: "test:",
-      url: "ioredis://localhost:6379/0",
-      lazyConnect: false,
-    }),
-    additionalTests() {
-      it("verify stored keys", async () => {
-        const client = new ioredis.default("ioredis://localhost:6379/0");
-        const keys = await client.keys("*");
-        expect(keys).toMatchInlineSnapshot(`
-          [
-            "test:s1:a",
-            "test:s2:a",
-            "test:s3:a",
-            "test:data:test.json",
-            "test:data:true.json",
-            "test:data:serialized1.json",
-            "test:data:serialized2.json",
-            "test:data:raw.bin",
-            "test:t:1",
-            "test:t:2",
-            "test:t:3",
-            "test:v1:a",
-            "test:v2:a",
-            "test:v3:a",
-            "test:zero",
-            "test:my-false-flag",
-          ]
-        `);
+    driver: binaryDriver,
+    additionalTests(ctx) {
+      it("saves raw data as binary", async () => {
+        const helloBuffer = Buffer.from("Hello, world!", "utf8");
+        const byteArray = new Uint8Array(4);
+        byteArray[0] = 2;
+        byteArray[1] = 0;
+        byteArray[2] = 2;
+        byteArray[3] = 5;
+
+        await ctx.storage.setItemRaw("s4:a", helloBuffer);
+        await ctx.storage.setItemRaw("s5:a", byteArray);
+
+        const client = new ioredisMock.default("ioredis://localhost:6379/0");
+
+        const bufferValue = await client.getBuffer("test:s4:a");
+        expect(bufferValue).toEqual(helloBuffer);
+
+        const byteArrayValue = await client.getBuffer("test:s5:a");
+        expect(byteArrayValue).toEqual(Buffer.from([2, 0, 2, 5]));
+
         await client.disconnect();
       });
     },

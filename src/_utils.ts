@@ -124,14 +124,14 @@ export function decryptStorageValue<T>(
   return raw ? (decryptedValue as T) : (new TextDecoder().decode(decryptedValue) as T);
 }
 
-export function encryptStorageKey(storageKey: string, key: string) {
+export function encryptStorageKey(storageKey: string, key: string): string {
   const cryptoKey = genBytesFromBase64(key);
   const gcmSiv = siv(cryptoKey, genBytesFromBase64(predefinedSivNonce));
   const encryptedKey = gcmSiv.encrypt(new Uint8Array(new TextEncoder().encode(storageKey)));
   return encryptionPrefix + genBase64FromBytes(encryptedKey, true);
 }
 
-export function decryptStorageKey(encryptedKey: string, key: string) {
+export function decryptStorageKey(encryptedKey: string, key: string): string {
   const cryptoKey = genBytesFromBase64(key);
   const gcmSiv = siv(cryptoKey, genBytesFromBase64(predefinedSivNonce));
   const decryptedKey = gcmSiv.decrypt(

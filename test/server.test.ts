@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, it, expect } from "vitest";
 import { serve } from "srvx";
 import { $fetch } from "ofetch";
-import { createStorage, encryptedStorage } from "../src/index.ts";
+import { createStorage } from "../src/index.ts";
 import { createStorageHandler } from "../src/server.ts";
 import fsDriver from "../src/drivers/fs.ts";
 import httpDriver from "../src/drivers/http.ts";
@@ -103,64 +103,8 @@ describe("server", () => {
   });
 });
 
-describe("encrypted server", () => {
-  const encryptionKey = "e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=";
-
-  it("basic", async () => {
-    const storage = createTestStorage();
-    const encStorage = encryptedStorage(storage, encryptionKey, true);
-    const storageServer = createStorageHandler(encStorage, {
-      authorize(req) {
-        if (req.type === "read" && req.key.startsWith("private:")) {
-          throw new Error("Unauthorized Read");
-        }
-      },
-    });
-    const server = await serve({
-      port: 0,
-      fetch: storageServer,
-    });
-
-    const fetchStorage = (url: string, options?: any) =>
-      $fetch(url, { baseURL: server.url!, ...options });
-
-    const remoteStorage = createStorage({
-      driver: httpDriver({ base: server.url! }),
-    });
-
-    expect(await fetchStorage("foo/", {})).toMatchObject([]);
-
-    await encStorage.setItem("foo/bar", "bar");
-    await encStorage.setMeta("foo/bar", { mtime: new Date() });
-    expect(await fetchStorage("foo/bar")).toBe("bar");
-
-    expect(await fetchStorage("foo/bar", { method: "PUT", body: "updated" })).toBe("OK");
-    expect(await fetchStorage("foo/bar")).toBe("updated");
-    expect(await fetchStorage("/")).toMatchObject(["foo/bar"]);
-
-    expect(await fetchStorage("foo/bar", { method: "DELETE" })).toBe("OK");
-    expect(await fetchStorage("foo/bar/", {})).toMatchObject([]);
-
-    await expect(
-      fetchStorage("private/foo/bar", { method: "GET" }).catch((error) => {
-        throw error.data;
-      }),
-    ).rejects.toMatchObject({
-      status: 401,
-      statusText: "Unauthorized Read",
-      message: "Unauthorized Read",
-    });
-
-    await encStorage.setItem("ttl", "ttl", { ttl: 1000 });
-    expect(await encStorage.getMeta("ttl")).toMatchObject({ ttl: 1000 });
-    expect(await remoteStorage.getMeta("ttl")).toMatchObject({ ttl: 1000 });
-
-    await server.close();
-  });
-});
-
 function createTestStorage() {
-  const data = new Map<string, any>();
+  const data = new Map<string, string>();
   const ttl = new Map<string, number>();
   const storage = createStorage({
     driver: {

@@ -1,4 +1,3 @@
-import { getRandomValues } from "uncrypto";
 import { xchacha20poly1305 } from "@noble/ciphers/chacha";
 import { siv } from "@noble/ciphers/aes";
 
@@ -102,7 +101,7 @@ export function encryptStorageValue(
   raw?: boolean,
 ): StorageValueEnvelope {
   const cryptoKey = genBytesFromBase64(key);
-  const nonce = getRandomValues(new Uint8Array(24));
+  const nonce = globalThis.crypto.getRandomValues(new Uint8Array(24));
   const chacha = xchacha20poly1305(cryptoKey, nonce);
   const encryptedValue = chacha.encrypt(
     raw ? storageValue : new TextEncoder().encode(storageValue),

@@ -167,7 +167,6 @@ describe("utils", () => {
     expect(await encStorage.getKeys()).toStrictEqual(["x", "y"]);
     expect(await storage.getItem("x")).toBeNull();
     expect(await storage.getItem("foo:x")).toBeTypeOf("object");
-    expect(await storage.getItem("foo:x")).toBeTypeOf("object");
 
     // Higher order storage
     const secondStorage = createStorage();
@@ -188,7 +187,6 @@ describe("utils", () => {
     expect(await encStorage.getItem("x")).toBe("bar");
     expect(await encStorage.getKeys()).toStrictEqual(["x", "y"]);
     expect(await storage.getItem("x")).toBeNull();
-    expect(await storage.getItem("foo:x")).toBeTypeOf("object");
     expect(await storage.getItem("foo:x")).toBeTypeOf("object");
 
     // Higher order storage

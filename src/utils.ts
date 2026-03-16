@@ -94,130 +94,77 @@ export function encryptedStorage<T extends StorageValue>(
 ): Storage<T> {
   const encStorage: Storage<T> = { ...storage };
 
-  encStorage.hasItem = (key, ...args) =>
-    storage.hasItem(
-      encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
-      ...args,
-    );
+  const getStoredKey = (key: string) =>
+    encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key;
+
+  const getItemOptions = (
+    item: string | { key: string; options?: TransactionOptions },
+    commonOptions?: TransactionOptions,
+  ) => {
+    return typeof item === "string" || !item.options
+      ? commonOptions
+      : { ...commonOptions, ...item.options };
+  };
+
+  encStorage.hasItem = (key, ...args) => storage.hasItem(getStoredKey(key), ...args);
 
   encStorage.getItem = (async (key, ...args) => {
-    if (encryptKeys) {
-      key = encryptStorageKey(normalizeKey(key), encryptionKey);
-    }
-    const value = await storage.getItem<StorageValueEnvelope>(key, ...args);
-    return value ? destr(decryptStorageValue<string>(value, encryptionKey)) : null;
+    const value = await storage.getItem<StorageValueEnvelope>(getStoredKey(key), ...args);
+    return value === null ? null : destr(decryptStorageValue<string>(value, encryptionKey));
   }) as Storage<T>["getItem"];
 
   encStorage.getItems = (async (items, commonOptions) => {
-    let encryptedItems: { key: string; value: StorageValueEnvelope | null }[];
-
-    if (encryptKeys) {
-      const encryptedKeyItems = items.map((item) => {
-        const isStringItem = typeof item === "string";
-        const key = encryptStorageKey(normalizeKey(isStringItem ? item : item.key), encryptionKey);
-        const options =
-          isStringItem || !item.options ? commonOptions : { ...commonOptions, ...item.options };
-
-        return { key, options };
-      });
-      encryptedItems = (await storage.getItems(encryptedKeyItems, commonOptions)) as {
-        key: string;
-        value: StorageValueEnvelope | null;
-      }[];
-    } else {
-      encryptedItems = (await storage.getItems(items, commonOptions)) as {
-        key: string;
-        value: StorageValueEnvelope | null;
-      }[];
-    }
-
-    return encryptedItems.map((encryptedItem) => {
-      const { value, key, ...rest } = encryptedItem;
-      return {
-        key: encryptKeys ? decryptStorageKey(normalizeKey(key), encryptionKey) : key,
-        value: value === null ? null : destr(decryptStorageValue<string>(value, encryptionKey)),
-        ...rest,
-      };
-    });
+    return Promise.all(
+      items.map(async (item) => {
+        const key = typeof item === "string" ? item : item.key;
+        return {
+          key: normalizeKey(key),
+          value: await encStorage.getItem(key, getItemOptions(item, commonOptions)),
+        };
+      }),
+    );
   }) as Storage<T>["getItems"];
 
   encStorage.getItemRaw = async (key, ...args) => {
-    if (encryptKeys) {
-      key = encryptStorageKey(normalizeKey(key), encryptionKey);
-    }
-    const value = await storage.getItem<StorageValueEnvelope>(key, ...args);
-    return value ? decryptStorageValue(value, encryptionKey, true) : null;
+    const value = await storage.getItem<StorageValueEnvelope>(getStoredKey(key), ...args);
+    return value === null ? null : decryptStorageValue(value, encryptionKey, true);
   };
 
   encStorage.setItem = async (key, value, ...args) => {
-    if (encryptKeys) {
-      key = encryptStorageKey(normalizeKey(key), encryptionKey);
-    }
     const encryptedValue = encryptStorageValue(stringify(value), encryptionKey);
-    return storage.setItem(key, encryptedValue as unknown as T, ...args);
+    return storage.setItem(getStoredKey(key), encryptedValue as unknown as T, ...args);
   };
 
-  encStorage.setItems = async (items, ...args) => {
-    const encryptedItems = items.map((item) => {
-      const { value, key, ...rest } = item;
-      return {
-        key: encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
-        value: encryptStorageValue(stringify(value), encryptionKey),
-        ...rest,
-      };
-    });
-
-    return storage.setItems(
-      encryptedItems as unknown as { key: string; value: T; options?: TransactionOptions }[],
-      ...args,
+  encStorage.setItems = async (items, commonOptions) => {
+    await Promise.all(
+      items.map((item) =>
+        encStorage.setItem(item.key, item.value, getItemOptions(item, commonOptions)),
+      ),
     );
   };
 
   encStorage.setItemRaw = async (key, value, ...args) => {
-    if (encryptKeys) {
-      key = encryptStorageKey(normalizeKey(key), encryptionKey);
-    }
     const encryptedValue = encryptStorageValue(value, encryptionKey, true);
-    return storage.setItem(key, encryptedValue as unknown as T, ...args);
+    return storage.setItem(getStoredKey(key), encryptedValue as unknown as T, ...args);
   };
 
-  encStorage.removeItem = (key, ...args) =>
-    storage.removeItem(
-      encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
-      ...args,
-    );
-
-  encStorage.setMeta = (key, ...args) =>
-    storage.setMeta(
-      encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
-      ...args,
-    );
-
-  encStorage.getMeta = (key, ...args) =>
-    storage.getMeta(
-      encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
-      ...args,
-    );
-
-  encStorage.removeMeta = (key, ...args) =>
-    storage.removeMeta(
-      encryptKeys ? encryptStorageKey(normalizeKey(key), encryptionKey) : key,
-      ...args,
-    );
+  encStorage.removeItem = (key, ...args) => storage.removeItem(getStoredKey(key), ...args);
+  encStorage.setMeta = (key, ...args) => storage.setMeta(getStoredKey(key), ...args);
+  encStorage.getMeta = (key, ...args) => storage.getMeta(getStoredKey(key), ...args);
+  encStorage.removeMeta = (key, ...args) => storage.removeMeta(getStoredKey(key), ...args);
 
   encStorage.getKeys = async (base, ...args) => {
     if (!encryptKeys) {
       return storage.getKeys(base, ...args);
     }
 
+    const normalizedBase = normalizeKey(base);
     const keys = await storage.getKeys("", ...args);
     const decryptedKeys = keys.map((key) => decryptStorageKey(key, encryptionKey));
 
-    if (base) {
-      return decryptedKeys.filter((key) => key.startsWith(base) && !key.endsWith("$"));
-    }
-
-    return decryptedKeys.filter((key) => !key.endsWith("$"));
+    return normalizedBase
+      ? decryptedKeys.filter((key) => key.startsWith(normalizedBase))
+      : decryptedKeys;
   };
 
   encStorage.keys = encStorage.getKeys;
@@ -231,9 +178,6 @@ export function encryptedStorage<T extends StorageValue>(
 }
 
 export function normalizeKey(key?: string): string {
-  if (key?.startsWith("$enc:")) {
-    return key;
-  }
   if (!key) {
     return "";
   }

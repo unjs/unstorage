@@ -20,10 +20,6 @@
     "composite": true,
     "isolatedDeclarations": true,
     "allowImportingTsExtensions": true,
-    "paths": {
-      "unstorage": ["./src/index.ts"],
-      "unstorage/*": ["./src/*"]
-    },
     "types": ["node", "deno"]
   },
   "include": ["src", "test"]

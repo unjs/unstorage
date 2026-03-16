@@ -43,7 +43,7 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
     getItem(key, topts) {
       key = r(key);
       const binding = getR2Binding(opts.binding);
-      return binding.get(key, topts).then((r) => (r && "text" in r ? r.text() : null));
+      return binding.get(key, topts).then((r) => r?.text() ?? null);
     },
     async getItemRaw(key, topts) {
       key = r(key);

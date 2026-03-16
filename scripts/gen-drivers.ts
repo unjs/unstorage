@@ -17,7 +17,6 @@ const drivers: {
   safeName: string;
   names: string[];
   subpath: string;
-  typeImport: string;
   optionsTExport?: string;
   optionsTName?: string;
 }[] = [];
@@ -25,7 +24,6 @@ const drivers: {
 for (const entry of driverEntries) {
   const name = entry.replace(/\.ts$/, "");
   const subpath = `unstorage/drivers/${name}`;
-  const typeImport = `./drivers/${name}.ts`;
   const fullPath = join(driversDir, `${name}.ts`);
 
   const contents = await readFile(fullPath, "utf8");
@@ -44,7 +42,6 @@ for (const entry of driverEntries) {
     safeName,
     names,
     subpath,
-    typeImport,
     optionsTExport,
     optionsTName,
   });
@@ -60,7 +57,7 @@ ${drivers
     if (exportName !== d.optionsTName) {
       exportName += ` as ${d.optionsTName}`;
     }
-    return `import type { ${exportName} } from "${d.typeImport}";`;
+    return `import type { ${exportName} } from "${d.subpath}";`;
   })
   .join("\n")}
 

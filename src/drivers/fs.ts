@@ -1,6 +1,5 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
-import { resolve, relative, join } from "node:path";
-import { isMatch } from "picomatch";
+import { resolve, relative, join, isAbsolute, matchesGlob } from "node:path";
 import type { FSWatcher, ChokidarOptions } from "chokidar";
 import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
 import {
@@ -33,7 +32,13 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
 
   const ignorePatterns = userOptions.ignore || ["**/node_modules/**", "**/.git/**"];
   const ignore = (path: string) => {
-    return ignorePatterns.some((pattern) => isMatch(path, pattern, { dot: true }));
+    const relativePath = relative(base, path);
+    return ignorePatterns.some((pattern) => {
+      if (isAbsolute(pattern)) {
+        return path.startsWith(pattern);
+      }
+      return matchesGlob(relativePath, pattern);
+    });
   };
 
   const r = (key: string) => {

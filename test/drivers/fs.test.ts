@@ -93,6 +93,16 @@ describe("drivers: fs", () => {
     expect(await ctx.storage.getKeys()).toHaveLength(0);
   });
 
+  it("ignores node_modules under dot-prefixed base path", async () => {
+    const dotDir = resolve(__dirname, "tmp/.dot-prefix-test");
+    ctx.driver = driver({ base: dotDir });
+    ctx.storage = createStorage({ driver: ctx.driver });
+    await ctx.storage.setItem("node_modules/pkg/index.js", "module");
+    await ctx.storage.setItem("src/index.ts", "source");
+    const keys = await ctx.storage.getKeys();
+    expect(keys).toEqual(["src:index.ts"]);
+  });
+
   afterEach(async () => {
     await ctx.storage?.clear();
     await ctx.storage?.dispose();

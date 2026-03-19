@@ -1,27 +1,26 @@
 import { describe, expect, it } from "vitest";
-import encryptionDriver from "../../src/drivers/encryption.ts";
 import memoryDriver from "../../src/drivers/memory.ts";
-import { createStorage } from "../../src/index.ts";
-import { testDriver } from "./utils.ts";
+import { createStorage, encryptedStorage } from "../../src/index.ts";
 
-describe("drivers: encryption", () => {
+describe("encryptedStorage", () => {
   const encryptionKey = "e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=";
 
-  testDriver({
-    driver: encryptionDriver({
-      driver: memoryDriver(),
+  it("encrypts and decrypts values", async () => {
+    const storage = encryptedStorage(
+      createStorage({ driver: memoryDriver() }),
       encryptionKey,
-    }),
+    );
+
+    await storage.setItem("foo", "bar");
+    expect(await storage.getItem("foo")).toBe("bar");
   });
 
   it("supports key encryption", async () => {
-    const storage = createStorage({
-      driver: encryptionDriver({
-        driver: memoryDriver(),
-        encryptionKey,
-        keyEncryption: true,
-      }),
-    });
+    const storage = encryptedStorage(
+      createStorage({ driver: memoryDriver() }),
+      encryptionKey,
+      true,
+    );
 
     await storage.setItem("foo/bar", "baz");
 

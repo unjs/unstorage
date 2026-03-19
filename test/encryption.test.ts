@@ -88,7 +88,11 @@ describe("encryptedStorage", () => {
     const oldStorage = encryptedStorage(base, { encryptionKey: oldKey, encryptKeys: true });
     await oldStorage.setItem("old-entry", "v1");
 
-    const rotated = encryptedStorage(base, { encryptionKey: newKey, encryptKeys: true, oldKeys: [oldKey] });
+    const rotated = encryptedStorage(base, {
+      encryptionKey: newKey,
+      encryptKeys: true,
+      oldKeys: [oldKey],
+    });
     await rotated.setItem("new-entry", "v2");
 
     const keys = await rotated.getKeys();

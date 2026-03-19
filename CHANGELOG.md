@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-alpha.7
+
+[compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.6...v2.0.0-alpha.7)
+
+### 🩹 Fixes
+
+- **memory:** Proactively flush expired entries after ttl ([#759](https://github.com/unjs/unstorage/pull/759))
+- **fs:** Resolve ignore pattern matching for dot-prefix paths ([#751](https://github.com/unjs/unstorage/pull/751))
+
+### 🏡 Chore
+
+- Ignore CHANGELOG.md from formatting ([c28ebab](https://github.com/unjs/unstorage/commit/c28ebab))
+- **docs:** Ignore formatting files with mdc syntax ([#747](https://github.com/unjs/unstorage/pull/747))
+- Update deps ([e9bdc8b](https://github.com/unjs/unstorage/commit/e9bdc8b))
+
+### ❤️ Contributors
+
+- KimHeeJun
+- Pooya Parsa <pooya@pi0.io>
+- Kricsleo
+
 ## v2.0.0-alpha.6
 
 [compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.5...v2.0.0-alpha.6)

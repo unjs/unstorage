@@ -106,11 +106,7 @@ interface StorageValueEnvelope {
 const _predefinedSivNonce = "ThtnxLK9eCF4OLMg";
 const _encryptionPrefix = "$enc:";
 
-function _encryptStorageValue(
-  storageValue: any,
-  key: string,
-  raw?: boolean,
-): StorageValueEnvelope {
+function _encryptStorageValue(storageValue: any, key: string, raw?: boolean): StorageValueEnvelope {
   const cryptoKey = _genBytesFromBase64(key);
   const nonce = globalThis.crypto.getRandomValues(new Uint8Array(24));
   const chacha = xchacha20poly1305(cryptoKey, nonce);

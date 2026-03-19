@@ -6,10 +6,7 @@ describe("encryptedStorage", () => {
   const encryptionKey = "e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=";
 
   it("encrypts and decrypts values", async () => {
-    const storage = encryptedStorage(
-      createStorage({ driver: memoryDriver() }),
-      encryptionKey,
-    );
+    const storage = encryptedStorage(createStorage({ driver: memoryDriver() }), encryptionKey);
 
     await storage.setItem("foo", "bar");
     expect(await storage.getItem("foo")).toBe("bar");

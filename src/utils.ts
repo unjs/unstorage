@@ -45,6 +45,7 @@ export function prefixStorage<T extends StorageValue>(
   nsStorage.getKeys = (key = "", ...arguments_) =>
     storage
       .getKeys(base + key, ...arguments_)
+      // Remove Prefix
       .then((keys) => keys.map((key) => key.slice(base.length)));
 
   nsStorage.keys = nsStorage.getKeys;
@@ -77,8 +78,6 @@ export function prefixStorage<T extends StorageValue>(
 
   return nsStorage;
 }
-
-
 export function normalizeKey(key?: string): string {
   if (!key) {
     return "";

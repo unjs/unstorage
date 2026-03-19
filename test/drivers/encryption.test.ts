@@ -13,10 +13,10 @@ describe("encryptedStorage", () => {
   });
 
   it("supports key encryption", async () => {
-    const storage = encryptedStorage(
-      createStorage({ driver: memoryDriver() }),
-      { encryptionKey, encryptKeys: true },
-    );
+    const storage = encryptedStorage(createStorage({ driver: memoryDriver() }), {
+      encryptionKey,
+      encryptKeys: true,
+    });
 
     await storage.setItem("foo/bar", "baz");
 

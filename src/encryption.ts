@@ -7,13 +7,21 @@ import { normalizeKey } from "./utils.ts";
 
 export interface EncryptedStorageOptions {
   /**
-   * Base64-encoded encryption secret(s) (each must decode to exactly 32 bytes / 256-bit). First is used as primary, rest are older ones for key rotation.
+   * Base64-encoded encryption secret(s) (each must decode to exactly 32 bytes / 256-bit).
+   *
+   * Can be a single string, a comma-separated string, or an array. First is used as primary, rest are older ones for key rotation.
+   *
+   * Generate with: `openssl rand -base64 32` or `btoa(String.fromCodePoint(...crypto.getRandomValues(new Uint8Array(32))))`
    */
   secret: string | string[];
 
   /** Encrypt storage keys in addition to values. */
   encryptKeys?: {
-    /** Nonce for AES-GCM-SIV key encryption (base64-encoded, must be 12 bytes). */
+    /**
+     * Nonce for AES-GCM-SIV key encryption (base64-encoded, must be 12 bytes).
+     *
+     * Generate with: `openssl rand -base64 12` or `btoa(String.fromCodePoint(...crypto.getRandomValues(new Uint8Array(12))))`
+     */
     nonce: string;
 
     /** Custom prefix for encrypted keys (default: `"$enc:"`). */

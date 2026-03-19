@@ -5,11 +5,16 @@ import { stringify } from "./_utils.ts";
 import type { Storage, StorageValue, TransactionOptions } from "./types.ts";
 import { normalizeKey } from "./utils.ts";
 
+export interface EncryptedStorageOptions {
+  encryptionKey: string;
+  encryptKeys?: boolean;
+}
+
 export function encryptedStorage<T extends StorageValue>(
   storage: Storage<T>,
-  encryptionKey: string,
-  encryptKeys = false,
+  options: EncryptedStorageOptions,
 ): Storage<T> {
+  const { encryptionKey, encryptKeys = false } = options;
   const encStorage: Storage<T> = { ...storage };
 
   const getStoredKey = (key: string) =>
@@ -146,8 +151,6 @@ function _decryptStorageKey(encryptedKey: string, key: string): string {
   );
   return new TextDecoder().decode(decryptedKey);
 }
-
-// Base64 utilities - Waiting for https://github.com/unjs/knitwork/pull/83
 
 function _genBytesFromBase64(input: string, urlSafe?: boolean) {
   if (urlSafe) {

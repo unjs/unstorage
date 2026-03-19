@@ -5,7 +5,7 @@ describe("encryptedStorage", () => {
   const encryptionKey = "e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=";
 
   it("getItems", async () => {
-    const storage = encryptedStorage(createStorage(), encryptionKey);
+    const storage = encryptedStorage(createStorage(), { encryptionKey });
     await storage.setItem("a", "foo");
     await storage.setItem("b", "bar");
 
@@ -17,7 +17,7 @@ describe("encryptedStorage", () => {
   });
 
   it("setItems", async () => {
-    const storage = encryptedStorage(createStorage(), encryptionKey);
+    const storage = encryptedStorage(createStorage(), { encryptionKey });
     await storage.setItems([
       { key: "a", value: "foo" },
       { key: "b", value: "bar" },
@@ -27,7 +27,7 @@ describe("encryptedStorage", () => {
   });
 
   it("setItemRaw and getItemRaw", async () => {
-    const storage = encryptedStorage(createStorage(), encryptionKey);
+    const storage = encryptedStorage(createStorage(), { encryptionKey });
     const raw = new TextEncoder().encode("raw-data");
     await storage.setItemRaw("raw", raw);
     const result = await storage.getItemRaw("raw");
@@ -35,12 +35,12 @@ describe("encryptedStorage", () => {
   });
 
   it("getItemRaw returns null for missing key", async () => {
-    const storage = encryptedStorage(createStorage(), encryptionKey);
+    const storage = encryptedStorage(createStorage(), { encryptionKey });
     expect(await storage.getItemRaw("missing")).toBeNull();
   });
 
   it("getKeys with base filter and key encryption", async () => {
-    const storage = encryptedStorage(createStorage(), encryptionKey, true);
+    const storage = encryptedStorage(createStorage(), { encryptionKey, encryptKeys: true });
     await storage.setItem("foo/a", "1");
     await storage.setItem("bar/b", "2");
     expect(await storage.getKeys("foo")).toStrictEqual(["foo:a"]);
@@ -49,7 +49,7 @@ describe("encryptedStorage", () => {
   it("prefixed encryptedStorage", async () => {
     const storage = createStorage();
     const pStorage = prefixStorage(storage, "foo");
-    const encStorage = encryptedStorage(pStorage, encryptionKey, false);
+    const encStorage = encryptedStorage(pStorage, { encryptionKey });
     await encStorage.setItem("x", "bar");
     await encStorage.setItem("y", "baz");
     expect(await encStorage.getItem("x")).toBe("bar");
@@ -69,7 +69,7 @@ describe("encryptedStorage", () => {
   it("prefixed encryptedStorage with key encryption", async () => {
     const storage = createStorage();
     const pStorage = prefixStorage(storage, "foo");
-    const encStorage = encryptedStorage(pStorage, encryptionKey, true);
+    const encStorage = encryptedStorage(pStorage, { encryptionKey, encryptKeys: true });
     await encStorage.setItem("x", "bar");
     await encStorage.setItem("y", "baz");
     expect(await encStorage.getItem("x")).toBe("bar");

@@ -3,10 +3,11 @@ import memoryDriver from "../../src/drivers/memory.ts";
 import { createStorage, encryptedStorage } from "../../src/index.ts";
 
 describe("encryptedStorage", () => {
-  const encryptionKey = "e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=";
+  const secret = "e9iF+8pS8qAjnj7B1+ZwdzWQ+KXNJGUPW3HdDuMJPgI=";
+  const sivNonce = "ThtnxLK9eCF4OLMg";
 
   it("encrypts and decrypts values", async () => {
-    const storage = encryptedStorage(createStorage({ driver: memoryDriver() }), { encryptionKey });
+    const storage = encryptedStorage(createStorage({ driver: memoryDriver() }), { secret });
 
     await storage.setItem("foo", "bar");
     expect(await storage.getItem("foo")).toBe("bar");
@@ -14,8 +15,8 @@ describe("encryptedStorage", () => {
 
   it("supports key encryption", async () => {
     const storage = encryptedStorage(createStorage({ driver: memoryDriver() }), {
-      encryptionKey,
-      encryptKeys: true,
+      secret,
+      encryptKeys: { nonce: sivNonce },
     });
 
     await storage.setItem("foo/bar", "baz");

@@ -6,36 +6,46 @@ import type { Storage, StorageValue, TransactionOptions } from "./types.ts";
 import { normalizeKey } from "./utils.ts";
 
 export interface EncryptedStorageOptions {
-  encryptionKey: string;
-  encryptKeys?: boolean;
+  /**
+   * Base64-encoded encryption secret(s) (each must decode to exactly 32 bytes / 256-bit). First is used as primary, rest are older ones for key rotation.
+   */
+  secret: string | string[];
 
-  /** Custom nonce for AES-GCM-SIV key encryption (base64-encoded, must be 16 bytes). */
-  sivNonce?: string;
+  /** Encrypt storage keys in addition to values. */
+  encryptKeys?: {
+    /** Nonce for AES-GCM-SIV key encryption (base64-encoded, must be 12 bytes). */
+    nonce: string;
 
-  /** Custom prefix for encrypted keys (default: `"$enc:"`). */
-  encryptedKeyPrefix?: string;
-
-  /** Previous encryption keys for key rotation. Entries encrypted with old keys can still be decrypted. */
-  oldKeys?: string[];
+    /** Custom prefix for encrypted keys (default: `"$enc:"`). */
+    prefix?: string;
+  };
 }
 
 export function encryptedStorage<T extends StorageValue>(
   storage: Storage<T>,
   options: EncryptedStorageOptions,
 ): Storage<T> {
-  const {
-    encryptionKey,
-    encryptKeys = false,
-    sivNonce = _defaultSivNonce,
-    encryptedKeyPrefix = _defaultEncryptionPrefix,
-    oldKeys = [],
-  } = options;
-  const allKeys = [encryptionKey, ...oldKeys];
+  const { encryptKeys } = options;
+
+  const allSecrets = Array.isArray(options.secret)
+    ? options.secret
+    : options.secret.split(",").map((s) => s.trim());
+  const secret = allSecrets[0]!;
+  const encryptedKeyPrefix = encryptKeys?.prefix || _defaultEncryptionPrefix;
+
+  // Validate all key lengths eagerly
+  for (const s of allSecrets) {
+    _validateKeyLength(s);
+  }
+  if (encryptKeys) {
+    _validateSivNonceLength(encryptKeys.nonce);
+  }
+
   const encStorage: Storage<T> = { ...storage };
 
   const getStoredKey = (key: string) =>
     encryptKeys
-      ? _encryptStorageKey(normalizeKey(key), encryptionKey, sivNonce, encryptedKeyPrefix)
+      ? _encryptStorageKey(normalizeKey(key), secret, encryptKeys.nonce, encryptedKeyPrefix)
       : key;
 
   const getItemOptions = (
@@ -51,7 +61,7 @@ export function encryptedStorage<T extends StorageValue>(
 
   encStorage.getItem = (async (key, ...args) => {
     const value = await storage.getItem<StorageValueEnvelope>(getStoredKey(key), ...args);
-    return value === null ? null : destr(_decryptWithFallback<string>(value, allKeys));
+    return value === null ? null : destr(_decryptWithFallback<string>(value, allSecrets));
   }) as Storage<T>["getItem"];
 
   encStorage.getItems = (async (items, commonOptions) => {
@@ -68,11 +78,11 @@ export function encryptedStorage<T extends StorageValue>(
 
   encStorage.getItemRaw = async (key, ...args) => {
     const value = await storage.getItem<StorageValueEnvelope>(getStoredKey(key), ...args);
-    return value === null ? null : _decryptWithFallback(value, allKeys, true);
+    return value === null ? null : _decryptWithFallback(value, allSecrets, true);
   };
 
   encStorage.setItem = async (key, value, ...args) => {
-    const encryptedValue = _encryptStorageValue(stringify(value), encryptionKey);
+    const encryptedValue = _encryptStorageValue(stringify(value), secret);
     return storage.setItem(getStoredKey(key), encryptedValue as unknown as T, ...args);
   };
 
@@ -85,7 +95,7 @@ export function encryptedStorage<T extends StorageValue>(
   };
 
   encStorage.setItemRaw = async (key, value, ...args) => {
-    const encryptedValue = _encryptStorageValue(value, encryptionKey, true);
+    const encryptedValue = _encryptStorageValue(value, secret, true);
     return storage.setItem(getStoredKey(key), encryptedValue as unknown as T, ...args);
   };
 
@@ -102,7 +112,7 @@ export function encryptedStorage<T extends StorageValue>(
     const normalizedBase = normalizeKey(base);
     const keys = await storage.getKeys("", ...args);
     const decryptedKeys = keys.map((key) =>
-      _decryptKeyWithFallback(key, allKeys, sivNonce, encryptedKeyPrefix),
+      _decryptKeyWithFallback(key, allSecrets, encryptKeys.nonce, encryptedKeyPrefix),
     );
 
     return normalizedBase
@@ -120,16 +130,32 @@ export function encryptedStorage<T extends StorageValue>(
   return encStorage;
 }
 
-// --- Internal helpers ---
+// --- Internal types ---
 
 interface StorageValueEnvelope {
   nonce: string;
   encryptedValue: string;
 }
 
-// Use only for GCM-SIV, due to nonce-misuse-resistance. We need deterministic keys.
-const _defaultSivNonce = "ThtnxLK9eCF4OLMg";
+// --- Internal helpers ---
+
 const _defaultEncryptionPrefix = "$enc:";
+
+function _validateKeyLength(base64Key: string): void {
+  const bytes = _genBytesFromBase64(base64Key);
+  if (bytes.length !== 32) {
+    throw new Error(
+      `Encryption key must be exactly 32 bytes (256-bit), got ${bytes.length} bytes.`,
+    );
+  }
+}
+
+function _validateSivNonceLength(base64Nonce: string): void {
+  const bytes = _genBytesFromBase64(base64Nonce);
+  if (bytes.length !== 12) {
+    throw new Error(`SIV nonce must be exactly 12 bytes, got ${bytes.length} bytes.`);
+  }
+}
 
 function _encryptStorageValue(storageValue: any, key: string, raw?: boolean): StorageValueEnvelope {
   const cryptoKey = _genBytesFromBase64(key);
@@ -182,14 +208,14 @@ function _decryptStorageKey(
 
 function _decryptWithFallback<T>(
   storageValue: StorageValueEnvelope,
-  keys: string[],
+  secrets: string[],
   raw?: boolean,
 ): T {
-  for (let i = 0; i < keys.length; i++) {
+  for (let i = 0; i < secrets.length; i++) {
     try {
-      return _decryptStorageValue<T>(storageValue, keys[i]!, raw);
+      return _decryptStorageValue<T>(storageValue, secrets[i]!, raw);
     } catch {
-      if (i === keys.length - 1) throw new Error("Decryption failed with all keys");
+      if (i === secrets.length - 1) throw new Error("Decryption failed with all keys");
     }
   }
   throw new Error("Decryption failed: no keys provided");
@@ -197,18 +223,21 @@ function _decryptWithFallback<T>(
 
 function _decryptKeyWithFallback(
   encryptedKey: string,
-  keys: string[],
+  secrets: string[],
   sivNonce: string,
   prefix: string,
 ): string {
-  for (let i = 0; i < keys.length; i++) {
+  if (!encryptedKey.startsWith(prefix)) {
+    return encryptedKey;
+  }
+  for (let i = 0; i < secrets.length; i++) {
     try {
-      return _decryptStorageKey(encryptedKey, keys[i]!, sivNonce, prefix);
+      return _decryptStorageKey(encryptedKey, secrets[i]!, sivNonce, prefix);
     } catch {
-      if (i === keys.length - 1) throw new Error("Key decryption failed with all keys");
+      if (i === secrets.length - 1) throw new Error("Key decryption failed with all keys");
     }
   }
-  throw new Error("Key decryption failed: no keys provided");
+  throw new Error("Key decryption failed with all keys");
 }
 
 function _genBytesFromBase64(input: string, urlSafe?: boolean) {
@@ -225,12 +254,12 @@ function _genBytesFromBase64(input: string, urlSafe?: boolean) {
 }
 
 function _genBase64FromBytes(input: Uint8Array, urlSafe?: boolean) {
-  if (urlSafe) {
-    return globalThis
-      .btoa(String.fromCodePoint(...input))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
+  let binary = "";
+  for (let i = 0; i < input.length; i++) {
+    binary += String.fromCodePoint(input[i]!);
   }
-  return globalThis.btoa(String.fromCodePoint(...input));
+  if (urlSafe) {
+    return globalThis.btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  return globalThis.btoa(binary);
 }

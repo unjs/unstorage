@@ -8,17 +8,28 @@ import { normalizeKey } from "./utils.ts";
 export interface EncryptedStorageOptions {
   encryptionKey: string;
   encryptKeys?: boolean;
+  /** Custom nonce for AES-GCM-SIV key encryption (base64-encoded, must be 16 bytes). */
+  sivNonce?: string;
+  /** Custom prefix for encrypted keys (default: `"$enc:"`). */
+  encryptedKeyPrefix?: string;
 }
 
 export function encryptedStorage<T extends StorageValue>(
   storage: Storage<T>,
   options: EncryptedStorageOptions,
 ): Storage<T> {
-  const { encryptionKey, encryptKeys = false } = options;
+  const {
+    encryptionKey,
+    encryptKeys = false,
+    sivNonce = _defaultSivNonce,
+    encryptedKeyPrefix = _defaultEncryptionPrefix,
+  } = options;
   const encStorage: Storage<T> = { ...storage };
 
   const getStoredKey = (key: string) =>
-    encryptKeys ? _encryptStorageKey(normalizeKey(key), encryptionKey) : key;
+    encryptKeys
+      ? _encryptStorageKey(normalizeKey(key), encryptionKey, sivNonce, encryptedKeyPrefix)
+      : key;
 
   const getItemOptions = (
     item: string | { key: string; options?: TransactionOptions },
@@ -83,7 +94,7 @@ export function encryptedStorage<T extends StorageValue>(
 
     const normalizedBase = normalizeKey(base);
     const keys = await storage.getKeys("", ...args);
-    const decryptedKeys = keys.map((key) => _decryptStorageKey(key, encryptionKey));
+    const decryptedKeys = keys.map((key) => _decryptStorageKey(key, encryptionKey, sivNonce, encryptedKeyPrefix));
 
     return normalizedBase
       ? decryptedKeys.filter((key) => key.startsWith(normalizedBase))
@@ -108,8 +119,8 @@ interface StorageValueEnvelope {
 }
 
 // Use only for GCM-SIV, due to nonce-misuse-resistance. We need deterministic keys.
-const _predefinedSivNonce = "ThtnxLK9eCF4OLMg";
-const _encryptionPrefix = "$enc:";
+const _defaultSivNonce = "ThtnxLK9eCF4OLMg";
+const _defaultEncryptionPrefix = "$enc:";
 
 function _encryptStorageValue(storageValue: any, key: string, raw?: boolean): StorageValueEnvelope {
   const cryptoKey = _genBytesFromBase64(key);
@@ -136,18 +147,18 @@ function _decryptStorageValue<T>(
   return raw ? (decryptedValue as T) : (new TextDecoder().decode(decryptedValue) as T);
 }
 
-function _encryptStorageKey(storageKey: string, key: string): string {
+function _encryptStorageKey(storageKey: string, key: string, sivNonce: string, prefix: string): string {
   const cryptoKey = _genBytesFromBase64(key);
-  const gcmSiv = siv(cryptoKey, _genBytesFromBase64(_predefinedSivNonce));
+  const gcmSiv = siv(cryptoKey, _genBytesFromBase64(sivNonce));
   const encryptedKey = gcmSiv.encrypt(new Uint8Array(new TextEncoder().encode(storageKey)));
-  return _encryptionPrefix + _genBase64FromBytes(encryptedKey, true);
+  return prefix + _genBase64FromBytes(encryptedKey, true);
 }
 
-function _decryptStorageKey(encryptedKey: string, key: string): string {
+function _decryptStorageKey(encryptedKey: string, key: string, sivNonce: string, prefix: string): string {
   const cryptoKey = _genBytesFromBase64(key);
-  const gcmSiv = siv(cryptoKey, _genBytesFromBase64(_predefinedSivNonce));
+  const gcmSiv = siv(cryptoKey, _genBytesFromBase64(sivNonce));
   const decryptedKey = gcmSiv.decrypt(
-    _genBytesFromBase64(encryptedKey.slice(_encryptionPrefix.length), true),
+    _genBytesFromBase64(encryptedKey.slice(prefix.length), true),
   );
   return new TextDecoder().decode(decryptedKey);
 }

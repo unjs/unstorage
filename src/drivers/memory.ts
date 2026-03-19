@@ -56,10 +56,7 @@ export default driver;
 
 // --- Internal helpers ---
 
-function _clearTimer(
-  timers: Map<string, ReturnType<typeof setTimeout>>,
-  key: string,
-) {
+function _clearTimer(timers: Map<string, ReturnType<typeof setTimeout>>, key: string) {
   const existing = timers.get(key);
   if (existing !== undefined) {
     clearTimeout(existing);

@@ -78,6 +78,7 @@ export function prefixStorage<T extends StorageValue>(
 
   return nsStorage;
 }
+
 export function normalizeKey(key?: string): string {
   if (!key) {
     return "";

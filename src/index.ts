@@ -1,3 +1,4 @@
+export * from "./encryption.ts";
 export * from "./storage.ts";
 export * from "./types.ts";
 export * from "./utils.ts";

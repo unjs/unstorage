@@ -46,6 +46,56 @@ describe("encryptedStorage", () => {
     expect(await storage.getKeys("foo")).toStrictEqual(["foo:a"]);
   });
 
+  it("key rotation: reads old values with oldKeys fallback", async () => {
+    const oldKey = encryptionKey;
+    const newKey = "RHlBd3FzRGFiTEJjb3pNWlRXSUVJSVRMb1FmZDJPaWI=";
+    const base = createStorage();
+
+    // Write with old key
+    const oldStorage = encryptedStorage(base, { encryptionKey: oldKey });
+    await oldStorage.setItem("legacy", "old-data");
+
+    // Rotate: new storage with oldKeys fallback
+    const rotated = encryptedStorage(base, { encryptionKey: newKey, oldKeys: [oldKey] });
+    expect(await rotated.getItem("legacy")).toBe("old-data");
+
+    // New writes use the new key
+    await rotated.setItem("fresh", "new-data");
+    expect(await rotated.getItem("fresh")).toBe("new-data");
+
+    // Old storage can't read new entries
+    expect(async () => await oldStorage.getItem("fresh")).rejects.toThrow();
+  });
+
+  it("key rotation: raw values with oldKeys fallback", async () => {
+    const oldKey = encryptionKey;
+    const newKey = "RHlBd3FzRGFiTEJjb3pNWlRXSUVJSVRMb1FmZDJPaWI=";
+    const base = createStorage();
+
+    const oldStorage = encryptedStorage(base, { encryptionKey: oldKey });
+    await oldStorage.setItemRaw("bin", new TextEncoder().encode("raw-old"));
+
+    const rotated = encryptedStorage(base, { encryptionKey: newKey, oldKeys: [oldKey] });
+    const result = await rotated.getItemRaw("bin");
+    expect(new TextDecoder().decode(result as Uint8Array)).toBe("raw-old");
+  });
+
+  it("key rotation: getKeys with encryptKeys and oldKeys", async () => {
+    const oldKey = encryptionKey;
+    const newKey = "RHlBd3FzRGFiTEJjb3pNWlRXSUVJSVRMb1FmZDJPaWI=";
+    const base = createStorage();
+
+    const oldStorage = encryptedStorage(base, { encryptionKey: oldKey, encryptKeys: true });
+    await oldStorage.setItem("old-entry", "v1");
+
+    const rotated = encryptedStorage(base, { encryptionKey: newKey, encryptKeys: true, oldKeys: [oldKey] });
+    await rotated.setItem("new-entry", "v2");
+
+    const keys = await rotated.getKeys();
+    expect(keys).toContain("old-entry");
+    expect(keys).toContain("new-entry");
+  });
+
   it("prefixed encryptedStorage", async () => {
     const storage = createStorage();
     const pStorage = prefixStorage(storage, "foo");

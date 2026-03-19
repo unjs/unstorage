@@ -8,10 +8,15 @@ import { normalizeKey } from "./utils.ts";
 export interface EncryptedStorageOptions {
   encryptionKey: string;
   encryptKeys?: boolean;
+
   /** Custom nonce for AES-GCM-SIV key encryption (base64-encoded, must be 16 bytes). */
   sivNonce?: string;
+
   /** Custom prefix for encrypted keys (default: `"$enc:"`). */
   encryptedKeyPrefix?: string;
+
+  /** Previous encryption keys for key rotation. Entries encrypted with old keys can still be decrypted. */
+  oldKeys?: string[];
 }
 
 export function encryptedStorage<T extends StorageValue>(
@@ -23,7 +28,9 @@ export function encryptedStorage<T extends StorageValue>(
     encryptKeys = false,
     sivNonce = _defaultSivNonce,
     encryptedKeyPrefix = _defaultEncryptionPrefix,
+    oldKeys = [],
   } = options;
+  const allKeys = [encryptionKey, ...oldKeys];
   const encStorage: Storage<T> = { ...storage };
 
   const getStoredKey = (key: string) =>
@@ -44,7 +51,7 @@ export function encryptedStorage<T extends StorageValue>(
 
   encStorage.getItem = (async (key, ...args) => {
     const value = await storage.getItem<StorageValueEnvelope>(getStoredKey(key), ...args);
-    return value === null ? null : destr(_decryptStorageValue<string>(value, encryptionKey));
+    return value === null ? null : destr(_decryptWithFallback<string>(value, allKeys));
   }) as Storage<T>["getItem"];
 
   encStorage.getItems = (async (items, commonOptions) => {
@@ -61,7 +68,7 @@ export function encryptedStorage<T extends StorageValue>(
 
   encStorage.getItemRaw = async (key, ...args) => {
     const value = await storage.getItem<StorageValueEnvelope>(getStoredKey(key), ...args);
-    return value === null ? null : _decryptStorageValue(value, encryptionKey, true);
+    return value === null ? null : _decryptWithFallback(value, allKeys, true);
   };
 
   encStorage.setItem = async (key, value, ...args) => {
@@ -94,7 +101,9 @@ export function encryptedStorage<T extends StorageValue>(
 
     const normalizedBase = normalizeKey(base);
     const keys = await storage.getKeys("", ...args);
-    const decryptedKeys = keys.map((key) => _decryptStorageKey(key, encryptionKey, sivNonce, encryptedKeyPrefix));
+    const decryptedKeys = keys.map((key) =>
+      _decryptKeyWithFallback(key, allKeys, sivNonce, encryptedKeyPrefix),
+    );
 
     return normalizedBase
       ? decryptedKeys.filter((key) => key.startsWith(normalizedBase))
@@ -147,20 +156,59 @@ function _decryptStorageValue<T>(
   return raw ? (decryptedValue as T) : (new TextDecoder().decode(decryptedValue) as T);
 }
 
-function _encryptStorageKey(storageKey: string, key: string, sivNonce: string, prefix: string): string {
+function _encryptStorageKey(
+  storageKey: string,
+  key: string,
+  sivNonce: string,
+  prefix: string,
+): string {
   const cryptoKey = _genBytesFromBase64(key);
   const gcmSiv = siv(cryptoKey, _genBytesFromBase64(sivNonce));
   const encryptedKey = gcmSiv.encrypt(new Uint8Array(new TextEncoder().encode(storageKey)));
   return prefix + _genBase64FromBytes(encryptedKey, true);
 }
 
-function _decryptStorageKey(encryptedKey: string, key: string, sivNonce: string, prefix: string): string {
+function _decryptStorageKey(
+  encryptedKey: string,
+  key: string,
+  sivNonce: string,
+  prefix: string,
+): string {
   const cryptoKey = _genBytesFromBase64(key);
   const gcmSiv = siv(cryptoKey, _genBytesFromBase64(sivNonce));
-  const decryptedKey = gcmSiv.decrypt(
-    _genBytesFromBase64(encryptedKey.slice(prefix.length), true),
-  );
+  const decryptedKey = gcmSiv.decrypt(_genBytesFromBase64(encryptedKey.slice(prefix.length), true));
   return new TextDecoder().decode(decryptedKey);
+}
+
+function _decryptWithFallback<T>(
+  storageValue: StorageValueEnvelope,
+  keys: string[],
+  raw?: boolean,
+): T {
+  for (let i = 0; i < keys.length; i++) {
+    try {
+      return _decryptStorageValue<T>(storageValue, keys[i]!, raw);
+    } catch {
+      if (i === keys.length - 1) throw new Error("Decryption failed with all keys");
+    }
+  }
+  throw new Error("Decryption failed: no keys provided");
+}
+
+function _decryptKeyWithFallback(
+  encryptedKey: string,
+  keys: string[],
+  sivNonce: string,
+  prefix: string,
+): string {
+  for (let i = 0; i < keys.length; i++) {
+    try {
+      return _decryptStorageKey(encryptedKey, keys[i]!, sivNonce, prefix);
+    } catch {
+      if (i === keys.length - 1) throw new Error("Key decryption failed with all keys");
+    }
+  }
+  throw new Error("Key decryption failed: no keys provided");
 }
 
 function _genBytesFromBase64(input: string, urlSafe?: boolean) {

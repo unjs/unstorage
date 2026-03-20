@@ -261,6 +261,15 @@ async function sha256Base64(str: string) {
   return btoa(binaryString);
 }
 
+function decodeXmlText(s: string): string {
+  return s
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
 function parseListResponse(xml: string): {
   keys: string[];
   isTruncated: boolean;
@@ -283,6 +292,13 @@ function parseListResponse(xml: string): {
     /<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/
   )?.[1];
 
+  if (isTruncated && !nextContinuationToken) {
+    throw new Error(
+      "S3 returned IsTruncated=true but no NextContinuationToken — " +
+        "pagination cannot continue. Check bucket/prefix configuration.",
+    );
+  }
+
   const contents = listBucketResult.match(
     /<Contents[^>]*>([\s\S]*?)<\/Contents>/g
   );
@@ -290,12 +306,15 @@ function parseListResponse(xml: string): {
     ? contents
         .map((content) => content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1])
         .filter(Boolean)
+        .map((k) => decodeXmlText(k as string))
     : [];
 
   return {
     keys: keys as string[],
     isTruncated,
-    nextContinuationToken,
+    nextContinuationToken: nextContinuationToken
+      ? decodeXmlText(nextContinuationToken)
+      : undefined,
   };
 }
 

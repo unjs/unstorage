@@ -127,12 +127,34 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
   const listObjects = async (prefix?: string) => {
-    const res = await awsFetch(baseURL).then((r) => r?.text());
-    if (!res) {
-      console.log("no list", prefix ? `${baseURL}?prefix=${prefix}` : baseURL);
-      return null;
-    }
-    return parseList(res);
+    const allKeys: string[] = [];
+    let continuationToken: string | undefined;
+
+    do {
+      const params = new URLSearchParams();
+      params.set("list-type", "2");
+      if (prefix) {
+        params.set("prefix", prefix);
+      }
+      if (continuationToken) {
+        params.set("continuation-token", continuationToken);
+      }
+
+      const listURL = `${baseURL}?${params.toString()}`;
+      const res = await awsFetch(listURL).then((r) => r?.text());
+      if (!res) {
+        break;
+      }
+
+      const result = parseListResponse(res);
+      allKeys.push(...result.keys);
+
+      continuationToken = result.isTruncated
+        ? result.nextContinuationToken
+        : undefined;
+    } while (continuationToken);
+
+    return allKeys.length > 0 ? allKeys : null;
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
@@ -239,24 +261,42 @@ async function sha256Base64(str: string) {
   return btoa(binaryString);
 }
 
-function parseList(xml: string) {
+function parseListResponse(xml: string): {
+  keys: string[];
+  isTruncated: boolean;
+  nextContinuationToken?: string;
+} {
   if (!xml.startsWith("<?xml")) {
     throw new Error("Invalid XML");
   }
-  const listBucketResult = xml.match(/<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/)?.[1];
+  const listBucketResult = xml.match(
+    /<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/
+  )?.[1];
   if (!listBucketResult) {
     throw new Error("Missing <ListBucketResult>");
   }
-  const contents = listBucketResult.match(/<Contents[^>]*>([\s\S]*?)<\/Contents>/g);
-  if (!contents?.length) {
-    return [];
-  }
-  return contents
-    .map((content) => {
-      const key = content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1];
-      return key;
-    })
-    .filter(Boolean) as string[];
+
+  const isTruncated =
+    listBucketResult.match(/<IsTruncated>([\s\S]*?)<\/IsTruncated>/)?.[1] ===
+    "true";
+  const nextContinuationToken = listBucketResult.match(
+    /<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/
+  )?.[1];
+
+  const contents = listBucketResult.match(
+    /<Contents[^>]*>([\s\S]*?)<\/Contents>/g
+  );
+  const keys = contents
+    ? contents
+        .map((content) => content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1])
+        .filter(Boolean)
+    : [];
+
+  return {
+    keys: keys as string[],
+    isTruncated,
+    nextContinuationToken,
+  };
 }
 
 export default driver;

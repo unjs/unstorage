@@ -189,22 +189,35 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
+  // S3 DeleteObjects API supports max 1000 keys per request
+  const MAX_BULK_DELETE = 1000;
+  // Bounded concurrency for per-object fallback deletes
+  const MAX_CONCURRENT_DELETES = 10;
+
   const deleteObjects = async (base: string) => {
     const keys = await listObjects(base);
     if (!keys?.length) {
       return null;
     }
     if (options.bulkDelete === false) {
-      await Promise.all(keys.map((key) => deleteObject(key)));
+      // Bounded concurrency: process MAX_CONCURRENT_DELETES at a time
+      for (let i = 0; i < keys.length; i += MAX_CONCURRENT_DELETES) {
+        const batch = keys.slice(i, i + MAX_CONCURRENT_DELETES);
+        await Promise.all(batch.map((key) => deleteObject(key)));
+      }
     } else {
-      const body = deleteKeysReq(keys);
-      await awsFetch(`${baseURL}?delete`, {
-        method: "POST",
-        headers: {
-          "x-amz-checksum-sha256": await sha256Base64(body),
-        },
-        body,
-      });
+      // Chunk into batches of MAX_BULK_DELETE for S3 API limit
+      for (let i = 0; i < keys.length; i += MAX_BULK_DELETE) {
+        const chunk = keys.slice(i, i + MAX_BULK_DELETE);
+        const body = deleteKeysReq(chunk);
+        await awsFetch(`${baseURL}?delete`, {
+          method: "POST",
+          headers: {
+            "x-amz-checksum-sha256": await sha256Base64(body),
+          },
+          body,
+        });
+      }
     }
   };
 

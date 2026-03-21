@@ -127,12 +127,34 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
   const listObjects = async (prefix?: string) => {
-    const res = await awsFetch(baseURL).then((r) => r?.text());
-    if (!res) {
-      console.log("no list", prefix ? `${baseURL}?prefix=${prefix}` : baseURL);
-      return null;
-    }
-    return parseList(res);
+    const allKeys: string[] = [];
+    let continuationToken: string | undefined;
+
+    do {
+      const params = new URLSearchParams();
+      params.set("list-type", "2");
+      if (prefix) {
+        params.set("prefix", prefix);
+      }
+      if (continuationToken) {
+        params.set("continuation-token", continuationToken);
+      }
+
+      const listURL = `${baseURL}?${params.toString()}`;
+      const res = await awsFetch(listURL).then((r) => r?.text());
+      if (!res) {
+        break;
+      }
+
+      const result = parseListResponse(res);
+      allKeys.push(...result.keys);
+
+      continuationToken = result.isTruncated
+        ? result.nextContinuationToken
+        : undefined;
+    } while (continuationToken);
+
+    return allKeys.length > 0 ? allKeys : null;
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
@@ -167,22 +189,35 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
+  // S3 DeleteObjects API supports max 1000 keys per request
+  const MAX_BULK_DELETE = 1000;
+  // Bounded concurrency for per-object fallback deletes
+  const MAX_CONCURRENT_DELETES = 10;
+
   const deleteObjects = async (base: string) => {
     const keys = await listObjects(base);
     if (!keys?.length) {
       return null;
     }
     if (options.bulkDelete === false) {
-      await Promise.all(keys.map((key) => deleteObject(key)));
+      // Bounded concurrency: process MAX_CONCURRENT_DELETES at a time
+      for (let i = 0; i < keys.length; i += MAX_CONCURRENT_DELETES) {
+        const batch = keys.slice(i, i + MAX_CONCURRENT_DELETES);
+        await Promise.all(batch.map((key) => deleteObject(key)));
+      }
     } else {
-      const body = deleteKeysReq(keys);
-      await awsFetch(`${baseURL}?delete`, {
-        method: "POST",
-        headers: {
-          "x-amz-checksum-sha256": await sha256Base64(body),
-        },
-        body,
-      });
+      // Chunk into batches of MAX_BULK_DELETE for S3 API limit
+      for (let i = 0; i < keys.length; i += MAX_BULK_DELETE) {
+        const chunk = keys.slice(i, i + MAX_BULK_DELETE);
+        const body = deleteKeysReq(chunk);
+        await awsFetch(`${baseURL}?delete`, {
+          method: "POST",
+          headers: {
+            "x-amz-checksum-sha256": await sha256Base64(body),
+          },
+          body,
+        });
+      }
     }
   };
 
@@ -239,24 +274,61 @@ async function sha256Base64(str: string) {
   return btoa(binaryString);
 }
 
-function parseList(xml: string) {
+function decodeXmlText(s: string): string {
+  return s
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
+function parseListResponse(xml: string): {
+  keys: string[];
+  isTruncated: boolean;
+  nextContinuationToken?: string;
+} {
   if (!xml.startsWith("<?xml")) {
     throw new Error("Invalid XML");
   }
-  const listBucketResult = xml.match(/<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/)?.[1];
+  const listBucketResult = xml.match(
+    /<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/
+  )?.[1];
   if (!listBucketResult) {
     throw new Error("Missing <ListBucketResult>");
   }
-  const contents = listBucketResult.match(/<Contents[^>]*>([\s\S]*?)<\/Contents>/g);
-  if (!contents?.length) {
-    return [];
+
+  const isTruncated =
+    listBucketResult.match(/<IsTruncated>([\s\S]*?)<\/IsTruncated>/)?.[1] ===
+    "true";
+  const nextContinuationToken = listBucketResult.match(
+    /<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/
+  )?.[1];
+
+  if (isTruncated && !nextContinuationToken) {
+    throw new Error(
+      "S3 returned IsTruncated=true but no NextContinuationToken — " +
+        "pagination cannot continue. Check bucket/prefix configuration.",
+    );
   }
-  return contents
-    .map((content) => {
-      const key = content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1];
-      return key;
-    })
-    .filter(Boolean) as string[];
+
+  const contents = listBucketResult.match(
+    /<Contents[^>]*>([\s\S]*?)<\/Contents>/g
+  );
+  const keys = contents
+    ? contents
+        .map((content) => content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1])
+        .filter(Boolean)
+        .map((k) => decodeXmlText(k as string))
+    : [];
+
+  return {
+    keys: keys as string[],
+    isTruncated,
+    nextContinuationToken: nextContinuationToken
+      ? decodeXmlText(nextContinuationToken)
+      : undefined,
+  };
 }
 
 export default driver;

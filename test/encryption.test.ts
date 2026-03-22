@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createStorage, encryptedStorage, prefixStorage } from "../src/index.ts";
 
 describe("encryptedStorage", () => {
@@ -185,6 +185,30 @@ describe("encryptedStorage", () => {
     const keys = await encStorage.getKeys();
     expect(keys).toContain("plain-key");
     expect(keys).toContain("my-secret");
+  });
+
+  it("clear with key encryption removes only the scoped logical base", async () => {
+    const base = createStorage();
+    const storage = encryptedStorage(base, { secret, encryptKeys: { nonce: sivNonce } });
+    await storage.setItem("foo/a", "1");
+    await storage.setItem("foo/b", "2");
+    await storage.setItem("bar/c", "3");
+
+    await storage.clear("foo");
+
+    expect(await storage.getKeys()).toStrictEqual(["bar:c"]);
+    expect(await base.getKeys()).toHaveLength(1);
+  });
+
+  it("watch with key encryption emits logical keys", async () => {
+    const storage = encryptedStorage(createStorage(), { secret, encryptKeys: { nonce: sivNonce } });
+    const onChange = vi.fn();
+    const unwatch = await storage.watch(onChange);
+
+    await storage.setItem("watched/key", "value");
+    await unwatch();
+
+    expect(onChange).toHaveBeenCalledWith("update", "watched:key");
   });
 
   it("handles large values without stack overflow", async () => {

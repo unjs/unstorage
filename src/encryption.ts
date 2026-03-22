@@ -249,6 +249,42 @@ export function encryptedStorage<T extends StorageValue>(
     );
   };
 
+  encStorage.clear = async (base, opts = {}) => {
+    if (!encryptKeys || !base) {
+      return storage.clear(base, opts);
+    }
+
+    await Promise.all((await encStorage.getKeys(base)).map((key) => encStorage.removeItem(key, opts)));
+  };
+
+  encStorage.watch = async (callback) => {
+    if (!encryptKeys) {
+      return storage.watch(callback);
+    }
+
+    return storage.watch((event, key) => {
+      const metaSuffix = key.endsWith("$") ? "$" : "";
+      const encryptedKey = metaSuffix ? key.slice(0, -1) : key;
+      const encryptedKeyIndex = encryptedKey.indexOf(encryptedKeyPrefix);
+
+      if (encryptedKeyIndex === -1) {
+        return callback(event, key);
+      }
+
+      const normalizedKey =
+        encryptedKey.slice(0, encryptedKeyIndex) +
+        _decryptKeyWithFallback(
+          encryptedKey.slice(encryptedKeyIndex),
+          allSecrets,
+          encryptKeys.nonce,
+          encryptedKeyPrefix,
+        ) +
+        metaSuffix;
+
+      return callback(event, normalizedKey);
+    });
+  };
+
   encStorage.keys = encStorage.getKeys;
   encStorage.get = (key, opts = {}) => encStorage.getItem(key, opts);
   encStorage.set = (key, value, opts = {}) => encStorage.setItem(key, value, opts);

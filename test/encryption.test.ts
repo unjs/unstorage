@@ -47,6 +47,22 @@ describe("encryptedStorage", () => {
     expect(await storage.getKeys("foo")).toStrictEqual(["foo:a"]);
   });
 
+  it("getKeys with key encryption respects maxDepth on logical keys", async () => {
+    const storage = encryptedStorage(createStorage(), { secret, encryptKeys: { nonce: sivNonce } });
+    await storage.setItem("top", "1");
+    await storage.setItem("nested/item", "2");
+
+    expect(await storage.getKeys("", { maxDepth: 0 })).toStrictEqual(["top"]);
+  });
+
+  it("getKeys with key encryption respects base boundaries", async () => {
+    const storage = encryptedStorage(createStorage(), { secret, encryptKeys: { nonce: sivNonce } });
+    await storage.setItem("foo/a", "1");
+    await storage.setItem("foobar/b", "2");
+
+    expect(await storage.getKeys("foo")).toStrictEqual(["foo:a"]);
+  });
+
   it("key rotation: reads old values with oldSecrets fallback", async () => {
     const oldSecret = secret;
     const newSecret = "RHlBd3FzRGFiTEJjb3pNWlRXSUVJSVRMb1FmZDJPaWI=";

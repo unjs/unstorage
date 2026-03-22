@@ -3,7 +3,7 @@ import { siv } from "@noble/ciphers/aes";
 import destr from "destr";
 import { stringify } from "./_utils.ts";
 import type { Storage, StorageValue, TransactionOptions } from "./types.ts";
-import { normalizeKey } from "./utils.ts";
+import { filterKeyByBase, filterKeyByDepth, normalizeBaseKey, normalizeKey } from "./utils.ts";
 
 export interface EncryptedStorageOptions {
   /**
@@ -237,15 +237,16 @@ export function encryptedStorage<T extends StorageValue>(
       return storage.getKeys(base, ...args);
     }
 
-    const normalizedBase = normalizeKey(base);
-    const keys = await storage.getKeys("", ...args);
+    const { maxDepth, ...getKeysOptions } = args[0] || {};
+    const normalizedBase = normalizeBaseKey(base);
+    const keys = await storage.getKeys("", getKeysOptions);
     const decryptedKeys = keys.map((key) =>
       _decryptKeyWithFallback(key, allSecrets, encryptKeys.nonce, encryptedKeyPrefix),
     );
 
-    return normalizedBase
-      ? decryptedKeys.filter((key) => key.startsWith(normalizedBase))
-      : decryptedKeys;
+    return decryptedKeys.filter(
+      (key) => filterKeyByDepth(key, maxDepth) && filterKeyByBase(key, normalizedBase),
+    );
   };
 
   encStorage.keys = encStorage.getKeys;

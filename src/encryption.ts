@@ -254,7 +254,9 @@ export function encryptedStorage<T extends StorageValue>(
       return storage.clear(base, opts);
     }
 
-    await Promise.all((await encStorage.getKeys(base)).map((key) => encStorage.removeItem(key, opts)));
+    await Promise.all(
+      (await encStorage.getKeys(base)).map((key) => encStorage.removeItem(key, opts)),
+    );
   };
 
   encStorage.watch = async (callback) => {

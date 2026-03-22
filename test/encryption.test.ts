@@ -270,7 +270,8 @@ describe("encryptedStorage", () => {
     expect(await encStorage.getItem("x")).toBe("bar");
     expect(await encStorage.getKeys()).toStrictEqual(["x", "y"]);
     expect(await storage.getItem("x")).toBeNull();
-    expect(await storage.getItem("foo:x")).toBeTypeOf("object");
+    expect(await storage.getItem("foo:x")).toBeNull();
+    expect((await storage.getKeys()).some((key) => key.startsWith("foo:$enc:"))).toBe(true);
 
     // Higher order storage
     const secondStorage = createStorage();

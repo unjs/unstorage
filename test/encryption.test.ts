@@ -81,7 +81,7 @@ describe("encryptedStorage", () => {
     expect(await rotated.getItem("fresh")).toBe("new-data");
 
     // Old storage can't read new entries
-    expect(async () => await oldStorage.getItem("fresh")).rejects.toThrow();
+    await expect(oldStorage.getItem("fresh")).rejects.toThrow();
   });
 
   it("key rotation: raw values with oldSecrets fallback", async () => {

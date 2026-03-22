@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { resolve } from "node:path";
-import { createStorage, snapshot, restoreSnapshot, prefixStorage } from "../src/index.ts";
+import { createStorage, prefixStorage, restoreSnapshot, snapshot } from "../src/index.ts";
 import memory from "../src/drivers/memory.ts";
 import fs from "../src/drivers/fs.ts";
 

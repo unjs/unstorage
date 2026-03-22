@@ -327,12 +327,25 @@ function _encryptStorageValue(storageValue: any, key: string, raw?: boolean): St
   const nonce = globalThis.crypto.getRandomValues(new Uint8Array(24));
   const chacha = xchacha20poly1305(cryptoKey, nonce);
   const encryptedValue = chacha.encrypt(
-    raw ? storageValue : new TextEncoder().encode(storageValue),
+    raw ? _normalizeRawStorageValue(storageValue) : new TextEncoder().encode(storageValue),
   );
   return {
     encryptedValue: _genBase64FromBytes(new Uint8Array(encryptedValue)),
     nonce: _genBase64FromBytes(nonce),
   };
+}
+
+function _normalizeRawStorageValue(storageValue: unknown): Uint8Array {
+  if (storageValue instanceof Uint8Array) {
+    return storageValue;
+  }
+  if (storageValue instanceof ArrayBuffer) {
+    return new Uint8Array(storageValue);
+  }
+  if (ArrayBuffer.isView(storageValue)) {
+    return new Uint8Array(storageValue.buffer, storageValue.byteOffset, storageValue.byteLength);
+  }
+  throw new TypeError("Raw encrypted values must be byte-like");
 }
 
 function _decryptStorageValue<T>(

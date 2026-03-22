@@ -35,6 +35,21 @@ describe("encryptedStorage", () => {
     expect(new TextDecoder().decode(result as Uint8Array)).toBe("raw-data");
   });
 
+  it("setItemRaw accepts ArrayBuffer input", async () => {
+    const storage = encryptedStorage(createStorage(), { secret });
+    const raw = new TextEncoder().encode("raw-data").buffer;
+    await storage.setItemRaw("raw-buffer", raw);
+    const result = await storage.getItemRaw("raw-buffer");
+    expect(new TextDecoder().decode(result as Uint8Array)).toBe("raw-data");
+  });
+
+  it("setItemRaw rejects non byte-like input", async () => {
+    const storage = encryptedStorage(createStorage(), { secret });
+    await expect(storage.setItemRaw("raw-invalid", { foo: "bar" } as never)).rejects.toThrow(
+      "Raw encrypted values must be byte-like",
+    );
+  });
+
   it("getItemRaw returns null for missing key", async () => {
     const storage = encryptedStorage(createStorage(), { secret });
     expect(await storage.getItemRaw("missing")).toBeNull();

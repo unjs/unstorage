@@ -51,10 +51,68 @@ export function encryptedStorage<T extends StorageValue>(
 
   const encStorage: Storage<T> = { ...storage };
 
-  const getStoredKey = (key: string) =>
+  const getPrimaryStoredKey = (key: string) =>
     encryptKeys
       ? _encryptStorageKey(normalizeKey(key), secret, encryptKeys.nonce, encryptedKeyPrefix)
       : key;
+
+  const getStoredKeyCandidates = (key: string) =>
+    encryptKeys
+      ? (() => {
+          const normalizedKey = normalizeKey(key);
+          return [
+            ...new Set(
+              allSecrets.map((candidateSecret) =>
+                _encryptStorageKey(
+                  normalizedKey,
+                  candidateSecret,
+                  encryptKeys.nonce,
+                  encryptedKeyPrefix,
+                ),
+              ),
+            ),
+          ];
+        })()
+      : [key];
+
+  const getProbeOptions = (options?: TransactionOptions | boolean) =>
+    typeof options === "boolean" ? {} : options;
+
+  const cleanupStoredKeyVariants = async (
+    key: string,
+    primaryStoredKey: string,
+    opts?: TransactionOptions,
+  ) => {
+    const storedKeyCandidates = getStoredKeyCandidates(key).filter(
+      (storedKey) => storedKey !== primaryStoredKey,
+    );
+
+    await Promise.all(
+      storedKeyCandidates.map(async (storedKey) => {
+        if (await storage.hasItem(storedKey, opts)) {
+          await storage.removeItem(storedKey, opts);
+        }
+      }),
+    );
+  };
+
+  const cleanupStoredMetaKeyVariants = async (
+    key: string,
+    primaryStoredKey: string,
+    opts?: TransactionOptions,
+  ) => {
+    const storedKeyCandidates = getStoredKeyCandidates(key).filter(
+      (storedKey) => storedKey !== primaryStoredKey,
+    );
+
+    await Promise.all(
+      storedKeyCandidates.map(async (storedKey) => {
+        if (await storage.hasItem(storedKey + "$", opts)) {
+          await storage.removeMeta(storedKey, opts);
+        }
+      }),
+    );
+  };
 
   const getItemOptions = (
     item: string | { key: string; options?: TransactionOptions },
@@ -65,11 +123,25 @@ export function encryptedStorage<T extends StorageValue>(
       : { ...commonOptions, ...item.options };
   };
 
-  encStorage.hasItem = (key, ...args) => storage.hasItem(getStoredKey(key), ...args);
+  encStorage.hasItem = async (key, ...args) => {
+    for (const storedKey of getStoredKeyCandidates(key)) {
+      if (await storage.hasItem(storedKey, ...args)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
 
   encStorage.getItem = (async (key, ...args) => {
-    const value = await storage.getItem<StorageValueEnvelope>(getStoredKey(key), ...args);
-    return value === null ? null : destr(_decryptWithFallback<string>(value, allSecrets));
+    for (const storedKey of getStoredKeyCandidates(key)) {
+      const value = await storage.getItem<StorageValueEnvelope>(storedKey, ...args);
+      if (value !== null) {
+        return destr(_decryptWithFallback<string>(value, allSecrets));
+      }
+    }
+
+    return null;
   }) as Storage<T>["getItem"];
 
   encStorage.getItems = (async (items, commonOptions) => {
@@ -85,13 +157,21 @@ export function encryptedStorage<T extends StorageValue>(
   }) as Storage<T>["getItems"];
 
   encStorage.getItemRaw = async (key, ...args) => {
-    const value = await storage.getItem<StorageValueEnvelope>(getStoredKey(key), ...args);
-    return value === null ? null : _decryptWithFallback(value, allSecrets, true);
+    for (const storedKey of getStoredKeyCandidates(key)) {
+      const value = await storage.getItem<StorageValueEnvelope>(storedKey, ...args);
+      if (value !== null) {
+        return _decryptWithFallback(value, allSecrets, true);
+      }
+    }
+
+    return null;
   };
 
   encStorage.setItem = async (key, value, ...args) => {
+    const storedKey = getPrimaryStoredKey(key);
     const encryptedValue = _encryptStorageValue(stringify(value), secret);
-    return storage.setItem(getStoredKey(key), encryptedValue as unknown as T, ...args);
+    await storage.setItem(storedKey, encryptedValue as unknown as T, ...args);
+    await cleanupStoredKeyVariants(key, storedKey, args[0]);
   };
 
   encStorage.setItems = async (items, commonOptions) => {
@@ -103,14 +183,54 @@ export function encryptedStorage<T extends StorageValue>(
   };
 
   encStorage.setItemRaw = async (key, value, ...args) => {
+    const storedKey = getPrimaryStoredKey(key);
     const encryptedValue = _encryptStorageValue(value, secret, true);
-    return storage.setItem(getStoredKey(key), encryptedValue as unknown as T, ...args);
+    await storage.setItem(storedKey, encryptedValue as unknown as T, ...args);
+    await cleanupStoredKeyVariants(key, storedKey, args[0]);
   };
 
-  encStorage.removeItem = (key, ...args) => storage.removeItem(getStoredKey(key), ...args);
-  encStorage.setMeta = (key, ...args) => storage.setMeta(getStoredKey(key), ...args);
-  encStorage.getMeta = (key, ...args) => storage.getMeta(getStoredKey(key), ...args);
-  encStorage.removeMeta = (key, ...args) => storage.removeMeta(getStoredKey(key), ...args);
+  encStorage.removeItem = async (key, ...args) => {
+    await Promise.all(
+      getStoredKeyCandidates(key).map(async (storedKey) => {
+        if (await storage.hasItem(storedKey, args[0])) {
+          await storage.removeItem(storedKey, ...args);
+        }
+      }),
+    );
+  };
+
+  encStorage.setMeta = async (key, ...args) => {
+    const storedKey = getPrimaryStoredKey(key);
+    await storage.setMeta(storedKey, ...args);
+    await cleanupStoredMetaKeyVariants(key, storedKey, args[1]);
+  };
+
+  encStorage.getMeta = async (key, ...args) => {
+    const probeOptions = getProbeOptions(args[0]);
+
+    for (const storedKey of getStoredKeyCandidates(key)) {
+      if (
+        (await storage.hasItem(storedKey, probeOptions)) ||
+        (await storage.hasItem(storedKey + "$", probeOptions))
+      ) {
+        return storage.getMeta(storedKey, ...args);
+      }
+    }
+
+    return storage.getMeta(getPrimaryStoredKey(key), ...args);
+  };
+
+  encStorage.removeMeta = async (key, ...args) => {
+    const probeOptions = getProbeOptions(args[0]);
+
+    await Promise.all(
+      getStoredKeyCandidates(key).map(async (storedKey) => {
+        if (await storage.hasItem(storedKey + "$", probeOptions)) {
+          await storage.removeMeta(storedKey, ...args);
+        }
+      }),
+    );
+  };
 
   encStorage.getKeys = async (base, ...args) => {
     if (!encryptKeys) {

@@ -103,6 +103,59 @@ describe("encryptedStorage", () => {
     expect(keys).toContain("new-entry");
   });
 
+  it("key rotation: encrypted keys support item and meta lookups", async () => {
+    const oldSecret = secret;
+    const newSecret = "RHlBd3FzRGFiTEJjb3pNWlRXSUVJSVRMb1FmZDJPaWI=";
+    const base = createStorage();
+
+    const oldStorage = encryptedStorage(base, {
+      secret: oldSecret,
+      encryptKeys: { nonce: sivNonce },
+    });
+    await oldStorage.setItem("legacy", "old-data");
+    await oldStorage.setItemRaw("bin", new TextEncoder().encode("raw-old"));
+    await oldStorage.setMeta("meta", { ttl: 60, note: "legacy" });
+
+    const rotated = encryptedStorage(base, {
+      secret: [newSecret, oldSecret],
+      encryptKeys: { nonce: sivNonce },
+    });
+
+    expect(await rotated.hasItem("legacy")).toBe(true);
+    expect(await rotated.getItem("legacy")).toBe("old-data");
+    expect(new TextDecoder().decode((await rotated.getItemRaw("bin")) as Uint8Array)).toBe(
+      "raw-old",
+    );
+    expect(await rotated.getMeta("meta")).toMatchObject({ ttl: 60, note: "legacy" });
+
+    await rotated.removeItem("legacy");
+    await rotated.removeMeta("meta");
+
+    expect(await rotated.hasItem("legacy")).toBe(false);
+    expect(Object.keys(await rotated.getMeta("meta"))).toHaveLength(0);
+  });
+
+  it("key rotation: rewriting encrypted keys removes stale variants", async () => {
+    const oldSecret = secret;
+    const newSecret = "RHlBd3FzRGFiTEJjb3pNWlRXSUVJSVRMb1FmZDJPaWI=";
+    const base = createStorage();
+
+    const oldStorage = encryptedStorage(base, {
+      secret: oldSecret,
+      encryptKeys: { nonce: sivNonce },
+    });
+    await oldStorage.setItem("duplicate", "old-value");
+
+    const rotated = encryptedStorage(base, {
+      secret: [newSecret, oldSecret],
+      encryptKeys: { nonce: sivNonce },
+    });
+    await rotated.setItem("duplicate", "new-value");
+
+    expect(await rotated.getItem("duplicate")).toBe("new-value");
+    expect(await base.getKeys()).toHaveLength(1);
+  });
+
   it("getKeys skips non-prefixed keys without crashing", async () => {
     const base = createStorage();
 

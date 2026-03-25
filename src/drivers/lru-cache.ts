@@ -15,7 +15,7 @@ const driver: DriverFactory<LRUDriverOptions, LRUCache<string, any, any>> = (opt
     max: 1000,
     sizeCalculation:
       opts.maxSize || opts.maxEntrySize
-        ? (value, key: string) => {
+        ? (value: unknown, key: string) => {
             return key.length + byteLength(value);
           }
         : undefined,
@@ -29,11 +29,13 @@ const driver: DriverFactory<LRUDriverOptions, LRUCache<string, any, any>> = (opt
     hasItem(key) {
       return cache.has(key);
     },
-    getItem(key) {
-      return cache.get(key) ?? null;
+    async getItem(key, options) {
+      const storageResult = await cache.fetch(key, options);
+      return storageResult ?? null;
     },
-    getItemRaw(key) {
-      return cache.get(key) ?? null;
+    async getItemRaw(key, options) {
+      const storageResult = await cache.fetch(key, options);
+      return storageResult ?? null;
     },
     setItem(key, value) {
       cache.set(key, value);

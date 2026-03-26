@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.17.5
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.17.4...v1.17.5)
+
+### 🏡 Chore
+
+- Update undocs ([a6d4235](https://github.com/unjs/unstorage/commit/a6d4235))
+- Update deps ([8cf2093](https://github.com/unjs/unstorage/commit/8cf2093))
+- Update deps (h3 and lru-cache) ([37e8958](https://github.com/unjs/unstorage/commit/37e8958))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v1.17.4
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.17.3...v1.17.4)

@@ -149,15 +149,12 @@ importers:
       oxlint:
         specifier: ^1.56.0
         version: 1.56.0
-      picomatch:
-        specifier: ^4.0.3
-        version: 4.0.3
       scule:
         specifier: ^1.3.0
         version: 1.3.0
       srvx:
         specifier: ^0.11.12
-        version: 0.11.12
+        version: 0.11.13
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -4447,8 +4444,8 @@ packages:
     resolution: {integrity: sha512-BsTCV265VpTp8tm1wyIm1xqQCS+Q9NHx2Sr+WcnUrgLrQ6yiDIvHYJV5gHxsj1lMBy2zm5twLaZao8Jd+S8JJw==}
     engines: {bun: '>=1.0.0', deno: '>=2.0.0', node: '>=12.0.0'}
 
-  srvx@0.11.12:
-    resolution: {integrity: sha512-AQfrGqntqVPXgP03pvBDN1KyevHC+KmYVqb8vVf4N+aomQqdhaZxjvoVp+AOm4u6x+GgNQY3MVzAUIn+TqwkOA==}
+  srvx@0.11.13:
+    resolution: {integrity: sha512-oknN6qduuMPafxKtHucUeG32Q963pjriA5g3/Bl05cwEsUe5VVbIU4qR9LrALHbipSCyBe+VmfDGGydqazDRkw==}
     engines: {node: '>=20.16.0'}
     hasBin: true
 
@@ -7883,7 +7880,7 @@ snapshots:
   h3@2.0.1-rc.16:
     dependencies:
       rou3: 0.8.1
-      srvx: 0.11.12
+      srvx: 0.11.13
 
   has-bigints@1.1.0: {}
 
@@ -9597,7 +9594,7 @@ snapshots:
 
   sql-escaper@1.3.3: {}
 
-  srvx@0.11.12: {}
+  srvx@0.11.13: {}
 
   stack-chain@1.3.7: {}
 

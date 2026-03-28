@@ -149,8 +149,10 @@ describe("utils", () => {
     expect(await mntStorage.getKeys("foo")).toStrictEqual(["foo:x", "foo:y"]);
   });
 
-  it("stringify", () => {
+  it("stringify", async () => {
     const storage = createStorage();
+    await storage.setItem("s", "[]");
+    expect(await storage.getItem("s")).toBe("[]");
     expect(async () => await storage.setItem("foo", [])).not.toThrow();
   });
 

@@ -31,7 +31,9 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
   const base = resolve(userOptions.base);
 
   const ignore = anymatch(
-    userOptions.ignore || ["**/node_modules/**", "**/.git/**"]
+    userOptions.ignore || ["**/node_modules/**", "**/.git/**"],
+    undefined,
+    { dot: true }
   );
 
   const r = (key: string) => {

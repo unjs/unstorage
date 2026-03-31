@@ -108,4 +108,58 @@ describe("drivers: fs", () => {
     await ctx.storage?.dispose();
     await ctx.driver?.dispose?.();
   });
+
+  describe("dataSuffix option", () => {
+    const suffixDir = resolve(__dirname, "tmp/fs-suffix");
+
+    afterEach(async () => {
+      const s = createStorage({
+        driver: driver({ base: suffixDir, dataSuffix: ".data" }),
+      });
+      await s.clear();
+      await s.dispose();
+    });
+
+    it("prevents file/directory collision with dataSuffix", async () => {
+      const d = driver({ base: suffixDir, dataSuffix: ".data" });
+      const storage = createStorage({ driver: d });
+
+      // This is the key scenario: "foo" and "foo:bar" must coexist.
+      // Without dataSuffix, "foo" creates a file at <base>/foo, but
+      // "foo:bar" needs <base>/foo/ to be a directory -> ENOTDIR.
+      await storage.setItem("foo", "value_foo");
+      await storage.setItem("foo:bar", "value_foo_bar");
+
+      expect(await storage.getItem("foo")).toBe("value_foo");
+      expect(await storage.getItem("foo:bar")).toBe("value_foo_bar");
+
+      // Verify on-disk layout uses suffix
+      expect(await readFile(resolve(suffixDir, "foo.data"), "utf8")).toBe(
+        "value_foo",
+      );
+      expect(
+        await readFile(resolve(suffixDir, "foo/bar.data"), "utf8"),
+      ).toBe("value_foo_bar");
+
+      // getKeys should return clean keys without the suffix
+      const keys = (await storage.getKeys()).sort();
+      expect(keys).toEqual(["foo", "foo:bar"]);
+
+      await storage.dispose();
+    });
+
+    it("runs standard driver tests with dataSuffix", async () => {
+      const d = driver({ base: suffixDir, dataSuffix: ".data" });
+      const storage = createStorage({ driver: d });
+
+      await storage.setItem("s1:a", "test_data");
+      expect(await storage.hasItem("s1:a")).toBe(true);
+      expect(await storage.getItem("s1:a")).toBe("test_data");
+
+      await storage.removeItem("s1:a");
+      expect(await storage.hasItem("s1:a")).toBe(false);
+
+      await storage.dispose();
+    });
+  });
 });

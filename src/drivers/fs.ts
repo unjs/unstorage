@@ -118,9 +118,9 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
     async getKeys(_base, topts) {
       const keys = await readdirRecursive(r("."), ignore, topts?.maxDepth);
       if (dataSuffix) {
-        return keys.map((key) =>
-          key.endsWith(dataSuffix) ? key.slice(0, -dataSuffix.length) : key,
-        );
+        return keys
+          .filter((key) => key.endsWith(dataSuffix))
+          .map((key) => key.slice(0, -dataSuffix.length));
       }
       return keys;
     },
@@ -161,7 +161,10 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
           .on("error", reject)
           .on("all", (eventName, path) => {
             path = relative(base, path);
-            if (dataSuffix && path.endsWith(dataSuffix)) {
+            if (dataSuffix) {
+              if (!path.endsWith(dataSuffix)) {
+                return; // ignore non-suffixed files
+              }
               path = path.slice(0, -dataSuffix.length);
             }
             if (eventName === "change" || eventName === "add") {

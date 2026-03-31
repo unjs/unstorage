@@ -89,9 +89,9 @@ const driver: DriverFactory<FSStorageOptions> = (opts = {}) => {
     async getKeys(_base, topts) {
       const keys = await readdirRecursive(r("."), opts.ignore, topts?.maxDepth);
       if (dataSuffix) {
-        return keys.map((key) =>
-          key.endsWith(dataSuffix) ? key.slice(0, -dataSuffix.length) : key,
-        );
+        return keys
+          .filter((key) => key.endsWith(dataSuffix))
+          .map((key) => key.slice(0, -dataSuffix.length));
       }
       return keys;
     },

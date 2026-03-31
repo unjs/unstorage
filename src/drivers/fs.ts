@@ -30,12 +30,11 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
 
   const base = resolve(userOptions.base);
 
-  const ignorePatterns = userOptions.ignore || [
-    "**/node_modules/**",
-    "**/.git/**",
-  ];
-  const ignore = (path: string) =>
-    anymatch(ignorePatterns, path, { dot: true });
+  const ignore = anymatch(
+    userOptions.ignore || ["**/node_modules/**", "**/.git/**"],
+    undefined,
+    { dot: true }
+  );
 
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {

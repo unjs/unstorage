@@ -3,7 +3,10 @@ import ioredisMock from "ioredis-mock";
 import redisDriver from "../../src/drivers/redis.ts";
 import { testDriver } from "./utils.ts";
 
-vi.mock("ioredis", () => ({ ...ioredisMock, Redis: ioredisMock.default }));
+vi.mock("ioredis", () => ({
+  ...ioredisMock,
+  Redis: (ioredisMock as any).default,
+}));
 
 describe("drivers: redis", () => {
   const binaryDriver = redisDriver({
@@ -26,7 +29,7 @@ describe("drivers: redis", () => {
         await ctx.storage.setItemRaw("s4:a", helloBuffer);
         await ctx.storage.setItemRaw("s5:a", byteArray);
 
-        const client = new ioredisMock.default("ioredis://localhost:6379/0");
+        const client = new (ioredisMock as any).default("ioredis://localhost:6379/0");
 
         const bufferValue = await client.getBuffer("test:s4:a");
         expect(bufferValue).toEqual(helloBuffer);

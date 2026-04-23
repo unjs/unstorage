@@ -72,6 +72,7 @@ const storage = createStorage({
 - `ttl`: Default TTL for all items in **seconds**.
 - `scanCount`: How many keys to scan at once ([redis documentation](https://redis.io/docs/latest/commands/scan/#the-count-option)).
 - `preConnect`: Whether to initialize the redis instance immediately. Otherwise, it will be initialized on the first read/write call. Default: `false`.
+- `clientInfoTag`: Tag to append to the library name in `CLIENT SETINFO` (e.g., `ioredis(unstorage_v2.0.0)`). This helps identify the higher-level library using ioredis. Default: `"unstorage_vX.X.X"` (with version) or `"unstorage"` (fallback).
 
 See [ioredis](https://github.com/redis/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 

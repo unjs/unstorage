@@ -1,4 +1,4 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
 import {
   TableClient,
   AzureNamedKeyCredential,
@@ -48,7 +48,7 @@ export interface AzureStorageTableOptions {
 
 const DRIVER_NAME = "azure-storage-table";
 
-export default defineDriver((opts: AzureStorageTableOptions) => {
+const driver: DriverFactory<AzureStorageTableOptions, TableClient> = (opts) => {
   const {
     accountName = null,
     tableName = "unstorage",
@@ -68,10 +68,7 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
       throw createRequiredError(DRIVER_NAME, "accountName");
     }
     if (pageSize > 1000) {
-      throw createError(
-        DRIVER_NAME,
-        "`pageSize` exceeds the maximum allowed value of `1000`"
-      );
+      throw createError(DRIVER_NAME, "`pageSize` exceeds the maximum allowed value of `1000`");
     }
     if (accountKey) {
       // AzureNamedKeyCredential is only available in Node.js runtime, not in browsers
@@ -79,14 +76,14 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
       client = new TableClient(
         `https://${accountName}.table.core.windows.net`,
         tableName,
-        credential
+        credential,
       );
     } else if (sasKey) {
       const credential = new AzureSASCredential(sasKey);
       client = new TableClient(
         `https://${accountName}.table.core.windows.net`,
         tableName,
-        credential
+        credential,
       );
     } else if (connectionString) {
       // fromConnectionString is only available in Node.js runtime, not in browsers
@@ -96,7 +93,7 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
       client = new TableClient(
         `https://${accountName}.table.core.windows.net`,
         tableName,
-        credential
+        credential,
       );
     }
     return client;
@@ -134,14 +131,10 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
       await getClient().deleteEntity(partitionKey, key);
     },
     async getKeys() {
-      const iterator = getClient()
-        .listEntities()
-        .byPage({ maxPageSize: pageSize });
+      const iterator = getClient().listEntities().byPage({ maxPageSize: pageSize });
       const keys: string[] = [];
       for await (const page of iterator) {
-        const pageKeys = page
-          .map((entity) => entity.rowKey)
-          .filter(Boolean) as string[];
+        const pageKeys = page.map((entity) => entity.rowKey).filter(Boolean) as string[];
         keys.push(...pageKeys);
       }
       return keys;
@@ -154,21 +147,18 @@ export default defineDriver((opts: AzureStorageTableOptions) => {
       };
     },
     async clear() {
-      const iterator = getClient()
-        .listEntities()
-        .byPage({ maxPageSize: pageSize });
+      const iterator = getClient().listEntities().byPage({ maxPageSize: pageSize });
       for await (const page of iterator) {
         await Promise.all(
           page.map(async (entity) => {
             if (entity.partitionKey && entity.rowKey) {
-              await getClient().deleteEntity(
-                entity.partitionKey,
-                entity.rowKey
-              );
+              await getClient().deleteEntity(entity.partitionKey, entity.rowKey);
             }
-          })
+          }),
         );
       }
     },
   };
-});
+};
+
+export default driver;

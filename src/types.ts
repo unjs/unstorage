@@ -33,38 +33,24 @@ export interface Driver<OptionsT = any, InstanceT = any> {
   options?: OptionsT;
   getInstance?: () => InstanceT;
   hasItem: (key: string, opts: TransactionOptions) => MaybePromise<boolean>;
-  getItem: (
-    key: string,
-    opts?: TransactionOptions
-  ) => MaybePromise<StorageValue>;
+  getItem: (key: string, opts?: TransactionOptions) => MaybePromise<StorageValue>;
   /** @experimental */
   getItems?: (
     items: { key: string; options?: TransactionOptions }[],
-    commonOptions?: TransactionOptions
+    commonOptions?: TransactionOptions,
   ) => MaybePromise<{ key: string; value: StorageValue }[]>;
   /** @experimental */
   getItemRaw?: (key: string, opts: TransactionOptions) => MaybePromise<unknown>;
-  setItem?: (
-    key: string,
-    value: string,
-    opts: TransactionOptions
-  ) => MaybePromise<void>;
+  setItem?: (key: string, value: string, opts: TransactionOptions) => MaybePromise<void>;
   /** @experimental */
   setItems?: (
     items: { key: string; value: string; options?: TransactionOptions }[],
-    commonOptions?: TransactionOptions
+    commonOptions?: TransactionOptions,
   ) => MaybePromise<void>;
   /** @experimental */
-  setItemRaw?: (
-    key: string,
-    value: any,
-    opts: TransactionOptions
-  ) => MaybePromise<void>;
+  setItemRaw?: (key: string, value: any, opts: TransactionOptions) => MaybePromise<void>;
   removeItem?: (key: string, opts: TransactionOptions) => MaybePromise<void>;
-  getMeta?: (
-    key: string,
-    opts: TransactionOptions
-  ) => MaybePromise<StorageMeta | null>;
+  getMeta?: (key: string, opts: TransactionOptions) => MaybePromise<StorageMeta | null>;
   getKeys: (base: string, opts: GetKeysOptions) => MaybePromise<string[]>;
   clear?: (base: string, opts: TransactionOptions) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
@@ -85,92 +71,63 @@ type StorageItemType<T, K> = K extends keyof StorageItemMap<T>
 
 export interface Storage<T extends StorageValue = StorageValue> {
   // Item
-  hasItem<
-    U extends Extract<T, StorageDefinition>,
-    K extends keyof StorageItemMap<U>,
-  >(
+  hasItem<U extends Extract<T, StorageDefinition>, K extends keyof StorageItemMap<U>>(
     key: K,
-    opts?: TransactionOptions
+    opts?: TransactionOptions,
   ): Promise<boolean>;
   hasItem(key: string, opts?: TransactionOptions): Promise<boolean>;
 
-  getItem<
-    U extends Extract<T, StorageDefinition>,
-    K extends string & keyof StorageItemMap<U>,
-  >(
+  getItem<U extends Extract<T, StorageDefinition>, K extends string & keyof StorageItemMap<U>>(
     key: K,
-    ops?: TransactionOptions
+    ops?: TransactionOptions,
   ): Promise<StorageItemType<T, K> | null>;
   getItem<R = StorageItemType<T, string>>(
     key: string,
-    opts?: TransactionOptions
+    opts?: TransactionOptions,
   ): Promise<R | null>;
 
   /** @experimental */
   getItems: <U extends T>(
     items: (string | { key: string; options?: TransactionOptions })[],
-    commonOptions?: TransactionOptions
+    commonOptions?: TransactionOptions,
   ) => Promise<{ key: string; value: U }[]>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
-  getItemRaw: <T = any>(
-    key: string,
-    opts?: TransactionOptions
-  ) => Promise<MaybeDefined<T> | null>;
+  getItemRaw: <T = any>(key: string, opts?: TransactionOptions) => Promise<MaybeDefined<T> | null>;
 
-  setItem<
-    U extends Extract<T, StorageDefinition>,
-    K extends keyof StorageItemMap<U>,
-  >(
+  setItem<U extends Extract<T, StorageDefinition>, K extends keyof StorageItemMap<U>>(
     key: K,
     value: StorageItemType<T, K>,
-    opts?: TransactionOptions
+    opts?: TransactionOptions,
   ): Promise<void>;
-  setItem<U extends T>(
-    key: string,
-    value: U,
-    opts?: TransactionOptions
-  ): Promise<void>;
+  setItem<U extends T>(key: string, value: U, opts?: TransactionOptions): Promise<void>;
 
   /** @experimental */
   setItems: <U extends T>(
     items: { key: string; value: U; options?: TransactionOptions }[],
-    commonOptions?: TransactionOptions
+    commonOptions?: TransactionOptions,
   ) => Promise<void>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   setItemRaw: <T = any>(
     key: string,
     value: MaybeDefined<T>,
-    opts?: TransactionOptions
+    opts?: TransactionOptions,
   ) => Promise<void>;
 
-  removeItem<
-    U extends Extract<T, StorageDefinition>,
-    K extends keyof StorageItemMap<U>,
-  >(
+  removeItem<U extends Extract<T, StorageDefinition>, K extends keyof StorageItemMap<U>>(
     key: K,
-    opts?:
-      | (TransactionOptions & { removeMeta?: boolean })
-      | boolean /* legacy: removeMeta */
+    opts?: (TransactionOptions & { removeMeta?: boolean }) | boolean /* legacy: removeMeta */,
   ): Promise<void>;
   removeItem(
     key: string,
-    opts?:
-      | (TransactionOptions & { removeMeta?: boolean })
-      | boolean /* legacy: removeMeta */
+    opts?: (TransactionOptions & { removeMeta?: boolean }) | boolean /* legacy: removeMeta */,
   ): Promise<void>;
 
   // Meta
   getMeta: (
     key: string,
-    opts?:
-      | (TransactionOptions & { nativeOnly?: boolean })
-      | boolean /* legacy: nativeOnly */
+    opts?: (TransactionOptions & { nativeOnly?: boolean }) | boolean /* legacy: nativeOnly */,
   ) => MaybePromise<StorageMeta>;
-  setMeta: (
-    key: string,
-    value: StorageMeta,
-    opts?: TransactionOptions
-  ) => Promise<void>;
+  setMeta: (key: string, value: StorageMeta, opts?: TransactionOptions) => Promise<void>;
   removeMeta: (key: string, opts?: TransactionOptions) => Promise<void>;
   // Keys
   getKeys: (base?: string, opts?: GetKeysOptions) => Promise<string[]>;
@@ -183,10 +140,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
   mount: (base: string, driver: Driver) => Storage;
   unmount: (base: string, dispose?: boolean) => Promise<void>;
   getMount: (key?: string) => { base: string; driver: Driver };
-  getMounts: (
-    base?: string,
-    options?: { parents?: boolean }
-  ) => { base: string; driver: Driver }[];
+  getMounts: (base?: string, options?: { parents?: boolean }) => { base: string; driver: Driver }[];
   // Aliases
   keys: Storage["getKeys"];
   get: Storage<T>["getItem"];

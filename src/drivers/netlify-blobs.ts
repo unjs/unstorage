@@ -1,15 +1,15 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
-import { type GetKeysOptions } from "../types";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
+import type { GetKeysOptions } from "../types.ts";
 import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
   Store,
   BlobResponseType,
+  // NOTE: this type is different in v10+ vs. pre-v10
   SetOptions,
   ListOptions,
   GetStoreOptions,
   GetDeployStoreOptions,
 } from "@netlify/blobs";
-import { fetch } from "ofetch";
 
 const DRIVER_NAME = "netlify-blobs";
 
@@ -25,27 +25,22 @@ export interface ExtraOptions {
   deployScoped?: boolean;
 }
 
-export interface NetlifyDeployStoreOptions
-  extends GetDeployStoreOptions,
-    ExtraOptions {
+export interface NetlifyDeployStoreOptions extends GetDeployStoreOptions, ExtraOptions {
   name?: never;
   deployScoped: true;
 }
 
-export interface NetlifyDeployStoreLegacyOptions
-  extends NetlifyDeployStoreOptions {
+export interface NetlifyDeployStoreLegacyOptions extends NetlifyDeployStoreOptions {
   // Added in v8.0.0. This ensures TS compatibility for older versions.
   region?: never;
 }
 
-export interface NetlifyNamedStoreOptions
-  extends GetStoreOptions,
-    ExtraOptions {
+export interface NetlifyNamedStoreOptions extends GetStoreOptions, ExtraOptions {
   name: string;
   deployScoped?: false;
 }
 
-export default defineDriver((options: NetlifyStoreOptions) => {
+const driver: DriverFactory<NetlifyStoreOptions, Store> = (options) => {
   const { deployScoped, name, ...opts } = options;
   let store: Store;
 
@@ -53,10 +48,7 @@ export default defineDriver((options: NetlifyStoreOptions) => {
     if (!store) {
       if (deployScoped) {
         if (name) {
-          throw createError(
-            DRIVER_NAME,
-            "deploy-scoped stores cannot have a name"
-          );
+          throw createError(DRIVER_NAME, "deploy-scoped stores cannot have a name");
         }
         store = getDeployStore({ fetch, ...options });
       } else {
@@ -88,30 +80,30 @@ export default defineDriver((options: NetlifyStoreOptions) => {
       // @ts-expect-error has trouble with the overloaded types
       return getClient().get(key, { type: topts?.type ?? "arrayBuffer" });
     },
-    setItem(key, value, topts?: SetOptions) {
-      return getClient().set(key, value, topts);
+    async setItem(key, value, topts?: SetOptions) {
+      // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
+      // TODO(serhalp): Allow drivers to return a value from `setItem`. The @netlify/blobs v10
+      // functionality isn't usable without this.
+      await getClient().set(key, value, topts);
     },
-    setItemRaw(key, value: string | ArrayBuffer | Blob, topts?: SetOptions) {
-      return getClient().set(key, value, topts);
+    async setItemRaw(key, value: string | ArrayBuffer | Blob, topts?: SetOptions) {
+      // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
+      // See TODO above.
+      await getClient().set(key, value, topts);
     },
     removeItem(key) {
       return getClient().delete(key);
     },
-    async getKeys(
-      base?: string,
-      tops?: GetKeysOptions & Omit<ListOptions, "prefix" | "paginate">
-    ) {
-      return (await getClient().list({ ...tops, prefix: base })).blobs.map(
-        (item) => item.key
-      );
+    async getKeys(base?: string, tops?: GetKeysOptions & Omit<ListOptions, "prefix" | "paginate">) {
+      return (await getClient().list({ ...tops, prefix: base })).blobs.map((item) => item.key);
     },
     async clear(base?: string) {
       const client = getClient();
       return Promise.allSettled(
-        (await client.list({ prefix: base })).blobs.map((item) =>
-          client.delete(item.key)
-        )
+        (await client.list({ prefix: base })).blobs.map((item) => client.delete(item.key)),
       ).then(() => {});
     },
   };
-});
+};
+
+export default driver;

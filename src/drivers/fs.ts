@@ -1,15 +1,15 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
-import { resolve, relative, join } from "node:path";
-import { FSWatcher, type ChokidarOptions, watch } from "chokidar";
-import anymatch from "anymatch";
-import { createError, createRequiredError, defineDriver } from "./utils";
+import { resolve, relative, join, isAbsolute, matchesGlob } from "node:path";
+import type { FSWatcher, ChokidarOptions } from "chokidar";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
 import {
   readFile,
   writeFile,
   readdirRecursive,
   rmRecursive,
   unlink,
-} from "./utils/node-fs";
+  ensuredir,
+} from "./utils/node-fs.ts";
 
 export interface FSStorageOptions {
   base?: string;
@@ -23,22 +23,29 @@ const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
 
 const DRIVER_NAME = "fs";
 
-export default defineDriver((userOptions: FSStorageOptions = {}) => {
+const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
   if (!userOptions.base) {
     throw createRequiredError(DRIVER_NAME, "base");
   }
 
   const base = resolve(userOptions.base);
 
-  const ignore = anymatch(
-    userOptions.ignore || ["**/node_modules/**", "**/.git/**"]
-  );
+  const ignorePatterns = userOptions.ignore || ["**/node_modules/**", "**/.git/**"];
+  const ignore = (path: string) => {
+    const relativePath = relative(base, path);
+    return ignorePatterns.some((pattern) => {
+      if (isAbsolute(pattern)) {
+        return path.startsWith(pattern);
+      }
+      return matchesGlob(relativePath, pattern);
+    });
+  };
 
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(
         DRIVER_NAME,
-        `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`
+        `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`,
       );
     }
     const resolved = join(base, key.replace(/:/g, "/"));
@@ -90,7 +97,7 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
       if (userOptions.readOnly) {
         return;
       }
-      return unlink(r(key));
+      return unlink(r(key)) as Promise<void>;
     },
     getKeys(_base, topts) {
       return readdirRecursive(r("."), ignore, topts?.maxDepth);
@@ -110,6 +117,8 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
       if (_watcher) {
         return _unwatch;
       }
+      await ensuredir(base);
+      const { watch } = await import("chokidar");
       await new Promise<void>((resolve, reject) => {
         const watchOptions: ChokidarOptions = {
           ignoreInitial: true,
@@ -123,7 +132,6 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
           watchOptions.ignored = [watchOptions.ignored];
         }
         watchOptions.ignored.push(ignore);
-
         _watcher = watch(base, watchOptions)
           .on("ready", () => {
             resolve();
@@ -141,4 +149,6 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
       return _unwatch;
     },
   };
-});
+};
+
+export default driver;

@@ -1,9 +1,9 @@
 import {
-  defineDriver,
+  type DriverFactory,
   createRequiredError,
   normalizeKey,
   createError,
-} from "./utils";
+} from "./utils/index.ts";
 import { AwsClient } from "aws4fetch";
 
 export interface S3DriverOptions {
@@ -44,9 +44,27 @@ export interface S3DriverOptions {
   bulkDelete?: boolean;
 }
 
+export interface S3ItemOptions {
+  /**
+   * HTTP headers to set when uploading the object.
+   * Supports standard S3 headers like Content-Type, Cache-Control, etc.
+   * and custom metadata via x-amz-meta-* prefixed headers.
+   */
+  headers?: {
+    "Content-Type"?: string;
+    "Cache-Control"?: string;
+    "Content-Disposition"?: string;
+    "Content-Encoding"?: string;
+    "Content-Language"?: string;
+    Expires?: string;
+  } & {
+    [key: `x-amz-meta-${string}`]: string | undefined;
+  };
+}
+
 const DRIVER_NAME = "s3";
 
-export default defineDriver((options: S3DriverOptions) => {
+const driver: DriverFactory<S3DriverOptions> = (options) => {
   let _awsClient: AwsClient;
   const getAwsClient = () => {
     if (!_awsClient) {
@@ -85,7 +103,7 @@ export default defineDriver((options: S3DriverOptions) => {
       }
       throw createError(
         DRIVER_NAME,
-        `[${request.method}] ${url}: ${res.status} ${res.statusText} ${await res.text()}`
+        `[${request.method}] ${url}: ${res.status} ${res.statusText} ${await res.text()}`,
       );
     }
     return res;
@@ -123,9 +141,18 @@ export default defineDriver((options: S3DriverOptions) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
-  const putObject = async (key: string, value: string) => {
+  const putObject = async (
+    key: string,
+    value: BufferSource | string,
+    headers?: Record<string, string | undefined>,
+  ) => {
     return awsFetch(url(key), {
       method: "PUT",
+      headers: headers
+        ? (Object.fromEntries(
+            Object.entries(headers).filter(([_, v]) => v !== undefined),
+          ) as Record<string, string>)
+        : undefined,
       body: value,
     });
   };
@@ -133,7 +160,7 @@ export default defineDriver((options: S3DriverOptions) => {
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
   const deleteObject = async (key: string) => {
     return awsFetch(url(key), { method: "DELETE" }).then((r) => {
-      if (r?.status !== 204) {
+      if (r?.status !== 204 && r?.status !== 200) {
         throw createError(DRIVER_NAME, `Failed to delete ${key}`);
       }
     });
@@ -168,11 +195,11 @@ export default defineDriver((options: S3DriverOptions) => {
     getItemRaw(key) {
       return getObject(key).then((res) => (res ? res.arrayBuffer() : null));
     },
-    async setItem(key, value) {
-      await putObject(key, value);
+    async setItem(key, value, topts?: S3ItemOptions) {
+      await putObject(key, value, topts?.headers);
     },
-    async setItemRaw(key, value) {
-      await putObject(key, value);
+    async setItemRaw(key, value, topts?: S3ItemOptions) {
+      await putObject(key, value, topts?.headers);
     },
     getMeta(key) {
       return headObject(key);
@@ -190,7 +217,7 @@ export default defineDriver((options: S3DriverOptions) => {
       await deleteObjects(base);
     },
   };
-});
+};
 
 // --- utils ---
 
@@ -208,7 +235,7 @@ async function sha256Base64(str: string) {
   const buffer = new TextEncoder().encode(str);
   const hash = await crypto.subtle.digest("SHA-256", buffer);
   const bytes = new Uint8Array(hash);
-  const binaryString = String.fromCharCode(...bytes); // eslint-disable-line unicorn/prefer-code-point
+  const binaryString = String.fromCharCode(...bytes);
   return btoa(binaryString);
 }
 
@@ -216,15 +243,11 @@ function parseList(xml: string) {
   if (!xml.startsWith("<?xml")) {
     throw new Error("Invalid XML");
   }
-  const listBucketResult = xml.match(
-    /<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/
-  )?.[1];
+  const listBucketResult = xml.match(/<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/)?.[1];
   if (!listBucketResult) {
     throw new Error("Missing <ListBucketResult>");
   }
-  const contents = listBucketResult.match(
-    /<Contents[^>]*>([\s\S]*?)<\/Contents>/g
-  );
+  const contents = listBucketResult.match(/<Contents[^>]*>([\s\S]*?)<\/Contents>/g);
   if (!contents?.length) {
     return [];
   }
@@ -235,3 +258,5 @@ function parseList(xml: string) {
     })
     .filter(Boolean) as string[];
 }
+
+export default driver;

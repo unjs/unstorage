@@ -7,11 +7,11 @@ import {
   test,
   vi,
 } from "vitest";
-import driver from "../../src/drivers/azure-storage-blob";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/azure-storage-blob.ts";
+import { testDriver } from "./utils.ts";
 import { AccountSASPermissions, BlobServiceClient } from "@azure/storage-blob";
 import { ChildProcess, exec } from "node:child_process";
-import { createStorage } from "../../src";
+import { createStorage } from "../../src/index.ts";
 import { ContainerClient } from "@azure/storage-blob";
 
 describe.skip("drivers: azure-storage-blob", () => {
@@ -19,14 +19,12 @@ describe.skip("drivers: azure-storage-blob", () => {
   let sasUrl: string;
   beforeAll(async () => {
     azuriteProcess = exec("pnpm exec azurite-blob --silent");
-    const client = BlobServiceClient.fromConnectionString(
-      "UseDevelopmentStorage=true;"
-    );
+    const client = BlobServiceClient.fromConnectionString("UseDevelopmentStorage=true;");
     const containerClient = client.getContainerClient("unstorage");
     await containerClient.createIfNotExists();
     sasUrl = client.generateAccountSasUrl(
       new Date(Date.now() + 1000 * 60),
-      AccountSASPermissions.from({ read: true, list: true, write: true })
+      AccountSASPermissions.from({ read: true, list: true, write: true }),
     );
   });
   afterAll(() => {
@@ -47,9 +45,9 @@ describe.skip("drivers: azure-storage-blob", () => {
             accountKey: "UseDevelopmentStorage=true",
           } as any),
         });
-        await expect(
-          async () => await invalidStorage.hasItem("test")
-        ).rejects.toThrowError("missing accountName");
+        await expect(async () => await invalidStorage.hasItem("test")).rejects.toThrowError(
+          "missing accountName",
+        );
       });
       test("sas key", async ({ skip }) => {
         if (

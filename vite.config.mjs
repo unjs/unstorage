@@ -8,11 +8,7 @@ export default defineConfig({
       enabled: true,
     },
     coverage: {
-      exclude: [
-        ...configDefaults.coverage.exclude,
-        "./drivers/**",
-        "./scripts/**",
-      ],
+      exclude: [...configDefaults.coverage.exclude, "./scripts/**"],
     },
   },
 });

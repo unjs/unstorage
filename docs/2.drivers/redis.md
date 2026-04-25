@@ -15,7 +15,7 @@ Learn more about Redis.
 ::
 
 ::note
-Unstorage uses [`ioredis`](https://github.com/luin/ioredis) internally to connect to Redis.
+Unstorage uses [`ioredis`](https://github.com/redis/ioredis) internally to connect to Redis.
 ::
 
 To use it, you will need to install `ioredis` in your project:
@@ -41,7 +41,7 @@ const storage = createStorage({
 
 Usage with a Redis cluster (e.g. AWS ElastiCache or Azure Redis Cache):
 
-⚠️ If you connect to a cluster, you have to use [`hashtags`](https://redis.io/docs/latest/operate/oss_and_stack/reference/cluster-spec/#hash-tags) as the prefix to avoid the Redis error `CROSSSLOT Keys in request don't hash to the same slot`. This means the prefix has to be surrounded by curly braces, which forces the keys into the same hash slot. You can read more [here](https://redis.io/blog/redis-clustering-best-practices-with-keys/).
+⚠️ If you connect to a cluster, when running commands that operate over multiple keys, all keys must be part of the same hashslot. Otherwise you may encounter the Redis error `CROSSSLOT Keys in request don't hash to the same slot`. You should use [`hashtags`](https://redis.io/docs/latest/operate/oss_and_stack/reference/cluster-spec/#hash-tags) to control how keys are slotted. If you want all keys to hash to the same slot, you can include the hashtag in the base prefix by wrapping it in curly braces. Read more about [Clustering Best Practices](https://redis.io/blog/redis-clustering-best-practices-with-keys/).
 
 ```js
 const storage = createStorage({
@@ -73,7 +73,7 @@ const storage = createStorage({
 - `scanCount`: How many keys to scan at once ([redis documentation](https://redis.io/docs/latest/commands/scan/#the-count-option)).
 - `preConnect`: Whether to initialize the redis instance immediately. Otherwise, it will be initialized on the first read/write call. Default: `false`.
 
-See [ioredis](https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
+See [ioredis](https://github.com/redis/ioredis/blob/master/API.md#new-redisport-host-options) for all available options.
 
 **Transaction options:**
 

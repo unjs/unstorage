@@ -1,6 +1,6 @@
 import { describe } from "vitest";
-import driver from "../../src/drivers/uploadthing";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/uploadthing.ts";
+import { testDriver } from "./utils.ts";
 
 const utfsToken = process.env.VITE_UPLOADTHING_TOKEN;
 

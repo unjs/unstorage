@@ -38,13 +38,13 @@ import sqlite from "db0/connectors/better-sqlite3";
 const database = createDatabase(
   sqlite({
     /* db0 connector options */
-  })
+  }),
 );
 
 const storage = createStorage({
   driver: dbDriver({
     database,
-    table: "custom_table_name", // Default is "unstorage"
+    tableName: "custom_table_name", // Default is "unstorage"
   }),
 });
 ```
@@ -57,4 +57,4 @@ Before first operation, driver ensures a table with columns of `id`, `value`, `b
 **Options:**
 
 - **`database`** (required): A `db0` database instance.
-- `table`: The name of the table to use. It defaults to `unstorage`.
+- `tableName`: The name of the table to use. It defaults to `unstorage`.

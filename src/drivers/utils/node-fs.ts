@@ -13,21 +13,21 @@ type WriteFileData = Parameters<typeof fsPromises.writeFile>[1];
 export async function writeFile(
   path: string,
   data: WriteFileData,
-  encoding?: BufferEncoding
-) {
+  encoding?: BufferEncoding,
+): Promise<void> {
   await ensuredir(dirname(path));
   return fsPromises.writeFile(path, data, encoding);
 }
 
-export function readFile(path: string, encoding?: BufferEncoding) {
+export function readFile(path: string, encoding?: BufferEncoding): Promise<string | Buffer | null> {
   return fsPromises.readFile(path, encoding).catch(ignoreNotfound);
 }
 
-export function stat(path: string) {
+export function stat(path: string): Promise<import("node:fs").Stats | null> {
   return fsPromises.stat(path).catch(ignoreNotfound);
 }
 
-export function unlink(path: string) {
+export function unlink(path: string): Promise<void | null> {
   return fsPromises.unlink(path).catch(ignoreNotfound);
 }
 
@@ -38,7 +38,7 @@ export function readdir(dir: string): Promise<Dirent[]> {
     .then((r) => r || []);
 }
 
-export async function ensuredir(dir: string) {
+export async function ensuredir(dir: string): Promise<void> {
   if (existsSync(dir)) {
     return;
   }
@@ -49,8 +49,8 @@ export async function ensuredir(dir: string) {
 export async function readdirRecursive(
   dir: string,
   ignore?: (p: string) => boolean,
-  maxDepth?: number
-) {
+  maxDepth?: number,
+): Promise<string[]> {
   if (ignore && ignore(dir)) {
     return [];
   }
@@ -64,21 +64,21 @@ export async function readdirRecursive(
           const dirFiles = await readdirRecursive(
             entryPath,
             ignore,
-            maxDepth === undefined ? undefined : maxDepth - 1
+            maxDepth === undefined ? undefined : maxDepth - 1,
           );
           files.push(...dirFiles.map((f) => entry.name + "/" + f));
         }
       } else {
-        if (!(ignore && ignore(entry.name))) {
+        if (!(ignore && ignore(entryPath))) {
           files.push(entry.name);
         }
       }
-    })
+    }),
   );
   return files;
 }
 
-export async function rmRecursive(dir: string) {
+export async function rmRecursive(dir: string): Promise<void> {
   const entries = await readdir(dir);
   await Promise.all(
     entries.map((entry) => {
@@ -88,6 +88,6 @@ export async function rmRecursive(dir: string) {
       } else {
         return fsPromises.unlink(entryPath);
       }
-    })
+    }),
   );
 }

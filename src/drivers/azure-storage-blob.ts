@@ -147,9 +147,7 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (opts) =
         return getKeysByDepth(getContainerClient(), opts.maxDepth);
       }
 
-      const iterator = getContainerClient()
-        .listBlobsFlat()
-        .byPage({ maxPageSize: 1000 });
+      const iterator = getContainerClient().listBlobsFlat().byPage({ maxPageSize: 1000 });
       const keys: string[] = [];
       for await (const page of iterator) {
         const pageKeys = page.segment.blobItems.map((blob) => blob.name);
@@ -184,10 +182,7 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (opts) =
 
 const isBrowser = typeof window !== "undefined";
 
-async function getKeysByDepth(
-  client: ContainerClient,
-  maxDepth: number
-): Promise<string[]> {
+async function getKeysByDepth(client: ContainerClient, maxDepth: number): Promise<string[]> {
   const queue: Array<{ depth: number; name: string }> = [];
   let current: { depth: number; name: string } | undefined = {
     name: "",

@@ -1,12 +1,4 @@
-import {
-  afterEach,
-  describe,
-  expect,
-  beforeAll,
-  afterAll,
-  test,
-  vi,
-} from "vitest";
+import { afterEach, describe, expect, beforeAll, afterAll, test, vi } from "vitest";
 import driver from "../../src/drivers/azure-storage-blob.ts";
 import { testDriver } from "./utils.ts";
 import { AccountSASPermissions, BlobServiceClient } from "@azure/storage-blob";
@@ -131,7 +123,7 @@ describe.skip("drivers: azure-storage-blob", () => {
             await ctx.driver.getKeys("", {
               maxDepth: 1,
             })
-          ).sort()
+          ).sort(),
         ).toMatchObject(["depth-test:key0"]);
 
         // assert that the underlying blob storage was only called upto 1 depth
@@ -154,7 +146,7 @@ describe.skip("drivers: azure-storage-blob", () => {
             await ctx.driver.getKeys("", {
               maxDepth: 2,
             })
-          ).sort()
+          ).sort(),
         ).toMatchObject(["depth-test:depth0:key1", "depth-test:key0"]);
 
         expect(spy).toHaveBeenCalledTimes(3);

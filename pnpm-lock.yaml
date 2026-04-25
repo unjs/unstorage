@@ -149,9 +149,6 @@ importers:
       oxlint:
         specifier: ^1.56.0
         version: 1.56.0
-      picomatch:
-        specifier: ^4.0.3
-        version: 4.0.3
       scule:
         specifier: ^1.3.0
         version: 1.3.0

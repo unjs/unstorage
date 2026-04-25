@@ -100,6 +100,9 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (opts) =
   return {
     name: DRIVER_NAME,
     options: opts,
+    flags: {
+      maxDepth: true,
+    },
     getInstance: getContainerClient,
     async hasItem(key) {
       return await getContainerClient().getBlockBlobClient(key).exists();
@@ -139,7 +142,11 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (opts) =
         .getBlockBlobClient(key)
         .deleteIfExists({ deleteSnapshots: "include" });
     },
-    async getKeys() {
+    async getKeys(base, opts) {
+      if (opts?.maxDepth !== undefined) {
+        return getKeysByDepth(getContainerClient(), opts.maxDepth, base);
+      }
+
       const iterator = getContainerClient().listBlobsFlat().byPage({ maxPageSize: 1000 });
       const keys: string[] = [];
       for await (const page of iterator) {
@@ -174,6 +181,44 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (opts) =
 };
 
 const isBrowser = typeof window !== "undefined";
+
+async function getKeysByDepth(client: ContainerClient, maxDepth: number, base): Promise<string[]> {
+  const queue: Array<{ depth: number; name: string }> = [];
+  let current: { depth: number; name: string } | undefined = {
+    name: base,
+    depth: 0,
+  };
+  const keys: string[] = [];
+
+  do {
+    const iterator = client
+      .listBlobsByHierarchy(":", {
+        prefix: current.name,
+      })
+      .byPage({ maxPageSize: 1000 });
+
+    for await (const result of iterator) {
+      const { blobPrefixes, blobItems } = result.segment;
+
+      if (blobPrefixes && current.depth < maxDepth) {
+        for (const childPrefix of blobPrefixes) {
+          queue.push({
+            name: childPrefix.name,
+            depth: current.depth + 1,
+          });
+        }
+      }
+
+      for (const item of blobItems) {
+        keys.push(item.name);
+      }
+    }
+
+    current = queue.pop();
+  } while (current !== undefined);
+
+  return keys;
+}
 
 // Helper function to read a Node.js readable stream into a Buffer. (https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob)
 async function streamToBuffer(readableStream: NodeJS.ReadableStream): Promise<Buffer> {

@@ -142,9 +142,9 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (opts) =
         .getBlockBlobClient(key)
         .deleteIfExists({ deleteSnapshots: "include" });
     },
-    async getKeys(_base, opts) {
+    async getKeys(base, opts) {
       if (opts?.maxDepth !== undefined) {
-        return getKeysByDepth(getContainerClient(), opts.maxDepth);
+        return getKeysByDepth(getContainerClient(), opts.maxDepth, base);
       }
 
       const iterator = getContainerClient().listBlobsFlat().byPage({ maxPageSize: 1000 });
@@ -182,10 +182,10 @@ const driver: DriverFactory<AzureStorageBlobOptions, ContainerClient> = (opts) =
 
 const isBrowser = typeof window !== "undefined";
 
-async function getKeysByDepth(client: ContainerClient, maxDepth: number): Promise<string[]> {
+async function getKeysByDepth(client: ContainerClient, maxDepth: number, base): Promise<string[]> {
   const queue: Array<{ depth: number; name: string }> = [];
   let current: { depth: number; name: string } | undefined = {
-    name: "",
+    name: base,
     depth: 0,
   };
   const keys: string[] = [];

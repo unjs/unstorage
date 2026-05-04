@@ -5,11 +5,13 @@ import { createError, createRequiredError, type DriverFactory } from "./utils/in
 import {
   readFile,
   writeFile,
+  writeFileExclusive,
   readdirRecursive,
   rmRecursive,
   unlink,
   ensuredir,
 } from "./utils/node-fs.ts";
+import { CASMismatchError, checkCAS } from "./utils/cas.ts";
 
 export interface FSStorageOptions {
   base?: string;
@@ -52,6 +54,32 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
     return resolved;
   };
 
+  // Per-key in-process write serialization for non-O_EXCL CAS paths.
+  // POSIX has no portable file-CAS primitive; this protects against races
+  // within a single process. Cross-process correctness for `ifMatch` is not
+  // guaranteed — use an external lock or a CAS-native driver for that.
+  const writeLocks = new Map<string, Promise<void>>();
+  const withLock = async <T>(key: string, fn: () => Promise<T>): Promise<T> => {
+    const previous = writeLocks.get(key) || Promise.resolve();
+    let release!: () => void;
+    const next = new Promise<void>((r) => {
+      release = r;
+    });
+    writeLocks.set(
+      key,
+      previous.then(() => next),
+    );
+    await previous;
+    try {
+      return await fn();
+    } finally {
+      release();
+      if (writeLocks.get(key) === next) {
+        writeLocks.delete(key);
+      }
+    }
+  };
+
   let _watcher: FSWatcher | undefined;
   const _unwatch = async () => {
     if (_watcher) {
@@ -60,11 +88,56 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
     }
   };
 
+  const writeWithCAS = async (
+    key: string,
+    plainWrite: (path: string) => Promise<void>,
+    exclusiveWrite: (path: string) => Promise<void>,
+    opts: { ifMatch?: string; ifNoneMatch?: string } | undefined,
+  ): Promise<{ etag: string } | undefined> => {
+    const path = r(key);
+    const wantsCAS = !!(opts && (opts.ifMatch !== undefined || opts.ifNoneMatch !== undefined));
+
+    if (!wantsCAS) {
+      await plainWrite(path);
+      return undefined;
+    }
+
+    // Atomic create-only via `link()`; correct across processes.
+    if (opts!.ifNoneMatch === "*" && opts!.ifMatch === undefined) {
+      try {
+        await exclusiveWrite(path);
+      } catch (err: any) {
+        if (err?.code === "EEXIST") {
+          throw new CASMismatchError(DRIVER_NAME, key);
+        }
+        throw err;
+      }
+      const stats = await fsp.stat(path);
+      return { etag: statEtag(stats) };
+    }
+
+    // Etag-based CAS: best-effort, single-process. POSIX has no portable
+    // file-CAS primitive; cross-process callers should layer an external lock.
+    return withLock(path, async () => {
+      const stats = await fsp.stat(path).catch(() => null);
+      checkCAS(
+        DRIVER_NAME,
+        key,
+        { exists: !!stats, etag: stats ? statEtag(stats) : undefined },
+        opts!,
+      );
+      await plainWrite(path);
+      const newStats = await fsp.stat(path);
+      return { etag: statEtag(newStats) };
+    });
+  };
+
   return {
     name: DRIVER_NAME,
     options: userOptions,
     flags: {
       maxDepth: true,
+      cas: true,
     },
     hasItem(key) {
       return existsSync(r(key));
@@ -76,22 +149,32 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
       return readFile(r(key));
     },
     async getMeta(key) {
-      const { atime, mtime, size, birthtime, ctime } = await fsp
-        .stat(r(key))
-        .catch(() => ({}) as Stats);
-      return { atime, mtime, size, birthtime, ctime };
+      const stats = await fsp.stat(r(key)).catch(() => ({}) as Stats);
+      const { atime, mtime, size, birthtime, ctime } = stats;
+      const etag = stats && stats.mtimeMs ? statEtag(stats) : undefined;
+      return { atime, mtime, size, birthtime, ctime, etag };
     },
-    setItem(key, value) {
+    async setItem(key, value, opts) {
       if (userOptions.readOnly) {
         return;
       }
-      return writeFile(r(key), value, "utf8");
+      return writeWithCAS(
+        key,
+        (path) => writeFile(path, value, "utf8"),
+        (path) => writeFileExclusive(path, value, "utf8"),
+        opts,
+      );
     },
-    setItemRaw(key, value) {
+    async setItemRaw(key, value, opts) {
       if (userOptions.readOnly) {
         return;
       }
-      return writeFile(r(key), value);
+      return writeWithCAS(
+        key,
+        (path) => writeFile(path, value),
+        (path) => writeFileExclusive(path, value),
+        opts,
+      );
     },
     removeItem(key) {
       if (userOptions.readOnly) {
@@ -150,5 +233,9 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
     },
   };
 };
+
+function statEtag(stats: { mtimeMs: number; size: number; ino: number }): string {
+  return `${stats.mtimeMs.toString(16)}-${stats.size.toString(16)}-${stats.ino.toString(16)}`;
+}
 
 export default driver;

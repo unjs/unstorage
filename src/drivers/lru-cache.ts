@@ -1,5 +1,6 @@
 import { type DriverFactory } from "./utils/index.ts";
 import { LRUCache } from "lru-cache";
+import { checkCAS } from "./utils/cas.ts";
 
 type LRUCacheOptions = LRUCache.OptionsBase<string, any, any> &
   Partial<LRUCache.OptionsMaxLimit<string, any, any>> &
@@ -11,6 +12,11 @@ export interface LRUDriverOptions extends LRUCacheOptions {}
 const DRIVER_NAME = "lru-cache";
 
 const driver: DriverFactory<LRUDriverOptions, LRUCache<string, any, any>> = (opts = {}) => {
+  const etags = new Map<string, string>();
+  let counter = 0;
+  const nextEtag = () => String(++counter);
+
+  const userDispose = opts.dispose;
   const cache = new LRUCache({
     max: 1000,
     sizeCalculation:
@@ -20,10 +26,15 @@ const driver: DriverFactory<LRUDriverOptions, LRUCache<string, any, any>> = (opt
           }
         : undefined,
     ...opts,
+    dispose(value, key, reason) {
+      etags.delete(key);
+      userDispose?.(value, key, reason);
+    },
   });
 
   return {
     name: DRIVER_NAME,
+    flags: { cas: true },
     options: opts,
     getInstance: () => cache,
     hasItem(key) {
@@ -35,11 +46,28 @@ const driver: DriverFactory<LRUDriverOptions, LRUCache<string, any, any>> = (opt
     getItemRaw(key) {
       return cache.get(key) ?? null;
     },
-    setItem(key, value) {
-      cache.set(key, value);
+    getMeta(key) {
+      return cache.has(key) ? { etag: etags.get(key) } : null;
     },
-    setItemRaw(key, value) {
+    setItem(key, value, tOpts) {
+      const wantsCAS = tOpts?.ifMatch !== undefined || tOpts?.ifNoneMatch !== undefined;
+      if (wantsCAS) {
+        checkCAS(DRIVER_NAME, key, { exists: cache.has(key), etag: etags.get(key) }, tOpts);
+      }
       cache.set(key, value);
+      const etag = nextEtag();
+      etags.set(key, etag);
+      return wantsCAS ? { etag } : undefined;
+    },
+    setItemRaw(key, value, tOpts) {
+      const wantsCAS = tOpts?.ifMatch !== undefined || tOpts?.ifNoneMatch !== undefined;
+      if (wantsCAS) {
+        checkCAS(DRIVER_NAME, key, { exists: cache.has(key), etag: etags.get(key) }, tOpts);
+      }
+      cache.set(key, value);
+      const etag = nextEtag();
+      etags.set(key, etag);
+      return wantsCAS ? { etag } : undefined;
     },
     removeItem(key) {
       cache.delete(key);
@@ -49,9 +77,11 @@ const driver: DriverFactory<LRUDriverOptions, LRUCache<string, any, any>> = (opt
     },
     clear() {
       cache.clear();
+      etags.clear();
     },
     dispose() {
       cache.clear();
+      etags.clear();
     },
   };
 };

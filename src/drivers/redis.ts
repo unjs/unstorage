@@ -1,7 +1,19 @@
+import { createHash } from "node:crypto";
 import { type DriverFactory, joinKeys } from "./utils/index.ts";
 import { Cluster, Redis } from "ioredis";
+import { CASMismatchError } from "./utils/cas.ts";
 
 import type { ClusterOptions, ClusterNode, RedisOptions as _RedisOptions } from "ioredis";
+
+// Content-addressable etag: SHA-1 of the stored bytes. Stable across writers
+// of the same value; no companion key or Lua script (compatible with the
+// ioredis-mock subset that lacks `redis.sha1hex` / full EVAL).
+const computeEtag = (value: string | Buffer | number): string => {
+  const buf = Buffer.isBuffer(value)
+    ? value
+    : Buffer.from(typeof value === "string" ? value : String(value));
+  return createHash("sha1").update(buf).digest("hex");
+};
 
 export interface RedisOptions extends _RedisOptions {
   /**
@@ -66,6 +78,68 @@ const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts) => {
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(`${base}:`, "") : key); // Deprefix a key
 
+  const setWithCAS = async (
+    key: string,
+    value: string | Buffer | number,
+    tOptions: { ifMatch?: string; ifNoneMatch?: string; ttl?: number } | undefined,
+  ): Promise<{ etag: string }> => {
+    const k = p(key);
+    const client = getRedisClient();
+    const ttl = tOptions?.ttl ?? opts.ttl ?? 0;
+    const ifMatch = tOptions?.ifMatch;
+    const ifNoneMatch = tOptions?.ifNoneMatch;
+
+    // Fast path: atomic create-only via `SET ... NX`.
+    if (ifNoneMatch === "*" && ifMatch === undefined) {
+      const result = ttl
+        ? await client.set(k, value as any, "EX", ttl, "NX")
+        : await client.set(k, value as any, "NX");
+      if (result === null) {
+        throw new CASMismatchError(DRIVER_NAME, key);
+      }
+      return { etag: computeEtag(value) };
+    }
+
+    // General path: WATCH + check + MULTI/EXEC. EXEC returns null if the
+    // watched key was modified between WATCH and EXEC, which we surface as
+    // a CAS mismatch (the caller's read became stale).
+    await client.watch(k);
+    try {
+      const cur = await client.getBuffer(k);
+      const exists = cur !== null;
+      const curEtag = exists ? computeEtag(cur) : undefined;
+
+      let mismatch = false;
+      if (ifNoneMatch !== undefined) {
+        mismatch =
+          ifNoneMatch === "*" ? exists : exists && curEtag === ifNoneMatch;
+      }
+      if (!mismatch && ifMatch !== undefined) {
+        mismatch =
+          ifMatch === "*" ? !exists : !exists || curEtag !== ifMatch;
+      }
+      if (mismatch) {
+        await client.unwatch();
+        throw new CASMismatchError(DRIVER_NAME, key);
+      }
+
+      const multi = client.multi();
+      if (ttl) {
+        multi.set(k, value as any, "EX", ttl);
+      } else {
+        multi.set(k, value as any);
+      }
+      const result = await multi.exec();
+      if (result === null) {
+        throw new CASMismatchError(DRIVER_NAME, key);
+      }
+      return { etag: computeEtag(value) };
+    } catch (err) {
+      await client.unwatch().catch(() => {});
+      throw err;
+    }
+  };
+
   if (opts.preConnect) {
     try {
       getRedisClient();
@@ -90,6 +164,7 @@ const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts) => {
 
   return {
     name: DRIVER_NAME,
+    flags: { cas: true },
     options: opts,
     getInstance: getRedisClient,
     async hasItem(key) {
@@ -114,7 +189,14 @@ const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts) => {
         };
       });
     },
+    async getMeta(key) {
+      const cur = await getRedisClient().getBuffer(p(key));
+      return cur === null ? null : { etag: computeEtag(cur) };
+    },
     async setItem(key, value, tOptions) {
+      if (tOptions?.ifMatch !== undefined || tOptions?.ifNoneMatch !== undefined) {
+        return setWithCAS(key, value, tOptions);
+      }
       const ttl = tOptions?.ttl ?? opts.ttl;
       if (ttl) {
         await getRedisClient().set(p(key), value, "EX", ttl);
@@ -124,6 +206,9 @@ const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts) => {
     },
     async setItemRaw(key, value, tOptions) {
       const _value = normalizeValue(value);
+      if (tOptions?.ifMatch !== undefined || tOptions?.ifNoneMatch !== undefined) {
+        return setWithCAS(key, _value, tOptions);
+      }
       const ttl = tOptions?.ttl ?? opts.ttl;
       if (ttl) {
         await getRedisClient().set(p(key), _value, "EX", ttl);

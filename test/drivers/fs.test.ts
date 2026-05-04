@@ -10,6 +10,7 @@ describe("drivers: fs", () => {
 
   testDriver({
     driver: driver({ base: dir }),
+    supportsCAS: true,
     additionalTests(ctx) {
       it("check filesystem", async () => {
         await ctx.storage.setItem("s1:a", "test_data");

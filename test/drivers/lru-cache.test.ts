@@ -5,6 +5,7 @@ import { testDriver } from "./utils.ts";
 describe("drivers: lru-cache", () => {
   testDriver({
     driver: driver({}),
+    supportsCAS: true,
   });
 });
 
@@ -13,6 +14,7 @@ describe("drivers: lru-cache with size", () => {
     driver: driver({
       maxEntrySize: 50,
     }),
+    supportsCAS: true,
     additionalTests(ctx) {
       it("should not store large items", async () => {
         await ctx.storage.setItem(

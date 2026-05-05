@@ -31,8 +31,8 @@ export async function writeFileExclusive(
 ): Promise<void> {
   await ensuredir(dirname(path));
   const tmp = `${path}.${process.pid}.${Date.now().toString(36)}.${Math.random().toString(36).slice(2, 8)}.tmp`;
-  await fsPromises.writeFile(tmp, data, encoding);
   try {
+    await fsPromises.writeFile(tmp, data, encoding);
     await fsPromises.link(tmp, path);
   } finally {
     await fsPromises.unlink(tmp).catch(() => {});

@@ -1,7 +1,8 @@
-import type { Storage, TransactionOptions, StorageMeta } from "./types.ts";
+import type { Storage, TransactionOptions, StorageMeta, SetItemResult } from "./types.ts";
 import { H3Event, HTTPError, defineHandler } from "h3";
 import { stringify } from "./_utils.ts";
 import { normalizeKey, normalizeBaseKey } from "./utils.ts";
+import { CASMismatchError, CASUnsupportedError } from "./errors.ts";
 
 export type StorageServerRequest = {
   request: globalThis.Request;
@@ -31,7 +32,11 @@ export type FetchHandler = (
  * The storage server will handle HEAD, GET, PUT and DELETE requests.
  * - HEAD: Return if the request item exists in the storage, including a last-modified header if the storage supports it and the meta is stored
  * - GET: Return the item if it exists
- * - PUT: Sets the item
+ * - PUT: Sets the item. Honors `If-Match` / `If-None-Match` precondition
+ *   headers (HTTP-style CAS). Returns `412 Precondition Failed` on CAS
+ *   mismatch and `501 Not Implemented` if the underlying driver doesn't
+ *   support CAS. On success, sets the `ETag` response header when the
+ *   driver returns one.
  * - DELETE: Removes the item (or clears the whole storage if the base key was used)
  *
  * If the request sets the `Accept` header to `application/octet-stream`, the server will handle the item as raw data.
@@ -89,7 +94,7 @@ export function createStorageHandler(
       return isRaw ? driverValue : stringify(driverValue);
     }
 
-    // HEAD => hasItem + meta (mtime, ttl)
+    // HEAD => hasItem + meta (mtime, ttl, etag)
     if (event.req.method === "HEAD") {
       if (!(await storage.hasItem(key))) {
         throw new HTTPError({
@@ -101,20 +106,48 @@ export function createStorageHandler(
       return "";
     }
 
-    // PUT => setItem
+    // PUT => setItem (with optional If-Match / If-None-Match CAS)
     if (event.req.method === "PUT") {
       const isRaw = event.req.headers.get("content-type") === "application/octet-stream";
+      const ifMatch = parseConditionHeader(event.req.headers.get("if-match"));
+      const ifNoneMatch = parseConditionHeader(event.req.headers.get("if-none-match"));
       const topts: TransactionOptions = {
         ttl: Number(event.req.headers.get("x-ttl")) || undefined,
+        ifMatch,
+        ifNoneMatch,
       };
-      if (isRaw) {
-        const value = await event.req.bytes();
-        await storage.setItemRaw(key, value, topts);
-      } else {
-        const value = await event.req.text();
-        if (value !== undefined) {
-          await storage.setItem(key, value, topts);
+      try {
+        let result: void | SetItemResult | undefined;
+        if (isRaw) {
+          const value = await event.req.bytes();
+          result = await storage.setItemRaw(key, value, topts);
+        } else {
+          const value = await event.req.text();
+          if (value !== undefined) {
+            result = await storage.setItem(key, value, topts);
+          }
         }
+        if (result && (result as SetItemResult).etag) {
+          event.res.headers.set("etag", formatEtag((result as SetItemResult).etag!));
+        }
+      } catch (error: any) {
+        if (CASMismatchError.is(error)) {
+          throw new HTTPError({
+            status: 412,
+            statusText: "Precondition Failed",
+            message: error.message,
+            cause: error,
+          });
+        }
+        if (CASUnsupportedError.is(error)) {
+          throw new HTTPError({
+            status: 501,
+            statusText: "Not Implemented",
+            message: error.message,
+            cause: error,
+          });
+        }
+        throw error;
       }
       return "OK";
     }
@@ -142,4 +175,25 @@ function setMetaHeaders(event: H3Event, meta: StorageMeta) {
     event.res.headers.set("x-ttl", `${meta.ttl}`);
     event.res.headers.set("cache-control", `max-age=${meta.ttl}`);
   }
+  if (meta.etag) {
+    event.res.headers.set("etag", formatEtag(meta.etag));
+  }
+}
+
+// Parse a single-value `If-Match` / `If-None-Match` header into the value
+// understood by drivers (`*` or the bare etag with surrounding quotes
+// stripped). We don't support multi-value lists or weak validators (`W/"..."`)
+// — the storage CAS contract is exact equality.
+function parseConditionHeader(raw: string | null | undefined): string | undefined {
+  if (!raw) return undefined;
+  const v = raw.trim();
+  if (v === "*") return "*";
+  if (v.length >= 2 && v.startsWith('"') && v.endsWith('"')) {
+    return v.slice(1, -1);
+  }
+  return v;
+}
+
+function formatEtag(etag: string): string {
+  return etag === "*" || (etag.startsWith('"') && etag.endsWith('"')) ? etag : `"${etag}"`;
 }

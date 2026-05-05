@@ -1,6 +1,7 @@
 import type * as CF from "@cloudflare/workers-types";
 import { type DriverFactory, joinKeys } from "./utils/index.ts";
 import { getR2Binding } from "./utils/cloudflare.ts";
+import { CASMismatchError } from "./utils/cas.ts";
 
 export interface CloudflareR2Options {
   binding?: string | CF.R2Bucket;
@@ -20,9 +21,25 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
     return kvList.objects.map((obj) => obj.key);
   };
 
+  const buildPutOpts = (
+    topts: (CF.R2PutOptions & { ifMatch?: string; ifNoneMatch?: string }) | undefined,
+  ): CF.R2PutOptions | undefined => {
+    if (!topts) return undefined;
+    const { ifMatch, ifNoneMatch, ...rest } = topts;
+    if (ifMatch === undefined && ifNoneMatch === undefined) {
+      return rest as CF.R2PutOptions;
+    }
+    // R2 accepts `"*"` as a wildcard etag for both etagMatches / etagDoesNotMatch.
+    const onlyIf: CF.R2Conditional = {};
+    if (ifNoneMatch !== undefined) onlyIf.etagDoesNotMatch = ifNoneMatch;
+    if (ifMatch !== undefined) onlyIf.etagMatches = ifMatch;
+    return { ...(rest as CF.R2PutOptions), onlyIf };
+  };
+
   return {
     name: DRIVER_NAME,
     options: opts,
+    flags: { cas: true },
     getInstance: () => getR2Binding(opts.binding),
     async hasItem(key) {
       key = r(key);
@@ -38,6 +55,7 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
         mtime: obj.uploaded,
         atime: obj.uploaded,
         ...obj,
+        etag: obj.etag,
       };
     },
     getItem(key, topts) {
@@ -54,12 +72,22 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
     async setItem(key, value, topts) {
       key = r(key);
       const binding = getR2Binding(opts.binding);
-      await binding.put(key, value, topts);
+      const wantsCAS = topts?.ifMatch !== undefined || topts?.ifNoneMatch !== undefined;
+      const result = await binding.put(key, value, buildPutOpts(topts) as any);
+      if (wantsCAS && result === null) {
+        throw new CASMismatchError(DRIVER_NAME, key);
+      }
+      return wantsCAS ? { etag: result!.etag } : undefined;
     },
     async setItemRaw(key, value, topts) {
       key = r(key);
       const binding = getR2Binding(opts.binding);
-      await binding.put(key, value, topts);
+      const wantsCAS = topts?.ifMatch !== undefined || topts?.ifNoneMatch !== undefined;
+      const result = await binding.put(key, value, buildPutOpts(topts) as any);
+      if (wantsCAS && result === null) {
+        throw new CASMismatchError(DRIVER_NAME, key);
+      }
+      return wantsCAS ? { etag: result!.etag } : undefined;
     },
     async removeItem(key) {
       key = r(key);

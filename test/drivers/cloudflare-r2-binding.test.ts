@@ -15,6 +15,7 @@ describe("drivers: cloudflare-r2-binding", async () => {
 
   testDriver({
     driver: CloudflareR2Binding({ base: "base" }),
+    supportsCAS: true,
     async additionalTests(ctx) {
       test("snapshot", async () => {
         await ctx.storage.setItem("s1:a", "test_data");

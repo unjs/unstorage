@@ -22,6 +22,7 @@ describe("drivers: mongodb", async () => {
       databaseName: "test",
       collectionName: "test",
     }),
+    supportsCAS: true,
     additionalTests: (ctx) => {
       it("should throw error if no connection string is provided", async () => {
         await expect(() =>

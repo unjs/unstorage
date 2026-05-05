@@ -13,6 +13,7 @@ describe.skipIf(!token)("drivers: vercel-blob (public)", async () => {
         base: Math.round(Math.random() * 1_000_000).toString(16),
         envPrefix: "VERCEL_TEST",
       }),
+    supportsCAS: true,
   });
 });
 
@@ -27,5 +28,6 @@ describe.skipIf(!privateToken)("drivers: vercel-blob (private)", async () => {
         base: Math.round(Math.random() * 1_000_000).toString(16),
         envPrefix: "VERCEL_TEST_PRIVATE",
       }),
+    supportsCAS: true,
   });
 });

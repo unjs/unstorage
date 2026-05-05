@@ -2,6 +2,7 @@ import type { TransactionOptions } from "../types.ts";
 import { type DriverFactory } from "./utils/index.ts";
 import { type FetchError, $fetch as _fetch } from "ofetch";
 import { joinURL } from "./utils/path.ts";
+import { CASMismatchError } from "./utils/cas.ts";
 
 export interface HTTPOptions {
   base: string;
@@ -26,7 +27,7 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
     topts: TransactionOptions | undefined,
     defaultHeaders?: Record<string, string>,
   ) => {
-    const headers = {
+    const headers: Record<string, string> = {
       ...defaultHeaders,
       ...opts.headers,
       ...topts?.headers,
@@ -34,11 +35,42 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
     if (topts?.ttl && !headers["x-ttl"]) {
       headers["x-ttl"] = topts.ttl + "";
     }
+    if (topts?.ifMatch !== undefined && !headers["if-match"]) {
+      headers["if-match"] = formatCondition(topts.ifMatch);
+    }
+    if (topts?.ifNoneMatch !== undefined && !headers["if-none-match"]) {
+      headers["if-none-match"] = formatCondition(topts.ifNoneMatch);
+    }
     return headers;
+  };
+
+  const setItemHTTP = async (
+    key: string,
+    value: any,
+    topts: TransactionOptions | undefined,
+    defaultHeaders?: Record<string, string>,
+  ): Promise<{ etag: string } | undefined> => {
+    const wantsCAS = topts?.ifMatch !== undefined || topts?.ifNoneMatch !== undefined;
+    try {
+      const res = await _fetch.raw(r(key), {
+        method: "PUT",
+        body: value,
+        headers: getHeaders(topts, defaultHeaders),
+      });
+      if (!wantsCAS) return undefined;
+      const etag = parseEtag(res.headers.get("etag"));
+      return etag === undefined ? undefined : { etag };
+    } catch (error: any) {
+      if (error?.response?.status === 412) {
+        throw new CASMismatchError(DRIVER_NAME, key);
+      }
+      throw error;
+    }
   };
 
   return {
     name: DRIVER_NAME,
+    flags: { cas: true },
     options: opts,
     hasItem(key, topts) {
       return _fetch(r(key), {
@@ -78,26 +110,20 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
       if (_ttl) {
         ttl = Number.parseInt(_ttl, 10);
       }
+      const etag = parseEtag(res.headers.get("etag"));
       return {
         status: res.status,
         mtime,
         ttl,
+        etag,
       };
     },
-    async setItem(key, value, topts) {
-      await _fetch(r(key), {
-        method: "PUT",
-        body: value,
-        headers: getHeaders(topts),
-      });
+    setItem(key, value, topts) {
+      return setItemHTTP(key, value, topts);
     },
-    async setItemRaw(key, value, topts) {
-      await _fetch(r(key), {
-        method: "PUT",
-        body: value,
-        headers: getHeaders(topts, {
-          "content-type": "application/octet-stream",
-        }),
+    setItemRaw(key, value, topts) {
+      return setItemHTTP(key, value, topts, {
+        "content-type": "application/octet-stream",
       });
     },
     async removeItem(key, topts) {
@@ -122,3 +148,24 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
 };
 
 export default driver;
+
+// --- Internal helpers ---
+
+// HTTP spec: ETag values are quoted (`"abc"`) and `If-Match: *` is a literal
+// `*` (no quotes). Strip surrounding quotes when parsing inbound, add them
+// when sending — but never quote `*`.
+function parseEtag(raw: string | null | undefined): string | undefined {
+  if (!raw) return undefined;
+  const v = raw.trim();
+  if (v === "*") return "*";
+  if (v.length >= 2 && v.startsWith('"') && v.endsWith('"')) {
+    return v.slice(1, -1);
+  }
+  return v;
+}
+
+function formatCondition(value: string): string {
+  if (value === "*") return "*";
+  if (value.startsWith('"') && value.endsWith('"')) return value;
+  return `"${value}"`;
+}

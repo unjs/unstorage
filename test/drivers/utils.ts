@@ -18,6 +18,13 @@ export interface TestOptions {
   noKeysSupport?: boolean;
   /** Driver supports `ifMatch`/`ifNoneMatch` preconditions. */
   supportsCAS?: boolean;
+  /**
+   * Backend supports CAS preconditions but the test environment (e.g. an
+   * in-process mock server) does not expose an etag through `getMeta`. Skips
+   * the etag-readback assertions that would otherwise verify
+   * `getMeta().etag === setItem().etag`.
+   */
+  casNoMetaEtag?: boolean;
   additionalTests?: (ctx: TestContext) => void;
 }
 
@@ -221,7 +228,7 @@ export function testDriver(opts: TestOptions): void {
       expect(await ctx.storage.getItem("cas:create")).toBe("first");
     });
 
-    it("CAS: ifMatch:<etag> swaps only when version matches", async () => {
+    it.skipIf(opts.casNoMetaEtag)("CAS: ifMatch:<etag> swaps only when version matches", async () => {
       await ctx.storage.setItem("cas:swap", "v1");
       const meta1 = await ctx.storage.getMeta("cas:swap");
       expect(meta1.etag).toBeTruthy();
@@ -247,7 +254,7 @@ export function testDriver(opts: TestOptions): void {
       expect(await ctx.storage.getItem("cas:absent")).toBe("y");
     });
 
-    it("CAS: getMeta returns etag after write", async () => {
+    it.skipIf(opts.casNoMetaEtag)("CAS: getMeta returns etag after write", async () => {
       const r = await ctx.storage.setItem("cas:meta", "hello", { ifNoneMatch: "*" });
       const meta = await ctx.storage.getMeta("cas:meta");
       expect(meta.etag).toBe((r as { etag: string }).etag);

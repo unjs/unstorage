@@ -53,6 +53,7 @@ for (const driver of drivers) {
 
     testDriver({
       driver: () => db0Driver({ database: db }),
+      supportsCAS: true,
       additionalTests: (ctx) => {
         it("meta", async () => {
           await ctx.storage.setItem("meta:test", "test_data");

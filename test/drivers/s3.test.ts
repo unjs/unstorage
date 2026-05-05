@@ -21,6 +21,7 @@ describe.skipIf(!accessKeyId || !secretAccessKey || !bucket || !endpoint || !reg
           endpoint: endpoint!,
           region: region!,
         }),
+      supportsCAS: true,
       additionalTests(ctx) {
         it("can access directly with / separator", async () => {
           await ctx.storage.set("foo/bar:baz", "ok");

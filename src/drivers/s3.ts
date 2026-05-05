@@ -4,6 +4,7 @@ import {
   normalizeKey,
   createError,
 } from "./utils/index.ts";
+import { CASMismatchError } from "./utils/cas.ts";
 import { AwsClient } from "aws4fetch";
 
 export interface S3DriverOptions {
@@ -94,12 +95,19 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
 
   const url = (key: string = "") => `${baseURL}/${normalizeKey(key, "/")}`;
 
-  const awsFetch = async (url: string, opts?: RequestInit) => {
+  const awsFetch = async (
+    url: string,
+    opts?: RequestInit,
+    allowedStatuses?: ReadonlySet<number>,
+  ) => {
     const request = await getAwsClient().sign(url, opts);
     const res = await fetch(request);
     if (!res.ok) {
       if (res.status === 404) {
         return null;
+      }
+      if (allowedStatuses?.has(res.status)) {
+        return res;
       }
       throw createError(
         DRIVER_NAME,
@@ -115,12 +123,16 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
     if (!res) {
       return null;
     }
-    const metaHeaders: HeadersInit = {};
+    const metaHeaders: Record<string, string> = {};
     for (const [key, value] of res.headers.entries()) {
       const match = /x-amz-meta-(.*)/.exec(key);
       if (match?.[1]) {
         metaHeaders[match[1]] = value;
       }
+    }
+    const etag = stripQuotes(res.headers.get("etag"));
+    if (etag) {
+      metaHeaders.etag = etag;
     }
     return metaHeaders;
   };
@@ -145,16 +157,55 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
     key: string,
     value: BufferSource | string,
     headers?: Record<string, string | undefined>,
+    allowedStatuses?: ReadonlySet<number>,
   ) => {
-    return awsFetch(url(key), {
-      method: "PUT",
-      headers: headers
-        ? (Object.fromEntries(
-            Object.entries(headers).filter(([_, v]) => v !== undefined),
-          ) as Record<string, string>)
-        : undefined,
-      body: value,
-    });
+    return awsFetch(
+      url(key),
+      {
+        method: "PUT",
+        headers: headers
+          ? (Object.fromEntries(
+              Object.entries(headers).filter(([_, v]) => v !== undefined),
+            ) as Record<string, string>)
+          : undefined,
+        body: value,
+      },
+      allowedStatuses,
+    );
+  };
+
+  // 412 Precondition Failed (If-Match/If-None-Match), 409 Conflict (some
+  // S3-compatible backends return this for create-only races).
+  const CAS_FAIL_STATUSES = new Set([412, 409]);
+
+  const putWithPreconditions = async (
+    key: string,
+    value: BufferSource | string,
+    topts: (S3ItemOptions & { ifMatch?: string; ifNoneMatch?: string }) | undefined,
+  ): Promise<{ etag: string } | undefined> => {
+    const wantsCAS =
+      topts?.ifMatch !== undefined || topts?.ifNoneMatch !== undefined;
+    const headers: Record<string, string | undefined> = { ...topts?.headers };
+    if (topts?.ifNoneMatch !== undefined) {
+      headers["If-None-Match"] =
+        topts.ifNoneMatch === "*" ? "*" : `"${topts.ifNoneMatch}"`;
+    }
+    if (topts?.ifMatch !== undefined) {
+      headers["If-Match"] = topts.ifMatch === "*" ? "*" : `"${topts.ifMatch}"`;
+    }
+    const res = await putObject(
+      key,
+      value,
+      headers,
+      wantsCAS ? CAS_FAIL_STATUSES : undefined,
+    );
+    if (wantsCAS && res && CAS_FAIL_STATUSES.has(res.status)) {
+      throw new CASMismatchError(DRIVER_NAME, key);
+    }
+    if (wantsCAS) {
+      return { etag: stripQuotes(res?.headers.get("etag")) };
+    }
+    return undefined;
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
@@ -188,6 +239,7 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
 
   return {
     name: DRIVER_NAME,
+    flags: { cas: true },
     options,
     getItem(key) {
       return getObject(key).then((res) => (res ? res.text() : null));
@@ -195,11 +247,11 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
     getItemRaw(key) {
       return getObject(key).then((res) => (res ? res.arrayBuffer() : null));
     },
-    async setItem(key, value, topts?: S3ItemOptions) {
-      await putObject(key, value, topts?.headers);
+    async setItem(key, value, topts?: S3ItemOptions & { ifMatch?: string; ifNoneMatch?: string }) {
+      return putWithPreconditions(key, value, topts);
     },
-    async setItemRaw(key, value, topts?: S3ItemOptions) {
-      await putObject(key, value, topts?.headers);
+    async setItemRaw(key, value, topts?: S3ItemOptions & { ifMatch?: string; ifNoneMatch?: string }) {
+      return putWithPreconditions(key, value, topts);
     },
     getMeta(key) {
       return headObject(key);
@@ -220,6 +272,11 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
 };
 
 // --- utils ---
+
+function stripQuotes(value: string | null | undefined): string {
+  if (!value) return "";
+  return value.startsWith('"') && value.endsWith('"') ? value.slice(1, -1) : value;
+}
 
 function deleteKeysReq(keys: string[]) {
   return `<Delete>${keys

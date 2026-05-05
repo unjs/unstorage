@@ -1,5 +1,12 @@
 import { it, expect, beforeAll, afterAll, afterEach } from "vitest";
-import { type Storage, type Driver, createStorage, restoreSnapshot } from "../../src/index.ts";
+import {
+  type Storage,
+  type Driver,
+  CASMismatchError,
+  CASUnsupportedError,
+  createStorage,
+  restoreSnapshot,
+} from "../../src/index.ts";
 
 export interface TestContext {
   storage: Storage;
@@ -9,6 +16,15 @@ export interface TestContext {
 export interface TestOptions {
   driver: Driver | (() => Driver);
   noKeysSupport?: boolean;
+  /** Driver supports `ifMatch`/`ifNoneMatch` preconditions. */
+  supportsCAS?: boolean;
+  /**
+   * Backend supports CAS preconditions but the test environment (e.g. an
+   * in-process mock server) does not expose an etag through `getMeta`. Skips
+   * the etag-readback assertions that would otherwise verify
+   * `getMeta().etag === setItem().etag`.
+   */
+  casNoMetaEtag?: boolean;
   additionalTests?: (ctx: TestContext) => void;
 }
 
@@ -199,4 +215,109 @@ export function testDriver(opts: TestOptions): void {
     await ctx.storage.clear();
     expect(await ctx.storage.getKeys()).toMatchObject([]);
   });
+
+  if (opts.supportsCAS) {
+    it("CAS: ifNoneMatch:* creates only when absent", async () => {
+      const r1 = await ctx.storage.setItem("cas:create", "first", { ifNoneMatch: "*" });
+      expect(r1).toMatchObject({ etag: expect.any(String) });
+      expect(await ctx.storage.getItem("cas:create")).toBe("first");
+
+      await expect(
+        ctx.storage.setItem("cas:create", "second", { ifNoneMatch: "*" }),
+      ).rejects.toBeInstanceOf(CASMismatchError);
+      expect(await ctx.storage.getItem("cas:create")).toBe("first");
+    });
+
+    it.skipIf(opts.casNoMetaEtag)("CAS: ifMatch:<etag> swaps only when version matches", async () => {
+      await ctx.storage.setItem("cas:swap", "v1");
+      const meta1 = await ctx.storage.getMeta("cas:swap");
+      expect(meta1.etag).toBeTruthy();
+
+      const r = await ctx.storage.setItem("cas:swap", "v2", { ifMatch: meta1.etag as string });
+      expect(r).toMatchObject({ etag: expect.any(String) });
+      expect(await ctx.storage.getItem("cas:swap")).toBe("v2");
+
+      await expect(
+        ctx.storage.setItem("cas:swap", "v3", { ifMatch: meta1.etag as string }),
+      ).rejects.toBeInstanceOf(CASMismatchError);
+      expect(await ctx.storage.getItem("cas:swap")).toBe("v2");
+    });
+
+    it("CAS: ifMatch:* requires existence", async () => {
+      await expect(
+        ctx.storage.setItem("cas:absent", "x", { ifMatch: "*" }),
+      ).rejects.toBeInstanceOf(CASMismatchError);
+
+      await ctx.storage.setItem("cas:absent", "x");
+      const r = await ctx.storage.setItem("cas:absent", "y", { ifMatch: "*" });
+      expect(r).toMatchObject({ etag: expect.any(String) });
+      expect(await ctx.storage.getItem("cas:absent")).toBe("y");
+    });
+
+    it.skipIf(opts.casNoMetaEtag)("CAS: getMeta returns etag after write", async () => {
+      const r = await ctx.storage.setItem("cas:meta", "hello", { ifNoneMatch: "*" });
+      const meta = await ctx.storage.getMeta("cas:meta");
+      expect(meta.etag).toBe((r as { etag: string }).etag);
+    });
+
+    it.skipIf(opts.casNoMetaEtag)(
+      "CAS: ifNoneMatch:<etag> rejects matching version, accepts mismatched",
+      async () => {
+        await ctx.storage.setItem("cas:nm", "v1");
+        const meta1 = await ctx.storage.getMeta("cas:nm");
+        const etag1 = meta1.etag as string;
+        expect(etag1).toBeTruthy();
+
+        // Forbidden etag matches current → mismatch.
+        await expect(
+          ctx.storage.setItem("cas:nm", "v2", { ifNoneMatch: etag1 }),
+        ).rejects.toBeInstanceOf(CASMismatchError);
+        expect(await ctx.storage.getItem("cas:nm")).toBe("v1");
+
+        // Forbidden etag does NOT match current → write proceeds.
+        const r = await ctx.storage.setItem("cas:nm", "v2", {
+          ifNoneMatch: "definitely-not-current",
+        });
+        expect(r).toMatchObject({ etag: expect.any(String) });
+        expect(await ctx.storage.getItem("cas:nm")).toBe("v2");
+      },
+    );
+
+    it.skipIf(opts.casNoMetaEtag)(
+      "CAS: combined ifMatch:* + ifNoneMatch:<etag> requires existence and version difference",
+      async () => {
+        await ctx.storage.setItem("cas:combo", "v1");
+        const etag1 = (await ctx.storage.getMeta("cas:combo")).etag as string;
+        expect(etag1).toBeTruthy();
+
+        // Current etag equals the forbidden etag → mismatch (regression for
+        // the mongodb combined-filter bug where this case overwrote silently).
+        await expect(
+          ctx.storage.setItem("cas:combo", "v2", { ifMatch: "*", ifNoneMatch: etag1 }),
+        ).rejects.toBeInstanceOf(CASMismatchError);
+        expect(await ctx.storage.getItem("cas:combo")).toBe("v1");
+
+        // Current etag differs from the forbidden one → write proceeds.
+        const r = await ctx.storage.setItem("cas:combo", "v2", {
+          ifMatch: "*",
+          ifNoneMatch: "definitely-not-current",
+        });
+        expect(r).toMatchObject({ etag: expect.any(String) });
+        expect(await ctx.storage.getItem("cas:combo")).toBe("v2");
+      },
+    );
+
+    it.skipIf(opts.casNoMetaEtag)("CAS: setMeta propagates etag", async () => {
+      const r = await ctx.storage.setMeta("cas:setmeta", { tag: "v1" } as any, {
+        ifNoneMatch: "*",
+      });
+      expect(r).toMatchObject({ etag: expect.any(String) });
+    });
+  } else {
+    it("CAS: throws CASUnsupportedError on ifMatch/ifNoneMatch", async () => {
+      await expect(
+        ctx.storage.setItem("cas:unsupported", "x", { ifNoneMatch: "*" }),
+      ).rejects.toBeInstanceOf(CASUnsupportedError);
+    });
+  }
 }

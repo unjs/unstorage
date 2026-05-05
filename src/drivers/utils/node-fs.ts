@@ -19,6 +19,26 @@ export async function writeFile(
   return fsPromises.writeFile(path, data, encoding);
 }
 
+/**
+ * Atomic create-only write. Writes to a temp file then `link()`s into place;
+ * `link()` fails with `EEXIST` if the target already exists, giving true
+ * cross-process atomicity (no window where readers see an empty/partial file).
+ */
+export async function writeFileExclusive(
+  path: string,
+  data: WriteFileData,
+  encoding?: BufferEncoding,
+): Promise<void> {
+  await ensuredir(dirname(path));
+  const tmp = `${path}.${process.pid}.${Date.now().toString(36)}.${Math.random().toString(36).slice(2, 8)}.tmp`;
+  try {
+    await fsPromises.writeFile(tmp, data, encoding);
+    await fsPromises.link(tmp, path);
+  } finally {
+    await fsPromises.unlink(tmp).catch(() => {});
+  }
+}
+
 export function readFile(path: string, encoding?: BufferEncoding): Promise<string | Buffer | null> {
   return fsPromises.readFile(path, encoding).catch(ignoreNotfound);
 }

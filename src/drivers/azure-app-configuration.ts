@@ -1,4 +1,5 @@
 import { type DriverFactory, createRequiredError } from "./utils/index.ts";
+import { CASMismatchError } from "./utils/cas.ts";
 import { AppConfigurationClient } from "@azure/app-configuration";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -60,8 +61,70 @@ const driver: DriverFactory<AzureAppConfigurationOptions, AppConfigurationClient
     return client;
   };
 
+  const setWithCAS = async (
+    key: string,
+    value: string,
+    tOptions: { ifMatch?: string; ifNoneMatch?: string },
+  ): Promise<{ etag: string | undefined }> => {
+    const k = p(key);
+    const label = opts.label;
+    const c = getClient();
+    const { ifMatch, ifNoneMatch } = tOptions;
+    try {
+      // Create-only: ifNoneMatch:"*"
+      if (ifNoneMatch === "*" && ifMatch === undefined) {
+        const result = await c.addConfigurationSetting({ key: k, value, label });
+        return { etag: result.etag };
+      }
+      // Swap by etag: ifMatch:<etag> (no ifNoneMatch, or harmless ifNoneMatch:"*")
+      if (
+        ifMatch !== undefined &&
+        ifMatch !== "*" &&
+        (ifNoneMatch === undefined || ifNoneMatch === "*")
+      ) {
+        const result = await c.setConfigurationSetting(
+          { key: k, value, label, etag: ifMatch },
+          { onlyIfUnchanged: true },
+        );
+        return { etag: result.etag };
+      }
+      // Remaining cases (ifMatch:"*", ifNoneMatch:<etag>, or combinations)
+      // are emulated via read-then-conditional-set.
+      const current = await c.getConfigurationSetting({ key: k, label }).catch(() => null);
+      const exists = !!current;
+      const curEtag = current?.etag;
+      let mismatch = false;
+      if (ifNoneMatch !== undefined) {
+        mismatch =
+          ifNoneMatch === "*" ? exists : exists && curEtag === ifNoneMatch;
+      }
+      if (!mismatch && ifMatch !== undefined) {
+        mismatch = ifMatch === "*" ? !exists : !exists || curEtag !== ifMatch;
+      }
+      if (mismatch) {
+        throw new CASMismatchError(DRIVER_NAME, key);
+      }
+      if (exists) {
+        const result = await c.setConfigurationSetting(
+          { key: k, value, label, etag: curEtag },
+          { onlyIfUnchanged: true },
+        );
+        return { etag: result.etag };
+      }
+      const result = await c.addConfigurationSetting({ key: k, value, label });
+      return { etag: result.etag };
+    } catch (err: any) {
+      if (CASMismatchError.is(err)) throw err;
+      if (err?.statusCode === 412 || err?.statusCode === 409) {
+        throw new CASMismatchError(DRIVER_NAME, key);
+      }
+      throw err;
+    }
+  };
+
   return {
     name: DRIVER_NAME,
+    flags: { cas: true },
     options: opts,
     getInstance: getClient,
     async hasItem(key) {
@@ -86,7 +149,10 @@ const driver: DriverFactory<AzureAppConfigurationOptions, AppConfigurationClient
         return null;
       }
     },
-    async setItem(key, value) {
+    async setItem(key, value, tOptions) {
+      if (tOptions?.ifMatch !== undefined || tOptions?.ifNoneMatch !== undefined) {
+        return setWithCAS(key, value, tOptions);
+      }
       await getClient().setConfigurationSetting({
         key: p(key),
         value,
@@ -114,10 +180,13 @@ const driver: DriverFactory<AzureAppConfigurationOptions, AppConfigurationClient
       return keys;
     },
     async getMeta(key) {
-      const setting = await getClient().getConfigurationSetting({
-        key: p(key),
-        label: opts.label,
-      });
+      const setting = await getClient()
+        .getConfigurationSetting({
+          key: p(key),
+          label: opts.label,
+        })
+        .catch(() => null);
+      if (!setting) return null;
       return {
         mtime: setting.lastModified,
         etag: setting.etag,

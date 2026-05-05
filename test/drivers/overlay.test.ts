@@ -6,6 +6,7 @@ import { testDriver } from "./utils.ts";
 describe("drivers: overlay", () => {
   const [s1, s2] = [memory(), memory()];
   testDriver({
+    supportsCAS: true,
     driver: driver({
       layers: [s1, s2],
     }),

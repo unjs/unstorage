@@ -2,7 +2,7 @@ import type { TransactionOptions } from "../types.ts";
 import { type DriverFactory } from "./utils/index.ts";
 import { type FetchError, $fetch as _fetch } from "ofetch";
 import { joinURL } from "./utils/path.ts";
-import { CASMismatchError } from "./utils/cas.ts";
+import { CASMismatchError, CASUnsupportedError } from "./utils/cas.ts";
 
 export interface HTTPOptions {
   base: string;
@@ -59,10 +59,20 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
       });
       if (!wantsCAS) return undefined;
       const etag = parseEtag(res.headers.get("etag"));
-      return etag === undefined ? undefined : { etag };
+      // A CAS-aware server echoes ETag on a successful conditional PUT. Its
+      // absence means the server (or its mounted driver) ignored the
+      // precondition headers — fail loudly to prevent silent lost updates,
+      // which is the whole point of CAS.
+      if (etag === undefined) {
+        throw new CASUnsupportedError(DRIVER_NAME);
+      }
+      return { etag };
     } catch (error: any) {
       if (error?.response?.status === 412) {
         throw new CASMismatchError(DRIVER_NAME, key);
+      }
+      if (error?.response?.status === 501) {
+        throw new CASUnsupportedError(DRIVER_NAME);
       }
       throw error;
     }

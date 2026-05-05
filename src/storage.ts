@@ -326,8 +326,8 @@ export function createStorage<T extends StorageValue>(
       }
       return meta;
     },
-    async setMeta(key: string, value: any, opts = {}) {
-      await this.setItem(key + "$", value, opts);
+    setMeta(key: string, value: any, opts = {}) {
+      return this.setItem(key + "$", value, opts);
     },
     removeMeta(key: string, opts = {}) {
       return this.removeItem(key + "$", opts);

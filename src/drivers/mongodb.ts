@@ -135,7 +135,9 @@ const driver: DriverFactory<MongoDbOptions, Collection> = (opts) => {
     const filter: Record<string, unknown> = { key };
     if (ifMatch !== undefined && ifMatch !== "*") {
       filter._etag = ifMatch;
-    } else if (ifNoneMatch !== undefined) {
+    } else if (ifNoneMatch !== undefined && ifNoneMatch !== "*") {
+      // ifMatch is `"*"` (existence already enforced by the `key` lookup)
+      // or undefined; ifNoneMatch is a concrete etag → require $ne.
       filter._etag = { $ne: ifNoneMatch };
     }
     const r = await col.updateOne(filter, {

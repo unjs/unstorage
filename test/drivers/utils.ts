@@ -259,6 +259,60 @@ export function testDriver(opts: TestOptions): void {
       const meta = await ctx.storage.getMeta("cas:meta");
       expect(meta.etag).toBe((r as { etag: string }).etag);
     });
+
+    it.skipIf(opts.casNoMetaEtag)(
+      "CAS: ifNoneMatch:<etag> rejects matching version, accepts mismatched",
+      async () => {
+        await ctx.storage.setItem("cas:nm", "v1");
+        const meta1 = await ctx.storage.getMeta("cas:nm");
+        const etag1 = meta1.etag as string;
+        expect(etag1).toBeTruthy();
+
+        // Forbidden etag matches current → mismatch.
+        await expect(
+          ctx.storage.setItem("cas:nm", "v2", { ifNoneMatch: etag1 }),
+        ).rejects.toBeInstanceOf(CASMismatchError);
+        expect(await ctx.storage.getItem("cas:nm")).toBe("v1");
+
+        // Forbidden etag does NOT match current → write proceeds.
+        const r = await ctx.storage.setItem("cas:nm", "v2", {
+          ifNoneMatch: "definitely-not-current",
+        });
+        expect(r).toMatchObject({ etag: expect.any(String) });
+        expect(await ctx.storage.getItem("cas:nm")).toBe("v2");
+      },
+    );
+
+    it.skipIf(opts.casNoMetaEtag)(
+      "CAS: combined ifMatch:* + ifNoneMatch:<etag> requires existence and version difference",
+      async () => {
+        await ctx.storage.setItem("cas:combo", "v1");
+        const etag1 = (await ctx.storage.getMeta("cas:combo")).etag as string;
+        expect(etag1).toBeTruthy();
+
+        // Current etag equals the forbidden etag → mismatch (regression for
+        // the mongodb combined-filter bug where this case overwrote silently).
+        await expect(
+          ctx.storage.setItem("cas:combo", "v2", { ifMatch: "*", ifNoneMatch: etag1 }),
+        ).rejects.toBeInstanceOf(CASMismatchError);
+        expect(await ctx.storage.getItem("cas:combo")).toBe("v1");
+
+        // Current etag differs from the forbidden one → write proceeds.
+        const r = await ctx.storage.setItem("cas:combo", "v2", {
+          ifMatch: "*",
+          ifNoneMatch: "definitely-not-current",
+        });
+        expect(r).toMatchObject({ etag: expect.any(String) });
+        expect(await ctx.storage.getItem("cas:combo")).toBe("v2");
+      },
+    );
+
+    it.skipIf(opts.casNoMetaEtag)("CAS: setMeta propagates etag", async () => {
+      const r = await ctx.storage.setMeta("cas:setmeta", { tag: "v1" } as any, {
+        ifNoneMatch: "*",
+      });
+      expect(r).toMatchObject({ etag: expect.any(String) });
+    });
   } else {
     it("CAS: throws CASUnsupportedError on ifMatch/ifNoneMatch", async () => {
       await expect(

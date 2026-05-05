@@ -66,16 +66,14 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
     const next = new Promise<void>((r) => {
       release = r;
     });
-    writeLocks.set(
-      key,
-      previous.then(() => next),
-    );
+    const chained = previous.then(() => next);
+    writeLocks.set(key, chained);
     await previous;
     try {
       return await fn();
     } finally {
       release();
-      if (writeLocks.get(key) === next) {
+      if (writeLocks.get(key) === chained) {
         writeLocks.delete(key);
       }
     }

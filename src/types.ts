@@ -174,7 +174,11 @@ export interface Storage<T extends StorageValue = StorageValue> {
     key: string,
     opts?: (TransactionOptions & { nativeOnly?: boolean }) | boolean /* legacy: nativeOnly */,
   ) => MaybePromise<StorageMeta>;
-  setMeta: (key: string, value: StorageMeta, opts?: TransactionOptions) => Promise<void>;
+  setMeta: (
+    key: string,
+    value: StorageMeta,
+    opts?: TransactionOptions,
+  ) => Promise<void | SetItemResult>;
   removeMeta: (key: string, opts?: TransactionOptions) => Promise<void>;
   // Keys
   getKeys: (base?: string, opts?: GetKeysOptions) => Promise<string[]>;

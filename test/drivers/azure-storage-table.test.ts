@@ -22,5 +22,6 @@ describe.skip("drivers: azure-storage-table", () => {
       connectionString: "UseDevelopmentStorage=true",
       accountName: "local",
     }),
+    supportsCAS: true,
   });
 });

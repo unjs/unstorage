@@ -1,4 +1,5 @@
 import { createRequiredError, type DriverFactory } from "./utils/index.ts";
+import { CASMismatchError } from "./utils/cas.ts";
 import { Container, CosmosClient } from "@azure/cosmos";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -43,7 +44,15 @@ export interface AzureCosmosItem {
    * The unstorage mtime metadata of the item.
    */
   modified: string | Date;
+
+  /**
+   * Cosmos-managed etag (read-only on the server side).
+   */
+  _etag?: string;
 }
+
+const isStatus = (err: unknown, status: number): boolean =>
+  !!err && typeof err === "object" && (err as { code?: number | string }).code === status;
 
 const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => {
   let client: Container;
@@ -83,8 +92,113 @@ const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => 
     return client;
   };
 
+  const setWithCAS = async (
+    key: string,
+    value: string,
+    tOptions: { ifMatch?: string; ifNoneMatch?: string },
+  ): Promise<{ etag: string }> => {
+    const container = await getCosmosClient();
+    const modified = new Date();
+    const body: AzureCosmosItem = { id: key, value, modified };
+    const { ifMatch, ifNoneMatch } = tOptions;
+
+    // ifNoneMatch:* — create-only via items.create (409 Conflict on collision).
+    if (ifNoneMatch === "*" && ifMatch === undefined) {
+      try {
+        const res = await container.items.create<AzureCosmosItem>(body, {
+          consistencyLevel: "Session",
+        });
+        return { etag: res.resource?._etag ?? res.etag };
+      } catch (err) {
+        if (isStatus(err, 409)) throw new CASMismatchError(DRIVER_NAME, key);
+        throw err;
+      }
+    }
+
+    // ifMatch:<etag> — replace with IfMatch precondition (412 on mismatch, 404 if absent).
+    if (ifMatch !== undefined && ifMatch !== "*" && ifNoneMatch === undefined) {
+      try {
+        const res = await container.item(key).replace<AzureCosmosItem>(body, {
+          accessCondition: { type: "IfMatch", condition: ifMatch },
+          consistencyLevel: "Session",
+        });
+        return { etag: res.resource?._etag ?? res.etag };
+      } catch (err) {
+        if (isStatus(err, 412) || isStatus(err, 404)) {
+          throw new CASMismatchError(DRIVER_NAME, key);
+        }
+        throw err;
+      }
+    }
+
+    // ifMatch:* — require existence; replace without etag pinning (404 if absent).
+    if (ifMatch === "*" && ifNoneMatch === undefined) {
+      try {
+        const res = await container.item(key).replace<AzureCosmosItem>(body, {
+          consistencyLevel: "Session",
+        });
+        return { etag: res.resource?._etag ?? res.etag };
+      } catch (err) {
+        if (isStatus(err, 404)) throw new CASMismatchError(DRIVER_NAME, key);
+        throw err;
+      }
+    }
+
+    // Remaining shapes (ifNoneMatch:<etag>, combined): read-then-conditional-replace.
+    // Cosmos accessCondition only supports a single header per request, so combined
+    // preconditions and "ifNoneMatch:<etag>" are evaluated client-side, then the
+    // write is pinned to the observed etag for atomicity.
+    const existing = await container
+      .item(key)
+      .read<AzureCosmosItem>()
+      .catch((err) => {
+        if (isStatus(err, 404)) {
+          return { resource: undefined as AzureCosmosItem | undefined, etag: "" };
+        }
+        throw err;
+      });
+    const exists = !!existing.resource;
+    const curEtag = existing.resource?._etag;
+
+    if (ifNoneMatch !== undefined) {
+      const mismatch =
+        ifNoneMatch === "*" ? exists : exists && curEtag === ifNoneMatch;
+      if (mismatch) throw new CASMismatchError(DRIVER_NAME, key);
+    }
+    if (ifMatch !== undefined) {
+      const mismatch =
+        ifMatch === "*" ? !exists : !exists || curEtag !== ifMatch;
+      if (mismatch) throw new CASMismatchError(DRIVER_NAME, key);
+    }
+
+    if (!exists) {
+      try {
+        const res = await container.items.create<AzureCosmosItem>(body, {
+          consistencyLevel: "Session",
+        });
+        return { etag: res.resource?._etag ?? res.etag };
+      } catch (err) {
+        if (isStatus(err, 409)) throw new CASMismatchError(DRIVER_NAME, key);
+        throw err;
+      }
+    }
+    try {
+      const res = await container.item(key).replace<AzureCosmosItem>(body, {
+        accessCondition: { type: "IfMatch", condition: curEtag! },
+        consistencyLevel: "Session",
+      });
+      return { etag: res.resource?._etag ?? res.etag };
+    } catch (err) {
+      if (isStatus(err, 412) || isStatus(err, 404)) {
+        throw new CASMismatchError(DRIVER_NAME, key);
+      }
+      throw err;
+    }
+  };
+
   return {
     name: DRIVER_NAME,
+    flags: { cas: true },
     options: opts,
     getInstance: getCosmosClient,
     async hasItem(key) {
@@ -95,7 +209,10 @@ const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => 
       const item = await (await getCosmosClient()).item(key).read<AzureCosmosItem>();
       return item.resource ? item.resource.value : null;
     },
-    async setItem(key, value) {
+    async setItem(key, value, tOptions) {
+      if (tOptions?.ifMatch !== undefined || tOptions?.ifNoneMatch !== undefined) {
+        return setWithCAS(key, value, tOptions);
+      }
       const modified = new Date();
       await (
         await getCosmosClient()
@@ -119,8 +236,10 @@ const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => 
     },
     async getMeta(key) {
       const item = await (await getCosmosClient()).item(key).read<AzureCosmosItem>();
+      if (!item.resource) return null;
       return {
-        mtime: item.resource?.modified ? new Date(item.resource.modified) : undefined,
+        mtime: item.resource.modified ? new Date(item.resource.modified) : undefined,
+        etag: item.resource._etag,
       };
     },
     async clear() {

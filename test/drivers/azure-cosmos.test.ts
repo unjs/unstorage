@@ -8,5 +8,6 @@ describe.skip("drivers: azure-cosmos", () => {
       endpoint: "COSMOS_DB_ENDPOINT",
       accountKey: "COSMOS_DB_KEY",
     }),
+    supportsCAS: true,
   });
 });

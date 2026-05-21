@@ -42,6 +42,11 @@ export interface S3DriverOptions {
    * Enabled by default to speedup `clear()` operation. Set to `false` if provider is not implementing [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html).
    */
   bulkDelete?: boolean;
+
+  /**
+   * akin to AWS_SESSION_TOKEN if using temp credentials.
+   */
+  sessionToken?: string;
 }
 
 export interface S3ItemOptions {
@@ -84,6 +89,7 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
         service: "s3",
         accessKeyId: options.accessKeyId,
         secretAccessKey: options.secretAccessKey,
+        sessionToken: options.sessionToken,
         region: options.region,
       });
     }

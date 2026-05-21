@@ -46,17 +46,21 @@ export interface TraceContext {
   };
 }
 
-type MaybeTracedStorage<T extends StorageValue> = Storage<T> & {
-  __traced?: boolean;
-};
+/**
+ * Runtime-only brand attached to wrapped storages so re-wrapping is a no-op.
+ * Kept off the public return type.
+ */
+type TracedBrand = { __traced?: boolean };
 
 /**
  * Wraps a storage instance with tracing capabilities.
  * All storage operations will emit tracing events through Node.js diagnostics channels.
  */
-export function withTracing<T extends StorageValue>(storage: MaybeTracedStorage<T>): Storage<T> {
+export function withTracing(storage: Storage<any>): Storage<StorageValue>;
+export function withTracing<T extends Storage<any>>(storage: T): T;
+export function withTracing<T extends Storage<any>>(storage: T): T {
   // Avoid wrapping already traced storages
-  if (storage.__traced) {
+  if ((storage as TracedBrand).__traced) {
     return storage;
   }
 
@@ -107,7 +111,10 @@ export function withTracing<T extends StorageValue>(storage: MaybeTracedStorage<
     return channel ? channel.tracePromise(exec, data) : exec();
   }
 
-  const tracedStorage: MaybeTracedStorage<T> = { ...storage, __traced: true };
+  const tracedStorage: T & TracedBrand = {
+    ...storage,
+    __traced: true,
+  };
 
   // Helper to get mount info for a key
   const getMountInfo = (key: string) => {
@@ -160,7 +167,9 @@ export function withTracing<T extends StorageValue>(storage: MaybeTracedStorage<
   }
 
   for (const operation in operations) {
-    tracedStorage[operation] = wrapOperation(operation as TracedOperation);
+    (tracedStorage as Record<TracedOperation, any>)[operation] = wrapOperation(
+      operation as TracedOperation,
+    );
   }
 
   // Wrap aliases

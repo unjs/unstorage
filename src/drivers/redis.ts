@@ -122,6 +122,31 @@ const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts) => {
         await getRedisClient().set(p(key), value);
       }
     },
+    async setItems(items, commonOptions) {
+      const defaultTtl = commonOptions?.ttl ?? opts.ttl;
+      // `MSET` cannot set a per-key TTL, so fall back to a pipeline of
+      // `SET ... EX` (mirroring `setItem`) whenever a TTL applies; otherwise
+      // use a single `MSET` for efficiency.
+      const hasTtl = defaultTtl || items.some((item) => item.options?.ttl);
+      if (hasTtl) {
+        const pipeline = getRedisClient().pipeline();
+        for (const item of items) {
+          const ttl = item.options?.ttl ?? defaultTtl;
+          if (ttl) {
+            pipeline.set(p(item.key), item.value, "EX", ttl);
+          } else {
+            pipeline.set(p(item.key), item.value);
+          }
+        }
+        await pipeline.exec();
+      } else {
+        const args: string[] = [];
+        for (const item of items) {
+          args.push(p(item.key), item.value);
+        }
+        await getRedisClient().mset(...args);
+      }
+    },
     async setItemRaw(key, value, tOptions) {
       const _value = normalizeValue(value);
       const ttl = tOptions?.ttl ?? opts.ttl;

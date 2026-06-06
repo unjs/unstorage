@@ -274,4 +274,22 @@ describe("Regression", () => {
       { key: "key2", value: "value2" },
     ]);
   });
+
+  it("prefixStorage keys() alias returns prefix-scoped keys only (issue #654)", async () => {
+    const storage = createStorage();
+    const pStorage = prefixStorage(storage, "foo");
+
+    // Add items inside the prefix
+    await pStorage.setItem("x", "bar");
+    await pStorage.setItem("y", "baz");
+
+    // Add an item outside the prefix directly on the base storage
+    await storage.setItem("other:z", "qux");
+
+    // keys() must return only keys scoped to "foo", without the prefix
+    expect(await pStorage.keys()).toStrictEqual(["x", "y"]);
+
+    // keys() and getKeys() must be consistent
+    expect(await pStorage.keys()).toStrictEqual(await pStorage.getKeys());
+  });
 });

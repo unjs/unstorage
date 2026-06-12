@@ -76,6 +76,13 @@ export function prefixStorage<T extends StorageValue>(
     return storage.setItems<U>(prefixedItems, commonOptions);
   };
 
+  nsStorage.watch = (callback) =>
+    storage.watch((event, key) => {
+      if (key.startsWith(base)) {
+        callback(event, key.slice(base.length));
+      }
+    });
+
   return nsStorage;
 }
 

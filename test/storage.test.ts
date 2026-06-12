@@ -274,4 +274,26 @@ describe("Regression", () => {
       { key: "key2", value: "value2" },
     ]);
   });
+
+  it("prefixStorage watch strips prefix and filters events", async () => {
+    const storage = createStorage();
+    const pStorage = prefixStorage(storage, "ns");
+
+    const events: { event: string; key: string }[] = [];
+    const unwatch = await pStorage.watch((event, key) => {
+      events.push({ event, key });
+    });
+
+    await pStorage.setItem("foo", "bar");
+    await storage.setItem("other:x", "y");
+
+    // give the synchronous memory-driver onChange time to flush
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    await unwatch();
+
+    // key delivered to the callback should be relative (no "ns:" prefix)
+    expect(events).toContainEqual({ event: "update", key: "foo" });
+    // events for keys outside the prefix must be filtered out
+    expect(events.every((e) => !e.key.startsWith("other"))).toBe(true);
+  });
 });

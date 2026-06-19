@@ -77,7 +77,7 @@ by `getKeys()` and watch callbacks. It must be a non-empty string other than `.`
 or `..` and must not contain `/`, `\` or `:`. It defaults to `undefined`
 (disabled) for backward compatibility.
 
-::alert{type="warning"}
+::warning
 `dataSuffix` changes the on-disk layout. Enabling it on a directory that already
 holds un-suffixed files makes those files invisible to the driver (they are
 skipped by `getItem`/`getKeys`). Treat enabling it as starting a fresh data

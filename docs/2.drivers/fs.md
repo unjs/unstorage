@@ -75,11 +75,15 @@ await storage.setItem("foo:bar", "b"); // -> ./data/foo/bar.data  (no collision)
 The suffix is transparently added on writes and stripped from the keys returned
 by `getKeys()` and watch callbacks. It must be a non-empty string other than `.`
 or `..` and must not contain `/`, `\` or `:`. It defaults to `undefined`
-(disabled) for backward compatibility.
+(disabled) for backward compatibility. Pick a suffix your keys do not end with: a
+key that itself ends in the suffix can still collide with a same-named namespace
+(for example `foo` and `foo.data:bar` when the suffix is `.data`).
 
 ::warning
 `dataSuffix` changes the on-disk layout. Enabling it on a directory that already
 holds un-suffixed files makes those files invisible to the driver (they are
 skipped by `getItem`/`getKeys`). Treat enabling it as starting a fresh data
 generation, or migrate existing files by renaming them to include the suffix.
+`clear()` still removes the entire base directory, including any non-suffixed
+files it otherwise ignores.
 ::

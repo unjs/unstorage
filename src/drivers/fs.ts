@@ -52,6 +52,23 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
 
   const dataSuffix = userOptions.dataSuffix;
 
+  // `dataSuffix` is appended to leaf filenames, so it must not introduce path
+  // separators (which would create nesting) or the ":" key separator (which
+  // would break the round-trip in getKeys/watch). Reject those up front.
+  if (
+    dataSuffix !== undefined &&
+    (typeof dataSuffix !== "string" ||
+      dataSuffix.length === 0 ||
+      dataSuffix === "." ||
+      dataSuffix === ".." ||
+      /[/\\:]/.test(dataSuffix))
+  ) {
+    throw createError(
+      DRIVER_NAME,
+      `Invalid dataSuffix: ${JSON.stringify(dataSuffix)}. It must be a non-empty string other than "." or ".." and must not contain "/", "\\" or ":".`,
+    );
+  }
+
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(
@@ -65,7 +82,12 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
 
   const rFile = (key: string) => {
     const resolved = r(key);
-    return dataSuffix ? resolved + dataSuffix : resolved;
+    if (!dataSuffix) {
+      return resolved;
+    }
+    // A root/empty key resolves to `base` itself; `base + suffix` would write a
+    // sibling *outside* base. Keep the suffixed file inside base instead.
+    return resolved === base ? join(base, dataSuffix) : resolved + dataSuffix;
   };
 
   let _watcher: FSWatcher | undefined;

@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { resolve } from "node:path";
-import { readFile } from "../../src/drivers/utils/node-fs.ts";
+import { existsSync } from "node:fs";
+import { readFile, writeFile } from "../../src/drivers/utils/node-fs.ts";
 import { testDriver } from "./utils.ts";
 import driver from "../../src/drivers/fs-lite.ts";
 import { createStorage } from "../../src/storage.ts";
@@ -118,6 +119,47 @@ describe("drivers: fs-lite", () => {
       expect(await storage.hasItem("s1:a")).toBe(false);
 
       await storage.dispose();
+    });
+
+    it("rejects an invalid dataSuffix", () => {
+      for (const bad of ["", ".", "..", "a/b", "a\\b", "a:b"]) {
+        expect(() => driver({ base: suffixDir, dataSuffix: bad })).toThrow(
+          /Invalid dataSuffix/,
+        );
+      }
+    });
+
+    it("strips exactly one suffix (key already ending in the suffix)", async () => {
+      const storage = createStorage({
+        driver: driver({ base: suffixDir, dataSuffix: ".data" }),
+      });
+      // key "foo.data" -> on-disk "foo.data.data"; getKeys must strip one suffix only
+      await storage.setItem("foo.data", "v");
+      expect(await storage.getItem("foo.data")).toBe("v");
+      expect(await readFile(resolve(suffixDir, "foo.data.data"), "utf8")).toBe("v");
+      expect(await storage.getKeys()).toEqual(["foo.data"]);
+      await storage.dispose();
+    });
+
+    it("getKeys ignores files without the suffix", async () => {
+      const storage = createStorage({
+        driver: driver({ base: suffixDir, dataSuffix: ".data" }),
+      });
+      await storage.setItem("foo", "v"); // -> foo.data
+      await writeFile(resolve(suffixDir, "stray.txt"), "x", "utf8"); // not ours
+      expect((await storage.getKeys()).sort()).toEqual(["foo"]);
+      await storage.dispose();
+    });
+
+    it("keeps an empty/root key inside base (no sibling escape)", async () => {
+      // Regression: rFile must not turn "" into `<base>.data`, a sibling
+      // written outside the configured base directory.
+      const d = driver({ base: suffixDir, dataSuffix: ".data" });
+      await d.setItem!("", "root", {});
+      expect(existsSync(suffixDir + ".data")).toBe(false); // no escape
+      expect(await d.getItem!("")).toBe("root"); // still addressable
+      expect(await d.getKeys!("", {})).toEqual([""]);
+      await d.dispose?.();
     });
   });
 });

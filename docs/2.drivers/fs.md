@@ -28,6 +28,7 @@ const storage = createStorage({
 - `base`: Base directory to isolate operations on this directory
 - `ignore`: Ignore patterns for watch <!-- and key listing -->
 - `watchOptions`: Additional [chokidar](https://github.com/paulmillr/chokidar) options.
+- `dataSuffix`: Suffix appended to on-disk filenames to prevent key/namespace collisions (see [below](#preventing-keynamespace-collisions)).
 
 ## Node.js Filesystem (Lite)
 
@@ -46,3 +47,39 @@ const storage = createStorage({
 
 - `base`: Base directory to isolate operations on this directory
 - `ignore`: Optional callback function `(path: string) => boolean`
+- `dataSuffix`: Suffix appended to on-disk filenames to prevent key/namespace collisions (see [below](#preventing-keynamespace-collisions)).
+
+## Preventing key/namespace collisions
+
+Both `fs` drivers map the `:` key separator to `/` on disk, so a key is also a
+directory prefix of its sub-keys. That means a key and its own namespace cannot
+normally coexist: writing `foo` creates the file `<base>/foo`, and then writing
+`foo:bar` needs `<base>/foo` to be a directory, which fails (`ENOTDIR` on
+POSIX, `ENOENT` on Windows).
+
+Set `dataSuffix` (for example `".data"`) to store every value in a suffixed
+leaf file so values and namespaces never collide:
+
+```js
+import { createStorage } from "unstorage";
+import fsDriver from "unstorage/drivers/fs";
+
+const storage = createStorage({
+  driver: fsDriver({ base: "./data", dataSuffix: ".data" }),
+});
+
+await storage.setItem("foo", "a"); // -> ./data/foo.data
+await storage.setItem("foo:bar", "b"); // -> ./data/foo/bar.data  (no collision)
+```
+
+The suffix is transparently added on writes and stripped from the keys returned
+by `getKeys()` and watch callbacks. It must be a non-empty string other than `.`
+or `..` and must not contain `/`, `\` or `:`. It defaults to `undefined`
+(disabled) for backward compatibility.
+
+::alert{type="warning"}
+`dataSuffix` changes the on-disk layout. Enabling it on a directory that already
+holds un-suffixed files makes those files invisible to the driver (they are
+skipped by `getItem`/`getKeys`). Treat enabling it as starting a fresh data
+generation, or migrate existing files by renaming them to include the suffix.
+::

@@ -201,27 +201,25 @@ The driver supports the following authentication methods:
 
 ## Azure Table Storage
 
-Store data in a Azure table storage.
+Store data in an Azure Table storage.
 
 ### Usage
 
 **Driver name:** `azure-storage-table`
 
 ::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables"}
-Learn more about Azure table storage.
+Learn more about Azure Table storage.
 ::
 
 ::warning
 This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
 ::
 
-Store data in a [data-tables]().
+This driver stores KV information in an Azure Table storage. The same partition key is used for all keys and the field `unstorageValue` is used to store the value.
 
-This driver stores KV information in a Azure table storage. The same partition key is used for all keys and the field `unstorageValue` is used to store the value.
+To use it, you will need to install `@azure/data-tables` and `@azure/identity` in your project:
 
-To use it, you will need to install `@azure/data-table` and `@azure/identity` in your project:
-
-:pm-install{name="@azure/data-table @azure/identity"}
+:pm-install{name="@azure/data-tables @azure/identity"}
 
 Please make sure that the table you want to use exists in your storage account.
 
@@ -245,7 +243,7 @@ The driver supports the following authentication methods:
   ⚠️ Make sure that your Managed Identity or personal account has the `Storage Table Data Contributor` role assigned to it, even if you already are `Contributor` or `Owner` on the storage account.
 
 - **`AzureNamedKeyCredential`** (only available in Node.js runtime): This will use the `accountName` and `accountKey` to authenticate the request.
-- **`AzureSASCredential`**: This will use the `accountName` and `sasToken` to authenticate the request.
+- **`AzureSASCredential`**: This will use the `accountName` and `sasKey` to authenticate the request.
 - **connection string** (only available in Node.js runtime): This will use the `connectionString` to authenticate the request. This is not recommended as it will expose your account key in plain text.
 
 **Options:**
@@ -253,5 +251,7 @@ The driver supports the following authentication methods:
 - **`accountName`** (required): The name of your storage account.
 - `tableName`: The name of the table to use. Defaults to `unstorage`.
 - `partitionKey`: The partition key to use. Defaults to `unstorage`.
-- `accountKey`: The account key to use for authentication. This is only required if you are using `AzureNamedKeyCredential`.
--
+- `accountKey`: The account key to use for authentication. This is only required if you are using `AzureNamedKeyCredential`. Only available in Node.js runtime.
+- `sasKey`: The SAS key to use for authentication. This is only required if you are using `AzureSASCredential`. If provided, the account key is ignored.
+- `connectionString`: The storage accounts' connection string. Only available in Node.js runtime. If provided, `accountKey` and `sasKey` are ignored.
+- `pageSize`: The number of entries to retrieve per request. Impacts `getKeys()` and `clear()` performance. Defaults to `1000`, which is also the maximum value.

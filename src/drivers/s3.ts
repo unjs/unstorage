@@ -127,12 +127,35 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
   const listObjects = async (prefix?: string) => {
-    const res = await awsFetch(baseURL).then((r) => r?.text());
-    if (!res) {
-      console.log("no list", prefix ? `${baseURL}?prefix=${prefix}` : baseURL);
-      return null;
-    }
-    return parseList(res);
+    const allKeys: string[] = [];
+    let continuationToken: string | undefined;
+
+    do {
+      const params = new URLSearchParams({ "list-type": "2" });
+      if (prefix) {
+        params.set("prefix", prefix);
+      }
+      if (continuationToken) {
+        params.set("continuation-token", continuationToken);
+      }
+
+      const listURL = `${baseURL}?${params.toString()}`;
+      const res = await awsFetch(listURL).then((r) => r?.text());
+      if (!res) {
+        return null;
+      }
+
+      const keys = parseList(res);
+      if (keys) {
+        allKeys.push(...keys);
+      }
+
+      // Check for more pages
+      const nextToken = res.match(/<NextContinuationToken>([\s\S]+?)<\/NextContinuationToken>/)?.[1];
+      continuationToken = nextToken || undefined;
+    } while (continuationToken);
+
+    return allKeys.length > 0 ? allKeys : null;
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html

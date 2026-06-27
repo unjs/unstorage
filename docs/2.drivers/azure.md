@@ -252,6 +252,6 @@ The driver supports the following authentication methods:
 - `tableName`: The name of the table to use. Defaults to `unstorage`.
 - `partitionKey`: The partition key to use. Defaults to `unstorage`.
 - `accountKey`: The account key to use for authentication. This is only required if you are using `AzureNamedKeyCredential`. Only available in Node.js runtime.
-- `sasKey`: The SAS key to use for authentication. This is only required if you are using `AzureSASCredential`. If provided, the account key is ignored.
-- `connectionString`: The storage accounts' connection string. Only available in Node.js runtime. If provided, `accountKey` and `sasKey` are ignored.
+- `sasKey`: The SAS key to use for authentication. This is only required if you are using `AzureSASCredential`. `accountKey` takes precedence.
+- `connectionString`: The storage accounts' connection string. Only available in Node.js runtime. `accountKey` and `sasKey` take precedence.
 - `pageSize`: The number of entries to retrieve per request. Impacts `getKeys()` and `clear()` performance. Defaults to `1000`, which is also the maximum value.

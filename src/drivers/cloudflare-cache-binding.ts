@@ -3,6 +3,7 @@ import type {
   CacheStorage as CFCacheStorage,
   Response as CFResponse,
 } from "@cloudflare/workers-types";
+import type { TransactionOptions } from "../types.ts";
 
 import { type DriverFactory, joinKeys } from "./utils/index.ts";
 
@@ -50,6 +51,25 @@ const driver: DriverFactory<CacheOptions, CFCache | Promise<CFCache>> = (opts) =
     return _cache;
   };
 
+  const setItemRaw = async (key: string, value: any, tOptions: TransactionOptions) => {
+    const cacheKey = r(key);
+
+    // https://developers.cloudflare.com/workers/runtime-apis/cache/#headers
+    const headers = {} as Record<string, string>;
+    const ttl = tOptions?.ttl ?? opts.ttl;
+    if (ttl) {
+      headers["Cache-Control"] = `max-age=${ttl}`;
+    }
+    if (tOptions.tag) {
+      headers["Cache-Tag"] = tOptions.tag;
+    }
+
+    const cacheValue = new Response(value, { headers });
+
+    const cache = await getCache();
+    await cache.put(cacheKey, cacheValue as unknown as CFResponse);
+  };
+
   return {
     name: DRIVER_NAME,
     options: opts,
@@ -77,26 +97,11 @@ const driver: DriverFactory<CacheOptions, CFCache | Promise<CFCache>> = (opts) =
     },
 
     async setItem(key, value, tOptions) {
-      return this.setItemRaw!(key, value, tOptions);
+      return setItemRaw(key, value, tOptions);
     },
 
     async setItemRaw(key, value, tOptions) {
-      const cacheKey = r(key);
-
-      // https://developers.cloudflare.com/workers/runtime-apis/cache/#headers
-      const headers = {} as Record<string, string>;
-      const ttl = tOptions?.ttl ?? opts.ttl;
-      if (ttl) {
-        headers["Cache-Control"] = `max-age=${ttl}`;
-      }
-      if (tOptions.tag) {
-        headers["Cache-Tag"] = tOptions.tag;
-      }
-
-      const cacheValue = new Response(value, { headers });
-
-      const cache = await getCache();
-      await cache.put(cacheKey, cacheValue as unknown as CFResponse);
+      return setItemRaw(key, value, tOptions);
     },
 
     async removeItem(key) {

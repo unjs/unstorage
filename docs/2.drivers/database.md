@@ -35,11 +35,7 @@ import dbDriver from "unstorage/drivers/db0";
 import sqlite from "db0/connectors/better-sqlite3";
 
 // Learn more: https://db0.unjs.io
-const database = createDatabase(
-  sqlite({
-    /* db0 connector options */
-  }),
-);
+const database = createDatabase(sqlite({/* db0 connector options */}));
 
 const storage = createStorage({
   driver: dbDriver({

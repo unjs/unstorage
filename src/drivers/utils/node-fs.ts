@@ -25,7 +25,12 @@ export async function writeFile(
     const destMode = await fsPromises
       .stat(path)
       .then((s) => s.mode)
-      .catch(() => undefined);
+      .catch((error) => {
+        if (error.code === "ENOENT") {
+          return undefined;
+        }
+        throw error;
+      });
     if (destMode !== undefined) {
       await fsPromises.chmod(tmp, destMode);
     }

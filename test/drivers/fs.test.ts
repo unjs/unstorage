@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { resolve } from "node:path";
+import { promises as fsPromises } from "node:fs";
 import { chmod, stat } from "node:fs/promises";
 import { readFile, writeFile } from "../../src/drivers/utils/node-fs.ts";
 import { testDriver, type TestContext } from "./utils.ts";
@@ -57,6 +58,26 @@ describe("drivers: fs", () => {
           await ctx.storage.setItem("perm:key", "overwritten");
           const mode = (await stat(filePath)).mode & 0o777;
           expect(mode).toBe(0o600);
+        },
+      );
+      it.skipIf(process.platform === "win32")(
+        "rethrows non-ENOENT stat errors when overwriting",
+        async () => {
+          const filePath = resolve(dir, "stat-error/key");
+          await writeFile(filePath, "original", "utf8");
+          const statSpy = vi
+            .spyOn(fsPromises, "stat")
+            .mockRejectedValueOnce(
+              Object.assign(new Error("permission denied"), { code: "EACCES" }),
+            );
+          try {
+            await expect(writeFile(filePath, "overwritten", "utf8")).rejects.toThrow(
+              "permission denied",
+            );
+          } finally {
+            statSpy.mockRestore();
+          }
+          expect(await readFile(filePath, "utf8")).toBe("original");
         },
       );
       it("native meta", async () => {

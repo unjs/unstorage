@@ -1,5 +1,6 @@
 import { Dirent, existsSync, promises as fsPromises } from "node:fs";
 import { resolve, dirname } from "node:path";
+import { randomUUID } from "node:crypto";
 
 function ignoreNotfound(err: any) {
   return err.code === "ENOENT" || err.code === "EISDIR" ? null : err;
@@ -16,7 +17,14 @@ export async function writeFile(
   encoding?: BufferEncoding,
 ): Promise<void> {
   await ensuredir(dirname(path));
-  return fsPromises.writeFile(path, data, encoding);
+  const tmp = `${path}.${process.pid}.${randomUUID()}.tmp`;
+  try {
+    await fsPromises.writeFile(tmp, data, encoding);
+    await fsPromises.rename(tmp, path);
+  } catch (error) {
+    await fsPromises.unlink(tmp).catch(() => {});
+    throw error;
+  }
 }
 
 export function readFile(path: string, encoding?: BufferEncoding): Promise<string | Buffer | null> {

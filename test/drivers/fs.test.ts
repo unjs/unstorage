@@ -15,6 +15,23 @@ describe("drivers: fs", () => {
         await ctx.storage.setItem("s1:a", "test_data");
         expect(await readFile(resolve(dir, "s1/a"), "utf8")).toBe("test_data");
       });
+      it("reads concurrent with a write never observe a truncated value", async () => {
+        const size = 256 * 1024;
+        const a = new Uint8Array(size).fill(0xaa);
+        const b = new Uint8Array(size).fill(0xbb);
+        await ctx.storage.setItemRaw("atomic:key", a);
+        for (let i = 0; i < 20; i++) {
+          const [, ...reads] = await Promise.all([
+            ctx.storage.setItemRaw("atomic:key", i % 2 === 0 ? b : a),
+            ctx.storage.getItemRaw("atomic:key"),
+            ctx.storage.getItemRaw("atomic:key"),
+            ctx.storage.getItemRaw("atomic:key"),
+          ]);
+          for (const read of reads) {
+            expect((read as Uint8Array).length).toBe(size);
+          }
+        }
+      });
       it("native meta", async () => {
         await ctx.storage.setItem("s1:a", "test_data");
         const meta = await ctx.storage.getMeta("/s1/a");

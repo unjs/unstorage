@@ -27,8 +27,23 @@ describe("drivers: fs-lite", () => {
             ctx.storage.getItemRaw("atomic:key"),
           ]);
           for (const read of reads) {
-            expect((read as Uint8Array).length).toBe(size);
+            const bytes = read as Uint8Array;
+            expect(bytes.length).toBe(size);
+            const first = bytes[0];
+            expect(first === 0xaa || first === 0xbb).toBe(true);
+            expect(bytes.every((byte) => byte === first)).toBe(true);
           }
+        }
+      });
+      it("getKeys never observes in-progress temp files", async () => {
+        const size = 256 * 1024;
+        const value = new Uint8Array(size).fill(0xaa);
+        for (let i = 0; i < 20; i++) {
+          const [, keys] = await Promise.all([
+            ctx.storage.setItemRaw("tmp:key", value),
+            ctx.driver.getKeys("", {}),
+          ]);
+          expect(keys.every((key) => !key.includes(".tmp"))).toBe(true);
         }
       });
       it("native meta", async () => {

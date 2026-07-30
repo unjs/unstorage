@@ -10,6 +10,8 @@ function ignoreExists(err: any) {
   return err.code === "EEXIST" ? null : err;
 }
 
+const TMP_FILE_RE = /\.\d+\.[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}\.tmp$/;
+
 type WriteFileData = Parameters<typeof fsPromises.writeFile>[1];
 export async function writeFile(
   path: string,
@@ -77,7 +79,7 @@ export async function readdirRecursive(
           files.push(...dirFiles.map((f) => entry.name + "/" + f));
         }
       } else {
-        if (!(ignore && ignore(entryPath))) {
+        if (!(ignore && ignore(entryPath)) && !TMP_FILE_RE.test(entry.name)) {
           files.push(entry.name);
         }
       }

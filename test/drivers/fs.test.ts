@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { resolve } from "node:path";
+import { chmod, stat } from "node:fs/promises";
 import { readFile, writeFile } from "../../src/drivers/utils/node-fs.ts";
 import { testDriver, type TestContext } from "./utils.ts";
 import driver from "../../src/drivers/fs.ts";
@@ -47,6 +48,17 @@ describe("drivers: fs", () => {
           expect(keys.every((key) => !key.includes(".tmp"))).toBe(true);
         }
       });
+      it.skipIf(process.platform === "win32")(
+        "preserves file permissions when overwriting",
+        async () => {
+          await ctx.storage.setItem("perm:key", "original");
+          const filePath = resolve(dir, "perm/key");
+          await chmod(filePath, 0o600);
+          await ctx.storage.setItem("perm:key", "overwritten");
+          const mode = (await stat(filePath)).mode & 0o777;
+          expect(mode).toBe(0o600);
+        },
+      );
       it("native meta", async () => {
         await ctx.storage.setItem("s1:a", "test_data");
         const meta = await ctx.storage.getMeta("/s1/a");

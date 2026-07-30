@@ -22,6 +22,13 @@ export async function writeFile(
   const tmp = `${path}.${process.pid}.${randomUUID()}.tmp`;
   try {
     await fsPromises.writeFile(tmp, data, encoding);
+    const destMode = await fsPromises
+      .stat(path)
+      .then((s) => s.mode)
+      .catch(() => undefined);
+    if (destMode !== undefined) {
+      await fsPromises.chmod(tmp, destMode);
+    }
     await fsPromises.rename(tmp, path);
   } catch (error) {
     await fsPromises.unlink(tmp).catch(() => {});

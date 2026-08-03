@@ -52,7 +52,7 @@ importers:
         version: 2.5.0
       '@types/ioredis-mock':
         specifier: ^8.2.7
-        version: 8.2.7(ioredis@5.10.1)
+        version: 8.2.7(ioredis@6.0.0)
       '@types/jsdom':
         specifier: ^28.0.1
         version: 28.0.1
@@ -114,11 +114,11 @@ importers:
         specifier: ^6.2.2
         version: 6.2.2
       ioredis:
-        specifier: ^5.10.1
-        version: 5.10.1
+        specifier: ^6.0.0
+        version: 6.0.0
       ioredis-mock:
         specifier: ^8.13.1
-        version: 8.13.1(@types/ioredis-mock@8.2.7(ioredis@5.10.1))(ioredis@5.10.1)
+        version: 8.13.1(@types/ioredis-mock@8.2.7(ioredis@6.0.0))(ioredis@6.0.0)
       jsdom:
         specifier: ^29.1.1
         version: 29.1.1
@@ -285,6 +285,7 @@ packages:
 
   '@azure/ms-rest-js@1.11.2':
     resolution: {integrity: sha512-2AyQ1IKmLGKW7DU3/x3TsTBzZLcbC9YRI+yuDPuXAQrv3zar340K9wsxU413kHFIDjkWNCo9T0w5VtwcyWxhbQ==}
+    deprecated: This package has been deprecated in favor of the new Azure SDK packages from [Azure SDK for JavaScript](https://github.com/azure/azure-sdk-for-js).
 
   '@azure/msal-browser@3.30.0':
     resolution: {integrity: sha512-I0XlIGVdM4E9kYP5eTjgW8fgATdzwxJvQ6bm2PNiHaZhEuUz47NYw1xHthC9R+lXz4i9zbShS0VdLyxd7n0GGA==}
@@ -1067,11 +1068,11 @@ packages:
   '@ioredis/as-callback@3.0.0':
     resolution: {integrity: sha512-Kqv1rZ3WbgOrS+hgzJ5xG5WQuhvzzSTRYvNeyPMLOAM78MHSnuKI20JeJGbpuAt//LCuP0vsexZcorqW7kWhJg==}
 
-  '@ioredis/commands@1.5.1':
-    resolution: {integrity: sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw==}
-
   '@ioredis/commands@1.7.0':
     resolution: {integrity: sha512-5E3KP12g1Po3xMdaym6N3VBibWAH/vv7XxGl8M20KQyPfZWB7sAhLb90+9IX/WJWFHuRFai5caz+DXKQbLI51g==}
+
+  '@ioredis/commands@2.0.0':
+    resolution: {integrity: sha512-vrx0AE/T0h7cRZwfo1M39Cr+ZhZrkf0V8mQN75wucKCxCLD9l/VX6no3gFvrLqD1IlG/1LtzWovqEw3t0Vr9zg==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -2401,8 +2402,8 @@ packages:
     resolution: {integrity: sha512-J4Xj5f5wq/4jAvcdgoGsL3G103BtWpZrMo8NEinRltN+xpTZdI+M38pyQqhuFU/P792xkMFvnKSf+Lm81U1bxw==}
     engines: {node: ^4.7 || >=6.9 || >=7.3 || >=8.2.1}
 
-  cluster-key-slot@1.1.2:
-    resolution: {integrity: sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==}
+  cluster-key-slot@1.1.1:
+    resolution: {integrity: sha512-rwHwUfXL40Chm1r08yrhU3qpUvdVlgkKNeyeGPOxnW8/SyVDvgRaed/Uz54AqWNaTCAThlj6QAs3TZcKI0xDEw==}
     engines: {node: '>=0.10.0'}
 
   color-convert@1.9.3:
@@ -3167,9 +3168,9 @@ packages:
       '@types/ioredis-mock': ^8
       ioredis: ^5
 
-  ioredis@5.10.1:
-    resolution: {integrity: sha512-HuEDBTI70aYdx1v6U97SbNx9F1+svQKBDo30o0b9fw055LMepzpOOd0Ccg9Q6tbqmBSJaMuY0fB7yw9/vjBYCA==}
-    engines: {node: '>=12.22.0'}
+  ioredis@6.0.0:
+    resolution: {integrity: sha512-f+Dtubxfpf6KYFq7WVXJoOLn0bk4TJrMrN9SzeE+jrWrCWj7XX3fA6vkryafhADX+GMymRxgDJDOI33COkJc0w==}
+    engines: {node: '>=20.0.0'}
 
   ipaddr.js@1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
@@ -3499,14 +3500,8 @@ packages:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
 
-  lodash.defaults@4.2.0:
-    resolution: {integrity: sha512-qjxPLHd3r5DnsdGacqOMU6pb/avJzdh9tFX2ymgoZE27BmjXrNy/y4LoaiTeAb+O3gL8AfpJGtqfX/ae2leYYQ==}
-
   lodash.includes@4.3.0:
     resolution: {integrity: sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w==}
-
-  lodash.isarguments@3.1.0:
-    resolution: {integrity: sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==}
 
   lodash.isboolean@3.0.3:
     resolution: {integrity: sha512-Bz5mupy2SVbPHURB98VAcw+aHh4vRV5IPNhILUCsOzRmsTmSQ17jIuqopAentWoehktxGd9e/hbIXq980/1QJg==}
@@ -4112,10 +4107,6 @@ packages:
 
   redis-errors@1.2.0:
     resolution: {integrity: sha512-1qny3OExCf0UvUV/5wpYKf2YwPcOqXzkwKKSmKHiE6ZMQs5heeE/c8eXK+PNllPvmjgAbfnsbpkGZWy8cBpn9w==}
-    engines: {node: '>=4'}
-
-  redis-parser@3.0.0:
-    resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
     engines: {node: '>=4'}
 
   reflect.getprototypeof@1.0.10:
@@ -5782,9 +5773,9 @@ snapshots:
 
   '@ioredis/as-callback@3.0.0': {}
 
-  '@ioredis/commands@1.5.1': {}
-
   '@ioredis/commands@1.7.0': {}
+
+  '@ioredis/commands@2.0.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -6327,9 +6318,9 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
-  '@types/ioredis-mock@8.2.7(ioredis@5.10.1)':
+  '@types/ioredis-mock@8.2.7(ioredis@6.0.0)':
     dependencies:
-      ioredis: 5.10.1
+      ioredis: 6.0.0
 
   '@types/jsdom@28.0.1':
     dependencies:
@@ -7019,7 +7010,7 @@ snapshots:
       emitter-listener: 1.1.2
       semver: 5.7.2
 
-  cluster-key-slot@1.1.2: {}
+  cluster-key-slot@1.1.1: {}
 
   color-convert@1.9.3:
     dependencies:
@@ -7883,26 +7874,23 @@ snapshots:
       hasown: 2.0.3
       side-channel: 1.1.0
 
-  ioredis-mock@8.13.1(@types/ioredis-mock@8.2.7(ioredis@5.10.1))(ioredis@5.10.1):
+  ioredis-mock@8.13.1(@types/ioredis-mock@8.2.7(ioredis@6.0.0))(ioredis@6.0.0):
     dependencies:
       '@ioredis/as-callback': 3.0.0
       '@ioredis/commands': 1.7.0
-      '@types/ioredis-mock': 8.2.7(ioredis@5.10.1)
+      '@types/ioredis-mock': 8.2.7(ioredis@6.0.0)
       fengari: 0.1.5
       fengari-interop: 0.1.4(fengari@0.1.5)
-      ioredis: 5.10.1
+      ioredis: 6.0.0
       semver: 7.7.4
 
-  ioredis@5.10.1:
+  ioredis@6.0.0:
     dependencies:
-      '@ioredis/commands': 1.5.1
-      cluster-key-slot: 1.1.2
+      '@ioredis/commands': 2.0.0
+      cluster-key-slot: 1.1.1
       debug: 4.4.3
       denque: 2.1.0
-      lodash.defaults: 4.2.0
-      lodash.isarguments: 3.1.0
       redis-errors: 1.2.0
-      redis-parser: 3.0.0
       standard-as-callback: 2.1.0
     transitivePeerDependencies:
       - supports-color
@@ -8231,11 +8219,7 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
-  lodash.defaults@4.2.0: {}
-
   lodash.includes@4.3.0: {}
-
-  lodash.isarguments@3.1.0: {}
 
   lodash.isboolean@3.0.3: {}
 
@@ -9091,10 +9075,6 @@ snapshots:
   readline-sync@1.4.10: {}
 
   redis-errors@1.2.0: {}
-
-  redis-parser@3.0.0:
-    dependencies:
-      redis-errors: 1.2.0
 
   reflect.getprototypeof@1.0.10:
     dependencies:

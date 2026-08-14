@@ -1,8 +1,15 @@
-import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
-import { SecretClient, type SecretClientOptions } from "@azure/keyvault-secrets";
-import { DefaultAzureCredential } from "@azure/identity";
+import {
+  createError,
+  createRequiredError,
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
+import { type AzureIdentityOptions, createDefaultAzureCredential } from "./utils/azure.ts";
+import type { SecretClient, SecretClientOptions } from "@azure/keyvault-secrets";
 
-export interface AzureKeyVaultOptions {
+export interface AzureKeyVaultOptions extends AzureIdentityOptions {
   /**
    * The name of the key vault to use.
    */
@@ -19,28 +26,42 @@ export interface AzureKeyVaultOptions {
    * @default 25
    */
   pageSize?: number;
+
+  /**
+   * Optionally provide the [`@azure/keyvault-secrets`](https://www.npmjs.com/package/@azure/keyvault-secrets)
+   * library to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("@azure/keyvault-secrets")>;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "@azure/keyvault-secrets", version: "^4.10.0" },
+  identityLib: { name: "@azure/identity", version: "^4.13.0" },
+};
 
 const DRIVER_NAME = "azure-key-vault";
 
-const driver: DriverFactory<AzureKeyVaultOptions, SecretClient> = (opts) => {
-  let keyVaultClient: SecretClient;
-  const getKeyVaultClient = () => {
-    if (keyVaultClient) {
-      return keyVaultClient;
-    }
-    const { vaultName = null, serviceVersion = "7.3", pageSize = 25 } = opts;
-    if (!vaultName) {
-      throw createRequiredError(DRIVER_NAME, "vaultName");
-    }
-    if (pageSize > 25) {
-      throw createError(DRIVER_NAME, "`pageSize` cannot be greater than `25`");
-    }
-    const credential = new DefaultAzureCredential();
-    const url = `https://${vaultName}.vault.azure.net`;
-    keyVaultClient = new SecretClient(url, credential, { serviceVersion });
-    return keyVaultClient;
-  };
+const driver: DriverFactory<AzureKeyVaultOptions, Promise<SecretClient>> = (opts) => {
+  let keyVaultClient: Promise<SecretClient> | undefined;
+  const getKeyVaultClient = () =>
+    (keyVaultClient ??= (async () => {
+      const { vaultName = null, serviceVersion = "7.3", pageSize = 25 } = opts;
+      if (!vaultName) {
+        throw createRequiredError(DRIVER_NAME, "vaultName");
+      }
+      if (pageSize > 25) {
+        throw createError(DRIVER_NAME, "`pageSize` cannot be greater than `25`");
+      }
+      const { SecretClient } = await importLib(
+        DRIVER_NAME,
+        "@azure/keyvault-secrets",
+        opts.lib,
+        () => import("@azure/keyvault-secrets"),
+      );
+      const credential = await createDefaultAzureCredential(DRIVER_NAME, opts);
+      const url = `https://${vaultName}.vault.azure.net`;
+      return new SecretClient(url, credential, { serviceVersion });
+    })());
 
   return {
     name: DRIVER_NAME,
@@ -48,7 +69,7 @@ const driver: DriverFactory<AzureKeyVaultOptions, SecretClient> = (opts) => {
     getInstance: getKeyVaultClient,
     async hasItem(key) {
       try {
-        await getKeyVaultClient().getSecret(encode(key));
+        await (await getKeyVaultClient()).getSecret(encode(key));
         return true;
       } catch {
         return false;
@@ -56,22 +77,22 @@ const driver: DriverFactory<AzureKeyVaultOptions, SecretClient> = (opts) => {
     },
     async getItem(key) {
       try {
-        const secret = await getKeyVaultClient().getSecret(encode(key));
+        const secret = await (await getKeyVaultClient()).getSecret(encode(key));
         return secret.value;
       } catch {
         return null;
       }
     },
     async setItem(key, value) {
-      await getKeyVaultClient().setSecret(encode(key), value);
+      await (await getKeyVaultClient()).setSecret(encode(key), value);
     },
     async removeItem(key) {
-      const poller = await getKeyVaultClient().beginDeleteSecret(encode(key));
+      const poller = await (await getKeyVaultClient()).beginDeleteSecret(encode(key));
       await poller.pollUntilDone();
-      await getKeyVaultClient().purgeDeletedSecret(encode(key));
+      await (await getKeyVaultClient()).purgeDeletedSecret(encode(key));
     },
     async getKeys() {
-      const secrets = getKeyVaultClient()
+      const secrets = (await getKeyVaultClient())
         .listPropertiesOfSecrets()
         .byPage({ maxPageSize: opts.pageSize || 25 });
       const keys: string[] = [];
@@ -82,7 +103,7 @@ const driver: DriverFactory<AzureKeyVaultOptions, SecretClient> = (opts) => {
       return keys;
     },
     async getMeta(key) {
-      const secret = await getKeyVaultClient().getSecret(encode(key));
+      const secret = await (await getKeyVaultClient()).getSecret(encode(key));
       return {
         mtime: secret.properties.updatedOn,
         birthtime: secret.properties.createdOn,
@@ -90,14 +111,14 @@ const driver: DriverFactory<AzureKeyVaultOptions, SecretClient> = (opts) => {
       };
     },
     async clear() {
-      const secrets = getKeyVaultClient()
+      const secrets = (await getKeyVaultClient())
         .listPropertiesOfSecrets()
         .byPage({ maxPageSize: opts.pageSize || 25 });
       for await (const page of secrets) {
         const deletionPromises = page.map(async (secret) => {
-          const poller = await getKeyVaultClient().beginDeleteSecret(secret.name);
+          const poller = await (await getKeyVaultClient()).beginDeleteSecret(secret.name);
           await poller.pollUntilDone();
-          await getKeyVaultClient().purgeDeletedSecret(secret.name);
+          await (await getKeyVaultClient()).purgeDeletedSecret(secret.name);
         });
         await Promise.all(deletionPromises);
       }

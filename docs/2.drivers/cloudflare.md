@@ -4,9 +4,46 @@ icon: devicon-plain:cloudflareworkers
 
 # Cloudflare
 
-> Store data in Cloudflare KV or R2 storage.
+> Use Cloudflare Cache, KV, or R2 from Workers, or access KV through the HTTP API.
 
-## CloudFlare KV (binding)
+## Cache API (binding)
+
+> Cache data inside Cloudflare Workers with the runtime Cache API.
+
+**Driver import:** `unstorage/drivers/cloudflare-cache-binding`
+
+```ts
+import { createStorage } from "unstorage";
+import cloudflareCacheDriver from "unstorage/drivers/cloudflare-cache-binding";
+
+const storage = createStorage({
+  driver: cloudflareCacheDriver({
+    base: "my-app",
+    ttl: 3600,
+  }),
+});
+```
+
+Options:
+
+- `base`: Prefixes all cache keys.
+- `ttl`: Default TTL in seconds.
+- `name`: Uses a named cache from `caches.open(name)` instead of `caches.default`. Workers for Platforms namespaced scripts require a named cache.
+
+Pass `ttl` or `tag` per write to set `Cache-Control` or `Cache-Tag`:
+
+```ts
+await storage.setItem("page:home", "<html>...</html>", {
+  ttl: 60,
+  tag: "pages",
+});
+```
+
+::note
+The Cache API cannot list keys. `getKeys()` returns an empty array, so clearing by base is not supported.
+::
+
+## Cloudflare KV (binding)
 
 > Store data in Cloudflare KV and access from worker bindings.
 
@@ -18,37 +55,30 @@ icon: devicon-plain:cloudflareworkers
 Learn more about Cloudflare KV.
 ::
 
-**Note:** This driver only works in a cloudflare worker environment, use `cloudflare-kv-http` for other environments.
+This driver only works in a Cloudflare Workers environment. Use `cloudflare-kv-http` in other runtimes.
 
 You need to create and assign a KV. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
 
-```js
+```ts
 import { createStorage } from "unstorage";
 import cloudflareKVBindingDriver from "unstorage/drivers/cloudflare-kv-binding";
 
-// Directly setting binding
-const storage = createStorage({
-  driver: cloudflareKVBindingDriver({ binding: "STORAGE" }),
-});
+export default {
+  async fetch(_request: Request, env: Env) {
+    const storage = createStorage({
+      driver: cloudflareKVBindingDriver({ binding: env.STORAGE }),
+    });
 
-// Using binding name to be picked from globalThis
-const storage = createStorage({
-  driver: cloudflareKVBindingDriver({ binding: globalThis.STORAGE }),
-});
-
-// Using from Durable Objects and Workers using Modules Syntax
-const storage = createStorage({
-  driver: cloudflareKVBindingDriver({ binding: this.env.STORAGE }),
-});
-
-// Using outside of Cloudflare Workers (like Node.js)
-// Use cloudflare-kv-http
+    return Response.json(await storage.getKeys());
+  },
+};
 ```
 
 **Options:**
 
-- `binding`: KV binding or name of namespace. Default is `STORAGE`.
-- `base`: Adds prefix to all stored keys
+- `binding`: KV namespace binding or a global binding name. Defaults to `STORAGE`.
+- `base`: Prefixes all stored keys.
+- `minTTL`: Minimum TTL in seconds. Defaults to Cloudflare's minimum of `60`.
 
 ## Cloudflare KV (http)
 
@@ -64,37 +94,17 @@ Learn more about Cloudflare KV API.
 
 You need to create a KV namespace. See [KV Bindings](https://developers.cloudflare.com/workers/runtime-apis/kv#kv-bindings) for more information.
 
-**Note:** This driver uses native fetch and works universally! For a direct usage in a cloudflare worker environment, please use `cloudflare-kv-binding` driver for best performance!
+This driver uses native `fetch` and works across runtimes. Inside Cloudflare Workers, prefer `cloudflare-kv-binding` for direct binding access.
 
-```js
+```ts
 import { createStorage } from "unstorage";
 import cloudflareKVHTTPDriver from "unstorage/drivers/cloudflare-kv-http";
 
-// Using `apiToken`
 const storage = createStorage({
   driver: cloudflareKVHTTPDriver({
     accountId: "my-account-id",
     namespaceId: "my-kv-namespace-id",
-    apiToken: "supersecret-api-token",
-  }),
-});
-
-// Using `email` and `apiKey`
-const storage = createStorage({
-  driver: cloudflareKVHTTPDriver({
-    accountId: "my-account-id",
-    namespaceId: "my-kv-namespace-id",
-    email: "me@example.com",
-    apiKey: "my-api-key",
-  }),
-});
-
-// Using `userServiceKey`
-const storage = createStorage({
-  driver: cloudflareKVHTTPDriver({
-    accountId: "my-account-id",
-    namespaceId: "my-kv-namespace-id",
-    userServiceKey: "v1.0-my-service-key",
+    apiToken: process.env.CLOUDFLARE_API_TOKEN!,
   }),
 });
 ```
@@ -107,8 +117,9 @@ const storage = createStorage({
 - `email`: Email address associated with your account. May be used along with `apiKey` to authenticate in place of `apiToken`.
 - `apiKey`: API key generated on the "My Account" page of the Cloudflare console. May be used along with `email` to authenticate in place of `apiToken`.
 - `userServiceKey`: A special Cloudflare API key good for a restricted set of endpoints. Always begins with "v1.0-", may vary in length. May be used to authenticate in place of `apiToken` or `apiKey` and `email`.
-- `apiURL`: Custom API URL. Default is `https://api.cloudflare.com`.
-- `base`: Adds prefix to all stored keys
+- `apiURL`: Custom API URL. Defaults to `https://api.cloudflare.com`.
+- `base`: Prefixes all stored keys.
+- `minTTL`: Minimum TTL in seconds. Defaults to Cloudflare's minimum of `60`.
 
 **Transaction options:**
 
@@ -116,19 +127,19 @@ const storage = createStorage({
 
 **Supported methods:**
 
-- `getItem`: Maps to [Read key-value pair](https://api.cloudflare.com/#workers-kv-namespace-read-key-value-pair) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
-- `hasItem`: Maps to [Read key-value pair](https://api.cloudflare.com/#workers-kv-namespace-read-key-value-pair) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`. Returns `true` if `<parsed response body>.success` is `true`.
-- `setItem`: Maps to [Write key-value pair](https://api.cloudflare.com/#workers-kv-namespace-write-key-value-pair) `PUT accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
-- `removeItem`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-key-value-pair) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/values/:key_name`
-- `getKeys`: Maps to [List a Namespace's Keys](https://api.cloudflare.com/#workers-kv-namespace-list-a-namespace-s-keys) `GET accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/keys`
-- `clear`: Maps to [Delete key-value pair](https://api.cloudflare.com/#workers-kv-namespace-delete-multiple-key-value-pairs) `DELETE accounts/:account_identifier/storage/kv/namespaces/:namespace_identifier/bulk`
+- `getItem`: `GET /values/:key`
+- `hasItem`: `GET /metadata/:key`
+- `setItem`: `PUT /values/:key`
+- `removeItem`: `DELETE /values/:key`
+- `getKeys`: `GET /keys`
+- `clear`: Lists keys, then sends chunks of up to 10,000 keys with `POST /bulk/delete`.
 
-## CloudFlare R2 (binding)
+## Cloudflare R2 (binding)
 
 > Store data in Cloudflare R2 buckets and access from worker bindings.
 
 ::warning
-This is an experimental driver! This driver only works in a cloudflare worker environment and cannot be used in other runtime environments such as Node.js (r2-http driver is coming soon)
+This experimental driver requires a Cloudflare Workers R2 binding. For other runtimes, use the [S3 driver](/drivers/s3) with an R2 S3-compatible endpoint.
 ::
 
 ### Usage
@@ -141,24 +152,19 @@ Learn more about Cloudflare R2 buckets.
 
 You need to create and assign a R2 bucket. See [R2 Bindings](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/#create-a-binding) for more information.
 
-```js
+```ts
 import { createStorage } from "unstorage";
 import cloudflareR2BindingDriver from "unstorage/drivers/cloudflare-r2-binding";
 
-// Using binding name to be picked from globalThis
-const storage = createStorage({
-  driver: cloudflareR2BindingDriver({ binding: "BUCKET" }),
-});
+export default {
+  async fetch(_request: Request, env: Env) {
+    const storage = createStorage({
+      driver: cloudflareR2BindingDriver({ binding: env.BUCKET }),
+    });
 
-// Directly setting binding
-const storage = createStorage({
-  driver: cloudflareR2BindingDriver({ binding: globalThis.BUCKET }),
-});
-
-// Using from Durable Objects and Workers using Modules Syntax
-const storage = createStorage({
-  driver: cloudflareR2BindingDriver({ binding: this.env.BUCKET }),
-});
+    return Response.json(await storage.getKeys());
+  },
+};
 ```
 
 **Options:**
@@ -172,12 +178,9 @@ const storage = createStorage({
   - `type: "object"`: Return the [R2 object body](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/#r2objectbody-definition).
   - `type: "stream"`: Return body stream.
   - `type: "blob"`: Return a `Blob`.
-  - `type: "bytes"`: Return an `Uint8Array`.
+  - `type: "bytes"`: Return a `Uint8Array`.
   - `type: "arrayBuffer"`: Return an `ArrayBuffer` (default)
 
 ## Cloudflare R2 (http)
 
-To use Cloudflare R2 over HTTP, you can use [s3 driver](/drivers/s3).
-
-> [!NOTE]
-> Make sure to set `region` to `auto`
+To use Cloudflare R2 over HTTP, configure the [S3 driver](/drivers/s3) with your R2 endpoint and set `region` to `auto`.

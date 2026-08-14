@@ -1,5 +1,5 @@
 import type { Connector, Database } from "db0";
-import { createError, type DriverFactory } from "./utils/index.ts";
+import { createError, type DriverFactory, type DriverDependencies } from "./utils/index.ts";
 
 interface ResultSchema {
   rows: Array<{
@@ -14,6 +14,10 @@ export interface DB0DriverOptions {
   database: Database;
   tableName?: string;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  database: { name: "db0", version: ">=0.3.4" },
+};
 
 const DRIVER_NAME = "db0";
 const DEFAULT_TABLE_NAME = "unstorage";

@@ -68,14 +68,14 @@ export function deserializeRaw(value: any): any {
 }
 
 function base64Decode(input: string) {
-  if (globalThis.Buffer) {
+  if (typeof Buffer !== "undefined") {
     return Buffer.from(input, "base64");
   }
   return Uint8Array.from(globalThis.atob(input), (c) => c.codePointAt(0) as number);
 }
 
 function base64Encode(input: Uint8Array) {
-  if (globalThis.Buffer) {
+  if (typeof Buffer !== "undefined") {
     return Buffer.from(input).toString("base64");
   }
   return globalThis.btoa(String.fromCodePoint(...input));

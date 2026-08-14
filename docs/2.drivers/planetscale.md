@@ -18,13 +18,7 @@ This driver stores KV information in a Planetscale DB with columns of `id`, `val
 
 To use, you will need to install `@planetscale/database` in your project:
 
-```json
-{
-  "dependencies": {
-    "@planetscale/database": "^1.5.0"
-  }
-}
-```
+:pm-install{name="@planetscale/database"}
 
 Then you can create a table to store your data by running the following query in your Planetscale database, where `<storage>` is the name of the table you want to use:
 

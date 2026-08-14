@@ -5,7 +5,7 @@ import {
   type LibImport,
   type DriverDependencies,
 } from "./utils/index.ts";
-import type { Collection, MongoClientOptions } from "mongodb";
+import type { Collection, MongoClient, MongoClientOptions } from "mongodb";
 
 export interface MongoDbOptions {
   /**
@@ -45,6 +45,7 @@ const DRIVER_NAME = "mongodb";
 
 const driver: DriverFactory<MongoDbOptions, Promise<Collection>> = (opts) => {
   let collection: Promise<Collection> | undefined;
+  let client: MongoClient | undefined;
   const getMongoCollection = () =>
     (collection ??= (async () => {
       if (!opts.connectionString) {
@@ -56,8 +57,8 @@ const driver: DriverFactory<MongoDbOptions, Promise<Collection>> = (opts) => {
         opts.lib,
         () => import("mongodb"),
       );
-      const mongoClient = new MongoClient(opts.connectionString, opts.clientOptions);
-      const db = mongoClient.db(opts.databaseName || "unstorage");
+      client = new MongoClient(opts.connectionString, opts.clientOptions);
+      const db = client.db(opts.databaseName || "unstorage");
       return db.collection(opts.collectionName || "unstorage");
     })());
 
@@ -134,6 +135,15 @@ const driver: DriverFactory<MongoDbOptions, Promise<Collection>> = (opts) => {
     },
     async clear() {
       await (await getMongoCollection()).deleteMany({});
+    },
+    async dispose() {
+      if (collection) {
+        // Wait for any pending connection attempt to settle before closing it
+        await collection.catch(() => {});
+        collection = undefined;
+        await client?.close();
+        client = undefined;
+      }
     },
   };
 };

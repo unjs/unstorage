@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { resolve } from "node:path";
 import { promises as fsPromises } from "node:fs";
 import { chmod, stat } from "node:fs/promises";
-import { readFile, writeFile } from "../../src/drivers/utils/node-fs.ts";
+import { readFile, writeFile, ensuredir } from "../../src/drivers/utils/node-fs.ts";
 import { testDriver, type TestContext } from "./utils.ts";
 import driver from "../../src/drivers/fs.ts";
 import { createStorage } from "../../src/storage.ts";
@@ -17,69 +17,13 @@ describe("drivers: fs", () => {
         await ctx.storage.setItem("s1:a", "test_data");
         expect(await readFile(resolve(dir, "s1/a"), "utf8")).toBe("test_data");
       });
-      it("reads concurrent with a write never observe a truncated value", async () => {
-        const size = 256 * 1024;
-        const a = new Uint8Array(size).fill(0xaa);
-        const b = new Uint8Array(size).fill(0xbb);
-        await ctx.storage.setItemRaw("atomic:key", a);
-        for (let i = 0; i < 20; i++) {
-          const [, ...reads] = await Promise.all([
-            ctx.storage.setItemRaw("atomic:key", i % 2 === 0 ? b : a),
-            ctx.storage.getItemRaw("atomic:key"),
-            ctx.storage.getItemRaw("atomic:key"),
-            ctx.storage.getItemRaw("atomic:key"),
-          ]);
-          for (const read of reads) {
-            const bytes = read as Uint8Array;
-            expect(bytes.length).toBe(size);
-            const first = bytes[0];
-            expect(first === 0xaa || first === 0xbb).toBe(true);
-            expect(bytes.every((byte) => byte === first)).toBe(true);
-          }
-        }
+      it("writes in place unless atomic is enabled", async () => {
+        await ctx.storage.setItem("inplace:key", "original");
+        const filePath = resolve(dir, "inplace/key");
+        const before = (await stat(filePath)).ino;
+        await ctx.storage.setItem("inplace:key", "overwritten");
+        expect((await stat(filePath)).ino).toBe(before);
       });
-      it("getKeys never observes in-progress temp files", async () => {
-        const size = 256 * 1024;
-        const value = new Uint8Array(size).fill(0xaa);
-        for (let i = 0; i < 20; i++) {
-          const [, keys] = await Promise.all([
-            ctx.storage.setItemRaw("tmp:key", value),
-            ctx.driver.getKeys("", {}),
-          ]);
-          expect(keys.every((key) => !key.includes(".tmp"))).toBe(true);
-        }
-      });
-      it.skipIf(process.platform === "win32")(
-        "preserves file permissions when overwriting",
-        async () => {
-          await ctx.storage.setItem("perm:key", "original");
-          const filePath = resolve(dir, "perm/key");
-          await chmod(filePath, 0o600);
-          await ctx.storage.setItem("perm:key", "overwritten");
-          const mode = (await stat(filePath)).mode & 0o777;
-          expect(mode).toBe(0o600);
-        },
-      );
-      it.skipIf(process.platform === "win32")(
-        "rethrows non-ENOENT stat errors when overwriting",
-        async () => {
-          const filePath = resolve(dir, "stat-error/key");
-          await writeFile(filePath, "original", "utf8");
-          const statSpy = vi
-            .spyOn(fsPromises, "stat")
-            .mockRejectedValueOnce(
-              Object.assign(new Error("permission denied"), { code: "EACCES" }),
-            );
-          try {
-            await expect(writeFile(filePath, "overwritten", "utf8")).rejects.toThrow(
-              "permission denied",
-            );
-          } finally {
-            statSpy.mockRestore();
-          }
-          expect(await readFile(filePath, "utf8")).toBe("original");
-        },
-      );
       it("native meta", async () => {
         await ctx.storage.setItem("s1:a", "test_data");
         const meta = await ctx.storage.getMeta("/s1/a");
@@ -172,5 +116,109 @@ describe("drivers: fs", () => {
     await ctx.storage?.clear();
     await ctx.storage?.dispose();
     await ctx.driver?.dispose?.();
+  });
+});
+
+describe("drivers: fs (atomic)", () => {
+  const dir = resolve(__dirname, "tmp/fs-atomic");
+
+  testDriver({
+    driver: driver({ base: dir, atomic: true }),
+    additionalTests(ctx) {
+      it("reads concurrent with a write never observe a truncated value", async () => {
+        const size = 256 * 1024;
+        const a = new Uint8Array(size).fill(0xaa);
+        const b = new Uint8Array(size).fill(0xbb);
+        await ctx.storage.setItemRaw("atomic:key", a);
+        for (let i = 0; i < 20; i++) {
+          const [, ...reads] = await Promise.all([
+            ctx.storage.setItemRaw("atomic:key", i % 2 === 0 ? b : a),
+            ctx.storage.getItemRaw("atomic:key"),
+            ctx.storage.getItemRaw("atomic:key"),
+            ctx.storage.getItemRaw("atomic:key"),
+          ]);
+          for (const read of reads) {
+            const bytes = read as Uint8Array;
+            expect(bytes.length).toBe(size);
+            const first = bytes[0];
+            expect(first === 0xaa || first === 0xbb).toBe(true);
+            expect(bytes.every((byte) => byte === first)).toBe(true);
+          }
+        }
+      });
+
+      it("getKeys never observes in-progress temp files", async () => {
+        const size = 256 * 1024;
+        const value = new Uint8Array(size).fill(0xaa);
+        for (let i = 0; i < 20; i++) {
+          const [, keys] = await Promise.all([
+            ctx.storage.setItemRaw("tmp:key", value),
+            ctx.driver.getKeys("", {}),
+          ]);
+          expect(keys.every((key) => !key.includes("unstorage-tmp"))).toBe(true);
+        }
+      });
+
+      it("watch never observes in-progress temp files", async () => {
+        const events: string[] = [];
+        const unwatch = await ctx.storage.watch((event, key) => events.push(`${event} ${key}`));
+        try {
+          await ensuredir(dir);
+          // Simulate the window in which an atomic write's temp file is visible on disk.
+          await fsPromises.writeFile(resolve(dir, ".unstorage-tmp-abc-12345678-0"), "partial");
+          await fsPromises.writeFile(resolve(dir, "watched_file"), "done");
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        } finally {
+          await unwatch();
+        }
+        expect(events).toContain("update watched_file");
+        expect(events.every((event) => !event.includes("unstorage-tmp"))).toBe(true);
+      });
+
+      it("writes keys too long to carry a temp suffix", async () => {
+        // The temp file name must not scale with the key, or long keys hit ENAMETOOLONG.
+        const key = "long:" + "k".repeat(220);
+        await ctx.storage.setItem(key, "value");
+        expect(await ctx.storage.getItem(key)).toBe("value");
+      });
+
+      it.skipIf(process.platform === "win32")(
+        "preserves file permissions when overwriting",
+        async () => {
+          await ctx.storage.setItem("perm:key", "original");
+          const filePath = resolve(dir, "perm/key");
+          await chmod(filePath, 0o600);
+          await ctx.storage.setItem("perm:key", "overwritten");
+          expect((await stat(filePath)).mode & 0o777).toBe(0o600);
+        },
+      );
+
+      it.skipIf(process.platform === "win32")(
+        "rethrows non-ENOENT stat errors when overwriting",
+        async () => {
+          const filePath = resolve(dir, "stat-error/key");
+          await writeFile(filePath, "original", "utf8", true);
+          const statSpy = vi
+            .spyOn(fsPromises, "stat")
+            .mockRejectedValueOnce(
+              Object.assign(new Error("permission denied"), { code: "EACCES" }),
+            );
+          try {
+            await expect(writeFile(filePath, "overwritten", "utf8", true)).rejects.toThrow(
+              "permission denied",
+            );
+          } finally {
+            statSpy.mockRestore();
+          }
+          expect(await readFile(filePath, "utf8")).toBe("original");
+        },
+      );
+
+      it("leaves no temp files behind", async () => {
+        await ctx.storage.setItem("leftover:key", "value");
+        const entries = await fsPromises.readdir(dir, { recursive: true });
+        expect(entries.filter((entry) => entry.includes("unstorage-tmp"))).toEqual([]);
+      });
+    },
   });
 });

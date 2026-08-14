@@ -8,6 +8,18 @@ export interface FSStorageOptions {
   ignore?: (path: string) => boolean;
   readOnly?: boolean;
   noClear?: boolean;
+
+  /**
+   * Write each item to a temporary file and rename it over the destination, so that concurrent
+   * readers never observe a partially written file.
+   *
+   * Renaming replaces the destination inode. The file mode is preserved, but ownership, ACLs and
+   * extended attributes are not, symbolic links are replaced instead of written through, and hard
+   * links to the destination stop tracking it. Small writes are also around twice as slow.
+   *
+   * @default false
+   */
+  atomic?: boolean;
 }
 
 const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
@@ -56,13 +68,13 @@ const driver: DriverFactory<FSStorageOptions> = (opts = {}) => {
       if (opts.readOnly) {
         return;
       }
-      return writeFile(r(key), value, "utf8");
+      return writeFile(r(key), value, "utf8", opts.atomic);
     },
     setItemRaw(key, value) {
       if (opts.readOnly) {
         return;
       }
-      return writeFile(r(key), value);
+      return writeFile(r(key), value, undefined, opts.atomic);
     },
     removeItem(key) {
       if (opts.readOnly) {

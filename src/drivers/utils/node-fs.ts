@@ -1,5 +1,5 @@
 import { Dirent, existsSync, promises as fsPromises } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { resolve, dirname, join, basename } from "node:path";
 import { randomUUID } from "node:crypto";
 
 function ignoreNotfound(err: any) {
@@ -10,27 +10,46 @@ function ignoreExists(err: any) {
   return err.code === "EEXIST" ? null : err;
 }
 
-const TMP_FILE_RE = /\.\d+\.[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}\.tmp$/;
+// Temp files are written next to their destination (rename is only atomic within a single
+// filesystem) using a fixed-length name, so that long keys cannot overflow NAME_MAX.
+const TMP_FILE_PREFIX = ".unstorage-tmp-";
+const TMP_FILE_RE = /^\.unstorage-tmp-[\da-z-]+$/;
+const _tmpFileId = `${process.pid.toString(36)}-${randomUUID().slice(0, 8)}-`;
+let _tmpFileCounter = 0;
+
+/** Whether a path is an in-progress atomic write and should be hidden from consumers. */
+export function isTmpFile(path: string): boolean {
+  return TMP_FILE_RE.test(basename(path));
+}
 
 type WriteFileData = Parameters<typeof fsPromises.writeFile>[1];
 export async function writeFile(
   path: string,
   data: WriteFileData,
   encoding?: BufferEncoding,
+  atomic?: boolean,
 ): Promise<void> {
-  await ensuredir(dirname(path));
-  const tmp = `${path}.${process.pid}.${randomUUID()}.tmp`;
+  const dir = dirname(path);
+  await ensuredir(dir);
+  if (!atomic) {
+    return fsPromises.writeFile(path, data, encoding);
+  }
+  const tmp = join(dir, TMP_FILE_PREFIX + _tmpFileId + (_tmpFileCounter++).toString(36));
   try {
-    await fsPromises.writeFile(tmp, data, encoding);
-    const destMode = await fsPromises
-      .stat(path)
-      .then((s) => s.mode)
-      .catch((error) => {
-        if (error.code === "ENOENT") {
-          return undefined;
-        }
-        throw error;
-      });
+    // Renaming replaces the destination inode, so carry over its permissions to avoid silently
+    // widening or narrowing access on overwrite.
+    const [, destMode] = await Promise.all([
+      fsPromises.writeFile(tmp, data, encoding),
+      fsPromises
+        .stat(path)
+        .then((s) => s.mode & 0o7777)
+        .catch((error) => {
+          if (error.code === "ENOENT") {
+            return undefined;
+          }
+          throw error;
+        }),
+    ]);
     if (destMode !== undefined) {
       await fsPromises.chmod(tmp, destMode);
     }

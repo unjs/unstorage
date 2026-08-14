@@ -13,3 +13,4 @@ __*
 test/fs-storage/**
 .env
 .wrangler
+tsconfig.tsbuildinfo

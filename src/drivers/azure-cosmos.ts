@@ -1,8 +1,14 @@
-import { createRequiredError, defineDriver } from "./utils";
-import { Container, CosmosClient } from "@azure/cosmos";
-import { DefaultAzureCredential } from "@azure/identity";
+import {
+  createRequiredError,
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
+import { type AzureIdentityOptions, createDefaultAzureCredential } from "./utils/azure.ts";
+import type { Container } from "@azure/cosmos";
 
-export interface AzureCosmosOptions {
+export interface AzureCosmosOptions extends AzureIdentityOptions {
   /**
    * CosmosDB endpoint in the format of https://<account>.documents.azure.com:443/.
    */
@@ -24,7 +30,18 @@ export interface AzureCosmosOptions {
    * @default "unstorage"
    */
   containerName?: string;
+
+  /**
+   * Optionally provide the [`@azure/cosmos`](https://www.npmjs.com/package/@azure/cosmos) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("@azure/cosmos")>;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "@azure/cosmos", version: "^4.9.1" },
+  identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+};
 
 const DRIVER_NAME = "azure-cosmos";
 
@@ -45,58 +62,44 @@ export interface AzureCosmosItem {
   modified: string | Date;
 }
 
-export default defineDriver((opts: AzureCosmosOptions) => {
-  let client: Container;
-  const getCosmosClient = async () => {
-    if (client) {
-      return client;
-    }
-    if (!opts.endpoint) {
-      throw createRequiredError(DRIVER_NAME, "endpoint");
-    }
-    if (opts.accountKey) {
-      const cosmosClient = new CosmosClient({
-        endpoint: opts.endpoint,
-        key: opts.accountKey,
-      });
+const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => {
+  let client: Promise<Container> | undefined;
+  const getCosmosClient = () =>
+    (client ??= (async () => {
+      if (!opts.endpoint) {
+        throw createRequiredError(DRIVER_NAME, "endpoint");
+      }
+      const { CosmosClient } = await importLib(
+        DRIVER_NAME,
+        "@azure/cosmos",
+        opts.lib,
+        () => import("@azure/cosmos"),
+      );
+      const cosmosClient = opts.accountKey
+        ? new CosmosClient({ endpoint: opts.endpoint, key: opts.accountKey })
+        : new CosmosClient({
+            endpoint: opts.endpoint,
+            aadCredentials: await createDefaultAzureCredential(DRIVER_NAME, opts),
+          });
       const { database } = await cosmosClient.databases.createIfNotExists({
         id: opts.databaseName || "unstorage",
       });
       const { container } = await database.containers.createIfNotExists({
         id: opts.containerName || "unstorage",
       });
-      client = container;
-    } else {
-      const credential = new DefaultAzureCredential();
-      const cosmosClient = new CosmosClient({
-        endpoint: opts.endpoint,
-        aadCredentials: credential,
-      });
-      const { database } = await cosmosClient.databases.createIfNotExists({
-        id: opts.databaseName || "unstorage",
-      });
-      const { container } = await database.containers.createIfNotExists({
-        id: opts.containerName || "unstorage",
-      });
-      client = container;
-    }
-    return client;
-  };
+      return container;
+    })());
 
   return {
     name: DRIVER_NAME,
     options: opts,
     getInstance: getCosmosClient,
     async hasItem(key) {
-      const item = await (await getCosmosClient())
-        .item(key)
-        .read<AzureCosmosItem>();
+      const item = await (await getCosmosClient()).item(key).read<AzureCosmosItem>();
       return item.resource ? true : false;
     },
     async getItem(key) {
-      const item = await (await getCosmosClient())
-        .item(key)
-        .read<AzureCosmosItem>();
+      const item = await (await getCosmosClient()).item(key).read<AzureCosmosItem>();
       return item.resource ? item.resource.value : null;
     },
     async setItem(key, value) {
@@ -105,40 +108,42 @@ export default defineDriver((opts: AzureCosmosOptions) => {
         await getCosmosClient()
       ).items.upsert<AzureCosmosItem>(
         { id: key, value, modified },
-        { consistencyLevel: "Session" }
+        { consistencyLevel: "Session" },
       );
     },
     async removeItem(key) {
-      await (await getCosmosClient())
+      await (
+        await getCosmosClient()
+      )
         .item(key)
         .delete<AzureCosmosItem>({ consistencyLevel: "Session" });
     },
     async getKeys() {
       const iterator = (await getCosmosClient()).items.query<AzureCosmosItem>(
-        `SELECT { id } from c`
+        `SELECT { id } from c`,
       );
       return (await iterator.fetchAll()).resources.map((item) => item.id);
     },
     async getMeta(key) {
-      const item = await (await getCosmosClient())
-        .item(key)
-        .read<AzureCosmosItem>();
+      const item = await (await getCosmosClient()).item(key).read<AzureCosmosItem>();
       return {
-        mtime: item.resource?.modified
-          ? new Date(item.resource.modified)
-          : undefined,
+        mtime: item.resource?.modified ? new Date(item.resource.modified) : undefined,
       };
     },
     async clear() {
       const iterator = (await getCosmosClient()).items.query<AzureCosmosItem>(
-        `SELECT { id } from c`
+        `SELECT { id } from c`,
       );
       const items = (await iterator.fetchAll()).resources;
       for (const item of items) {
-        await (await getCosmosClient())
+        await (
+          await getCosmosClient()
+        )
           .item(item.id)
           .delete<AzureCosmosItem>({ consistencyLevel: "Session" });
       }
     },
   };
-});
+};
+
+export default driver;

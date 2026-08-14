@@ -1,11 +1,10 @@
-export * from "./storage";
-export * from "./types";
-export * from "./utils";
-
-export { defineDriver } from "./drivers/utils";
+export * from "./storage.ts";
+export * from "./types.ts";
+export * from "./utils.ts";
 
 export {
   builtinDrivers,
+  builtinDriverDependencies,
   type BuiltinDriverName,
   type BuiltinDriverOptions,
-} from "./_drivers";
+} from "./_drivers.ts";

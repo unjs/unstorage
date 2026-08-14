@@ -1,4 +1,4 @@
-import type { Storage, StorageValue, TransactionOptions } from "./types";
+import type { Storage, StorageValue, TransactionOptions } from "./types.ts";
 
 type StorageKeys = Array<keyof Storage>;
 
@@ -24,11 +24,11 @@ const storageKeyProperties: StorageKeys = [
 
 export function prefixStorage<T extends StorageValue>(
   storage: Storage<T> | Storage<any>,
-  base: string
+  base: string,
 ): Storage<T>;
 export function prefixStorage<T extends StorageValue>(
   storage: Storage<T>,
-  base: string
+  base: string,
 ): Storage<T> {
   base = normalizeBaseKey(base);
   if (!base) {
@@ -47,14 +47,21 @@ export function prefixStorage<T extends StorageValue>(
       // Remove Prefix
       .then((keys) => keys.map((key) => key.slice(base.length)));
 
-  nsStorage.keys = (key = "", ...argumens_) => nsStorage.getKeys(key, ...argumens_);
+  nsStorage.keys = nsStorage.getKeys;
+
+  nsStorage.watch = (callback) =>
+    storage.watch((event, key) => {
+      if (key.startsWith(base)) {
+        return callback(event, key.slice(base.length));
+      }
+    });
 
   nsStorage.getItems = async <U extends T>(
     items: (string | { key: string; options?: TransactionOptions })[],
-    commonOptions?: TransactionOptions
+    commonOptions?: TransactionOptions,
   ) => {
     const prefixedItems = items.map((item) =>
-      typeof item === "string" ? base + item : { ...item, key: base + item.key }
+      typeof item === "string" ? base + item : { ...item, key: base + item.key },
     );
     const results = await storage.getItems<U>(prefixedItems, commonOptions);
     return results.map((entry) => ({
@@ -65,7 +72,7 @@ export function prefixStorage<T extends StorageValue>(
 
   nsStorage.setItems = async <U extends T>(
     items: { key: string; value: U; options?: TransactionOptions }[],
-    commonOptions?: TransactionOptions
+    commonOptions?: TransactionOptions,
   ) => {
     const prefixedItems = items.map((item) => ({
       key: base + item.key,
@@ -78,32 +85,23 @@ export function prefixStorage<T extends StorageValue>(
   return nsStorage;
 }
 
-export function normalizeKey(key?: string) {
+export function normalizeKey(key?: string): string {
   if (!key) {
     return "";
   }
-  return (
-    key
-      .split("?")[0]
-      ?.replace(/[/\\]/g, ":")
-      .replace(/:+/g, ":")
-      .replace(/^:|:$/g, "") || ""
-  );
+  return key.split("?")[0]?.replace(/[/\\]/g, ":").replace(/:+/g, ":").replace(/^:|:$/g, "") || "";
 }
 
-export function joinKeys(...keys: string[]) {
+export function joinKeys(...keys: string[]): string {
   return normalizeKey(keys.join(":"));
 }
 
-export function normalizeBaseKey(base?: string) {
+export function normalizeBaseKey(base?: string): string {
   base = normalizeKey(base);
   return base ? base + ":" : "";
 }
 
-export function filterKeyByDepth(
-  key: string,
-  depth: number | undefined
-): boolean {
+export function filterKeyByDepth(key: string, depth: number | undefined): boolean {
   if (depth === undefined) {
     return true;
   }
@@ -119,10 +117,7 @@ export function filterKeyByDepth(
   return substrCount <= depth;
 }
 
-export function filterKeyByBase(
-  key: string,
-  base: string | undefined
-): boolean {
+export function filterKeyByBase(key: string, base: string | undefined): boolean {
   if (base) {
     return key.startsWith(base) && key[key.length - 1] !== "$";
   }

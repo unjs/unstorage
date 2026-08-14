@@ -1,12 +1,14 @@
-import { createError, defineDriver } from "./utils";
 import {
-  BlobServiceClient,
-  ContainerClient,
-  StorageSharedKeyCredential,
-} from "@azure/storage-blob";
-import { DefaultAzureCredential } from "@azure/identity";
+  createError,
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
+import { type AzureIdentityOptions, createDefaultAzureCredential } from "./utils/azure.ts";
+import type { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
 
-export interface AzureStorageBlobOptions {
+export interface AzureStorageBlobOptions extends AzureIdentityOptions {
   /**
    * The name of the Azure Storage account.
    */
@@ -43,82 +45,82 @@ export interface AzureStorageBlobOptions {
    * @default ".blob.core.windows.net"
    */
   endpointSuffix?: string;
+
+  /**
+   * Optionally provide the [`@azure/storage-blob`](https://www.npmjs.com/package/@azure/storage-blob)
+   * library to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("@azure/storage-blob")>;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "@azure/storage-blob", version: "^12.31.0" },
+  identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+};
 
 const DRIVER_NAME = "azure-storage-blob";
 
-export default defineDriver((opts: AzureStorageBlobOptions) => {
-  let containerClient: ContainerClient;
+const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> = (opts) => {
+  let containerClient: Promise<ContainerClient> | undefined;
   const endpointSuffix = opts.endpointSuffix || ".blob.core.windows.net";
-  const getContainerClient = () => {
-    if (containerClient) {
-      return containerClient;
-    }
-    if (!opts.connectionString && !opts.sasUrl && !opts.accountName) {
-      throw createError(DRIVER_NAME, "missing accountName");
-    }
-    let serviceClient: BlobServiceClient;
-    if (opts.accountKey) {
-      // StorageSharedKeyCredential is only available in Node.js runtime, not in browsers
-      const credential = new StorageSharedKeyCredential(
-        opts.accountName!,
-        opts.accountKey
-      );
-      serviceClient = new BlobServiceClient(
-        `https://${opts.accountName}${endpointSuffix}`,
-        credential
-      );
-    } else if (opts.sasUrl) {
-      if (
-        opts.containerName &&
-        opts.sasUrl.includes(`${opts.containerName}?`)
-      ) {
-        // Check if the sas url is a container url
-        containerClient = new ContainerClient(`${opts.sasUrl}`);
-        return containerClient;
+  const getContainerClient = () =>
+    (containerClient ??= (async () => {
+      if (!opts.connectionString && !opts.sasUrl && !opts.accountName) {
+        throw createError(DRIVER_NAME, "missing accountName");
       }
-      serviceClient = new BlobServiceClient(opts.sasUrl);
-    } else if (opts.sasKey) {
-      if (opts.containerName) {
-        containerClient = new ContainerClient(
-          `https://${opts.accountName}${endpointSuffix}/${opts.containerName}?${opts.sasKey}`
+      const { BlobServiceClient, ContainerClient, StorageSharedKeyCredential } = await importLib(
+        DRIVER_NAME,
+        "@azure/storage-blob",
+        opts.lib,
+        () => import("@azure/storage-blob"),
+      );
+      let serviceClient: BlobServiceClient;
+      if (opts.accountKey) {
+        // StorageSharedKeyCredential is only available in Node.js runtime, not in browsers
+        const credential = new StorageSharedKeyCredential(opts.accountName!, opts.accountKey);
+        serviceClient = new BlobServiceClient(
+          `https://${opts.accountName}${endpointSuffix}`,
+          credential,
         );
-        return containerClient;
+      } else if (opts.sasUrl) {
+        if (opts.containerName && opts.sasUrl.includes(`${opts.containerName}?`)) {
+          // Check if the sas url is a container url
+          return new ContainerClient(`${opts.sasUrl}`);
+        }
+        serviceClient = new BlobServiceClient(opts.sasUrl);
+      } else if (opts.sasKey) {
+        if (opts.containerName) {
+          return new ContainerClient(
+            `https://${opts.accountName}${endpointSuffix}/${opts.containerName}?${opts.sasKey}`,
+          );
+        }
+        serviceClient = new BlobServiceClient(
+          `https://${opts.accountName}${endpointSuffix}?${opts.sasKey}`,
+        );
+      } else if (opts.connectionString) {
+        // fromConnectionString is only available in Node.js runtime, not in browsers
+        serviceClient = BlobServiceClient.fromConnectionString(opts.connectionString);
+      } else {
+        serviceClient = new BlobServiceClient(
+          `https://${opts.accountName}${endpointSuffix}`,
+          await createDefaultAzureCredential(DRIVER_NAME, opts),
+        );
       }
-      serviceClient = new BlobServiceClient(
-        `https://${opts.accountName}${endpointSuffix}?${opts.sasKey}`
-      );
-    } else if (opts.connectionString) {
-      // fromConnectionString is only available in Node.js runtime, not in browsers
-      serviceClient = BlobServiceClient.fromConnectionString(
-        opts.connectionString
-      );
-    } else {
-      const credential = new DefaultAzureCredential();
-      serviceClient = new BlobServiceClient(
-        `https://${opts.accountName}${endpointSuffix}`,
-        credential
-      );
-    }
-    containerClient = serviceClient.getContainerClient(
-      opts.containerName || "unstorage"
-    );
-    containerClient.createIfNotExists();
-    return containerClient;
-  };
+      const client = serviceClient.getContainerClient(opts.containerName || "unstorage");
+      client.createIfNotExists();
+      return client;
+    })());
 
   return {
     name: DRIVER_NAME,
     options: opts,
     getInstance: getContainerClient,
     async hasItem(key) {
-      return await getContainerClient().getBlockBlobClient(key).exists();
+      return await (await getContainerClient()).getBlockBlobClient(key).exists();
     },
     async getItem(key) {
       try {
-        const blob = await getContainerClient()
-          .getBlockBlobClient(key)
-          .download();
+        const blob = await (await getContainerClient()).getBlockBlobClient(key).download();
         if (isBrowser) {
           return blob.blobBody ? await blobToString(await blob.blobBody) : null;
         }
@@ -131,38 +133,38 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
     },
     async getItemRaw(key) {
       try {
-        const blob = await getContainerClient()
-          .getBlockBlobClient(key)
-          .download();
+        const blob = await (await getContainerClient()).getBlockBlobClient(key).download();
         if (isBrowser) {
           return blob.blobBody ? await blobToString(await blob.blobBody) : null;
         }
-        return blob.readableStreamBody
-          ? await streamToBuffer(blob.readableStreamBody)
-          : null;
+        return blob.readableStreamBody ? await streamToBuffer(blob.readableStreamBody) : null;
       } catch {
         return null;
       }
     },
     async setItem(key, value) {
-      await getContainerClient()
+      await (
+        await getContainerClient()
+      )
         .getBlockBlobClient(key)
         .upload(value, Buffer.byteLength(value));
     },
     async setItemRaw(key, value) {
-      await getContainerClient()
+      await (
+        await getContainerClient()
+      )
         .getBlockBlobClient(key)
         .upload(value, Buffer.byteLength(value));
     },
     async removeItem(key) {
-      await getContainerClient()
+      await (
+        await getContainerClient()
+      )
         .getBlockBlobClient(key)
         .deleteIfExists({ deleteSnapshots: "include" });
     },
     async getKeys() {
-      const iterator = getContainerClient()
-        .listBlobsFlat()
-        .byPage({ maxPageSize: 1000 });
+      const iterator = (await getContainerClient()).listBlobsFlat().byPage({ maxPageSize: 1000 });
       const keys: string[] = [];
       for await (const page of iterator) {
         const pageKeys = page.segment.blobItems.map((blob) => blob.name);
@@ -171,7 +173,9 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
       return keys;
     },
     async getMeta(key) {
-      const blobProperties = await getContainerClient()
+      const blobProperties = await (
+        await getContainerClient()
+      )
         .getBlockBlobClient(key)
         .getProperties();
       return {
@@ -182,29 +186,27 @@ export default defineDriver((opts: AzureStorageBlobOptions) => {
       };
     },
     async clear() {
-      const iterator = getContainerClient()
-        .listBlobsFlat()
-        .byPage({ maxPageSize: 1000 });
+      const iterator = (await getContainerClient()).listBlobsFlat().byPage({ maxPageSize: 1000 });
       for await (const page of iterator) {
         await Promise.all(
           page.segment.blobItems.map(
             async (blob) =>
-              await getContainerClient().deleteBlob(blob.name, {
+              await (
+                await getContainerClient()
+              ).deleteBlob(blob.name, {
                 deleteSnapshots: "include",
-              })
-          )
+              }),
+          ),
         );
       }
     },
   };
-});
+};
 
 const isBrowser = typeof window !== "undefined";
 
 // Helper function to read a Node.js readable stream into a Buffer. (https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob)
-async function streamToBuffer(
-  readableStream: NodeJS.ReadableStream
-): Promise<Buffer> {
+async function streamToBuffer(readableStream: NodeJS.ReadableStream): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     readableStream.on("data", (data) => {
@@ -230,3 +232,5 @@ async function blobToString(blob: Blob) {
     fileReader.readAsText(blob);
   });
 }
+
+export default driver;

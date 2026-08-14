@@ -1,8 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
 import { describe, test, expect, afterAll } from "vitest";
-import { createStorage, snapshot } from "../../src";
-import CloudflareR2Binding from "../../src/drivers/cloudflare-r2-binding";
-import { testDriver } from "./utils";
+import { createStorage, snapshot } from "../../src/index.ts";
+import CloudflareR2Binding from "../../src/drivers/cloudflare-r2-binding.ts";
+import { testDriver } from "./utils.ts";
 import { getPlatformProxy } from "wrangler";
 
 describe("drivers: cloudflare-r2-binding", async () => {
@@ -43,7 +43,7 @@ describe("drivers: cloudflare-r2-binding", async () => {
             atime: expect.any(Date),
             mtime: expect.any(Date),
             size: expect.any(Number),
-          })
+          }),
         );
         const nonExistentMeta = await ctx.storage.getMeta("/s1/nonexistent");
         expect(nonExistentMeta).toEqual({});

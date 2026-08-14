@@ -4,23 +4,36 @@ icon: bi:memory
 
 # Memory
 
-> Keep data in memory.
+> Keep values in the current JavaScript process.
 
-Keeps data in memory using [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map). (default storage)
+The memory driver uses a `Map` and is the default for `createStorage()`. Data is not shared between processes and is lost when the process exits or the storage is disposed.
 
-## Usage
+```ts
+import { createStorage } from "unstorage";
 
-**Driver name:** `memory`
+const storage = createStorage();
+```
 
-::note
-By default, it is mounted at the top level, so it's unlikely that you will need to mount it again.
-::
+You can also create the driver explicitly:
 
-```js
+```ts
 import { createStorage } from "unstorage";
 import memoryDriver from "unstorage/drivers/memory";
 
-const storage = createStorage({
-  driver: memoryDriver(),
-});
+const driver = memoryDriver();
+const storage = createStorage({ driver });
+
+const map = driver.getInstance?.();
 ```
+
+## TTL
+
+Pass a TTL in seconds when setting an item:
+
+```ts
+await storage.setItem("session:1", { userId: 1 }, { ttl: 60 });
+```
+
+The driver removes the item after the TTL expires. Calling `clear()` or `dispose()` also cancels pending expiration timers.
+
+Use this driver for tests, short-lived caches, and local defaults—not for durable or distributed data.

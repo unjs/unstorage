@@ -64,6 +64,12 @@ export interface S3ItemOptions {
 
 const DRIVER_NAME = "s3";
 
+/** S3 DeleteObjects API supports max 1000 keys per request. */
+const MAX_BULK_DELETE = 1000;
+
+/** Bounded concurrency for per-object fallback deletes. */
+const MAX_CONCURRENT_DELETES = 10;
+
 const driver: DriverFactory<S3DriverOptions> = (options) => {
   let _awsClient: AwsClient;
   const getAwsClient = () => {
@@ -126,32 +132,40 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
-  const listObjects = async (prefix?: string) => {
+  const listObjects = async (base?: string) => {
+    // Keys are stored with `/` separators (see `url()`) but drivers receive `:` separated bases.
+    // The trailing `/` keeps the prefix on a key boundary so `foo` does not also match `foobar`.
+    const normalizedBase = normalizeKey(base, "/");
+    const prefix = normalizedBase ? `${normalizedBase}/` : undefined;
+
     const allKeys: string[] = [];
     let continuationToken: string | undefined;
 
     do {
-      const params = new URLSearchParams();
-      params.set("list-type", "2");
-      if (prefix) {
-        params.set("prefix", prefix);
-      }
-      if (continuationToken) {
-        params.set("continuation-token", continuationToken);
-      }
-
-      const listURL = `${baseURL}?${params.toString()}`;
+      const listURL = `${baseURL}?${encodeQuery({
+        "list-type": "2",
+        prefix,
+        "continuation-token": continuationToken,
+      })}`;
       const res = await awsFetch(listURL).then((r) => r?.text());
       if (!res) {
-        break;
+        if (continuationToken) {
+          // A missing page mid-pagination would silently truncate the result.
+          throw createError(DRIVER_NAME, `Missing page while listing objects: ${listURL}`);
+        }
+        return null;
       }
 
       const result = parseListResponse(res);
       allKeys.push(...result.keys);
 
-      continuationToken = result.isTruncated
-        ? result.nextContinuationToken
-        : undefined;
+      if (result.isTruncated && result.nextContinuationToken === continuationToken) {
+        throw createError(
+          DRIVER_NAME,
+          "S3 returned the same NextContinuationToken twice — pagination is not advancing.",
+        );
+      }
+      continuationToken = result.isTruncated ? result.nextContinuationToken : undefined;
     } while (continuationToken);
 
     return allKeys.length > 0 ? allKeys : null;
@@ -189,11 +203,6 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
-  // S3 DeleteObjects API supports max 1000 keys per request
-  const MAX_BULK_DELETE = 1000;
-  // Bounded concurrency for per-object fallback deletes
-  const MAX_CONCURRENT_DELETES = 10;
-
   const deleteObjects = async (base: string) => {
     const keys = await listObjects(base);
     if (!keys?.length) {
@@ -266,6 +275,26 @@ function deleteKeysReq(keys: string[]) {
     .join("")}</Delete>`;
 }
 
+/**
+ * Build a query string using RFC3986 encoding.
+ *
+ * `URLSearchParams` encodes spaces as `+`, which AWS SigV4 canonicalization encodes as `%20`,
+ * producing a signature mismatch for keys containing spaces. Undefined values are skipped.
+ */
+function encodeQuery(params: Record<string, string | undefined>) {
+  return Object.entries(params)
+    .filter(([, value]) => value !== undefined)
+    .map(([key, value]) => `${encodeRfc3986(key)}=${encodeRfc3986(value!)}`)
+    .join("&");
+}
+
+function encodeRfc3986(str: string) {
+  return encodeURIComponent(str).replace(
+    /[!'()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
 async function sha256Base64(str: string) {
   const buffer = new TextEncoder().encode(str);
   const hash = await crypto.subtle.digest("SHA-256", buffer);
@@ -291,18 +320,15 @@ function parseListResponse(xml: string): {
   if (!xml.startsWith("<?xml")) {
     throw new Error("Invalid XML");
   }
-  const listBucketResult = xml.match(
-    /<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/
-  )?.[1];
+  const listBucketResult = xml.match(/<ListBucketResult[^>]*>([\s\S]*)<\/ListBucketResult>/)?.[1];
   if (!listBucketResult) {
     throw new Error("Missing <ListBucketResult>");
   }
 
   const isTruncated =
-    listBucketResult.match(/<IsTruncated>([\s\S]*?)<\/IsTruncated>/)?.[1] ===
-    "true";
+    listBucketResult.match(/<IsTruncated>([\s\S]*?)<\/IsTruncated>/)?.[1] === "true";
   const nextContinuationToken = listBucketResult.match(
-    /<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/
+    /<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/,
   )?.[1];
 
   if (isTruncated && !nextContinuationToken) {
@@ -312,9 +338,7 @@ function parseListResponse(xml: string): {
     );
   }
 
-  const contents = listBucketResult.match(
-    /<Contents[^>]*>([\s\S]*?)<\/Contents>/g
-  );
+  const contents = listBucketResult.match(/<Contents[^>]*>([\s\S]*?)<\/Contents>/g);
   const keys = contents
     ? contents
         .map((content) => content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1])
@@ -325,9 +349,7 @@ function parseListResponse(xml: string): {
   return {
     keys: keys as string[],
     isTruncated,
-    nextContinuationToken: nextContinuationToken
-      ? decodeXmlText(nextContinuationToken)
-      : undefined,
+    nextContinuationToken: nextContinuationToken ? decodeXmlText(nextContinuationToken) : undefined,
   };
 }
 

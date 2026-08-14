@@ -36,7 +36,7 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
         );
         (globalThis as any)[kExperimentalWarning] = true;
       }
-      setupPromise = setupTable(opts, tableName).then(() => {
+      setupPromise = setupTable(opts.database, tableName).then(() => {
         setupDone = true;
         setupPromise = undefined;
       });
@@ -140,11 +140,11 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
 };
 
 /** Run database init/migration once */
-async function setupTable(opts: DB0DriverOptions, tableName: string) {
-  switch (opts.database.dialect) {
+async function setupTable(database: Database, tableName: string) {
+  switch (database.dialect) {
     case "sqlite":
     case "libsql": {
-      await opts.database.sql /* sql */ `
+      await database.sql /* sql */ `
       CREATE TABLE IF NOT EXISTS {${tableName}} (
         key TEXT PRIMARY KEY,
         value TEXT,
@@ -156,7 +156,7 @@ async function setupTable(opts: DB0DriverOptions, tableName: string) {
       return;
     }
     case "postgresql": {
-      await opts.database.sql /* sql */ `
+      await database.sql /* sql */ `
       CREATE TABLE IF NOT EXISTS {${tableName}} (
         key VARCHAR(255) NOT NULL PRIMARY KEY,
         value TEXT,
@@ -168,7 +168,7 @@ async function setupTable(opts: DB0DriverOptions, tableName: string) {
       return;
     }
     case "mysql": {
-      await opts.database.sql /* sql */ `
+      await database.sql /* sql */ `
       CREATE TABLE IF NOT EXISTS {${tableName}} (
         \`key\` VARCHAR(255) NOT NULL PRIMARY KEY,
         \`value\` LONGTEXT,
@@ -180,7 +180,7 @@ async function setupTable(opts: DB0DriverOptions, tableName: string) {
       return;
     }
     default: {
-      throw createError(DRIVER_NAME, `unsuppoted SQL dialect: ${opts.database.dialect}`);
+      throw createError(DRIVER_NAME, `unsuppoted SQL dialect: ${database.dialect}`);
     }
   }
 }

@@ -60,7 +60,7 @@ const driver: DriverFactory<CacheOptions, CFCache | Promise<CFCache>> = (opts) =
     if (ttl) {
       headers["Cache-Control"] = `max-age=${ttl}`;
     }
-    if (tOptions.tag) {
+    if (tOptions?.tag) {
       headers["Cache-Tag"] = tOptions.tag;
     }
 

@@ -33,7 +33,7 @@ const driver: DriverFactory<FSStorageOptions> = (opts = {}) => {
 
   return {
     name: DRIVER_NAME,
-    options: opts,
+    options: { ...opts, base },
     flags: {
       maxDepth: true,
     },

@@ -12,8 +12,9 @@ describe("drivers: fs-lite", () => {
     additionalTests(ctx) {
       it("does not mutate input options", () => {
         const opts = { base: "./tmp/fs-lite-opts" };
-        driver(opts);
+        const instance = driver(opts);
         expect(opts).toEqual({ base: "./tmp/fs-lite-opts" });
+        expect(instance.options?.base).toBe(resolve("./tmp/fs-lite-opts"));
       });
       it("check filesystem", async () => {
         await ctx.storage.setItem("s1:a", "test_data");

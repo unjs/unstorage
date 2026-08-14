@@ -44,7 +44,7 @@ const driver: DriverFactory<PlanetscaleDriverOptions, Connection> = (opts = {}) 
 
   return {
     name: DRIVER_NAME,
-    options: opts,
+    options: { ...opts, table },
     getInstance: getConnection,
     hasItem: async (key) => {
       const res = await getConnection().execute(

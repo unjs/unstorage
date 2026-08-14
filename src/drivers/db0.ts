@@ -48,7 +48,7 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
 
   return {
     name: DRIVER_NAME,
-    options: opts,
+    options: { ...opts, tableName },
     getInstance: () => opts.database,
     async hasItem(key) {
       await ensureTable();

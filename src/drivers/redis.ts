@@ -157,7 +157,7 @@ function normalizeValue(value: unknown): Buffer | string | number {
     return value as string | number;
   }
   if (Buffer.isBuffer(value)) {
-    return value;
+    return value as Buffer;
   }
   if (isTypedArray(value)) {
     if (Buffer.copyBytesFrom) {

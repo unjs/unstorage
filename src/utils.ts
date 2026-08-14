@@ -17,7 +17,6 @@ const storageKeyProperties: StorageKeys = [
   "getMeta",
   "setMeta",
   "removeMeta",
-  "getKeys",
   "clear",
   "mount",
   "unmount",

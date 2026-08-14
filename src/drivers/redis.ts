@@ -135,7 +135,7 @@ const driver: DriverFactory<RedisOptions, Promise<Redis | Cluster>> = (opts) => 
       if (items.length === 0) {
         return;
       }
-      const client = getRedisClient();
+      const client = await getRedisClient();
       const defaultTtl = commonOptions?.ttl ?? opts.ttl;
       const getTtl = (item: (typeof items)[number]) => item.options?.ttl ?? defaultTtl;
 

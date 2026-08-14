@@ -212,10 +212,10 @@ Learn more about Azure Table storage.
 ::
 
 ::warning
-This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
+This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be an HTTP-based driver in the future.
 ::
 
-The driver stores all keys in one partition and uses the `unstorageValue` field for values.
+The driver stores all keys in one partition, using the storage key as the `rowKey` and the `unstorageValue` field for values. `getMeta()` returns the entity's last modified time (`mtime`) and `etag`.
 
 Install `@azure/data-tables`. Also install `@azure/identity` when using `DefaultAzureCredential` instead of an account key, SAS key, or connection string.
 

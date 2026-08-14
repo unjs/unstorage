@@ -18,10 +18,7 @@ describe("drivers: github", () => {
   });
 
   it("can read a json file content", async () => {
-    const pkg = (await storage.getItem("package.json"))! as Record<
-      string,
-      unknown
-    >;
+    const pkg = (await storage.getItem("package.json"))! as Record<string, unknown>;
     expect(pkg.name).toBe("unstorage");
   });
 

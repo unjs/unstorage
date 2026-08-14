@@ -3,13 +3,7 @@ import s3Driver from "../../src/drivers/s3.ts";
 
 const PAGE_SIZE = 2;
 
-const objects = [
-  "foo/a.json",
-  "foo/b.json",
-  "foo/nested/c.json",
-  "foobar/d.json",
-  "other/e.json",
-];
+const objects = ["foo/a.json", "foo/b.json", "foo/nested/c.json", "foobar/d.json", "other/e.json"];
 
 let requests: string[] = [];
 let deleted: string[] = [];
@@ -44,9 +38,7 @@ describe("drivers: s3 (listObjects)", () => {
       requests.push(`${req.method} ${url.pathname}${url.search}`);
       if (url.search === "?delete") {
         const body = await req.text();
-        deleted.push(
-          ...[...body.matchAll(/<Key>(.+?)<\/Key>/g)].map((m) => m[1]!)
-        );
+        deleted.push(...[...body.matchAll(/<Key>(.+?)<\/Key>/g)].map((m) => m[1]!));
         return new Response("", { status: 200 });
       }
       const prefix = url.searchParams.get("prefix") || "";
@@ -54,10 +46,9 @@ describe("drivers: s3 (listObjects)", () => {
       const offset = Number(url.searchParams.get("continuation-token") || 0);
       const page = matched.slice(offset, offset + PAGE_SIZE);
       const nextOffset = offset + PAGE_SIZE;
-      return new Response(
-        listResponse(page, nextOffset < matched.length ? `${nextOffset}` : ""),
-        { status: 200 }
-      );
+      return new Response(listResponse(page, nextOffset < matched.length ? `${nextOffset}` : ""), {
+        status: 200,
+      });
     });
   });
 
@@ -83,26 +74,18 @@ describe("drivers: s3 (listObjects)", () => {
 
   it("normalizes `:` separator in prefix", async () => {
     await driver().getKeys!("foo:nested", {});
-    expect(requests[0]).toBe(
-      "GET /test-bucket?list-type=2&prefix=foo%2Fnested%2F"
-    );
+    expect(requests[0]).toBe("GET /test-bucket?list-type=2&prefix=foo%2Fnested%2F");
   });
 
   it("does not loop when a stale continuation token is echoed back", async () => {
     echoStaleToken = true;
-    expect(await driver().getKeys!("other", {})).toMatchObject([
-      "other/e.json",
-    ]);
+    expect(await driver().getKeys!("other", {})).toMatchObject(["other/e.json"]);
     expect(requests.length).toBe(1);
   });
 
   it("only clears keys under the given base", async () => {
     await driver().clear!("foo", {});
-    expect(deleted).toMatchObject([
-      "foo/a.json",
-      "foo/b.json",
-      "foo/nested/c.json",
-    ]);
+    expect(deleted).toMatchObject(["foo/a.json", "foo/b.json", "foo/nested/c.json"]);
   });
 
   it("returns an empty list for a missing bucket", async () => {

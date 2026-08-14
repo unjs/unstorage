@@ -1,11 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { resolve } from "node:path";
-import {
-  createStorage,
-  snapshot,
-  restoreSnapshot,
-  prefixStorage,
-} from "../src/index.ts";
+import { createStorage, snapshot, restoreSnapshot, prefixStorage } from "../src/index.ts";
 import memory from "../src/drivers/memory.ts";
 import fs from "../src/drivers/fs.ts";
 
@@ -33,22 +28,19 @@ describe("storage", () => {
     expect(storage.getMount("/cache:sub").base).toBe("cache:sub:");
     expect(storage.getMount("/cache:sub:foo").base).toBe("cache:sub:");
 
-    expect(storage.getMounts("/cache").map((m) => m.base))
-      .toMatchInlineSnapshot(`
+    expect(storage.getMounts("/cache").map((m) => m.base)).toMatchInlineSnapshot(`
         [
           "cache:sub:",
           "cache:",
         ]
       `);
-    expect(storage.getMounts("/cache:sub").map((m) => m.base))
-      .toMatchInlineSnapshot(`
+    expect(storage.getMounts("/cache:sub").map((m) => m.base)).toMatchInlineSnapshot(`
         [
           "cache:sub:",
         ]
       `);
-    expect(
-      storage.getMounts("/cache:sub", { parents: true }).map((m) => m.base)
-    ).toMatchInlineSnapshot(`
+    expect(storage.getMounts("/cache:sub", { parents: true }).map((m) => m.base))
+      .toMatchInlineSnapshot(`
       [
         "cache:sub:",
         "cache:",
@@ -157,6 +149,23 @@ describe("utils", () => {
     expect(await mntStorage.getKeys("foo")).toStrictEqual(["foo:x", "foo:y"]);
   });
 
+  it("prefixStorage watch strips base from callback key", async () => {
+    const storage = createStorage();
+    const pStorage = prefixStorage(storage, "foo");
+    const onChange = vi.fn();
+
+    await pStorage.watch(onChange);
+    await pStorage.setItem("x", "bar");
+    await storage.setItem("foo:y", "baz");
+    await storage.setItem("bar:x", "ignored");
+    await pStorage.removeItem("x");
+
+    expect(onChange).toHaveBeenCalledWith("update", "x");
+    expect(onChange).toHaveBeenCalledWith("update", "y");
+    expect(onChange).toHaveBeenCalledWith("remove", "x");
+    expect(onChange).toHaveBeenCalledTimes(3);
+  });
+
   it("stringify", () => {
     const storage = createStorage();
     expect(async () => await storage.setItem("foo", [])).not.toThrow();
@@ -218,6 +227,8 @@ describe("Regression", () => {
     expect(await pStorage.has("x")).toBe(true);
     expect(await pStorage.get("y")).toBe("bar");
 
+    expect(await pStorage.keys()).toStrictEqual(["x", "y"]);
+
     await pStorage.del("x");
     expect(await pStorage.has("x")).toBe(false);
 
@@ -241,10 +252,7 @@ describe("Regression", () => {
 
       const keys = await storage.getKeys(undefined, { maxDepth: 1 });
 
-      expect(keys.sort()).toMatchObject([
-        "storage_a:file_depth1",
-        "storage_b:file_depth1",
-      ]);
+      expect(keys.sort()).toMatchObject(["storage_a:file_depth1", "storage_b:file_depth1"]);
     } finally {
       await storage.clear();
     }
@@ -273,10 +281,7 @@ describe("Regression", () => {
       { key: "key2", value: "value2" },
     ]);
 
-    const plainResult = await storage.getItems([
-      "namespace:key1",
-      "namespace:key2",
-    ]);
+    const plainResult = await storage.getItems(["namespace:key1", "namespace:key2"]);
     expect(plainResult).toEqual([
       { key: "namespace:key1", value: "value1" },
       { key: "namespace:key2", value: "value2" },

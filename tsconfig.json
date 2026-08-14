@@ -18,12 +18,9 @@
     "noEmit": true,
     "skipLibCheck": true,
     "composite": true,
-    // "isolatedDeclarations": true,
+    "isolatedDeclarations": true,
     "allowImportingTsExtensions": true,
-    "types": ["node", "deno"],
-    "paths": {
-      "unstorage/drivers/*": ["./src/drivers/*.ts"]
-    }
+    "types": ["node", "deno"]
   },
   "include": ["src", "test"]
 }

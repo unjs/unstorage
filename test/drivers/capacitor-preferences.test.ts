@@ -7,9 +7,7 @@ vi.mock("@capacitor/preferences", () => {
   const data = new Map<string, string>();
 
   const keys = vi.fn(() => Promise.resolve({ keys: [...data.keys()] }));
-  const get = vi.fn(({ key }) =>
-    Promise.resolve({ value: data.get(key) ?? null })
-  );
+  const get = vi.fn(({ key }) => Promise.resolve({ value: data.get(key) ?? null }));
   const set = vi.fn(({ key, value }) => Promise.resolve(data.set(key, value)));
   const remove = vi.fn(({ key }) => Promise.resolve(data.delete(key)));
   const clear = vi.fn(() => Promise.resolve(data.clear()));

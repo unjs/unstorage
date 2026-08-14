@@ -14,12 +14,10 @@ Learn more about Capacitor Preferences API.
 
 **Driver name:** `capacitor-preferences`
 
-To use this driver, you need to install and sync `@capacitor/preferences` inside your capacitor project:
+Install and sync `@capacitor/preferences` in your Capacitor project:
 
 :pm-install{name="@capacitor/preferences"}
 :pm-x{command="cap sync"}
-
-Usage:
 
 ```js
 import { createStorage } from "unstorage";
@@ -34,4 +32,5 @@ const storage = createStorage({
 
 **Options:**
 
-- `base`: Add `${base}:` to all keys to avoid collision
+- `base`: Prefixes all keys to avoid collisions.
+- `lib`: An imported `@capacitor/preferences` module or a function that returns it.

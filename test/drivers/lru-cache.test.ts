@@ -17,7 +17,7 @@ describe("drivers: lru-cache with size", () => {
       it("should not store large items", async () => {
         await ctx.storage.setItem(
           "big",
-          "0123456789012345678901234567890123456789012345678901234567890123456789"
+          "0123456789012345678901234567890123456789012345678901234567890123456789",
         );
         expect(await ctx.storage.getItem("big")).toBe(null);
 

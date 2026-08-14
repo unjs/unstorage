@@ -1,4 +1,11 @@
-import { defineDriver, normalizeKey, joinKeys } from "./utils/index.ts";
+import {
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  normalizeKey,
+  joinKeys,
+  type DriverDependencies,
+} from "./utils/index.ts";
 import type { RuntimeCache } from "@vercel/functions";
 
 export interface VercelCacheOptions {
@@ -16,47 +23,54 @@ export interface VercelCacheOptions {
    * Default tags to apply to all cache entries.
    */
   tags?: string[];
+
+  /**
+   * Optionally provide the [`@vercel/functions`](https://www.npmjs.com/package/@vercel/functions)
+   * library to avoid dynamically importing it.
+   *
+   * Only used as a fallback when the runtime cache is not exposed via the Vercel request context.
+   */
+  lib?: LibImport<typeof import("@vercel/functions")>;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "@vercel/functions", version: "^2.2.12 || ^3.0.0", optional: true },
+};
 
 const DRIVER_NAME = "vercel-runtime-cache";
 
-export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
+const driver: DriverFactory<VercelCacheOptions, Promise<RuntimeCache>> = (opts) => {
   const base = normalizeKey(opts?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
 
-  let _cache: RuntimeCache;
+  let _cache: Promise<RuntimeCache> | undefined;
 
-  const getClient = () => {
-    if (!_cache) {
-      _cache = getCache();
-    }
-    return _cache;
-  };
+  const getClient = () => (_cache ??= getCache(opts));
 
   return {
     name: DRIVER_NAME,
     getInstance: getClient,
     async hasItem(key) {
-      const value = await getClient().get(r(key));
+      const value = await (await getClient()).get(r(key));
       return value !== undefined && value !== null;
     },
     async getItem(key) {
-      const value = await getClient().get(r(key));
+      const value = await (await getClient()).get(r(key));
       return value === undefined ? null : value;
     },
     async setItem(key, value, tOptions) {
       const ttl = tOptions?.ttl ?? opts?.ttl;
-      const tags = [...(tOptions?.tags || []), ...(opts?.tags || [])].filter(
-        Boolean
-      );
+      const tags = [...(tOptions?.tags || []), ...(opts?.tags || [])].filter(Boolean);
 
-      await getClient().set(r(key), value, {
+      await (
+        await getClient()
+      ).set(r(key), value, {
         ttl,
         tags,
       });
     },
     async removeItem(key) {
-      await getClient().delete(r(key));
+      await (await getClient()).delete(r(key));
     },
     async getKeys(_base) {
       // Runtime Cache doesn't provide a way to list keys
@@ -66,11 +80,11 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
       // Runtime Cache doesn't provide a way to clear all keys
       // You can only expire by tags
       if (opts?.tags && opts.tags.length > 0) {
-        await getClient().expireTag(opts.tags);
+        await (await getClient()).expireTag(opts.tags);
       }
     },
   };
-});
+};
 
 // --- internal ---
 
@@ -80,9 +94,7 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
 
 type Context = { cache?: RuntimeCache };
 
-const SYMBOL_FOR_REQ_CONTEXT = /*#__PURE__*/ Symbol.for(
-  "@vercel/request-context"
-);
+const SYMBOL_FOR_REQ_CONTEXT = /*#__PURE__*/ Symbol.for("@vercel/request-context");
 
 function getContext(): Context {
   const fromSymbol: typeof globalThis & {
@@ -91,10 +103,17 @@ function getContext(): Context {
   return fromSymbol[SYMBOL_FOR_REQ_CONTEXT]?.get?.() ?? {};
 }
 
-function getCache(): RuntimeCache {
+async function getCache(opts: VercelCacheOptions): Promise<RuntimeCache> {
   const cache =
     getContext()?.cache ||
-    tryRequireVCFunctions()?.getCache?.({
+    (
+      await importLib(
+        DRIVER_NAME,
+        "@vercel/functions",
+        opts?.lib,
+        () => import("@vercel/functions"),
+      )
+    ).getCache?.({
       keyHashFunction: (key) => key,
       namespaceSeparator: ":",
     });
@@ -104,13 +123,4 @@ function getCache(): RuntimeCache {
   return cache;
 }
 
-let _vcFunctionsLib: typeof import("@vercel/functions") | undefined;
-
-function tryRequireVCFunctions() {
-  if (!_vcFunctionsLib) {
-    const { createRequire } =
-      globalThis.process?.getBuiltinModule?.("node:module") || {};
-    _vcFunctionsLib = createRequire?.(import.meta.url)("@vercel/functions");
-  }
-  return _vcFunctionsLib;
-}
+export default driver;

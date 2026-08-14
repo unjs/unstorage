@@ -43,7 +43,7 @@ describe("drivers: cloudflare-r2-binding", async () => {
             atime: expect.any(Date),
             mtime: expect.any(Date),
             size: expect.any(Number),
-          })
+          }),
         );
         const nonExistentMeta = await ctx.storage.getMeta("/s1/nonexistent");
         expect(nonExistentMeta).toEqual({});

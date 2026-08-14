@@ -1,9 +1,6 @@
 // Source: https://github.com/h3js/h3/blob/main/src/utils/internal/path.ts
 
-export function joinURL(
-  base: string | undefined,
-  path: string | undefined
-): string {
+export function joinURL(base: string | undefined, path: string | undefined): string {
   if (!base || base === "/") {
     return path || "/";
   }

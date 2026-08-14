@@ -1,9 +1,8 @@
-/// <reference types="@cloudflare/workers-types" />
-import { defineDriver, joinKeys } from "./utils/index.ts";
+import type * as CF from "@cloudflare/workers-types";
+import { type DriverFactory, joinKeys } from "./utils/index.ts";
 import { getKVBinding } from "./utils/cloudflare.ts";
 export interface KVOptions {
-  binding?: string | KVNamespace;
-
+  binding?: string | CF.KVNamespace;
   /** Adds prefix to all stored keys */
   base?: string;
 
@@ -18,7 +17,7 @@ export interface KVOptions {
 
 const DRIVER_NAME = "cloudflare-kv-binding";
 
-export default defineDriver((opts: KVOptions) => {
+const driver: DriverFactory<KVOptions, CF.KVNamespace<string>> = (opts) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   async function getKeys(base: string = "") {
@@ -30,9 +29,7 @@ export default defineDriver((opts: KVOptions) => {
       const kvList = await binding.list({ prefix: base || undefined, cursor });
 
       keys.push(...kvList.keys);
-      cursor = (kvList.list_complete ? undefined : kvList.cursor) as
-        | string
-        | undefined;
+      cursor = (kvList.list_complete ? undefined : kvList.cursor) as string | undefined;
     } while (cursor);
 
     return keys.map((key) => key.name);
@@ -60,12 +57,10 @@ export default defineDriver((opts: KVOptions) => {
         value,
         topts
           ? {
-              expirationTtl: topts?.ttl
-                ? Math.max(topts.ttl, opts.minTTL ?? 60)
-                : undefined,
+              expirationTtl: topts?.ttl ? Math.max(topts.ttl, opts.minTTL ?? 60) : undefined,
               ...topts,
             }
-          : undefined
+          : undefined,
       );
     },
     removeItem(key) {
@@ -75,7 +70,7 @@ export default defineDriver((opts: KVOptions) => {
     },
     getKeys(base) {
       return getKeys(base).then((keys) =>
-        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key))
+        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key)),
       );
     },
     async clear(base) {
@@ -84,4 +79,6 @@ export default defineDriver((opts: KVOptions) => {
       await Promise.all(keys.map((key) => binding.delete(key)));
     },
   };
-});
+};
+
+export default driver;

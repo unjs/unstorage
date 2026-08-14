@@ -1,5 +1,5 @@
 import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
-import { $fetch } from "ofetch";
+import { fetchRequest } from "./utils/fetch.ts";
 import { withTrailingSlash, joinURL } from "./utils/path.ts";
 
 export interface GithubOptions {
@@ -103,14 +103,13 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
 
       if (!item.body) {
         try {
-          item.body = await $fetch(key.replace(/:/g, "/"), {
+          const res = await fetchRequest(key.replace(/:/g, "/"), {
             baseURL: rawUrl,
-            headers: opts.token
-              ? {
-                  Authorization: `token ${opts.token}`,
-                }
-              : undefined,
+            headers: {
+              Authorization: opts.token ? `token ${opts.token}` : undefined,
+            },
           });
+          item.body = await res.text();
         } catch (error) {
           throw createError("github", `Failed to fetch \`${JSON.stringify(key)}\``, {
             cause: error,
@@ -131,13 +130,17 @@ async function fetchFiles(opts: GithubOptions) {
   const prefix = withTrailingSlash(opts.dir).replace(/^\//, "");
   const files: Record<string, GithubFile> = {};
   try {
-    const trees = await $fetch(`/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`, {
+    const res = await fetchRequest(`/repos/${opts.repo}/git/trees/${opts.branch}`, {
       baseURL: opts.apiURL,
+      query: { recursive: 1 },
       headers: {
         "User-Agent": "unstorage",
-        ...(opts.token && { Authorization: `token ${opts.token}` }),
+        Authorization: opts.token ? `token ${opts.token}` : undefined,
       },
     });
+    const trees = (await res.json()) as {
+      tree: { type: string; path: string; sha: string; mode: string; size: number }[];
+    };
 
     for (const node of trees.tree) {
       if (node.type !== "blob" || !node.path.startsWith(prefix)) {

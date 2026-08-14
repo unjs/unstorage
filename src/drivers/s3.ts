@@ -1,10 +1,13 @@
 import {
   type DriverFactory,
   createRequiredError,
+  importLib,
+  type LibImport,
   normalizeKey,
   createError,
+  type DriverDependencies,
 } from "./utils/index.ts";
-import { AwsClient } from "aws4fetch";
+import type { AwsClient } from "aws4fetch";
 
 export interface S3DriverOptions {
   /**
@@ -42,6 +45,12 @@ export interface S3DriverOptions {
    * Enabled by default to speedup `clear()` operation. Set to `false` if provider is not implementing [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html).
    */
   bulkDelete?: boolean;
+
+  /**
+   * Optionally provide the [`aws4fetch`](https://www.npmjs.com/package/aws4fetch) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("aws4fetch")>;
 }
 
 export interface S3ItemOptions {
@@ -62,12 +71,16 @@ export interface S3ItemOptions {
   };
 }
 
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "aws4fetch", version: "^1.0.20" },
+};
+
 const DRIVER_NAME = "s3";
 
 const driver: DriverFactory<S3DriverOptions> = (options) => {
-  let _awsClient: AwsClient;
-  const getAwsClient = () => {
-    if (!_awsClient) {
+  let _awsClient: Promise<AwsClient> | undefined;
+  const getAwsClient = () =>
+    (_awsClient ??= (async () => {
       if (!options.accessKeyId) {
         throw createRequiredError(DRIVER_NAME, "accessKeyId");
       }
@@ -80,22 +93,26 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
       if (!options.region) {
         throw createRequiredError(DRIVER_NAME, "region");
       }
-      _awsClient = new AwsClient({
+      const { AwsClient } = await importLib(
+        DRIVER_NAME,
+        "aws4fetch",
+        options.lib,
+        () => import("aws4fetch"),
+      );
+      return new AwsClient({
         service: "s3",
         accessKeyId: options.accessKeyId,
         secretAccessKey: options.secretAccessKey,
         region: options.region,
       });
-    }
-    return _awsClient;
-  };
+    })());
 
   const baseURL = `${options.endpoint.replace(/\/$/, "")}/${options.bucket || ""}`;
 
   const url = (key: string = "") => `${baseURL}/${normalizeKey(key, "/")}`;
 
   const awsFetch = async (url: string, opts?: RequestInit) => {
-    const request = await getAwsClient().sign(url, opts);
+    const request = await (await getAwsClient()).sign(url, opts);
     const res = await fetch(request);
     if (!res.ok) {
       if (res.status === 404) {

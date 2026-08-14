@@ -1,7 +1,14 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, relative, join, isAbsolute, matchesGlob } from "node:path";
 import type { FSWatcher, ChokidarOptions } from "chokidar";
-import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
+import {
+  createError,
+  createRequiredError,
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
 import {
   readFile,
   writeFile,
@@ -17,9 +24,21 @@ export interface FSStorageOptions {
   readOnly?: boolean;
   noClear?: boolean;
   watchOptions?: ChokidarOptions;
+
+  /**
+   * Optionally provide the [`chokidar`](https://www.npmjs.com/package/chokidar) library
+   * to avoid dynamically importing it.
+   *
+   * Only used by `watch()`.
+   */
+  lib?: LibImport<typeof import("chokidar")>;
 }
 
 const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "chokidar", version: "^4 || ^5", optional: true },
+};
 
 const DRIVER_NAME = "fs";
 
@@ -118,7 +137,12 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
         return _unwatch;
       }
       await ensuredir(base);
-      const { watch } = await import("chokidar");
+      const { watch } = await importLib(
+        DRIVER_NAME,
+        "chokidar",
+        userOptions.lib,
+        () => import("chokidar"),
+      );
       await new Promise<void>((resolve, reject) => {
         const watchOptions: ChokidarOptions = {
           ignoreInitial: true,

@@ -12,6 +12,10 @@ icon: material-symbols:cached-rounded
 
 Keeps cached data in memory using [LRU Cache](https://www.npmjs.com/package/lru-cache).
 
+Make sure to install the required dependency:
+
+:pm-install{name="lru-cache"}
+
 See [`lru-cache`](https://www.npmjs.com/package/lru-cache) for supported options.
 
 By default, [`max`](https://www.npmjs.com/package/lru-cache#max) setting is set to `1000` items.

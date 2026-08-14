@@ -50,6 +50,13 @@ export function prefixStorage<T extends StorageValue>(
 
   nsStorage.keys = nsStorage.getKeys;
 
+  nsStorage.watch = (callback) =>
+    storage.watch((event, key) => {
+      if (key.startsWith(base)) {
+        return callback(event, key.slice(base.length));
+      }
+    });
+
   nsStorage.getItems = async <U extends T>(
     items: (string | { key: string; options?: TransactionOptions })[],
     commonOptions?: TransactionOptions,

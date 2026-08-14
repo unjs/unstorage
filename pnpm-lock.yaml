@@ -30,8 +30,8 @@ importers:
         specifier: ^8.0.1
         version: 8.0.1(@capacitor/core@8.1.0)
       '@cloudflare/workers-types':
-        specifier: ^4.20260505.1
-        version: 4.20260505.1
+        specifier: ^5.20260811.1
+        version: 5.20260814.1
       '@deno/kv':
         specifier: ^0.13.0
         version: 0.13.0
@@ -169,7 +169,7 @@ importers:
         version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(jsdom@29.1.1)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.27.4)(jiti@2.6.1))
       wrangler:
         specifier: ^4.87.0
-        version: 4.87.0(@cloudflare/workers-types@4.20260505.1)
+        version: 4.87.0(@cloudflare/workers-types@5.20260814.1)
 
 packages:
 
@@ -285,6 +285,7 @@ packages:
 
   '@azure/ms-rest-js@1.11.2':
     resolution: {integrity: sha512-2AyQ1IKmLGKW7DU3/x3TsTBzZLcbC9YRI+yuDPuXAQrv3zar340K9wsxU413kHFIDjkWNCo9T0w5VtwcyWxhbQ==}
+    deprecated: This package has been deprecated in favor of the new Azure SDK packages from [Azure SDK for JavaScript](https://github.com/azure/azure-sdk-for-js).
 
   '@azure/msal-browser@3.30.0':
     resolution: {integrity: sha512-I0XlIGVdM4E9kYP5eTjgW8fgATdzwxJvQ6bm2PNiHaZhEuUz47NYw1xHthC9R+lXz4i9zbShS0VdLyxd7n0GGA==}
@@ -419,8 +420,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20260505.1':
-    resolution: {integrity: sha512-Uz9D2hcwB4/pdnmCU7RsgknY8TQ5st0cQMMN6h/hvWt1TCt99GUkbi6dMgWdP7jXfIfh+S/EI5zQugI9RZn4Bw==}
+  '@cloudflare/workers-types@5.20260814.1':
+    resolution: {integrity: sha512-bF5RT5bmxEaHJR2PRrAmcdf09EPxpRXXzPHcOtjX//r84jZNpwslNwx291ofNdBVuqGV129CBJzxiMYsB37DHw==}
 
   '@colors/colors@1.6.0':
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
@@ -5360,7 +5361,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260430.1':
     optional: true
 
-  '@cloudflare/workers-types@4.20260505.1': {}
+  '@cloudflare/workers-types@5.20260814.1': {}
 
   '@colors/colors@1.6.0': {}
 
@@ -9895,7 +9896,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260430.1
       '@cloudflare/workerd-windows-64': 1.20260430.1
 
-  wrangler@4.87.0(@cloudflare/workers-types@4.20260505.1):
+  wrangler@4.87.0(@cloudflare/workers-types@5.20260814.1):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.5.0
       '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260430.1)
@@ -9906,7 +9907,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       workerd: 1.20260430.1
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20260505.1
+      '@cloudflare/workers-types': 5.20260814.1
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil

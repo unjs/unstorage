@@ -41,7 +41,7 @@
     "@azure/keyvault-secrets": "^4.11.1",
     "@azure/storage-blob": "^12.31.0",
     "@capacitor/preferences": "^8.0.1",
-    "@cloudflare/workers-types": "^4.20260505.1",
+    "@cloudflare/workers-types": "^5.20260811.1",
     "@deno/kv": "^0.13.0",
     "@electric-sql/pglite": "^0.4.5",
     "@libsql/client": "^0.17.3",

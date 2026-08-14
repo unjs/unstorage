@@ -1,4 +1,4 @@
-----
+---
 icon: mdi:microsoft-azure
 ---
 
@@ -18,9 +18,9 @@ Learn more about Azure App Configuration.
 
 This driver uses the configuration store as a key-value store. It uses the `key` as the name and the `value` as content. You can also use labels to differentiate between different environments (dev, prod, etc.) and use prefixes to differentiate between different applications (app01, app02, etc.).
 
-To use it, you will need to install `@azure/app-configuration` and `@azure/identity` in your project:
+Install `@azure/app-configuration`. Also install `@azure/identity` when using `DefaultAzureCredential` instead of a connection string.
 
-:pm-install{name="@azure/app-configuration @azure/identity"}
+:pm-install{name="@azure/app-configuration"}
 
 Usage:
 
@@ -67,9 +67,9 @@ Learn more about Azure Cosmos DB.
 
 This driver stores KV information in a NoSQL API Cosmos DB collection as documents. It uses the `id` field as the key and adds `value` and `modified` fields to the document.
 
-To use it, you will need to install `@azure/cosmos` and `@azure/identity` in your project:
+Install `@azure/cosmos`. Also install `@azure/identity` when using `DefaultAzureCredential` instead of an account key.
 
-:pm-install{name="@azure/cosmos @azure/identity"}
+:pm-install{name="@azure/cosmos"}
 
 Usage:
 
@@ -100,7 +100,7 @@ const storage = createStorage({
 
 ## Azure Key Vault
 
-Store data in a Azure Key Vault secrets.
+Store data as Azure Key Vault secrets.
 
 ### Usage
 
@@ -148,7 +148,7 @@ The driver supports the following authentication methods:
 
 ## Azure Blob Storage
 
-Store data in a Azure blob storage.
+Store data in Azure Blob Storage.
 
 ### Usage
 
@@ -158,11 +158,11 @@ Store data in a Azure blob storage.
 Learn more about Azure blob storage.
 ::
 
-This driver stores KV information in a Azure blob storage blob. The same container is used for all entries. Each entry is stored in a separate blob with the key as the blob name and the value as the blob content.
+The driver uses one container and stores each entry as a separate blob, with the storage key as the blob name.
 
-To use it, you will need to install `@azure/storage-blob` and `@azure/identity` in your project:
+Install `@azure/storage-blob`. Also install `@azure/identity` when using `DefaultAzureCredential`.
 
-:pm-install{name="@azure/storage-blob @azure/identity"}
+:pm-install{name="@azure/storage-blob"}
 
 Please make sure that the container you want to use exists in your storage account.
 
@@ -184,44 +184,42 @@ The driver supports the following authentication methods:
 - **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate. <br>
   ⚠️ Make sure that your Managed Identity or personal account has the `Storage Blob Data Contributor` role assigned to it, even if you already are `Contributor` or `Owner` on the storage account.
 - **`AzureNamedKeyCredential`** (only available in Node.js runtime): This will use the `accountName` and `accountKey` to authenticate the request.
-- **`AzureSASCredential`**: This will use the `accountName` and `sasToken` to authenticate the request.
+- **`AzureSASCredential`**: Uses `accountName` and `sasKey` to authenticate the request.
 - **connection string** (only available in Node.js runtime): This will use the `connectionString` to authenticate the request. This is not recommended as it will expose your account key in plain text.
 
 **Options:**
 
-- **`accountName`** (required): The name of your storage account.
+- `accountName`: Storage account name. Required unless `connectionString` or `sasUrl` is provided.
 - `containerName`: The name of the blob container to use. Defaults to `unstorage`.
 - `accountKey`: The account key to use for authentication. This is only required if you are using `AzureNamedKeyCredential`.
 - `sasKey`: The SAS token to use for authentication. This is only required if you are using `AzureSASCredential`.
 - `sasUrl`: The SAS URL of the storage account. This is an alternative to providing `accountName` and `sasKey` separately. The URL can be either:
   - A storage account URL: `https://<account>.blob.core.windows.net?<sas-token>`
   - A container URL: `https://<account>.blob.core.windows.net/<container>?<sas-token>` you must specify the `containerName` option
-- `connectionString`: The storage accounts' connection string. `accountKey` and `sasKey` take precedence.
+- `connectionString`: Storage account connection string for Node.js.
 - `endpointSuffix`: Storage account endpoint suffix. Needs to be changed for Microsoft Azure operated by 21Vianet, Azure Government or Azurite. Defaults to `.blob.core.windows.net`.
 
 ## Azure Table Storage
 
-Store data in a Azure table storage.
+Store data in Azure Table Storage.
 
 ### Usage
 
 **Driver name:** `azure-storage-table`
 
 ::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables"}
-Learn more about Azure table storage.
+Learn more about Azure Table storage.
 ::
 
 ::warning
 This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
 ::
 
-Store data in a [data-tables]().
+The driver stores all keys in one partition and uses the `unstorageValue` field for values.
 
-This driver stores KV information in a Azure table storage. The same partition key is used for all keys and the field `unstorageValue` is used to store the value.
+Install `@azure/data-tables`. Also install `@azure/identity` when using `DefaultAzureCredential` instead of an account key, SAS key, or connection string.
 
-To use it, you will need to install `@azure/data-table` and `@azure/identity` in your project:
-
-:pm-install{name="@azure/data-table @azure/identity"}
+:pm-install{name="@azure/data-tables"}
 
 Please make sure that the table you want to use exists in your storage account.
 
@@ -240,18 +238,21 @@ const storage = createStorage({
 
 The driver supports the following authentication methods:
 
-- **`DefaultAzureCredential`**: This is the recommended way to authenticate. It will use managed identity or environment variables to authenticate the request. It will also work in a local environment by trying to use Azure CLI or Azure PowerShell to authenticate.
+- **`AzureNamedKeyCredential`** (Node.js only): Uses `accountName` and `accountKey`.
+- **`AzureSASCredential`**: Uses `accountName` and `sasKey`.
+- **Connection string** (Node.js only): Uses `connectionString`. Keep connection strings secret because they contain account credentials.
+- **`DefaultAzureCredential`**: Used when none of the above is set. Uses managed identity, environment variables, the Azure CLI, or Azure PowerShell. Install `@azure/identity` and assign the `Storage Table Data Contributor` role.
 
-  ⚠️ Make sure that your Managed Identity or personal account has the `Storage Table Data Contributor` role assigned to it, even if you already are `Contributor` or `Owner` on the storage account.
-
-- **`AzureNamedKeyCredential`** (only available in Node.js runtime): This will use the `accountName` and `accountKey` to authenticate the request.
-- **`AzureSASCredential`**: This will use the `accountName` and `sasToken` to authenticate the request.
-- **connection string** (only available in Node.js runtime): This will use the `connectionString` to authenticate the request. This is not recommended as it will expose your account key in plain text.
+Options are checked in the order above: `accountKey` takes precedence over `sasKey`, which takes precedence over `connectionString`.
 
 **Options:**
 
-- **`accountName`** (required): The name of your storage account.
-- `tableName`: The name of the table to use. Defaults to `unstorage`.
-- `partitionKey`: The partition key to use. Defaults to `unstorage`.
-- `accountKey`: The account key to use for authentication. This is only required if you are using `AzureNamedKeyCredential`.
--
+- **`accountName`** (required): Storage account name.
+- `tableName`: Table name. Defaults to `unstorage`.
+- `partitionKey`: Partition key shared by all entries. Defaults to `unstorage`.
+- `accountKey`: Account key for `AzureNamedKeyCredential` authentication. Node.js only. Takes precedence over `sasKey` and `connectionString`.
+- `sasKey`: SAS key for `AzureSASCredential` authentication. Takes precedence over `connectionString`.
+- `connectionString`: Connection string for Node.js authentication.
+- `pageSize`: Entries retrieved per request by `getKeys()` and `clear()`. Defaults to `1000`, which is also the maximum.
+- `lib`: An imported `@azure/data-tables` module or a function that returns it.
+- `identityLib`: An imported `@azure/identity` module or a function that returns it.

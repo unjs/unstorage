@@ -1,10 +1,13 @@
 import {
   type DriverFactory,
   createRequiredError,
+  importLib,
+  type LibImport,
   normalizeKey,
   createError,
+  type DriverDependencies,
 } from "./utils/index.ts";
-import { AwsClient } from "aws4fetch";
+import type { AwsClient } from "aws4fetch";
 
 export interface S3DriverOptions {
   /**
@@ -42,6 +45,12 @@ export interface S3DriverOptions {
    * Enabled by default to speedup `clear()` operation. Set to `false` if provider is not implementing [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html).
    */
   bulkDelete?: boolean;
+
+  /**
+   * Optionally provide the [`aws4fetch`](https://www.npmjs.com/package/aws4fetch) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("aws4fetch")>;
 }
 
 export interface S3ItemOptions {
@@ -62,6 +71,10 @@ export interface S3ItemOptions {
   };
 }
 
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "aws4fetch", version: "^1.0.20" },
+};
+
 const DRIVER_NAME = "s3";
 
 /** S3 DeleteObjects API supports max 1000 keys per request. */
@@ -71,9 +84,9 @@ const MAX_BULK_DELETE = 1000;
 const MAX_CONCURRENT_DELETES = 10;
 
 const driver: DriverFactory<S3DriverOptions> = (options) => {
-  let _awsClient: AwsClient;
-  const getAwsClient = () => {
-    if (!_awsClient) {
+  let _awsClient: Promise<AwsClient> | undefined;
+  const getAwsClient = () =>
+    (_awsClient ??= (async () => {
       if (!options.accessKeyId) {
         throw createRequiredError(DRIVER_NAME, "accessKeyId");
       }
@@ -86,22 +99,26 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
       if (!options.region) {
         throw createRequiredError(DRIVER_NAME, "region");
       }
-      _awsClient = new AwsClient({
+      const { AwsClient } = await importLib(
+        DRIVER_NAME,
+        "aws4fetch",
+        options.lib,
+        () => import("aws4fetch"),
+      );
+      return new AwsClient({
         service: "s3",
         accessKeyId: options.accessKeyId,
         secretAccessKey: options.secretAccessKey,
         region: options.region,
       });
-    }
-    return _awsClient;
-  };
+    })());
 
   const baseURL = `${options.endpoint.replace(/\/$/, "")}/${options.bucket || ""}`;
 
   const url = (key: string = "") => `${baseURL}/${normalizeKey(key, "/")}`;
 
   const awsFetch = async (url: string, opts?: RequestInit) => {
-    const request = await getAwsClient().sign(url, opts);
+    const request = await (await getAwsClient()).sign(url, opts);
     const res = await fetch(request);
     if (!res.ok) {
       if (res.status === 404) {
@@ -133,42 +150,40 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
   const listObjects = async (base?: string) => {
-    // Keys are stored with `/` separators (see `url()`) but drivers receive `:` separated bases.
-    // The trailing `/` keeps the prefix on a key boundary so `foo` does not also match `foobar`.
-    const normalizedBase = normalizeKey(base, "/");
-    const prefix = normalizedBase ? `${normalizedBase}/` : undefined;
-
-    const allKeys: string[] = [];
+    // Trailing separator is required to avoid matching sibling prefixes (`foo` should not match `foobar/`)
+    const prefix = normalizeKey(base, "/");
+    const keys: string[] = [];
     let continuationToken: string | undefined;
 
     do {
-      const listURL = `${baseURL}?${encodeQuery({
+      const query = encodeQuery({
         "list-type": "2",
-        prefix,
+        prefix: prefix ? `${prefix}/` : undefined,
         "continuation-token": continuationToken,
-      })}`;
-      const res = await awsFetch(listURL).then((r) => r?.text());
+      });
+
+      const res = await awsFetch(`${baseURL}?${query}`).then((r) => r?.text());
       if (!res) {
         if (continuationToken) {
-          // A missing page mid-pagination would silently truncate the result.
-          throw createError(DRIVER_NAME, `Missing page while listing objects: ${listURL}`);
+          // Bailing out mid-pagination would silently return a partial list
+          throw createError(DRIVER_NAME, `Failed to list objects in ${prefix}`);
         }
-        return null;
+        return [];
       }
 
-      const result = parseListResponse(res);
-      allKeys.push(...result.keys);
-
-      if (result.isTruncated && result.nextContinuationToken === continuationToken) {
+      const result = parseList(res);
+      keys.push(...result.keys);
+      if (result.isTruncated && (!result.nextToken || result.nextToken === continuationToken)) {
+        // Without a fresh token the loop would either truncate silently or spin forever
         throw createError(
           DRIVER_NAME,
-          "S3 returned the same NextContinuationToken twice — pagination is not advancing.",
+          `Truncated listing did not return a new continuation token for ${prefix || baseURL}`,
         );
       }
-      continuationToken = result.isTruncated ? result.nextContinuationToken : undefined;
+      continuationToken = result.isTruncated ? result.nextToken : undefined;
     } while (continuationToken);
 
-    return allKeys.length > 0 ? allKeys : null;
+    return keys;
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
@@ -205,20 +220,18 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
   const deleteObjects = async (base: string) => {
     const keys = await listObjects(base);
-    if (!keys?.length) {
+    if (keys.length === 0) {
       return null;
     }
     if (options.bulkDelete === false) {
-      // Bounded concurrency: process MAX_CONCURRENT_DELETES at a time
       for (let i = 0; i < keys.length; i += MAX_CONCURRENT_DELETES) {
-        const batch = keys.slice(i, i + MAX_CONCURRENT_DELETES);
-        await Promise.all(batch.map((key) => deleteObject(key)));
+        await Promise.all(
+          keys.slice(i, i + MAX_CONCURRENT_DELETES).map((key) => deleteObject(key)),
+        );
       }
     } else {
-      // Chunk into batches of MAX_BULK_DELETE for S3 API limit
       for (let i = 0; i < keys.length; i += MAX_BULK_DELETE) {
-        const chunk = keys.slice(i, i + MAX_BULK_DELETE);
-        const body = deleteKeysReq(chunk);
+        const body = deleteKeysReq(keys.slice(i, i + MAX_BULK_DELETE));
         await awsFetch(`${baseURL}?delete`, {
           method: "POST",
           headers: {
@@ -252,7 +265,7 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
       return headObject(key).then((meta) => !!meta);
     },
     getKeys(base) {
-      return listObjects(base).then((keys) => keys || []);
+      return listObjects(base);
     },
     async removeItem(key) {
       await deleteObject(key);
@@ -276,10 +289,10 @@ function deleteKeysReq(keys: string[]) {
 }
 
 /**
- * Build a query string using RFC3986 encoding.
+ * Build a query string using RFC3986 encoding, skipping undefined values.
  *
- * `URLSearchParams` encodes spaces as `+`, which AWS SigV4 canonicalization encodes as `%20`,
- * producing a signature mismatch for keys containing spaces. Undefined values are skipped.
+ * `URLSearchParams` encodes spaces as `+` while SigV4 canonicalization signs them as `%20`,
+ * which breaks the request signature for prefixes containing spaces.
  */
 function encodeQuery(params: Record<string, string | undefined>) {
   return Object.entries(params)
@@ -295,6 +308,16 @@ function encodeRfc3986(str: string) {
   );
 }
 
+/** Decode the XML entities S3 escapes in element text. */
+function decodeXmlText(str: string) {
+  return str
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
 async function sha256Base64(str: string) {
   const buffer = new TextEncoder().encode(str);
   const hash = await crypto.subtle.digest("SHA-256", buffer);
@@ -303,20 +326,7 @@ async function sha256Base64(str: string) {
   return btoa(binaryString);
 }
 
-function decodeXmlText(s: string): string {
-  return s
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&amp;/g, "&");
-}
-
-function parseListResponse(xml: string): {
-  keys: string[];
-  isTruncated: boolean;
-  nextContinuationToken?: string;
-} {
+function parseList(xml: string) {
   if (!xml.startsWith("<?xml")) {
     throw new Error("Invalid XML");
   }
@@ -324,33 +334,21 @@ function parseListResponse(xml: string): {
   if (!listBucketResult) {
     throw new Error("Missing <ListBucketResult>");
   }
-
+  const contents = listBucketResult.match(/<Contents[^>]*>([\s\S]*?)<\/Contents>/g);
+  const keys = (contents || [])
+    .map((content) => {
+      const key = content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1];
+      // `deleteKeysReq` re-escapes keys, so leaving them encoded would double-escape on delete
+      return key && decodeXmlText(key);
+    })
+    .filter(Boolean) as string[];
+  // Some S3 compatible providers echo <NextContinuationToken> even when not truncated
   const isTruncated =
     listBucketResult.match(/<IsTruncated>([\s\S]*?)<\/IsTruncated>/)?.[1] === "true";
-  const nextContinuationToken = listBucketResult.match(
+  const nextToken = listBucketResult.match(
     /<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/,
   )?.[1];
-
-  if (isTruncated && !nextContinuationToken) {
-    throw new Error(
-      "S3 returned IsTruncated=true but no NextContinuationToken — " +
-        "pagination cannot continue. Check bucket/prefix configuration.",
-    );
-  }
-
-  const contents = listBucketResult.match(/<Contents[^>]*>([\s\S]*?)<\/Contents>/g);
-  const keys = contents
-    ? contents
-        .map((content) => content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1])
-        .filter(Boolean)
-        .map((k) => decodeXmlText(k as string))
-    : [];
-
-  return {
-    keys: keys as string[],
-    isTruncated,
-    nextContinuationToken: nextContinuationToken ? decodeXmlText(nextContinuationToken) : undefined,
-  };
+  return { keys, isTruncated, nextToken: nextToken && decodeXmlText(nextToken) };
 }
 
 export default driver;

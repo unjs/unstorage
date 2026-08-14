@@ -4,17 +4,11 @@ icon: bi:trash3-fill
 
 # Null
 
-> Discards all data.
+> Disable storage by discarding every write.
 
-::warning
-This driver does NOT store any data. It will discard any data written to it and will always return null similar to [`/dev/null`](https://en.wikipedia.org/wiki/Null_device)
-::
+The null driver behaves like [`/dev/null`](https://en.wikipedia.org/wiki/Null_device): writes succeed without storing data, reads return `null`, `hasItem` returns `false`, and `getKeys` returns an empty array.
 
-## Usage
-
-**Driver name:** `null`
-
-```js
+```ts
 import { createStorage } from "unstorage";
 import nullDriver from "unstorage/drivers/null";
 
@@ -22,3 +16,5 @@ const storage = createStorage({
   driver: nullDriver(),
 });
 ```
+
+It is useful as an explicit no-op backend when storage or caching is optional.

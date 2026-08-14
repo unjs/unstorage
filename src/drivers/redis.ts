@@ -123,28 +123,53 @@ const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts) => {
       }
     },
     async setItems(items, commonOptions) {
+      if (items.length === 0) {
+        return;
+      }
+      const client = getRedisClient();
       const defaultTtl = commonOptions?.ttl ?? opts.ttl;
+      const getTtl = (item: (typeof items)[number]) => item.options?.ttl ?? defaultTtl;
+
+      // In cluster mode both `MSET` and pipelines require all keys to hash to the
+      // same slot, so send individual `SET` commands (mirroring `setItem`).
+      if (opts.cluster) {
+        await Promise.all(
+          items.map((item) => {
+            const ttl = getTtl(item);
+            return ttl
+              ? client.set(p(item.key), item.value, "EX", ttl)
+              : client.set(p(item.key), item.value);
+          }),
+        );
+        return;
+      }
+
       // `MSET` cannot set a per-key TTL, so fall back to a pipeline of
       // `SET ... EX` (mirroring `setItem`) whenever a TTL applies; otherwise
       // use a single `MSET` for efficiency.
       const hasTtl = defaultTtl || items.some((item) => item.options?.ttl);
       if (hasTtl) {
-        const pipeline = getRedisClient().pipeline();
+        const pipeline = client.pipeline();
         for (const item of items) {
-          const ttl = item.options?.ttl ?? defaultTtl;
+          const ttl = getTtl(item);
           if (ttl) {
             pipeline.set(p(item.key), item.value, "EX", ttl);
           } else {
             pipeline.set(p(item.key), item.value);
           }
         }
-        await pipeline.exec();
+        // Pipelines resolve with per-command errors instead of rejecting.
+        const results = await pipeline.exec();
+        const error = results?.find(([error]) => error)?.[0];
+        if (error) {
+          throw error;
+        }
       } else {
         const args: string[] = [];
         for (const item of items) {
           args.push(p(item.key), item.value);
         }
-        await getRedisClient().mset(...args);
+        await client.mset(...args);
       }
     },
     async setItemRaw(key, value, tOptions) {

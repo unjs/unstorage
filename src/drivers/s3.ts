@@ -108,32 +108,36 @@ export default defineDriver((options: S3DriverOptions) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
-  const listObjects = async (prefix?: string) => {
+  const listObjects = async (base?: string) => {
+    // Trailing separator is required to avoid matching sibling prefixes (`foo` should not match `foobar/`)
+    const prefix = normalizeKey(base, "/");
     const keys: string[] = [];
     let continuationToken: string | undefined;
 
     do {
-      const params = new URLSearchParams();
-      params.append("list-type", "2");
+      const params = new URLSearchParams({ "list-type": "2" });
       if (prefix) {
-        params.append("prefix", normalizeKey(prefix, "/"));
+        params.set("prefix", `${prefix}/`);
       }
       if (continuationToken) {
-        params.append("continuation-token", continuationToken);
+        params.set("continuation-token", continuationToken);
       }
 
-      const url = `${baseURL}?${params.toString()}`;
-      const res = await awsFetch(url).then((r) => r?.text());
+      const res = await awsFetch(`${baseURL}?${params}`).then((r) => r?.text());
       if (!res) {
-        break;
+        if (continuationToken) {
+          // Bailing out mid-pagination would silently return a partial list
+          throw createError(DRIVER_NAME, `Failed to list objects in ${prefix}`);
+        }
+        return [];
       }
 
       const result = parseList(res);
       keys.push(...result.keys);
-      continuationToken = result.nextToken;
+      continuationToken = result.isTruncated ? result.nextToken : undefined;
     } while (continuationToken);
 
-    return keys.length > 0 ? keys : null;
+    return keys;
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
@@ -161,7 +165,7 @@ export default defineDriver((options: S3DriverOptions) => {
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
   const deleteObjects = async (base: string) => {
     const keys = await listObjects(base);
-    if (!keys?.length) {
+    if (keys.length === 0) {
       return null;
     }
     if (options.bulkDelete === false) {
@@ -200,7 +204,7 @@ export default defineDriver((options: S3DriverOptions) => {
       return headObject(key).then((meta) => !!meta);
     },
     getKeys(base) {
-      return listObjects(base).then((keys) => keys || []);
+      return listObjects(base);
     },
     async removeItem(key) {
       await deleteObject(key);
@@ -244,17 +248,18 @@ function parseList(xml: string) {
   const contents = listBucketResult.match(
     /<Contents[^>]*>([\s\S]*?)<\/Contents>/g
   );
-  if (!contents?.length) {
-    return { keys: [] };
-  }
-  const keys = contents
+  const keys = (contents || [])
     .map((content) => {
       const key = content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1];
       return key;
     })
     .filter(Boolean) as string[];
+  // Some S3 compatible providers echo <NextContinuationToken> even when not truncated
+  const isTruncated =
+    listBucketResult.match(/<IsTruncated>([\s\S]*?)<\/IsTruncated>/)?.[1] ===
+    "true";
   const nextToken = listBucketResult.match(
     /<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/
   )?.[1];
-  return { keys, nextToken };
+  return { keys, isTruncated, nextToken };
 }

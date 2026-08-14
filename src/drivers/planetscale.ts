@@ -31,9 +31,10 @@ export const DRIVER_DEPENDENCIES: DriverDependencies = {
 };
 
 const DRIVER_NAME = "planetscale";
+const DEFAULT_TABLE_NAME = "storage";
 
 const driver: DriverFactory<PlanetscaleDriverOptions, Promise<Connection>> = (opts = {}) => {
-  opts.table = opts.table || "storage";
+  const table = opts.table || DEFAULT_TABLE_NAME;
 
   let _connection: Promise<Connection> | undefined;
   const getConnection = () =>
@@ -63,18 +64,18 @@ const driver: DriverFactory<PlanetscaleDriverOptions, Promise<Connection>> = (op
 
   return {
     name: DRIVER_NAME,
-    options: opts,
+    options: { ...opts, table },
     getInstance: getConnection,
     hasItem: async (key) => {
       const res = await (
         await getConnection()
-      ).execute(`SELECT EXISTS (SELECT 1 FROM ${opts.table} WHERE id = :key) as value;`, { key });
+      ).execute(`SELECT EXISTS (SELECT 1 FROM ${table} WHERE id = :key) as value;`, { key });
       return rows<{ value: string }[]>(res)[0]?.value == "1";
     },
     getItem: async (key) => {
       const res = await (
         await getConnection()
-      ).execute(`SELECT value from ${opts.table} WHERE id=:key;`, {
+      ).execute(`SELECT value from ${table} WHERE id=:key;`, {
         key,
       });
       return rows(res)[0]?.value ?? null;
@@ -83,17 +84,17 @@ const driver: DriverFactory<PlanetscaleDriverOptions, Promise<Connection>> = (op
       await (
         await getConnection()
       ).execute(
-        `INSERT INTO ${opts.table} (id, value) VALUES (:key, :value) ON DUPLICATE KEY UPDATE value = :value;`,
+        `INSERT INTO ${table} (id, value) VALUES (:key, :value) ON DUPLICATE KEY UPDATE value = :value;`,
         { key, value },
       );
     },
     removeItem: async (key) => {
-      await (await getConnection()).execute(`DELETE FROM ${opts.table} WHERE id=:key;`, { key });
+      await (await getConnection()).execute(`DELETE FROM ${table} WHERE id=:key;`, { key });
     },
     getMeta: async (key) => {
       const res = await (
         await getConnection()
-      ).execute(`SELECT created_at, updated_at from ${opts.table} WHERE id=:key;`, { key });
+      ).execute(`SELECT created_at, updated_at from ${table} WHERE id=:key;`, { key });
       return {
         birthtime: rows(res)[0]?.created_at,
         mtime: rows(res)[0]?.updated_at,
@@ -102,11 +103,11 @@ const driver: DriverFactory<PlanetscaleDriverOptions, Promise<Connection>> = (op
     getKeys: async (base = "") => {
       const res = await (
         await getConnection()
-      ).execute(`SELECT id from ${opts.table} WHERE id LIKE :base;`, { base: `${base}%` });
+      ).execute(`SELECT id from ${table} WHERE id LIKE :base;`, { base: `${base}%` });
       return rows(res).map((r) => r.id);
     },
     clear: async () => {
-      await (await getConnection()).execute(`DELETE FROM ${opts.table};`);
+      await (await getConnection()).execute(`DELETE FROM ${table};`);
     },
   };
 };

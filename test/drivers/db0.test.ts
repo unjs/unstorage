@@ -54,6 +54,12 @@ for (const driver of drivers) {
     testDriver({
       driver: () => db0Driver({ database: db }),
       additionalTests: (ctx) => {
+        it("does not mutate input options", () => {
+          const opts = { database: db };
+          const instance = db0Driver(opts);
+          expect(opts).toEqual({ database: db });
+          expect(instance.options?.tableName).toBe("unstorage");
+        });
         it("meta", async () => {
           await ctx.storage.setItem("meta:test", "test_data");
 

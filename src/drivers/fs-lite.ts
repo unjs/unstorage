@@ -19,7 +19,7 @@ const driver: DriverFactory<FSStorageOptions> = (opts = {}) => {
     throw createRequiredError(DRIVER_NAME, "base");
   }
 
-  opts.base = resolve(opts.base);
+  const base = resolve(opts.base);
   const r = (key: string) => {
     if (PATH_TRAVERSE_RE.test(key)) {
       throw createError(
@@ -27,13 +27,13 @@ const driver: DriverFactory<FSStorageOptions> = (opts = {}) => {
         `Invalid key: ${JSON.stringify(key)}. It should not contain .. segments`,
       );
     }
-    const resolved = join(opts.base!, key.replace(/:/g, "/"));
+    const resolved = join(base, key.replace(/:/g, "/"));
     return resolved;
   };
 
   return {
     name: DRIVER_NAME,
-    options: opts,
+    options: { ...opts, base },
     flags: {
       maxDepth: true,
     },

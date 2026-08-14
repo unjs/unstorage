@@ -1,11 +1,5 @@
-import {
-  createError,
-  createRequiredError,
-  type DriverFactory,
-  importLib,
-  type LibImport,
-  type DriverDependencies,
-} from "./utils/index.ts";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
+import { fetchRequest } from "./utils/fetch.ts";
 import { withTrailingSlash, joinURL } from "./utils/path.ts";
 
 export interface GithubOptions {
@@ -39,11 +33,6 @@ export interface GithubOptions {
    * @default "https://raw.githubusercontent.com"
    */
   cdnURL?: string;
-  /**
-   * Optionally provide the [`ofetch`](https://www.npmjs.com/package/ofetch) library
-   * to avoid dynamically importing it.
-   */
-  lib?: LibImport<typeof import("ofetch")>;
 }
 
 interface GithubFile {
@@ -62,10 +51,6 @@ const defaultOptions: GithubOptions = {
   dir: "",
   apiURL: "https://api.github.com",
   cdnURL: "https://raw.githubusercontent.com",
-};
-
-export const DRIVER_DEPENDENCIES: DriverDependencies = {
-  lib: { name: "ofetch", version: "^1" },
 };
 
 const DRIVER_NAME = "github";
@@ -117,16 +102,14 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
       }
 
       if (!item.body) {
-        const { $fetch } = await importLib(DRIVER_NAME, "ofetch", opts.lib, () => import("ofetch"));
         try {
-          item.body = await $fetch(key.replace(/:/g, "/"), {
+          const res = await fetchRequest(key.replace(/:/g, "/"), {
             baseURL: rawUrl,
-            headers: opts.token
-              ? {
-                  Authorization: `token ${opts.token}`,
-                }
-              : undefined,
+            headers: {
+              Authorization: opts.token ? `token ${opts.token}` : undefined,
+            },
           });
+          item.body = await res.text();
         } catch (error) {
           throw createError("github", `Failed to fetch \`${JSON.stringify(key)}\``, {
             cause: error,
@@ -146,15 +129,18 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
 async function fetchFiles(opts: GithubOptions) {
   const prefix = withTrailingSlash(opts.dir).replace(/^\//, "");
   const files: Record<string, GithubFile> = {};
-  const { $fetch } = await importLib(DRIVER_NAME, "ofetch", opts.lib, () => import("ofetch"));
   try {
-    const trees = await $fetch(`/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`, {
+    const res = await fetchRequest(`/repos/${opts.repo}/git/trees/${opts.branch}`, {
       baseURL: opts.apiURL,
+      query: { recursive: 1 },
       headers: {
         "User-Agent": "unstorage",
-        ...(opts.token && { Authorization: `token ${opts.token}` }),
+        Authorization: opts.token ? `token ${opts.token}` : undefined,
       },
     });
+    const trees = (await res.json()) as {
+      tree: { type: string; path: string; sha: string; mode: string; size: number }[];
+    };
 
     for (const node of trees.tree) {
       if (node.type !== "blob" || !node.path.startsWith(prefix)) {

@@ -1,43 +1,22 @@
 import type { TransactionOptions } from "../types.ts";
-import {
-  type DriverFactory,
-  importLib,
-  type LibImport,
-  type DriverDependencies,
-} from "./utils/index.ts";
-import type { $Fetch, FetchError } from "ofetch";
+import { type DriverFactory } from "./utils/index.ts";
+import { FetchError, fetchRequest } from "./utils/fetch.ts";
 import { joinURL } from "./utils/path.ts";
 
 export interface HTTPOptions {
   base: string;
   headers?: Record<string, string>;
-
-  /**
-   * Optionally provide the [`ofetch`](https://www.npmjs.com/package/ofetch) library
-   * to avoid dynamically importing it.
-   */
-  lib?: LibImport<typeof import("ofetch")>;
 }
-
-export const DRIVER_DEPENDENCIES: DriverDependencies = {
-  lib: { name: "ofetch", version: "^1" },
-};
 
 const DRIVER_NAME = "http";
 
-const driver: DriverFactory<HTTPOptions, Promise<$Fetch>> = (opts) => {
+const driver: DriverFactory<HTTPOptions> = (opts) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
-
-  let _fetchPromise: Promise<$Fetch> | undefined;
-  const getFetch = () =>
-    (_fetchPromise ??= importLib(DRIVER_NAME, "ofetch", opts.lib, () => import("ofetch")).then(
-      (lib) => lib.$fetch,
-    ));
 
   const rBase = (key: string = "") => joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
 
-  const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
-    if (error?.response?.status === 404) {
+  const catchFetchError = (error: unknown, fallbackVal: any = null) => {
+    if (error instanceof FetchError && error.status === 404) {
       return fallbackVal;
     }
     throw error;
@@ -61,36 +40,28 @@ const driver: DriverFactory<HTTPOptions, Promise<$Fetch>> = (opts) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    getInstance: getFetch,
     async hasItem(key, topts) {
-      const _fetch = await getFetch();
-      return _fetch(r(key), {
+      return fetchRequest(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
       })
         .then(() => true)
-        .catch((err) => catchFetchError(err, false));
+        .catch((error) => catchFetchError(error, false));
     },
     async getItem(key, tops) {
-      const _fetch = await getFetch();
-      const value = await _fetch(r(key), {
+      const res = await fetchRequest(r(key), {
         headers: getHeaders(tops),
       }).catch(catchFetchError);
-      return value;
+      return res ? await res.text() : null;
     },
     async getItemRaw(key, topts) {
-      const _fetch = await getFetch();
-      const response = await _fetch
-        .raw(r(key), {
-          responseType: "arrayBuffer",
-          headers: getHeaders(topts, { accept: "application/octet-stream" }),
-        })
-        .catch(catchFetchError);
-      return response._data;
+      const res = await fetchRequest(r(key), {
+        headers: getHeaders(topts, { accept: "application/octet-stream" }),
+      }).catch(catchFetchError);
+      return res ? await res.arrayBuffer() : null;
     },
     async getMeta(key, topts) {
-      const _fetch = await getFetch();
-      const res = await _fetch.raw(r(key), {
+      const res = await fetchRequest(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
       });
@@ -111,16 +82,14 @@ const driver: DriverFactory<HTTPOptions, Promise<$Fetch>> = (opts) => {
       };
     },
     async setItem(key, value, topts) {
-      const _fetch = await getFetch();
-      await _fetch(r(key), {
+      await fetchRequest(r(key), {
         method: "PUT",
         body: value,
         headers: getHeaders(topts),
       });
     },
     async setItemRaw(key, value, topts) {
-      const _fetch = await getFetch();
-      await _fetch(r(key), {
+      await fetchRequest(r(key), {
         method: "PUT",
         body: value,
         headers: getHeaders(topts, {
@@ -129,22 +98,20 @@ const driver: DriverFactory<HTTPOptions, Promise<$Fetch>> = (opts) => {
       });
     },
     async removeItem(key, topts) {
-      const _fetch = await getFetch();
-      await _fetch(r(key), {
+      await fetchRequest(r(key), {
         method: "DELETE",
         headers: getHeaders(topts),
       });
     },
     async getKeys(base, topts) {
-      const _fetch = await getFetch();
-      const value = await _fetch(rBase(base), {
+      const res = await fetchRequest(rBase(base), {
         headers: getHeaders(topts),
       });
+      const value = await res.json();
       return Array.isArray(value) ? value : [];
     },
     async clear(base, topts) {
-      const _fetch = await getFetch();
-      await _fetch(rBase(base), {
+      await fetchRequest(rBase(base), {
         method: "DELETE",
         headers: getHeaders(topts),
       });

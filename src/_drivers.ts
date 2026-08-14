@@ -196,12 +196,6 @@ export const builtinDriverDependencies: Partial<Record<BuiltinDriverName, Driver
   "capacitorPreferences": {
     lib: { name: "@capacitor/preferences", version: "^6 || ^7 || ^8" },
   },
-  "cloudflare-kv-http": {
-    lib: { name: "ofetch", version: "^1" },
-  },
-  "cloudflareKVHttp": {
-    lib: { name: "ofetch", version: "^1" },
-  },
   "db0": {
     database: { name: "db0", version: ">=0.3.4" },
   },
@@ -213,12 +207,6 @@ export const builtinDriverDependencies: Partial<Record<BuiltinDriverName, Driver
   },
   "fs": {
     lib: { name: "chokidar", version: "^4 || ^5", optional: true },
-  },
-  "github": {
-    lib: { name: "ofetch", version: "^1" },
-  },
-  "http": {
-    lib: { name: "ofetch", version: "^1" },
   },
   "indexedb": {
     lib: { name: "idb-keyval", version: "^6.2.2" },

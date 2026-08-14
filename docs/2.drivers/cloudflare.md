@@ -66,10 +66,6 @@ You need to create a KV namespace. See [KV Bindings](https://developers.cloudfla
 
 **Note:** This driver uses native fetch and works universally! For a direct usage in a cloudflare worker environment, please use `cloudflare-kv-binding` driver for best performance!
 
-Make sure to install the required dependency:
-
-:pm-install{name="ofetch"}
-
 ```js
 import { createStorage } from "unstorage";
 import cloudflareKVHTTPDriver from "unstorage/drivers/cloudflare-kv-http";

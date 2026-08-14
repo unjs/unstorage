@@ -29,9 +29,12 @@ const storage = createStorage({
 
 **Options:**
 
-- `base`: Base directory to isolate operations on this directory
-- `ignore`: Ignore patterns for watch <!-- and key listing -->
+- `base` (**required**): Directory used as the storage root.
+- `ignore`: Glob patterns ignored by watching and key listing.
+- `readOnly`: Disables write and removal operations.
+- `noClear`: Disables clearing.
 - `watchOptions`: Additional [chokidar](https://github.com/paulmillr/chokidar) options.
+- `lib`: An imported `chokidar` module or a function that returns it.
 
 ## Node.js Filesystem (Lite)
 
@@ -48,5 +51,7 @@ const storage = createStorage({
 
 **Options:**
 
-- `base`: Base directory to isolate operations on this directory
-- `ignore`: Optional callback function `(path: string) => boolean`
+- `base` (**required**): Directory used as the storage root.
+- `ignore`: Optional callback `(path: string) => boolean`.
+- `readOnly`: Disables write and removal operations.
+- `noClear`: Disables clearing.

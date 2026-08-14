@@ -6,7 +6,7 @@ icon: teenyicons:netlify-solid
 
 > Store data in Netlify Blobs.
 
-Store data in a [Netlify Blobs](https://docs.netlify.com/blobs/overview/) store. This is supported in both [edge](#using-in-netlify-edge) and Node.js function runtimes, as well as during builds.
+Store data in a [Netlify Blobs](https://docs.netlify.com/blobs/overview/) store. This is supported in both [edge](#using-in-netlify-edge-functions) and Node.js function runtimes, as well as during builds.
 
 ::read-more{title="Netlify Blobs" to="https://docs.netlify.com/blobs/overview/"}
 ::
@@ -73,12 +73,11 @@ These are not normally needed, but are available for advanced use cases or for u
 
 When using Unstorage in a Netlify edge function you should use a URL import. This does not apply if you are compiling your code in a framework - just if you are creating your own edge functions.
 
-```js
+```ts
 import { createStorage } from "https://esm.sh/unstorage";
 import netlifyBlobsDriver from "https://esm.sh/unstorage/drivers/netlify-blobs";
 
 export default async function handler(request: Request) {
-
   const storage = createStorage({
     driver: netlifyBlobsDriver({
       name: "blob-store-name",

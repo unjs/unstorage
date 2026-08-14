@@ -1,4 +1,8 @@
 packages: []
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: false
+  vue-demi: false
 ignoredBuiltDependencies:
   - "@parcel/watcher"
   - "@tailwindcss/oxide"

@@ -4,13 +4,13 @@ icon: ph:database
 
 # SQL Database
 
-> Store data in any SQL database.
+> Store data in a supported SQL database through db0.
 
 ## Usage
 
 **Driver name:** `db0`
 
-This driver stores KV data in any SQL database using [db0](https://db0.unjs.io).
+This driver stores key-value data through [db0](https://db0.unjs.io). It supports db0 connections using the `sqlite`, `libsql`, `postgresql`, and `mysql` dialects.
 
 ::warning
 Database driver is experimental and behavior may change in the future.
@@ -46,8 +46,7 @@ const storage = createStorage({
 ```
 
 ::tip
-The database table is automatically created, no additional setup is required! <br>
-Before first operation, driver ensures a table with columns of `id`, `value`, `blob`, `created_at` and `updated_at` exist.
+No manual schema setup is required. Before the first operation, the driver creates a table with `key`, `value`, `blob`, `created_at`, and `updated_at` columns when it does not already exist.
 ::
 
 **Options:**

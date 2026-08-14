@@ -208,7 +208,7 @@ Store data in Azure Table Storage.
 **Driver name:** `azure-storage-table`
 
 ::note{to="https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/tables/data-tables"}
-Learn more about Azure table storage.
+Learn more about Azure Table storage.
 ::
 
 ::warning
@@ -238,18 +238,20 @@ const storage = createStorage({
 
 The driver supports the following authentication methods:
 
-- **`DefaultAzureCredential`**: Uses managed identity, environment variables, the Azure CLI, or Azure PowerShell. Install `@azure/identity` and assign the `Storage Table Data Contributor` role.
 - **`AzureNamedKeyCredential`** (Node.js only): Uses `accountName` and `accountKey`.
 - **`AzureSASCredential`**: Uses `accountName` and `sasKey`.
 - **Connection string** (Node.js only): Uses `connectionString`. Keep connection strings secret because they contain account credentials.
+- **`DefaultAzureCredential`**: Used when none of the above is set. Uses managed identity, environment variables, the Azure CLI, or Azure PowerShell. Install `@azure/identity` and assign the `Storage Table Data Contributor` role.
+
+Options are checked in the order above: `accountKey` takes precedence over `sasKey`, which takes precedence over `connectionString`.
 
 **Options:**
 
 - **`accountName`** (required): Storage account name.
 - `tableName`: Table name. Defaults to `unstorage`.
 - `partitionKey`: Partition key shared by all entries. Defaults to `unstorage`.
-- `accountKey`: Account key for `AzureNamedKeyCredential` authentication.
-- `sasKey`: SAS key for `AzureSASCredential` authentication.
+- `accountKey`: Account key for `AzureNamedKeyCredential` authentication. Node.js only. Takes precedence over `sasKey` and `connectionString`.
+- `sasKey`: SAS key for `AzureSASCredential` authentication. Takes precedence over `connectionString`.
 - `connectionString`: Connection string for Node.js authentication.
 - `pageSize`: Entries retrieved per request by `getKeys()` and `clear()`. Defaults to `1000`, which is also the maximum.
 - `lib`: An imported `@azure/data-tables` module or a function that returns it.

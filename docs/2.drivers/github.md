@@ -4,13 +4,13 @@ icon: mdi:github
 
 # GitHub
 
-> Map files from a remote GitHub repository (readonly).
+> Read files from a remote GitHub repository.
 
 ## Usage
 
 **Driver name:** `github`
 
-This driver fetches all possible keys once and keep it in cache for 10 minutes. Due to GitHub rate limit, it is highly recommended to provide a token. It only applies to fetching keys.
+This read-only driver fetches the repository file list and caches it for 10 minutes by default. Providing a token is strongly recommended to avoid GitHub API rate limits. File contents are fetched separately from the raw content URL, using the same token.
 
 ```js
 import { createStorage } from "unstorage";
@@ -27,13 +27,13 @@ const storage = createStorage({
 
 **Options:**
 
-- `repo`: GitHub repository. Format is `username/repo` or `org/repo` **(required)**
-- `token`: GitHub API token. **(recommended)**
-- `branch`: Target branch. Default is `main`
-- `dir`: Use a directory as driver root.
-- `ttl`: Filenames cache revalidate time. Default is `600` seconds (10 minutes)
-- `apiURL`: GitHub API domain. Default is `https://api.github.com`
-- `cdnURL`: GitHub RAW CDN Url. Default is `https://raw.githubusercontent.com`
+- `repo` (**required**): Repository in `owner/name` format.
+- `token` (recommended): GitHub API token.
+- `branch`: Target branch. Defaults to `main`.
+- `dir`: Directory to use as the driver root.
+- `ttl`: File-list cache duration in seconds. Defaults to `600` (10 minutes).
+- `apiURL`: GitHub API base URL. Defaults to `https://api.github.com`.
+- `cdnURL`: Raw content base URL. Defaults to `https://raw.githubusercontent.com`.
 
 ## Private repositories
 

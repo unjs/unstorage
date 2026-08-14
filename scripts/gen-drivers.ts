@@ -1,8 +1,9 @@
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { findTypeExports } from "mlly";
 import { camelCase, upperFirst } from "scule";
+import type { DriverDependencies } from "../src/types.ts";
 
 const driversDir = fileURLToPath(new URL("../src/drivers", import.meta.url));
 
@@ -19,6 +20,7 @@ const drivers: {
   subpath: string;
   optionsTExport?: string;
   optionsTName?: string;
+  dependencies?: DriverDependencies;
 }[] = [];
 
 for (const entry of driverEntries) {
@@ -37,6 +39,11 @@ for (const entry of driverEntries) {
 
   const optionsTName = upperFirst(safeName) + "Options";
 
+  // Drivers only import their third-party libraries dynamically, so this is safe to load.
+  const { DRIVER_DEPENDENCIES: dependencies } = contents.includes("DRIVER_DEPENDENCIES")
+    ? await import(pathToFileURL(fullPath).href)
+    : { DRIVER_DEPENDENCIES: undefined };
+
   drivers.push({
     name,
     safeName,
@@ -44,11 +51,14 @@ for (const entry of driverEntries) {
     subpath,
     optionsTExport,
     optionsTName,
+    dependencies,
   });
 }
 
 const genCode = /* ts */ `// Auto-generated using scripts/gen-drivers.
 // Do not manually edit!
+
+import type { DriverDependencies } from "./types.ts";
 
 ${drivers
   .filter((d) => d.optionsTExport)
@@ -73,6 +83,29 @@ export type BuiltinDriverOptions = {
 export const builtinDrivers = {
   ${drivers.flatMap((d) => d.names.map((name) => `"${name}": "${d.subpath}"`)).join(",\n  ")},
 } as const;
+
+/**
+ * Third-party packages each built-in driver dynamically imports, keyed by the driver
+ * option that can be used to provide them (usually \`lib\`).
+ *
+ * Drivers not listed here have no third-party dependencies.
+ */
+export const builtinDriverDependencies: Partial<Record<BuiltinDriverName, DriverDependencies>> = {
+  ${drivers
+    .filter((d) => d.dependencies)
+    .flatMap((d) =>
+      d.names.map(
+        (name) =>
+          `"${name}": {\n    ${Object.entries(d.dependencies!)
+            .map(
+              ([option, dep]) =>
+                `${option}: { name: "${dep.name}", version: "${dep.version}"${dep.optional ? ", optional: true" : ""} },`,
+            )
+            .join("\n    ")}\n  }`,
+      ),
+    )
+    .join(",\n  ")},
+};
 `;
 
 await writeFile(driversMetaFile, genCode, "utf8");

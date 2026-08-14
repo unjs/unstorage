@@ -16,6 +16,10 @@ Supports built-in [http server](/guide/http-server) methods.
 
 This driver implements meta for each key including `mtime` (last modified time) and `status` from HTTP headers by making a `HEAD` request.
 
+Make sure to install the required dependency:
+
+:pm-install{name="ofetch"}
+
 ```js
 import { createStorage } from "unstorage";
 import httpDriver from "unstorage/drivers/http";

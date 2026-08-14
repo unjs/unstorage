@@ -1,6 +1,8 @@
 // Auto-generated using scripts/gen-drivers.
 // Do not manually edit!
 
+import type { DriverDependencies } from "./types.ts";
+
 import type { AzureAppConfigurationOptions } from "unstorage/drivers/azure-app-configuration";
 import type { AzureCosmosOptions } from "unstorage/drivers/azure-cosmos";
 import type { AzureKeyVaultOptions } from "unstorage/drivers/azure-key-vault";
@@ -140,3 +142,127 @@ export const builtinDrivers = {
   "vercel-runtime-cache": "unstorage/drivers/vercel-runtime-cache",
   "vercelRuntimeCache": "unstorage/drivers/vercel-runtime-cache",
 } as const;
+
+/**
+ * Third-party packages each built-in driver dynamically imports, keyed by the driver
+ * option that can be used to provide them (usually `lib`).
+ *
+ * Drivers not listed here have no third-party dependencies.
+ */
+export const builtinDriverDependencies: Partial<Record<BuiltinDriverName, DriverDependencies>> = {
+  "azure-app-configuration": {
+    lib: { name: "@azure/app-configuration", version: "^1.11.0" },
+    identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+  },
+  "azureAppConfiguration": {
+    lib: { name: "@azure/app-configuration", version: "^1.11.0" },
+    identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+  },
+  "azure-cosmos": {
+    lib: { name: "@azure/cosmos", version: "^4.9.1" },
+    identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+  },
+  "azureCosmos": {
+    lib: { name: "@azure/cosmos", version: "^4.9.1" },
+    identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+  },
+  "azure-key-vault": {
+    lib: { name: "@azure/keyvault-secrets", version: "^4.10.0" },
+    identityLib: { name: "@azure/identity", version: "^4.13.0" },
+  },
+  "azureKeyVault": {
+    lib: { name: "@azure/keyvault-secrets", version: "^4.10.0" },
+    identityLib: { name: "@azure/identity", version: "^4.13.0" },
+  },
+  "azure-storage-blob": {
+    lib: { name: "@azure/storage-blob", version: "^12.31.0" },
+    identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+  },
+  "azureStorageBlob": {
+    lib: { name: "@azure/storage-blob", version: "^12.31.0" },
+    identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+  },
+  "azure-storage-table": {
+    lib: { name: "@azure/data-tables", version: "^13.3.2" },
+    identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+  },
+  "azureStorageTable": {
+    lib: { name: "@azure/data-tables", version: "^13.3.2" },
+    identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+  },
+  "capacitor-preferences": {
+    lib: { name: "@capacitor/preferences", version: "^6 || ^7 || ^8" },
+  },
+  "capacitorPreferences": {
+    lib: { name: "@capacitor/preferences", version: "^6 || ^7 || ^8" },
+  },
+  "cloudflare-kv-http": {
+    lib: { name: "ofetch", version: "^1" },
+  },
+  "cloudflareKVHttp": {
+    lib: { name: "ofetch", version: "^1" },
+  },
+  "db0": {
+    database: { name: "db0", version: ">=0.3.4" },
+  },
+  "deno-kv-node": {
+    lib: { name: "@deno/kv", version: ">=0.14.0" },
+  },
+  "denoKVNode": {
+    lib: { name: "@deno/kv", version: ">=0.14.0" },
+  },
+  "fs": {
+    lib: { name: "chokidar", version: "^4 || ^5", optional: true },
+  },
+  "github": {
+    lib: { name: "ofetch", version: "^1" },
+  },
+  "http": {
+    lib: { name: "ofetch", version: "^1" },
+  },
+  "indexedb": {
+    lib: { name: "idb-keyval", version: "^6.2.2" },
+  },
+  "lru-cache": {
+    lib: { name: "lru-cache", version: "^11.2.6" },
+  },
+  "lruCache": {
+    lib: { name: "lru-cache", version: "^11.2.6" },
+  },
+  "mongodb": {
+    lib: { name: "mongodb", version: "^6 || ^7" },
+  },
+  "netlify-blobs": {
+    lib: { name: "@netlify/blobs", version: "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0" },
+  },
+  "netlifyBlobs": {
+    lib: { name: "@netlify/blobs", version: "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0" },
+  },
+  "planetscale": {
+    lib: { name: "@planetscale/database", version: "^1.19.0" },
+  },
+  "redis": {
+    lib: { name: "ioredis", version: "^5.9.3 || ^6" },
+  },
+  "s3": {
+    lib: { name: "aws4fetch", version: "^1.0.20" },
+  },
+  "uploadthing": {
+    lib: { name: "uploadthing", version: "^7.7.4" },
+  },
+  "upstash": {
+    lib: { name: "@upstash/redis", version: "^1.36.2" },
+  },
+  "vercel-blob": {
+    lib: { name: "@vercel/blob", version: ">=0.27.3" },
+  },
+  "vercelBlob": {
+    lib: { name: "@vercel/blob", version: ">=0.27.3" },
+  },
+  "vercel-runtime-cache": {
+    lib: { name: "@vercel/functions", version: "^2.2.12 || ^3.0.0", optional: true },
+  },
+  "vercelRuntimeCache": {
+    lib: { name: "@vercel/functions", version: "^2.2.12 || ^3.0.0", optional: true },
+  },
+};

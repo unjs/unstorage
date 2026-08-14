@@ -12,6 +12,10 @@ icon: ph:file-light
 
 Maps data to the real filesystem using directory structure for nested keys. Supports watching using [chokidar](https://github.com/paulmillr/chokidar).
 
+Watching requires `chokidar` to be installed (all other operations work without it):
+
+:pm-install{name="chokidar"}
+
 This driver implements meta for each key including `mtime` (last modified time), `atime` (last access time), and `size` (file size) using `fs.stat`.
 
 ```js

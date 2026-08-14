@@ -1,17 +1,38 @@
 import type { TransactionOptions } from "../types.ts";
-import { type DriverFactory } from "./utils/index.ts";
-import { type FetchError, $fetch as _fetch } from "ofetch";
+import {
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
+import type { $Fetch, FetchError } from "ofetch";
 import { joinURL } from "./utils/path.ts";
 
 export interface HTTPOptions {
   base: string;
   headers?: Record<string, string>;
+
+  /**
+   * Optionally provide the [`ofetch`](https://www.npmjs.com/package/ofetch) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("ofetch")>;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "ofetch", version: "^1" },
+};
 
 const DRIVER_NAME = "http";
 
-const driver: DriverFactory<HTTPOptions> = (opts) => {
+const driver: DriverFactory<HTTPOptions, Promise<$Fetch>> = (opts) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
+
+  let _fetchPromise: Promise<$Fetch> | undefined;
+  const getFetch = () =>
+    (_fetchPromise ??= importLib(DRIVER_NAME, "ofetch", opts.lib, () => import("ofetch")).then(
+      (lib) => lib.$fetch,
+    ));
 
   const rBase = (key: string = "") => joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
 
@@ -40,7 +61,9 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    hasItem(key, topts) {
+    getInstance: getFetch,
+    async hasItem(key, topts) {
+      const _fetch = await getFetch();
       return _fetch(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
@@ -49,12 +72,14 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
         .catch((err) => catchFetchError(err, false));
     },
     async getItem(key, tops) {
+      const _fetch = await getFetch();
       const value = await _fetch(r(key), {
         headers: getHeaders(tops),
       }).catch(catchFetchError);
       return value;
     },
     async getItemRaw(key, topts) {
+      const _fetch = await getFetch();
       const response = await _fetch
         .raw(r(key), {
           responseType: "arrayBuffer",
@@ -64,6 +89,7 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
       return response._data;
     },
     async getMeta(key, topts) {
+      const _fetch = await getFetch();
       const res = await _fetch.raw(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
@@ -85,6 +111,7 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
       };
     },
     async setItem(key, value, topts) {
+      const _fetch = await getFetch();
       await _fetch(r(key), {
         method: "PUT",
         body: value,
@@ -92,6 +119,7 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
       });
     },
     async setItemRaw(key, value, topts) {
+      const _fetch = await getFetch();
       await _fetch(r(key), {
         method: "PUT",
         body: value,
@@ -101,18 +129,21 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
       });
     },
     async removeItem(key, topts) {
+      const _fetch = await getFetch();
       await _fetch(r(key), {
         method: "DELETE",
         headers: getHeaders(topts),
       });
     },
     async getKeys(base, topts) {
+      const _fetch = await getFetch();
       const value = await _fetch(rBase(base), {
         headers: getHeaders(topts),
       });
       return Array.isArray(value) ? value : [];
     },
     async clear(base, topts) {
+      const _fetch = await getFetch();
       await _fetch(rBase(base), {
         method: "DELETE",
         headers: getHeaders(topts),

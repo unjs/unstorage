@@ -68,7 +68,7 @@ Deno provides [`@deno/kv`](https://www.npmjs.com/package/@deno/kv) npm package, 
 - Create ephemeral in-memory KV instances backed by SQLite memory files or by a
   lightweight JS-only implementation for testing.
 
-Install `@deno/kv` peer dependency:
+Install the `@deno/kv` dependency:
 
 :pm-install{name="@deno/kv"}
 

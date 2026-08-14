@@ -1,5 +1,13 @@
-import { $fetch } from "ofetch";
-import { createError, createRequiredError, type DriverFactory, joinKeys } from "./utils/index.ts";
+import type { $Fetch } from "ofetch";
+import {
+  createError,
+  createRequiredError,
+  type DriverFactory,
+  importLib,
+  joinKeys,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
 
 interface KVAuthAPIToken {
   /**
@@ -57,6 +65,11 @@ export type KVHTTPOptions = {
    * The default is 60 seconds as per Cloudflare's [documentation](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
    */
   minTTL?: number;
+  /**
+   * Optionally provide the [`ofetch`](https://www.npmjs.com/package/ofetch) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("ofetch")>;
 } & (KVAuthServiceKey | KVAuthAPIToken | KVAuthEmailKey);
 
 type CloudflareAuthorizationHeaders =
@@ -78,6 +91,10 @@ type CloudflareAuthorizationHeaders =
       "X-Auth-User-Service-Key"?: string;
       Authorization: `Bearer ${string}`;
     };
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "ofetch", version: "^1" },
+};
 
 const DRIVER_NAME = "cloudflare-kv-http";
 
@@ -106,13 +123,17 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
 
   const apiURL = opts.apiURL || "https://api.cloudflare.com";
   const baseURL = `${apiURL}/client/v4/accounts/${opts.accountId}/storage/kv/namespaces/${opts.namespaceId}`;
-  const kvFetch = $fetch.create({ baseURL, headers });
+  let _kvFetch: Promise<$Fetch> | undefined;
+  const getKvFetch = () =>
+    (_kvFetch ??= importLib(DRIVER_NAME, "ofetch", opts.lib, () => import("ofetch")).then((lib) =>
+      lib.$fetch.create({ baseURL, headers }),
+    ));
 
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   const hasItem = async (key: string) => {
     try {
-      const res = await kvFetch(`/metadata/${r(key)}`);
+      const res = await (await getKvFetch())(`/metadata/${r(key)}`);
       return res?.success === true;
     } catch (err: any) {
       if (!err?.response) {
@@ -128,7 +149,7 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
   const getItem = async (key: string) => {
     try {
       // Cloudflare API returns with `content-type: application/octet-stream`
-      return await kvFetch(`/values/${r(key)}`).then((r) => r.text());
+      return await (await getKvFetch())(`/values/${r(key)}`).then((r) => r.text());
     } catch (err: any) {
       if (!err?.response) {
         throw err;
@@ -141,7 +162,9 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
   };
 
   const setItem = async (key: string, value: any, topts: any) => {
-    return await kvFetch(`/values/${r(key)}`, {
+    return await (
+      await getKvFetch()
+    )(`/values/${r(key)}`, {
       method: "PUT",
       body: value,
       query: topts?.ttl ? { expiration_ttl: Math.max(topts?.ttl, opts.minTTL || 60) } : undefined,
@@ -149,7 +172,9 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
   };
 
   const removeItem = async (key: string) => {
-    return await kvFetch(`/values/${r(key)}`, { method: "DELETE" });
+    return await (
+      await getKvFetch()
+    )(`/values/${r(key)}`, { method: "DELETE" });
   };
 
   const getKeys = async (base?: string) => {
@@ -160,7 +185,7 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
       params.prefix = r(base);
     }
 
-    const firstPage = await kvFetch("/keys", { params });
+    const firstPage = await (await getKvFetch())("/keys", { params });
     for (const item of firstPage.result as { name: string }[]) {
       keys.push(item.name);
     }
@@ -171,7 +196,7 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
     }
 
     while (params.cursor) {
-      const pageResult = await kvFetch("/keys", { params });
+      const pageResult = await (await getKvFetch())("/keys", { params });
       for (const item of pageResult.result as { name: string }[]) {
         keys.push(item.name);
       }
@@ -198,9 +223,9 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
     );
     // Call bulk delete endpoint with each chunk
     await Promise.all(
-      chunks.map((chunk) => {
+      chunks.map(async (chunk) => {
         if (chunk.length > 0) {
-          return kvFetch("/bulk/delete", {
+          return (await getKvFetch())("/bulk/delete", {
             method: "POST",
             body: chunk,
           });

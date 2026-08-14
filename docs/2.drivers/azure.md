@@ -221,7 +221,7 @@ This driver stores KV information in a Azure table storage. The same partition k
 
 To use it, you will need to install `@azure/data-table` and `@azure/identity` in your project:
 
-:pm-install{name="@azure/data-table @azure/identity"}
+:pm-install{name="@azure/data-tables @azure/identity"}
 
 Please make sure that the table you want to use exists in your storage account.
 

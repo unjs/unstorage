@@ -12,6 +12,10 @@ icon: mdi:github
 
 This driver fetches all possible keys once and keep it in cache for 10 minutes. Due to GitHub rate limit, it is highly recommended to provide a token. It only applies to fetching keys.
 
+Make sure to install the required dependency:
+
+:pm-install{name="ofetch"}
+
 ```js
 import { createStorage } from "unstorage";
 import githubDriver from "unstorage/drivers/github";

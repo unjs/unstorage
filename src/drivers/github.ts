@@ -1,5 +1,11 @@
-import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
-import { $fetch } from "ofetch";
+import {
+  createError,
+  createRequiredError,
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
 import { withTrailingSlash, joinURL } from "./utils/path.ts";
 
 export interface GithubOptions {
@@ -33,6 +39,11 @@ export interface GithubOptions {
    * @default "https://raw.githubusercontent.com"
    */
   cdnURL?: string;
+  /**
+   * Optionally provide the [`ofetch`](https://www.npmjs.com/package/ofetch) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("ofetch")>;
 }
 
 interface GithubFile {
@@ -51,6 +62,10 @@ const defaultOptions: GithubOptions = {
   dir: "",
   apiURL: "https://api.github.com",
   cdnURL: "https://raw.githubusercontent.com",
+};
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "ofetch", version: "^1" },
 };
 
 const DRIVER_NAME = "github";
@@ -102,6 +117,7 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
       }
 
       if (!item.body) {
+        const { $fetch } = await importLib(DRIVER_NAME, "ofetch", opts.lib, () => import("ofetch"));
         try {
           item.body = await $fetch(key.replace(/:/g, "/"), {
             baseURL: rawUrl,
@@ -130,6 +146,7 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
 async function fetchFiles(opts: GithubOptions) {
   const prefix = withTrailingSlash(opts.dir).replace(/^\//, "");
   const files: Record<string, GithubFile> = {};
+  const { $fetch } = await importLib(DRIVER_NAME, "ofetch", opts.lib, () => import("ofetch"));
   try {
     const trees = await $fetch(`/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`, {
       baseURL: opts.apiURL,

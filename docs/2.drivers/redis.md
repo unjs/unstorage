@@ -24,17 +24,17 @@ To use it, you will need to install `ioredis` in your project:
 
 Usage with single Redis instance:
 
-```js
+```ts
 import { createStorage } from "unstorage";
 import redisDriver from "unstorage/drivers/redis";
 
 const storage = createStorage({
   driver: redisDriver({
     base: "unstorage",
-    host: 'HOSTNAME',
+    host: "HOSTNAME",
     tls: true as any,
     port: 6380,
-    password: 'REDIS_PASSWORD'
+    password: "REDIS_PASSWORD",
   }),
 });
 ```

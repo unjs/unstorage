@@ -131,6 +131,56 @@ const driver: DriverFactory<RedisOptions, Promise<Redis | Cluster>> = (opts) => 
         await (await getRedisClient()).set(p(key), value);
       }
     },
+    async setItems(items, commonOptions) {
+      if (items.length === 0) {
+        return;
+      }
+      const client = await getRedisClient();
+      const defaultTtl = commonOptions?.ttl ?? opts.ttl;
+      const getTtl = (item: (typeof items)[number]) => item.options?.ttl ?? defaultTtl;
+
+      // In cluster mode both `MSET` and pipelines require all keys to hash to the
+      // same slot, so send individual `SET` commands (mirroring `setItem`).
+      if (opts.cluster) {
+        await Promise.all(
+          items.map((item) => {
+            const ttl = getTtl(item);
+            return ttl
+              ? client.set(p(item.key), item.value, "EX", ttl)
+              : client.set(p(item.key), item.value);
+          }),
+        );
+        return;
+      }
+
+      // `MSET` cannot set a per-key TTL, so fall back to a pipeline of
+      // `SET ... EX` (mirroring `setItem`) whenever a TTL applies; otherwise
+      // use a single `MSET` for efficiency.
+      const hasTtl = defaultTtl || items.some((item) => item.options?.ttl);
+      if (hasTtl) {
+        const pipeline = client.pipeline();
+        for (const item of items) {
+          const ttl = getTtl(item);
+          if (ttl) {
+            pipeline.set(p(item.key), item.value, "EX", ttl);
+          } else {
+            pipeline.set(p(item.key), item.value);
+          }
+        }
+        // Pipelines resolve with per-command errors instead of rejecting.
+        const results = await pipeline.exec();
+        const error = results?.find(([error]) => error)?.[0];
+        if (error) {
+          throw error;
+        }
+      } else {
+        const args: string[] = [];
+        for (const item of items) {
+          args.push(p(item.key), item.value);
+        }
+        await client.mset(...args);
+      }
+    },
     async setItemRaw(key, value, tOptions) {
       const _value = normalizeValue(value);
       const ttl = tOptions?.ttl ?? opts.ttl;

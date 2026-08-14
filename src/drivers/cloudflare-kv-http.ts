@@ -1,10 +1,5 @@
-import { $fetch } from "ofetch";
-import {
-  createError,
-  createRequiredError,
-  defineDriver,
-  joinKeys,
-} from "./utils/index.ts";
+import { createError, createRequiredError, type DriverFactory, joinKeys } from "./utils/index.ts";
+import { createFetch, FetchError } from "./utils/fetch.ts";
 
 interface KVAuthAPIToken {
   /**
@@ -86,7 +81,7 @@ type CloudflareAuthorizationHeaders =
 
 const DRIVER_NAME = "cloudflare-kv-http";
 
-export default defineDriver<KVHTTPOptions>((opts) => {
+const driver: DriverFactory<KVHTTPOptions> = (opts) => {
   if (!opts.accountId) {
     throw createRequiredError(DRIVER_NAME, "accountId");
   }
@@ -105,85 +100,82 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   } else {
     throw createError(
       DRIVER_NAME,
-      "One of the `apiToken`, `userServiceKey`, or a combination of `email` and `apiKey` is required."
+      "One of the `apiToken`, `userServiceKey`, or a combination of `email` and `apiKey` is required.",
     );
   }
 
   const apiURL = opts.apiURL || "https://api.cloudflare.com";
   const baseURL = `${apiURL}/client/v4/accounts/${opts.accountId}/storage/kv/namespaces/${opts.namespaceId}`;
-  const kvFetch = $fetch.create({ baseURL, headers });
+  const kvFetch = createFetch({ baseURL, headers });
 
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   const hasItem = async (key: string) => {
     try {
-      const res = await kvFetch(`/metadata/${r(key)}`);
-      return res?.success === true;
-    } catch (err: any) {
-      if (!err?.response) {
-        throw err;
-      }
-      if (err?.response?.status === 404) {
+      const res = await kvFetch(`/metadata/${r(key)}`).then((res) => res.json());
+      return (res as { success?: boolean })?.success === true;
+    } catch (error) {
+      if (error instanceof FetchError && error.status === 404) {
         return false;
       }
-      throw err;
+      throw error;
     }
   };
 
   const getItem = async (key: string) => {
     try {
       // Cloudflare API returns with `content-type: application/octet-stream`
-      return await kvFetch(`/values/${r(key)}`).then((r) => r.text());
-    } catch (err: any) {
-      if (!err?.response) {
-        throw err;
-      }
-      if (err?.response?.status === 404) {
+      return await kvFetch(`/values/${r(key)}`).then((res) => res.text());
+    } catch (error) {
+      if (error instanceof FetchError && error.status === 404) {
         return null;
       }
-      throw err;
+      throw error;
     }
   };
 
   const setItem = async (key: string, value: any, topts: any) => {
-    return await kvFetch(`/values/${r(key)}`, {
+    await kvFetch(`/values/${r(key)}`, {
       method: "PUT",
       body: value,
-      query: topts?.ttl
-        ? { expiration_ttl: Math.max(topts?.ttl, opts.minTTL || 60) }
-        : undefined,
+      query: topts?.ttl ? { expiration_ttl: Math.max(topts?.ttl, opts.minTTL || 60) } : undefined,
     });
   };
 
   const removeItem = async (key: string) => {
-    return await kvFetch(`/values/${r(key)}`, { method: "DELETE" });
+    await kvFetch(`/values/${r(key)}`, { method: "DELETE" });
+  };
+
+  type KeysResponse = {
+    result: { name: string }[];
+    result_info: { cursor?: string };
   };
 
   const getKeys = async (base?: string) => {
     const keys: string[] = [];
 
-    const params: Record<string, string | undefined> = {};
+    const query: Record<string, string | undefined> = {};
     if (base || opts.base) {
-      params.prefix = r(base);
+      query.prefix = r(base);
     }
 
-    const firstPage = await kvFetch("/keys", { params });
-    for (const item of firstPage.result as { name: string }[]) {
+    const firstPage: KeysResponse = await kvFetch("/keys", { query }).then((res) => res.json());
+    for (const item of firstPage.result) {
       keys.push(item.name);
     }
 
     const cursor = firstPage.result_info.cursor;
     if (cursor) {
-      params.cursor = cursor;
+      query.cursor = cursor;
     }
 
-    while (params.cursor) {
-      const pageResult = await kvFetch("/keys", { params });
-      for (const item of pageResult.result as { name: string }[]) {
+    while (query.cursor) {
+      const pageResult: KeysResponse = await kvFetch("/keys", { query }).then((res) => res.json());
+      for (const item of pageResult.result) {
         keys.push(item.name);
       }
       const pageCursor = pageResult.result_info.cursor;
-      params.cursor = pageCursor ? pageCursor : undefined;
+      query.cursor = pageCursor ? pageCursor : undefined;
     }
     return keys;
   };
@@ -201,18 +193,18 @@ export default defineDriver<KVHTTPOptions>((opts) => {
         acc[acc.length - 1]!.push(key);
         return acc;
       },
-      [[]]
+      [[]],
     );
     // Call bulk delete endpoint with each chunk
     await Promise.all(
-      chunks.map((chunk) => {
+      chunks.map(async (chunk) => {
         if (chunk.length > 0) {
-          return kvFetch("/bulk/delete", {
+          await kvFetch("/bulk/delete", {
             method: "POST",
             body: chunk,
           });
         }
-      })
+      }),
     );
   };
 
@@ -225,8 +217,10 @@ export default defineDriver<KVHTTPOptions>((opts) => {
     removeItem,
     getKeys: (base?: string) =>
       getKeys(base).then((keys) =>
-        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key))
+        keys.map((key) => (opts.base ? key.slice(opts.base.length) : key)),
       ),
     clear,
   };
-});
+};
+
+export default driver;

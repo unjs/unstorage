@@ -14,18 +14,13 @@ describe.skipIf(!hasDeno)("drivers: deno-kv", async () => {
   const randomPort = await getRandomPort();
 
   beforeAll(async () => {
-    const fixtureFile = fileURLToPath(
-      new URL("deno-kv.fixture.ts", import.meta.url)
-    );
-    denoProcess = exec(
-      `deno run --unstable-kv --unstable-sloppy-imports -A ${fixtureFile}`,
-      {
-        env: {
-          ...process.env,
-          PORT: randomPort.toString(),
-        },
-      }
-    );
+    const fixtureFile = fileURLToPath(new URL("deno-kv.fixture.ts", import.meta.url));
+    denoProcess = exec(`deno run --unstable-kv --unstable-sloppy-imports -A ${fixtureFile}`, {
+      env: {
+        ...process.env,
+        PORT: randomPort.toString(),
+      },
+    });
     await waitForPort(randomPort, { host: "0.0.0.0" });
   });
 

@@ -19,13 +19,9 @@ describe("drivers: localstorage", () => {
     additionalTests: (ctx) => {
       it("check localstorage", async () => {
         await ctx.storage.setItem("s1:a", "test_data");
-        expect(jsdom.window.localStorage.getItem("test:s1:a")).toBe(
-          "test_data"
-        );
+        expect(jsdom.window.localStorage.getItem("test:s1:a")).toBe("test_data");
         await ctx.driver.clear!("", {});
-        expect(jsdom.window.localStorage.getItem("__external_key__")).toBe(
-          "unrelated_data"
-        );
+        expect(jsdom.window.localStorage.getItem("__external_key__")).toBe("unrelated_data");
       });
       it("watch localstorage", async () => {
         const watcher = vi.fn();

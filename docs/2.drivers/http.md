@@ -4,42 +4,63 @@ icon: ic:baseline-http
 
 # HTTP
 
-> Use a remote HTTP/HTTPS endpoint as data storage.
+> Use a remote HTTP endpoint through the unstorage API.
 
-## Usage
+**Driver import:** `unstorage/drivers/http`
 
-**Driver name:** `http`
+The driver is designed for the built-in [storage server protocol](/guide/http-server), but it can connect to any endpoint that implements the same methods and response formats.
 
-::note
-Supports built-in [http server](/guide/http-server) methods.
-::
-
-This driver implements meta for each key including `mtime` (last modified time) and `status` from HTTP headers by making a `HEAD` request.
-
-```js
+```ts
 import { createStorage } from "unstorage";
 import httpDriver from "unstorage/drivers/http";
 
 const storage = createStorage({
-  driver: httpDriver({ base: "http://cdn.com" }),
+  driver: httpDriver({
+    base: "https://storage.example.com",
+    headers: {
+      authorization: `Bearer ${process.env.STORAGE_TOKEN}`,
+    },
+  }),
 });
 ```
 
-**Options:**
+## Options
 
-- `base`: Base URL for urls (**required**)
-- `headers`: Custom headers to send on all requests
+- `base` (**required**): Base URL of the storage endpoint.
+- `headers`: Headers sent with every request.
 
-**Supported HTTP Methods:**
+## Per-operation options
 
-- `getItem`: Maps to http `GET`. Returns deserialized value if response is ok
-- `hasItem`: Maps to http `HEAD`. Returns `true` if response is ok (200)
-- `getMeta`: Maps to http `HEAD` (headers: `last-modified` => `mtime`, `x-ttl` => `ttl`)
-- `setItem`: Maps to http `PUT`. Sends serialized value using body (`ttl` option will be sent as `x-ttl` header).
-- `removeItem`: Maps to `DELETE`
-- `clear`: Not supported
+- `headers`: Additional headers for one operation. These override driver-level headers.
+- `ttl`: TTL in seconds. The driver sends it as `x-ttl`.
 
-**Transaction Options:**
+```ts
+await storage.setItem(
+  "sessions:1",
+  { userId: 1 },
+  {
+    ttl: 3600,
+    headers: { "x-request-id": "abc" },
+  },
+);
+```
 
-- `headers`: Custom headers to be sent on each operation (`getItem`, `setItem`, etc)
-- `ttl`: Custom `ttl` (in seconds) for supported drivers. Will be mapped to `x-ttl` http header.
+## Protocol mapping
+
+| Storage method           | HTTP request                                             |
+| ------------------------ | -------------------------------------------------------- |
+| `hasItem(key)`           | `HEAD /key`                                              |
+| `getItem(key)`           | `GET /key`                                               |
+| `getItemRaw(key)`        | `GET /key` with `Accept: application/octet-stream`       |
+| `getMeta(key)`           | `HEAD /key`                                              |
+| `setItem(key, value)`    | `PUT /key`                                               |
+| `setItemRaw(key, value)` | `PUT /key` with `Content-Type: application/octet-stream` |
+| `removeItem(key)`        | `DELETE /key`                                            |
+| `getKeys(base)`          | `GET /base/:`                                            |
+| `clear(base)`            | `DELETE /base/:`                                         |
+
+`getItem` returns the response body as text, which the storage layer then deserializes. `getItemRaw` returns an `ArrayBuffer`.
+
+`getMeta` maps the `last-modified` header to `mtime`, the `x-ttl` header to `ttl`, and includes the HTTP response `status`.
+
+A `404` response becomes `null` for `getItem` and `getItemRaw`, or `false` for `hasItem`. Other non-success responses throw an error.

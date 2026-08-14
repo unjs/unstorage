@@ -215,7 +215,7 @@ Learn more about Azure table storage.
 This driver is currently not compatible with edge workers like Cloudflare Workers or Vercel Edge Functions. There may be a http based driver in the future.
 ::
 
-Store data in a [data-tables]().
+Store data in a [data-tables](<>).
 
 This driver stores KV information in a Azure table storage. The same partition key is used for all keys and the field `unstorageValue` is used to store the value.
 

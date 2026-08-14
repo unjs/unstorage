@@ -77,6 +77,12 @@ export const DRIVER_DEPENDENCIES: DriverDependencies = {
 
 const DRIVER_NAME = "s3";
 
+/** S3 DeleteObjects API supports max 1000 keys per request. */
+const MAX_BULK_DELETE = 1000;
+
+/** Bounded concurrency for per-object fallback deletes. */
+const MAX_CONCURRENT_DELETES = 10;
+
 const driver: DriverFactory<S3DriverOptions> = (options) => {
   let _awsClient: Promise<AwsClient> | undefined;
   const getAwsClient = () =>
@@ -150,15 +156,13 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
     let continuationToken: string | undefined;
 
     do {
-      const params = new URLSearchParams({ "list-type": "2" });
-      if (prefix) {
-        params.set("prefix", `${prefix}/`);
-      }
-      if (continuationToken) {
-        params.set("continuation-token", continuationToken);
-      }
+      const query = encodeQuery({
+        "list-type": "2",
+        prefix: prefix ? `${prefix}/` : undefined,
+        "continuation-token": continuationToken,
+      });
 
-      const res = await awsFetch(`${baseURL}?${params}`).then((r) => r?.text());
+      const res = await awsFetch(`${baseURL}?${query}`).then((r) => r?.text());
       if (!res) {
         if (continuationToken) {
           // Bailing out mid-pagination would silently return a partial list
@@ -169,6 +173,13 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
 
       const result = parseList(res);
       keys.push(...result.keys);
+      if (result.isTruncated && (!result.nextToken || result.nextToken === continuationToken)) {
+        // Without a fresh token the loop would either truncate silently or spin forever
+        throw createError(
+          DRIVER_NAME,
+          `Truncated listing did not return a new continuation token for ${prefix || baseURL}`,
+        );
+      }
       continuationToken = result.isTruncated ? result.nextToken : undefined;
     } while (continuationToken);
 
@@ -213,16 +224,22 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
       return null;
     }
     if (options.bulkDelete === false) {
-      await Promise.all(keys.map((key) => deleteObject(key)));
+      for (let i = 0; i < keys.length; i += MAX_CONCURRENT_DELETES) {
+        await Promise.all(
+          keys.slice(i, i + MAX_CONCURRENT_DELETES).map((key) => deleteObject(key)),
+        );
+      }
     } else {
-      const body = deleteKeysReq(keys);
-      await awsFetch(`${baseURL}?delete`, {
-        method: "POST",
-        headers: {
-          "x-amz-checksum-sha256": await sha256Base64(body),
-        },
-        body,
-      });
+      for (let i = 0; i < keys.length; i += MAX_BULK_DELETE) {
+        const body = deleteKeysReq(keys.slice(i, i + MAX_BULK_DELETE));
+        await awsFetch(`${baseURL}?delete`, {
+          method: "POST",
+          headers: {
+            "x-amz-checksum-sha256": await sha256Base64(body),
+          },
+          body,
+        });
+      }
     }
   };
 
@@ -271,6 +288,36 @@ function deleteKeysReq(keys: string[]) {
     .join("")}</Delete>`;
 }
 
+/**
+ * Build a query string using RFC3986 encoding, skipping undefined values.
+ *
+ * `URLSearchParams` encodes spaces as `+` while SigV4 canonicalization signs them as `%20`,
+ * which breaks the request signature for prefixes containing spaces.
+ */
+function encodeQuery(params: Record<string, string | undefined>) {
+  return Object.entries(params)
+    .filter(([, value]) => value !== undefined)
+    .map(([key, value]) => `${encodeRfc3986(key)}=${encodeRfc3986(value!)}`)
+    .join("&");
+}
+
+function encodeRfc3986(str: string) {
+  return encodeURIComponent(str).replace(
+    /[!'()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
+/** Decode the XML entities S3 escapes in element text. */
+function decodeXmlText(str: string) {
+  return str
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
 async function sha256Base64(str: string) {
   const buffer = new TextEncoder().encode(str);
   const hash = await crypto.subtle.digest("SHA-256", buffer);
@@ -291,7 +338,8 @@ function parseList(xml: string) {
   const keys = (contents || [])
     .map((content) => {
       const key = content.match(/<Key>([\s\S]+?)<\/Key>/)?.[1];
-      return key;
+      // `deleteKeysReq` re-escapes keys, so leaving them encoded would double-escape on delete
+      return key && decodeXmlText(key);
     })
     .filter(Boolean) as string[];
   // Some S3 compatible providers echo <NextContinuationToken> even when not truncated
@@ -300,7 +348,7 @@ function parseList(xml: string) {
   const nextToken = listBucketResult.match(
     /<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/,
   )?.[1];
-  return { keys, isTruncated, nextToken };
+  return { keys, isTruncated, nextToken: nextToken && decodeXmlText(nextToken) };
 }
 
 export default driver;

@@ -16,9 +16,10 @@ interface TableSchema {
 }
 
 const DRIVER_NAME = "planetscale";
+const DEFAULT_TABLE_NAME = "storage";
 
 const driver: DriverFactory<PlanetscaleDriverOptions, Connection> = (opts = {}) => {
-  opts.table = opts.table || "storage";
+  const table = opts.table || DEFAULT_TABLE_NAME;
 
   let _connection: Connection;
   const getConnection = () => {
@@ -47,29 +48,29 @@ const driver: DriverFactory<PlanetscaleDriverOptions, Connection> = (opts = {}) 
     getInstance: getConnection,
     hasItem: async (key) => {
       const res = await getConnection().execute(
-        `SELECT EXISTS (SELECT 1 FROM ${opts.table} WHERE id = :key) as value;`,
+        `SELECT EXISTS (SELECT 1 FROM ${table} WHERE id = :key) as value;`,
         { key },
       );
       return rows<{ value: string }[]>(res)[0]?.value == "1";
     },
     getItem: async (key) => {
-      const res = await getConnection().execute(`SELECT value from ${opts.table} WHERE id=:key;`, {
+      const res = await getConnection().execute(`SELECT value from ${table} WHERE id=:key;`, {
         key,
       });
       return rows(res)[0]?.value ?? null;
     },
     setItem: async (key, value) => {
       await getConnection().execute(
-        `INSERT INTO ${opts.table} (id, value) VALUES (:key, :value) ON DUPLICATE KEY UPDATE value = :value;`,
+        `INSERT INTO ${table} (id, value) VALUES (:key, :value) ON DUPLICATE KEY UPDATE value = :value;`,
         { key, value },
       );
     },
     removeItem: async (key) => {
-      await getConnection().execute(`DELETE FROM ${opts.table} WHERE id=:key;`, { key });
+      await getConnection().execute(`DELETE FROM ${table} WHERE id=:key;`, { key });
     },
     getMeta: async (key) => {
       const res = await getConnection().execute(
-        `SELECT created_at, updated_at from ${opts.table} WHERE id=:key;`,
+        `SELECT created_at, updated_at from ${table} WHERE id=:key;`,
         { key },
       );
       return {
@@ -78,14 +79,13 @@ const driver: DriverFactory<PlanetscaleDriverOptions, Connection> = (opts = {}) 
       };
     },
     getKeys: async (base = "") => {
-      const res = await getConnection().execute(
-        `SELECT id from ${opts.table} WHERE id LIKE :base;`,
-        { base: `${base}%` },
-      );
+      const res = await getConnection().execute(`SELECT id from ${table} WHERE id LIKE :base;`, {
+        base: `${base}%`,
+      });
       return rows(res).map((r) => r.id);
     },
     clear: async () => {
-      await getConnection().execute(`DELETE FROM ${opts.table};`);
+      await getConnection().execute(`DELETE FROM ${table};`);
     },
   };
 };

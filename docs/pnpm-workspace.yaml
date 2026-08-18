@@ -8,5 +8,7 @@ ignoredBuiltDependencies:
   - "@tailwindcss/oxide"
   - esbuild
   - vue-demi
+minimumReleaseAgeExclude:
+  - undocs-nightly@0.10.1-20260818-084150-1428cc3
 onlyBuiltDependencies:
   - better-sqlite3

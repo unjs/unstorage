@@ -370,9 +370,14 @@ export function createStorage<T extends StorageValue>(
             keys
               .filter((key) => {
                 const fullKey = mount.mountpoint + normalizeKey(key);
-                return (
-                  !maskedMounts.some((p) => fullKey.startsWith(p)) && filterKeyByBase(fullKey, base)
-                );
+                if (maskedMounts.some((p) => fullKey.startsWith(p))) {
+                  return false;
+                }
+                if (filterKeyByBase(fullKey, base)) {
+                  return true;
+                }
+                // Companion metadata is stored as `${key}$` and excluded by filterKeyByBase.
+                return fullKey.endsWith("$") && filterKeyByBase(fullKey.slice(0, -1), base);
               })
               .map((key) => mount.driver.removeItem!(key, opts)),
           );

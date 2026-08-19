@@ -138,6 +138,17 @@ describe("storage", () => {
     expect(await storage.getItem("bar:b")).toBe(2);
   });
 
+  it("clear(base) also removes companion metadata for matching keys", async () => {
+    const storage = createStorage();
+    await storage.setItem("foo:a", 1);
+    await storage.setMeta("foo:a", { note: "x" });
+    await storage.setItem("bar:b", 2);
+    await storage.setMeta("bar:b", { note: "y" });
+    await storage.clear("foo");
+    expect(await storage.getMeta("foo:a")).toEqual({});
+    expect(await storage.getMeta("bar:b")).toEqual({ note: "y" });
+  });
+
   it("clear(base) does not wipe keys hidden under a nested mount", async () => {
     const storage = createStorage();
     await storage.setItem("mnt:hidden", "keep");

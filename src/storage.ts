@@ -509,9 +509,14 @@ export function createStorage<T extends StorageValue>(
       const mounts = getMounts(base, true);
       let maskedMounts: string[] = [];
       for (const mount of mounts) {
-        if (mount.driver.clear && !mount.relativeBase) {
-          // The whole mount is covered by base, so clear it in one call.
-          await asyncCall(mount.driver.clear, mount.relativeBase, opts);
+        const relativeBase = mount.relativeBase || "";
+        const hasMaskedChild = maskedMounts.some((maskedMount) =>
+          maskedMount.startsWith(mount.mountpoint),
+        );
+        // driver.clear() wipes the whole mount. Skip it when a nested child
+        // mount is masking keys that should survive until unmount.
+        if (mount.driver.clear && !relativeBase && !hasMaskedChild) {
+          await asyncCall(mount.driver.clear, relativeBase, opts);
         } else if (mount.driver.removeItem) {
           // Fallback to removing keys one by one for drivers without clear
           // support and for prefixes inside a mount, where driver.clear

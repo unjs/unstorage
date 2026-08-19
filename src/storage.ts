@@ -503,19 +503,41 @@ export function createStorage<T extends StorageValue>(
     // Utils
     async clear(base, opts = {}) {
       base = normalizeBase(base);
-      await Promise.all(
-        getMounts(base, false).map(async (m) => {
-          if (m.driver.clear) {
-            return asyncCall(m.driver.clear, m.relativeBase, opts);
-          }
-          // Fallback to remove all keys if clear not implemented
-          if (m.driver.removeItem) {
-            const keys = await m.driver.getKeys(m.relativeBase || "", opts);
-            return Promise.all(keys.map((key) => m.driver.removeItem!(key, opts)));
-          }
-          // Readonly
-        }),
-      );
+      // includeParent so a prefix on the root mount is in scope (issue #801).
+      // Nested mounts are still processed first and then masked, so a parent
+      // mount is not asked to delete keys that belong to a child driver.
+      const mounts = getMounts(base, true);
+      let maskedMounts: string[] = [];
+      for (const mount of mounts) {
+        if (mount.driver.clear && !mount.relativeBase) {
+          // The whole mount is covered by base, so clear it in one call.
+          await asyncCall(mount.driver.clear, mount.relativeBase, opts);
+        } else if (mount.driver.removeItem) {
+          // Fallback to removing keys one by one for drivers without clear
+          // support and for prefixes inside a mount, where driver.clear
+          // would drop keys outside of base.
+          const keys = await asyncCall(mount.driver.getKeys, mount.relativeBase, opts);
+          await Promise.all(
+            keys
+              .filter((key) => {
+                const fullKey = mount.mountpoint + normalizeKey(key);
+                return (
+                  !maskedMounts.some((p) => fullKey.startsWith(p)) &&
+                  filterKeyByBase(fullKey, base)
+                );
+              })
+              .map((key) => mount.driver.removeItem!(key, opts)),
+          );
+        }
+        // Readonly
+
+        // When /mnt/foo is processed, any key in /mnt with /mnt/foo prefix
+        // should be masked. Using filter to improve performance.
+        maskedMounts = [
+          mount.mountpoint,
+          ...maskedMounts.filter((p) => !p.startsWith(mount.mountpoint)),
+        ];
+      }
     },
     async dispose() {
       await Promise.all(Object.values(context.mounts).map((driver) => dispose(driver)));

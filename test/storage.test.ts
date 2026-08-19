@@ -127,6 +127,27 @@ describe("storage", () => {
     expect(await storage.getKeys()).toMatchObject(initialKeys);
     expect(await storage.getItem("/mnt/test.txt")).toBe("v1");
   });
+
+  it("clear(base) removes matching keys on the root mount (issue #801)", async () => {
+    const storage = createStorage();
+    await storage.setItem("foo:a", 1);
+    await storage.setItem("bar:b", 2);
+    await storage.clear("foo");
+    expect(await storage.getKeys()).toEqual(["bar:b"]);
+    expect(await storage.getItem("foo:a")).toBe(null);
+    expect(await storage.getItem("bar:b")).toBe(2);
+  });
+
+  it("clear(base) does not wipe keys hidden under a nested mount", async () => {
+    const storage = createStorage();
+    await storage.setItem("mnt:hidden", "keep");
+    storage.mount("/mnt", memory());
+    await storage.setItem("mnt:visible", "drop");
+    await storage.clear("/mnt");
+    expect(await storage.getItem("mnt:visible")).toBe(null);
+    await storage.unmount("/mnt");
+    expect(await storage.getItem("mnt:hidden")).toBe("keep");
+  });
 });
 
 describe("utils", () => {
@@ -292,5 +313,15 @@ describe("Regression", () => {
       { key: "key1", value: "value1" },
       { key: "key2", value: "value2" },
     ]);
+  });
+
+  it("prefixStorage clear only removes the prefixed subset (issue #801)", async () => {
+    const storage = createStorage();
+    await storage.setItem("users:1", "a");
+    await storage.setItem("orders:1", "b");
+    const users = prefixStorage(storage, "users");
+    await users.clear();
+    expect(await storage.getItem("users:1")).toBe(null);
+    expect(await storage.getItem("orders:1")).toBe("b");
   });
 });

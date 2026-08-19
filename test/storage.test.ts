@@ -159,6 +159,23 @@ describe("storage", () => {
     await storage.unmount("/mnt");
     expect(await storage.getItem("mnt:hidden")).toBe("keep");
   });
+
+  it("clear(base) does not wipe parent-driver keys hidden by a nested child mount", async () => {
+    const storage = createStorage();
+    storage.mount("/mnt", memory());
+    await storage.setItem("/mnt/keep", "keep");
+    await storage.setItem("/mnt/foo/hidden", "hidden");
+    storage.mount("/mnt/foo", memory());
+    await storage.setItem("/mnt/foo/child", "child");
+
+    await storage.clear("/mnt");
+
+    expect(await storage.getItem("/mnt/keep")).toBe(null);
+    expect(await storage.getItem("/mnt/foo/child")).toBe(null);
+
+    await storage.unmount("/mnt/foo");
+    expect(await storage.getItem("/mnt/foo/hidden")).toBe("hidden");
+  });
 });
 
 describe("utils", () => {

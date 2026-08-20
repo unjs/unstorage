@@ -2,6 +2,7 @@ import { destr } from "destr";
 import type {
   Storage,
   Driver,
+  GetItemOptions,
   GetItemType,
   WatchCallback,
   Unwatch,
@@ -63,9 +64,9 @@ function toValueType(value: StorageValue, type: GetItemType | undefined): Storag
 async function getTypedItem(
   driver: Driver,
   relativeKey: string,
-  opts: TransactionOptions = {},
+  opts: GetItemOptions = {},
 ): Promise<StorageValue> {
-  const type = opts.type as GetItemType | undefined;
+  const type = opts.type;
 
   if (isRawType(type)) {
     const raw = driver.getItemRaw

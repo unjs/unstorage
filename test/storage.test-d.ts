@@ -96,6 +96,19 @@ describe("types", () => {
     >();
   });
 
+  it("rejects invalid getItem inputs", async () => {
+    const storage = createStorage();
+
+    // @ts-expect-error keys have to be strings
+    await storage.getItem(123);
+
+    // @ts-expect-error `type` has to be a known conversion type
+    await storage.getItem("foo", { type: "buffer" });
+
+    // @ts-expect-error `type` has to be a known conversion type, per item too
+    await storage.getItems([{ key: "foo", options: { type: "buffer" } }]);
+  });
+
   it("prefix storage", () => {
     const storage1 = createStorage();
     const prefixedStorage1 = prefixStorage(storage1, "foo");

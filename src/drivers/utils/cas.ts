@@ -12,8 +12,8 @@
  * boundary.
  */
 
-export const ERR_CAS_MISMATCH: "ERR_CAS_MISMATCH" = "ERR_CAS_MISMATCH";
-export const ERR_CAS_UNSUPPORTED: "ERR_CAS_UNSUPPORTED" = "ERR_CAS_UNSUPPORTED";
+export const ERR_CAS_MISMATCH = "ERR_CAS_MISMATCH" as const;
+export const ERR_CAS_UNSUPPORTED = "ERR_CAS_UNSUPPORTED" as const;
 
 /** Thrown by CAS-aware drivers when an `ifMatch` / `ifNoneMatch` precondition fails. */
 export class CASMismatchError extends Error {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll } from "vitest";
 import { resolve } from "node:path";
 import { createStorage, snapshot, restoreSnapshot, prefixStorage } from "../src/index.ts";
 import memory from "../src/drivers/memory.ts";
@@ -437,4 +437,93 @@ describe("get() raw value normalization", () => {
       /Cannot convert `Object` to bytes/,
     );
   });
+});
+
+describe("getItems() with type option", () => {
+  const bytes = new Uint8Array([1, 2, 3, 4]);
+
+  // The memory driver has no `getItems`, this one exercises the batch path.
+  const batchDriver = () => {
+    const data = new Map<string, any>();
+    return {
+      name: "batch-test",
+      hasItem: (key: string) => data.has(key),
+      getItem: (key: string) => data.get(key) ?? null,
+      getItemRaw: (key: string) => data.get(key) ?? null,
+      getItems: (items: { key: string }[]) =>
+        items.map((item) => ({ key: item.key, value: data.get(item.key) ?? null })),
+      setItem: (key: string, value: string) => void data.set(key, value),
+      setItemRaw: (key: string, value: any) => void data.set(key, value),
+      getKeys: () => [...data.keys()],
+    };
+  };
+
+  const drivers = { "without driver.getItems": undefined, "with driver.getItems": batchDriver() };
+
+  for (const [name, driver] of Object.entries(drivers)) {
+    describe(name, () => {
+      const storage = createStorage({ driver });
+      const valueOf = (results: { key: string; value: unknown }[], key: string): any =>
+        results.find((r) => r.key === key)?.value;
+
+      beforeAll(async () => {
+        await storage.setItem("text-key", "hello world");
+        await storage.setItem("json-key", { foo: "bar" });
+        await storage.setItemRaw("bytes-key", bytes);
+      });
+
+      it("applies type from commonOptions", async () => {
+        expect(await storage.getItems(["text-key", "json-key"], { type: "text" })).toEqual([
+          { key: "text-key", value: "hello world" },
+          { key: "json-key", value: '{"foo":"bar"}' },
+        ]);
+
+        expect(await storage.getItems(["json-key", "text-key"], { type: "json" })).toEqual([
+          { key: "json-key", value: { foo: "bar" } },
+          { key: "text-key", value: "hello world" },
+        ]);
+
+        const asBytes = await storage.getItems(["bytes-key"], { type: "bytes" });
+        expect(valueOf(asBytes, "bytes-key")).toEqual(bytes);
+      });
+
+      it("applies type from per-item options", async () => {
+        const results = await storage.getItems([
+          { key: "text-key", options: { type: "text" } },
+          { key: "json-key", options: { type: "json" } },
+          { key: "bytes-key", options: { type: "bytes" } },
+        ]);
+        expect(results).toHaveLength(3);
+        expect(valueOf(results, "text-key")).toBe("hello world");
+        expect(valueOf(results, "json-key")).toEqual({ foo: "bar" });
+        expect(valueOf(results, "bytes-key")).toEqual(bytes);
+      });
+
+      it("lets per-item options override commonOptions", async () => {
+        const results = await storage.getItems(
+          ["json-key", { key: "bytes-key", options: { type: "blob" } }],
+          { type: "text" },
+        );
+        expect(valueOf(results, "json-key")).toBe('{"foo":"bar"}');
+        const blob = valueOf(results, "bytes-key");
+        expect(blob).toBeInstanceOf(Blob);
+        expect(new Uint8Array(await blob.arrayBuffer())).toEqual(bytes);
+      });
+
+      it("keeps the default behavior without a type", async () => {
+        expect(await storage.getItems(["text-key", "json-key"])).toEqual([
+          { key: "text-key", value: "hello world" },
+          { key: "json-key", value: { foo: "bar" } },
+        ]);
+      });
+
+      it("returns null for missing keys", async () => {
+        for (const type of ["text", "json", "bytes", "blob", "stream"] as const) {
+          expect(await storage.getItems(["missing-key"], { type })).toEqual([
+            { key: "missing-key", value: null },
+          ]);
+        }
+      });
+    });
+  }
 });

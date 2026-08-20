@@ -82,6 +82,20 @@ describe("types", () => {
     expectTypeOf(await storage.get("foo", { type: "bytes" })).toEqualTypeOf<Uint8Array | null>();
   });
 
+  it("typed getItems", async () => {
+    const storage = createStorage();
+
+    expectTypeOf(await storage.getItems(["foo"], { type: "text" })).toEqualTypeOf<
+      { key: string; value: string | null }[]
+    >();
+    expectTypeOf(await storage.getItems(["foo"], { type: "bytes" })).toEqualTypeOf<
+      { key: string; value: Uint8Array | null }[]
+    >();
+    expectTypeOf(await storage.getItems(["foo"])).toEqualTypeOf<
+      { key: string; value: StorageValue }[]
+    >();
+  });
+
   it("prefix storage", () => {
     const storage1 = createStorage();
     const prefixedStorage1 = prefixStorage(storage1, "foo");

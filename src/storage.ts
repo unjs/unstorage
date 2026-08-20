@@ -39,6 +39,57 @@ export interface CreateStorageOptions {
   driver?: Driver;
 }
 
+/** Types that are read from the driver's raw value instead of its serialized one. */
+type RawItemType = Extract<GetItemType, "bytes" | "blob" | "stream">;
+
+function isRawType(type: unknown): type is RawItemType {
+  return type === "bytes" || type === "blob" || type === "stream";
+}
+
+/** Converts a deserialized driver value to the requested `text`/`json` type. */
+function toValueType(value: StorageValue, type: GetItemType | undefined): StorageValue {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (type === "text") {
+    return typeof value === "string" ? value : stringify(value);
+  }
+  // `json` is intentionally lenient (same as the default): values are stored with
+  // `stringify()` which keeps strings bare, so `JSON.parse` would throw on them.
+  return destr(value) as StorageValue;
+}
+
+/** Reads a single key from a driver and converts it to the `type` given in `opts`. */
+async function getTypedItem(
+  driver: Driver,
+  relativeKey: string,
+  opts: TransactionOptions = {},
+): Promise<StorageValue> {
+  const type = opts.type as GetItemType | undefined;
+
+  if (isRawType(type)) {
+    const raw = driver.getItemRaw
+      ? await asyncCall(driver.getItemRaw, relativeKey, opts)
+      : deserializeRaw(await asyncCall(driver.getItem, relativeKey, opts));
+    if (raw === null || raw === undefined) {
+      return null;
+    }
+    switch (type) {
+      case "bytes": {
+        return await toBytes(raw);
+      }
+      case "blob": {
+        return await toBlob(raw);
+      }
+      case "stream": {
+        return await toStream(raw);
+      }
+    }
+  }
+
+  return toValueType(await asyncCall(driver.getItem, relativeKey, opts), type);
+}
+
 export function createStorage<T extends StorageValue>(
   options: CreateStorageOptions = {},
 ): Storage<T> {
@@ -166,79 +217,61 @@ export function createStorage<T extends StorageValue>(
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem: async (key: string, opts: TransactionOptions = {}) => {
+    getItem: (key: string, opts: TransactionOptions = {}) => {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
-
-      const type = opts.type as GetItemType | undefined;
-
-      if (type === "bytes" || type === "blob" || type === "stream") {
-        const raw = driver.getItemRaw
-          ? await asyncCall(driver.getItemRaw, relativeKey, opts)
-          : deserializeRaw(await asyncCall(driver.getItem, relativeKey, opts));
-        if (raw === null || raw === undefined) {
-          return null;
-        }
-        switch (type) {
-          case "bytes": {
-            return await toBytes(raw);
-          }
-          case "blob": {
-            return await toBlob(raw);
-          }
-          case "stream": {
-            return await toStream(raw);
-          }
-        }
-      }
-
-      const value = await asyncCall(driver.getItem, relativeKey, opts);
-      if (value === null || value === undefined) {
-        return null;
-      }
-
-      switch (type) {
-        case "text": {
-          return typeof value === "string" ? value : stringify(value);
-        }
-        // `json` is intentionally lenient (same as the default): values are stored with
-        // `stringify()` which keeps strings bare, so `JSON.parse` would throw on them.
-        case "json":
-        default: {
-          return destr(value) as StorageValue;
-        }
-      }
+      return getTypedItem(driver, relativeKey, opts);
     },
     getItems(
       items: (string | { key: string; options?: TransactionOptions })[],
       commonOptions = {},
     ) {
-      return runBatch(items, commonOptions, (batch) => {
-        if (batch.driver.getItems) {
-          return asyncCall(
-            batch.driver.getItems,
-            batch.items.map((item) => ({
-              key: item.relativeKey,
-              options: item.options,
-            })),
-            commonOptions,
-          ).then((r) =>
-            r.map((item) => ({
-              key: joinKeys(batch.base, item.key),
-              value: destr(item.value),
+      return runBatch(items, commonOptions, async (batch) => {
+        if (!batch.driver.getItems) {
+          return Promise.all(
+            batch.items.map(async (item) => ({
+              key: item.key,
+              value: await getTypedItem(batch.driver, item.relativeKey, item.options),
             })),
           );
         }
-        return Promise.all(
-          batch.items.map((item) => {
-            return asyncCall(batch.driver.getItem, item.relativeKey, item.options).then(
-              (value) => ({
-                key: item.key,
-                value: destr(value),
+
+        // `bytes`, `blob` and `stream` read the driver's raw value, which has no batch
+        // equivalent, so they are resolved one by one alongside the batch call.
+        const rawItems = batch.items.filter((item) => isRawType(item.options?.type));
+        const plainItems =
+          rawItems.length === 0
+            ? batch.items
+            : batch.items.filter((item) => !isRawType(item.options?.type));
+
+        const [plain, raw] = await Promise.all([
+          plainItems.length === 0
+            ? []
+            : asyncCall(
+                batch.driver.getItems,
+                plainItems.map((item) => ({
+                  key: item.relativeKey,
+                  options: item.options,
+                })),
+                commonOptions,
+              ).then((r) => {
+                const types = new Map(
+                  plainItems.map((item) => [item.relativeKey, item.options?.type]),
+                );
+                return r.map((item) => ({
+                  key: joinKeys(batch.base, item.key),
+                  value: toValueType(item.value, types.get(item.key)),
+                }));
               }),
-            );
-          }),
-        );
+          Promise.all(
+            rawItems.map(async (item) => ({
+              key: item.key,
+              value: await getTypedItem(batch.driver, item.relativeKey, item.options),
+            })),
+          ),
+        ]);
+
+        return [...plain, ...raw];
       });
     },
     getItemRaw(key, opts = {}) {

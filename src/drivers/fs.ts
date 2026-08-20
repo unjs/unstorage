@@ -150,15 +150,10 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
     // file-CAS primitive; cross-process callers should layer an external lock.
     return withLock(path, async () => {
       const stats = await fsp.stat(path).catch(() => null);
-      checkCAS(
-        DRIVER_NAME,
-        key,
-        { exists: !!stats, etag: stats ? statEtag(stats) : undefined },
-        opts!,
-      );
+      const prevEtag = stats ? statEtag(stats) : undefined;
+      checkCAS(DRIVER_NAME, key, { exists: !!stats, etag: prevEtag }, opts!);
       await plainWrite(path);
-      const newStats = await fsp.stat(path);
-      return { etag: statEtag(newStats) };
+      return { etag: await distinctEtag(path, prevEtag) };
     });
   };
 
@@ -272,6 +267,23 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
 
 function statEtag(stats: { mtimeMs: number; size: number; ino: number }): string {
   return `${stats.mtimeMs.toString(16)}-${stats.size.toString(16)}-${stats.ino.toString(16)}`;
+}
+
+// The etag is derived from (mtime, size, ino), and filesystem timestamp
+// granularity can be coarser than the gap between two writes. A same-size
+// overwrite can therefore land on the exact triple it replaced, which would
+// let a stale `ifMatch` succeed. Nudge mtime forward until the etag actually
+// differs, doubling the step so filesystems with second-level granularity
+// converge too.
+async function distinctEtag(path: string, prevEtag: string | undefined): Promise<string> {
+  let stats = await fsp.stat(path);
+  let etag = statEtag(stats);
+  for (let step = 1; etag === prevEtag && step <= 4096; step *= 2) {
+    await fsp.utimes(path, stats.atime, new Date(stats.mtimeMs + step));
+    stats = await fsp.stat(path);
+    etag = statEtag(stats);
+  }
+  return etag;
 }
 
 export default driver;

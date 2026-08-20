@@ -141,16 +141,15 @@ const driver: DriverFactory<NetlifyStoreOptions, Promise<Store>> = (options) => 
     async hasItem(key) {
       return (await getClient()).getMetadata(key).then(Boolean);
     },
-    getItem: async (key, tops?: GetOptions) => {
+    getItem: async (key, tops) => {
       // @ts-expect-error has trouble with the overloaded types
-      return (await getClient()).get(key, tops);
+      return (await getClient()).get(key, tops as GetOptions);
     },
     async getMeta(key) {
       const m = await (await getClient()).getMetadata(key);
       return m ? { ...m.metadata, etag: m.etag } : null;
     },
-    async getItemRaw(key, topts?: GetOptions) {
-      // @ts-expect-error has trouble with the overloaded types
+    async getItemRaw(key, topts) {
       return (await getClient()).get(key, { type: topts?.type ?? "arrayBuffer" });
     },
     async setItem(key, value, topts?: SetOptions & { ifMatch?: string; ifNoneMatch?: string }) {

@@ -221,10 +221,10 @@ export const builtinDriverDependencies: Partial<Record<BuiltinDriverName, Driver
     lib: { name: "mongodb", version: "^6 || ^7" },
   },
   "netlify-blobs": {
-    lib: { name: "@netlify/blobs", version: "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0" },
+    lib: { name: "@netlify/blobs", version: "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0 || ^11.0.0" },
   },
   "netlifyBlobs": {
-    lib: { name: "@netlify/blobs", version: "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0" },
+    lib: { name: "@netlify/blobs", version: "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0 || ^11.0.0" },
   },
   "planetscale": {
     lib: { name: "@planetscale/database", version: "^1.19.0" },

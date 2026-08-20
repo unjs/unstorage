@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-alpha.9
+
+[compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.8...v2.0.0-alpha.9)
+
+### 📦 Build
+
+- Bundle destr ([afbb66e](https://github.com/unjs/unstorage/commit/afbb66e))
+
+### 🏡 Chore
+
+- Update release script ([ef4b73c](https://github.com/unjs/unstorage/commit/ef4b73c))
+- Update release script ([1169716](https://github.com/unjs/unstorage/commit/1169716))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v2.0.0-alpha.8
 
 [compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.7...v2.0.0-alpha.8)

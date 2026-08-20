@@ -41,7 +41,7 @@
     "@azure/keyvault-secrets": "^4.11.2",
     "@azure/storage-blob": "^12.33.0",
     "@capacitor/preferences": "^8.0.1",
-    "@cloudflare/workers-types": "^5",
+    "@cloudflare/workers-types": "^5.20260817.1",
     "@deno/kv": "^0.14.0",
     "@electric-sql/pglite": "^0.5.5",
     "@libsql/client": "^0.17.4",
@@ -50,7 +50,7 @@
     "@types/deno": "^2.7.0",
     "@types/ioredis-mock": "^8.2.8",
     "@types/jsdom": "^30",
-    "@types/node": "^26",
+    "@types/node": "^26.2.0",
     "@upstash/redis": "^1.38.2",
     "@vercel/blob": "^2.8.0",
     "@vercel/functions": "^3.9.3",
@@ -70,7 +70,7 @@
     "idb-keyval": "^6.3.0",
     "ioredis": "^6.0.0",
     "ioredis-mock": "^8.13.1",
-    "jsdom": "^30",
+    "jsdom": "^30.0.1",
     "lru-cache": "^11.5.2",
     "mitata": "^1.0.34",
     "mlly": "^1.8.2",
@@ -88,5 +88,5 @@
     "vitest": "^4.1.10",
     "wrangler": "^4.123.0"
   },
-  "packageManager": "pnpm@11.21.0"
+  "packageManager": "pnpm@11.22.0"
 }

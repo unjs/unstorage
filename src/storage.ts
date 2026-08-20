@@ -13,6 +13,7 @@ import type {
 import memory from "./drivers/memory.ts";
 import {
   asyncCall,
+  BASE64_PREFIX,
   deserializeRaw,
   serializeRaw,
   stringify,
@@ -47,11 +48,35 @@ function isRawType(type: unknown): type is RawItemType {
   return type === "bytes" || type === "blob" || type === "stream";
 }
 
-/** Converts a deserialized driver value to the requested `text`/`json` type. */
-function toValueType(value: StorageValue, type: GetItemType | undefined): StorageValue {
+/**
+ * Values written with `setItemRaw`, which `text` and `json` decode back to text.
+ *
+ * Most drivers store them base64 encoded, drivers that can hold binary keep it as-is.
+ */
+function isRawValue(value: StorageValue): boolean {
+  return typeof value === "string"
+    ? value.startsWith(BASE64_PREFIX)
+    : ArrayBuffer.isView(value) ||
+        value instanceof ArrayBuffer ||
+        value instanceof Blob ||
+        value instanceof ReadableStream;
+}
+
+/** Converts a driver value to the requested `text`/`json` type. */
+async function toValueType(
+  value: StorageValue,
+  type: GetItemType | undefined,
+): Promise<StorageValue> {
   if (value === null || value === undefined) {
     return null;
   }
+
+  // An explicit type never surfaces the `base64:` wrapper or a byte array. The default
+  // (no type) keeps returning raw values as-is for backwards compatibility.
+  if (type !== undefined && isRawValue(value)) {
+    value = new TextDecoder().decode(await toBytes(deserializeRaw(value)));
+  }
+
   if (type === "text") {
     return typeof value === "string" ? value : stringify(value);
   }
@@ -259,10 +284,12 @@ export function createStorage<T extends StorageValue>(
                 const types = new Map(
                   plainItems.map((item) => [item.relativeKey, item.options?.type]),
                 );
-                return r.map((item) => ({
-                  key: joinKeys(batch.base, item.key),
-                  value: toValueType(item.value, types.get(item.key)),
-                }));
+                return Promise.all(
+                  r.map(async (item) => ({
+                    key: joinKeys(batch.base, item.key),
+                    value: await toValueType(item.value, types.get(item.key)),
+                  })),
+                );
               }),
           Promise.all(
             rawItems.map(async (item) => ({

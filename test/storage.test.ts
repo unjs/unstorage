@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { createStorage, snapshot, restoreSnapshot, prefixStorage } from "../src/index.ts";
 import memory from "../src/drivers/memory.ts";
 import fs from "../src/drivers/fs.ts";
+import { serializeRaw } from "../src/_utils.ts";
 
 const data = {
   "etc:conf": "test",
@@ -436,6 +437,74 @@ describe("get() raw value normalization", () => {
     await expect(rawStorage({ foo: "bar" }).getItem("key", { type: "bytes" })).rejects.toThrow(
       /Cannot convert `Object` to bytes/,
     );
+  });
+
+  it("releases the reader lock when reading throws", async () => {
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue({ not: "bytes" });
+        controller.close();
+      },
+    });
+
+    await expect(rawStorage(stream).getItem("key", { type: "bytes" })).rejects.toThrow(
+      /Cannot convert `Object` to bytes/,
+    );
+    expect(stream.locked).toBe(false);
+  });
+});
+
+describe("get() text and json of raw values", () => {
+  const text = "hello wörld";
+  const bytes = new TextEncoder().encode(text);
+
+  it("decodes base64 values from drivers that store strings", async () => {
+    const storage = createStorage({
+      driver: {
+        name: "string-only",
+        hasItem: () => true,
+        getItem: () => serializeRaw(bytes),
+        getKeys: () => [],
+      },
+    });
+
+    // Sanity check: the driver really does hold a `base64:` wrapped value
+    expect(await storage.getItem("key")).toBe(`base64:${Buffer.from(bytes).toString("base64")}`);
+
+    expect(await storage.getItem("key", { type: "text" })).toBe(text);
+    expect(await storage.getItem("key", { type: "json" })).toBe(text);
+  });
+
+  it("decodes binary values from drivers that store them natively", async () => {
+    // The memory driver keeps the `Uint8Array` given to `setItemRaw` as-is
+    const storage = createStorage();
+    await storage.setItemRaw("key", bytes);
+
+    expect(await storage.getItem("key", { type: "text" })).toBe(text);
+    expect(await storage.getItem("key", { type: "json" })).toBe(text);
+  });
+
+  it("parses json stored as raw bytes", async () => {
+    const storage = createStorage();
+    await storage.setItemRaw("key", new TextEncoder().encode('{"foo":"bar"}'));
+
+    expect(await storage.getItem("key", { type: "json" })).toEqual({ foo: "bar" });
+    expect(await storage.getItem("key", { type: "text" })).toBe('{"foo":"bar"}');
+  });
+
+  it("leaves plain values untouched", async () => {
+    const storage = createStorage();
+    await storage.setItem("text-key", "base64 is not a prefix here");
+    await storage.setItem("json-key", { foo: "bar" });
+
+    expect(await storage.getItem("text-key", { type: "text" })).toBe("base64 is not a prefix here");
+    expect(await storage.getItem("json-key", { type: "json" })).toEqual({ foo: "bar" });
+  });
+
+  it("keeps the default behavior of returning raw values as-is", async () => {
+    const storage = createStorage();
+    await storage.setItemRaw("key", bytes);
+    expect(await storage.getItem("key")).toEqual(bytes);
   });
 });
 

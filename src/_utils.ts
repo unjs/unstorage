@@ -153,12 +153,17 @@ async function readChunks(value: any): Promise<Uint8Array[]> {
   const chunks: Uint8Array[] = [];
   if (typeof value.getReader === "function") {
     const reader = value.getReader();
-    while (true) {
-      const { done, value: chunk } = await reader.read();
-      if (done) {
-        break;
+    try {
+      while (true) {
+        const { done, value: chunk } = await reader.read();
+        if (done) {
+          break;
+        }
+        chunks.push(await toBytes(chunk));
       }
-      chunks.push(await toBytes(chunk));
+    } finally {
+      // Leave the stream unlocked if reading throws mid-way
+      reader.releaseLock();
     }
   } else {
     for await (const chunk of value) {

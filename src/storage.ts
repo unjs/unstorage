@@ -52,6 +52,9 @@ function isRawType(type: unknown): type is RawItemType {
  * Values written with `setItemRaw`, which `text` and `json` decode back to text.
  *
  * Most drivers store them base64 encoded, drivers that can hold binary keep it as-is.
+ *
+ * The `base64:` prefix is stored in-band, so a regular string starting with it is
+ * indistinguishable from a raw value. See the "Raw values" section of the guide.
  */
 function isRawValue(value: StorageValue): boolean {
   return typeof value === "string"

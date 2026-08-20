@@ -6,12 +6,6 @@ export default defineBuildConfig({
       type: "bundle",
       input: ["src/index.ts", "src/server.ts", "src/tracing.ts"],
       rolldown: {
-        resolve: {
-          alias: {
-            h3: "h3/generic",
-            // srvx: "srvx/generic", // TODO
-          },
-        },
         external: [/unstorage\/drivers\//],
       },
     },

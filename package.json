@@ -29,7 +29,7 @@
     "lint": "oxlint . && oxfmt --check .",
     "fmt": "oxlint . --fix && oxfmt .",
     "prepack": "pnpm build",
-    "release": "pnpm test && pnpm build && changelogen --release --prerelease --publish --publishTag alpha --push",
+    "release": "pnpm test && pnpm build && changelogen --prerelease --publish --push && npm publish --tag alpha",
     "test": "pnpm lint && pnpm test:types && vitest run --coverage",
     "test:types": "tsc --noEmit --skipLibCheck"
   },

@@ -249,8 +249,8 @@ export function createStorage<T extends StorageValue>(
       return getTypedItem(driver, relativeKey, opts);
     },
     getItems(
-      items: (string | { key: string; options?: TransactionOptions })[],
-      commonOptions = {},
+      items: (string | { key: string; options?: GetItemOptions })[],
+      commonOptions: GetItemOptions = {},
     ) {
       return runBatch(items, commonOptions, async (batch) => {
         if (!batch.driver.getItems) {
@@ -281,13 +281,24 @@ export function createStorage<T extends StorageValue>(
                 })),
                 commonOptions,
               ).then((r) => {
-                const types = new Map(
-                  plainItems.map((item) => [item.relativeKey, item.options?.type]),
-                );
+                // Drivers are expected to return one entry per requested key, in order. Only
+                // fall back to a key lookup (and then to `commonOptions`) when they do not,
+                // otherwise a driver echoing back a normalized key would drop the type.
+                const types =
+                  r.length === plainItems.length
+                    ? undefined
+                    : new Map(plainItems.map((item) => [item.relativeKey, item.options?.type]));
                 return Promise.all(
-                  r.map(async (item) => ({
+                  r.map(async (item, index) => ({
                     key: joinKeys(batch.base, item.key),
-                    value: await toValueType(item.value, types.get(item.key)),
+                    value: await toValueType(
+                      item.value,
+                      types
+                        ? types.has(item.key)
+                          ? types.get(item.key)
+                          : commonOptions.type
+                        : plainItems[index]!.options?.type,
+                    ),
                   })),
                 );
               }),
@@ -299,7 +310,16 @@ export function createStorage<T extends StorageValue>(
           ),
         ]);
 
-        return [...plain, ...raw];
+        if (rawItems.length === 0 || plain.length !== plainItems.length) {
+          return [...plain, ...raw];
+        }
+
+        // Raw values are resolved outside of the batch call, restore the input order.
+        let plainIndex = 0;
+        let rawIndex = 0;
+        return batch.items.map((item) =>
+          isRawType(item.options?.type) ? raw[rawIndex++]! : plain[plainIndex++]!,
+        );
       });
     },
     getItemRaw(key, opts = {}) {

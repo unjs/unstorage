@@ -593,6 +593,43 @@ describe("getItems() with type option", () => {
           ]);
         }
       });
+
+      it("keeps the input order when raw and plain types are mixed", async () => {
+        const results = await storage.getItems([
+          "text-key",
+          { key: "bytes-key", options: { type: "bytes" } },
+          "json-key",
+          { key: "bytes-key", options: { type: "blob" } },
+        ]);
+        expect(results.map((r) => r.key)).toEqual([
+          "text-key",
+          "bytes-key",
+          "json-key",
+          "bytes-key",
+        ]);
+        expect(results[1]!.value).toEqual(bytes);
+        expect(results[3]!.value).toBeInstanceOf(Blob);
+      });
     });
   }
+});
+
+describe("getItems() with drivers that normalize keys", () => {
+  const storage = createStorage({
+    driver: {
+      name: "normalizing",
+      hasItem: () => true,
+      getItem: () => ({ foo: "bar" }),
+      // Echoes back a key that is not exactly the one it was given
+      getItems: (items) =>
+        items.map((item) => ({ key: item.key.toUpperCase(), value: { foo: "bar" } })),
+      getKeys: () => [],
+    },
+  });
+
+  it("still applies the type from commonOptions", async () => {
+    expect(await storage.getItems(["a"], { type: "text" })).toEqual([
+      { key: "A", value: '{"foo":"bar"}' },
+    ]);
+  });
 });

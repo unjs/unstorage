@@ -1,7 +1,14 @@
 import { existsSync, promises as fsp, Stats } from "node:fs";
 import { resolve, relative, join, isAbsolute, matchesGlob } from "node:path";
 import type { FSWatcher, ChokidarOptions } from "chokidar";
-import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
+import {
+  createError,
+  createRequiredError,
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
 import {
   readFile,
   writeFile,
@@ -10,6 +17,7 @@ import {
   rmRecursive,
   unlink,
   ensuredir,
+  isTmpFile,
 } from "./utils/node-fs.ts";
 import { CASMismatchError, checkCAS } from "./utils/cas.ts";
 
@@ -19,9 +27,33 @@ export interface FSStorageOptions {
   readOnly?: boolean;
   noClear?: boolean;
   watchOptions?: ChokidarOptions;
+
+  /**
+   * Write each item to a temporary file and rename it over the destination, so that concurrent
+   * readers never observe a partially written file.
+   *
+   * Renaming replaces the destination inode. The file mode is preserved, but ownership, ACLs and
+   * extended attributes are not, symbolic links are replaced instead of written through, and hard
+   * links to the destination stop tracking it. Small writes are also around twice as slow.
+   *
+   * @default false
+   */
+  atomic?: boolean;
+
+  /**
+   * Optionally provide the [`chokidar`](https://www.npmjs.com/package/chokidar) library
+   * to avoid dynamically importing it.
+   *
+   * Only used by `watch()`.
+   */
+  lib?: LibImport<typeof import("chokidar")>;
 }
 
 const PATH_TRAVERSE_RE = /\.\.:|\.\.$/;
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "chokidar", version: "^4 || ^5", optional: true },
+};
 
 const DRIVER_NAME = "fs";
 
@@ -158,7 +190,7 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
       }
       return writeWithCAS(
         key,
-        (path) => writeFile(path, value, "utf8"),
+        (path) => writeFile(path, value, "utf8", userOptions.atomic),
         (path) => writeFileExclusive(path, value, "utf8"),
         opts,
       );
@@ -169,7 +201,7 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
       }
       return writeWithCAS(
         key,
-        (path) => writeFile(path, value),
+        (path) => writeFile(path, value, undefined, userOptions.atomic),
         (path) => writeFileExclusive(path, value),
         opts,
       );
@@ -199,7 +231,12 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
         return _unwatch;
       }
       await ensuredir(base);
-      const { watch } = await import("chokidar");
+      const { watch } = await importLib(
+        DRIVER_NAME,
+        "chokidar",
+        userOptions.lib,
+        () => import("chokidar"),
+      );
       await new Promise<void>((resolve, reject) => {
         const watchOptions: ChokidarOptions = {
           ignoreInitial: true,
@@ -212,7 +249,8 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
         } else {
           watchOptions.ignored = [watchOptions.ignored];
         }
-        watchOptions.ignored.push(ignore);
+        // Never surface in-progress atomic writes as key events.
+        watchOptions.ignored.push(ignore, (path: string) => isTmpFile(path));
         _watcher = watch(base, watchOptions)
           .on("ready", () => {
             resolve();

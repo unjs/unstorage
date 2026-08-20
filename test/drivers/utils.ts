@@ -228,25 +228,28 @@ export function testDriver(opts: TestOptions): void {
       expect(await ctx.storage.getItem("cas:create")).toBe("first");
     });
 
-    it.skipIf(opts.casNoMetaEtag)("CAS: ifMatch:<etag> swaps only when version matches", async () => {
-      await ctx.storage.setItem("cas:swap", "v1");
-      const meta1 = await ctx.storage.getMeta("cas:swap");
-      expect(meta1.etag).toBeTruthy();
+    it.skipIf(opts.casNoMetaEtag)(
+      "CAS: ifMatch:<etag> swaps only when version matches",
+      async () => {
+        await ctx.storage.setItem("cas:swap", "v1");
+        const meta1 = await ctx.storage.getMeta("cas:swap");
+        expect(meta1.etag).toBeTruthy();
 
-      const r = await ctx.storage.setItem("cas:swap", "v2", { ifMatch: meta1.etag as string });
-      expect(r).toMatchObject({ etag: expect.any(String) });
-      expect(await ctx.storage.getItem("cas:swap")).toBe("v2");
+        const r = await ctx.storage.setItem("cas:swap", "v2", { ifMatch: meta1.etag as string });
+        expect(r).toMatchObject({ etag: expect.any(String) });
+        expect(await ctx.storage.getItem("cas:swap")).toBe("v2");
 
-      await expect(
-        ctx.storage.setItem("cas:swap", "v3", { ifMatch: meta1.etag as string }),
-      ).rejects.toBeInstanceOf(CASMismatchError);
-      expect(await ctx.storage.getItem("cas:swap")).toBe("v2");
-    });
+        await expect(
+          ctx.storage.setItem("cas:swap", "v3", { ifMatch: meta1.etag as string }),
+        ).rejects.toBeInstanceOf(CASMismatchError);
+        expect(await ctx.storage.getItem("cas:swap")).toBe("v2");
+      },
+    );
 
     it("CAS: ifMatch:* requires existence", async () => {
-      await expect(
-        ctx.storage.setItem("cas:absent", "x", { ifMatch: "*" }),
-      ).rejects.toBeInstanceOf(CASMismatchError);
+      await expect(ctx.storage.setItem("cas:absent", "x", { ifMatch: "*" })).rejects.toBeInstanceOf(
+        CASMismatchError,
+      );
 
       await ctx.storage.setItem("cas:absent", "x");
       const r = await ctx.storage.setItem("cas:absent", "y", { ifMatch: "*" });

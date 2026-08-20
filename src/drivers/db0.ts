@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { Connector, Database } from "db0";
-import { createError, type DriverFactory } from "./utils/index.ts";
+import { createError, type DriverFactory, type DriverDependencies } from "./utils/index.ts";
 import { checkCAS } from "./utils/cas.ts";
 
 interface ResultSchema {
@@ -18,6 +18,10 @@ export interface DB0DriverOptions {
   tableName?: string;
 }
 
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  database: { name: "db0", version: ">=0.3.4" },
+};
+
 const DRIVER_NAME = "db0";
 const DEFAULT_TABLE_NAME = "unstorage";
 
@@ -31,7 +35,7 @@ const computeEtag = (value: unknown): string => {
 };
 
 const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (opts) => {
-  opts.tableName = opts.tableName || DEFAULT_TABLE_NAME;
+  const tableName = opts.tableName || DEFAULT_TABLE_NAME;
 
   let setupPromise: Promise<void> | undefined;
   let setupDone = false;
@@ -46,7 +50,7 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
         );
         (globalThis as any)[kExperimentalWarning] = true;
       }
-      setupPromise = setupTable(opts).then(() => {
+      setupPromise = setupTable(opts.database, tableName).then(() => {
         setupDone = true;
         setupPromise = undefined;
       });
@@ -79,14 +83,12 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
     }
   };
 
-  const readState = async (
-    key: string,
-  ): Promise<{ exists: boolean; etag?: string }> => {
+  const readState = async (key: string): Promise<{ exists: boolean; etag?: string }> => {
     const { rows } = isMysql
       ? await opts.database.sql<ResultSchema>
-        /* sql */ `SELECT etag FROM {${opts.tableName}} WHERE \`key\` = ${key}`
+        /* sql */ `SELECT etag FROM {${tableName}} WHERE \`key\` = ${key}`
       : await opts.database.sql<ResultSchema>
-        /* sql */ `SELECT etag FROM {${opts.tableName}} WHERE key = ${key}`;
+        /* sql */ `SELECT etag FROM {${tableName}} WHERE key = ${key}`;
     const row = rows?.[0];
     if (!row) {
       return { exists: false };
@@ -109,36 +111,36 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
         if (isMysql) {
           if (column === "value") {
             await opts.database.sql
-            /* sql */ `UPDATE {${opts.tableName}} SET \`value\` = ${v}, etag = ${newEtag}, updated_at = CURRENT_TIMESTAMP WHERE \`key\` = ${key}`;
+            /* sql */ `UPDATE {${tableName}} SET \`value\` = ${v}, etag = ${newEtag}, updated_at = CURRENT_TIMESTAMP WHERE \`key\` = ${key}`;
           } else {
             await opts.database.sql
-            /* sql */ `UPDATE {${opts.tableName}} SET \`blob\` = ${v}, etag = ${newEtag}, updated_at = CURRENT_TIMESTAMP WHERE \`key\` = ${key}`;
+            /* sql */ `UPDATE {${tableName}} SET \`blob\` = ${v}, etag = ${newEtag}, updated_at = CURRENT_TIMESTAMP WHERE \`key\` = ${key}`;
           }
         } else {
           if (column === "value") {
             await opts.database.sql
-            /* sql */ `UPDATE {${opts.tableName}} SET value = ${v}, etag = ${newEtag}, updated_at = CURRENT_TIMESTAMP WHERE key = ${key}`;
+            /* sql */ `UPDATE {${tableName}} SET value = ${v}, etag = ${newEtag}, updated_at = CURRENT_TIMESTAMP WHERE key = ${key}`;
           } else {
             await opts.database.sql
-            /* sql */ `UPDATE {${opts.tableName}} SET blob = ${v}, etag = ${newEtag}, updated_at = CURRENT_TIMESTAMP WHERE key = ${key}`;
+            /* sql */ `UPDATE {${tableName}} SET blob = ${v}, etag = ${newEtag}, updated_at = CURRENT_TIMESTAMP WHERE key = ${key}`;
           }
         }
       } else {
         if (isMysql) {
           if (column === "value") {
             await opts.database.sql
-            /* sql */ `INSERT INTO {${opts.tableName}} (\`key\`, \`value\`, etag, created_at, updated_at) VALUES (${key}, ${v}, ${newEtag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
+            /* sql */ `INSERT INTO {${tableName}} (\`key\`, \`value\`, etag, created_at, updated_at) VALUES (${key}, ${v}, ${newEtag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
           } else {
             await opts.database.sql
-            /* sql */ `INSERT INTO {${opts.tableName}} (\`key\`, \`blob\`, etag, created_at, updated_at) VALUES (${key}, ${v}, ${newEtag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
+            /* sql */ `INSERT INTO {${tableName}} (\`key\`, \`blob\`, etag, created_at, updated_at) VALUES (${key}, ${v}, ${newEtag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
           }
         } else {
           if (column === "value") {
             await opts.database.sql
-            /* sql */ `INSERT INTO {${opts.tableName}} (key, value, etag, created_at, updated_at) VALUES (${key}, ${v}, ${newEtag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
+            /* sql */ `INSERT INTO {${tableName}} (key, value, etag, created_at, updated_at) VALUES (${key}, ${v}, ${newEtag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
           } else {
             await opts.database.sql
-            /* sql */ `INSERT INTO {${opts.tableName}} (key, blob, etag, created_at, updated_at) VALUES (${key}, ${v}, ${newEtag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
+            /* sql */ `INSERT INTO {${tableName}} (key, blob, etag, created_at, updated_at) VALUES (${key}, ${v}, ${newEtag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
           }
         }
       }
@@ -149,16 +151,16 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
   const hasRow = async (key: string): Promise<boolean> => {
     const { rows } = isMysql
       ? await opts.database.sql<ResultSchema>
-        /* sql */ `SELECT EXISTS (SELECT 1 FROM {${opts.tableName}} WHERE \`key\` = ${key}) AS \`value\``
+        /* sql */ `SELECT EXISTS (SELECT 1 FROM {${tableName}} WHERE \`key\` = ${key}) AS \`value\``
       : await opts.database.sql<ResultSchema>
-        /* sql */ `SELECT EXISTS (SELECT 1 FROM {${opts.tableName}} WHERE key = ${key}) AS value`;
+        /* sql */ `SELECT EXISTS (SELECT 1 FROM {${tableName}} WHERE key = ${key}) AS value`;
     return rows?.[0]?.value == "1";
   };
 
   return {
     name: DRIVER_NAME,
     flags: { cas: true },
-    options: opts,
+    options: { ...opts, tableName },
     getInstance: () => opts.database,
     async hasItem(key) {
       await ensureTable();
@@ -168,40 +170,38 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
       await ensureTable();
       const { rows } = isMysql
         ? await opts.database.sql<ResultSchema>
-          /* sql */ `SELECT value FROM {${opts.tableName}} WHERE \`key\` = ${key}`
+          /* sql */ `SELECT value FROM {${tableName}} WHERE \`key\` = ${key}`
         : await opts.database.sql<ResultSchema>
-          /* sql */ `SELECT value FROM {${opts.tableName}} WHERE key = ${key}`;
+          /* sql */ `SELECT value FROM {${tableName}} WHERE key = ${key}`;
       return rows?.[0]?.value ?? null;
     },
     getItemRaw: async (key) => {
       await ensureTable();
       const { rows } = isMysql
         ? await opts.database.sql<ResultSchema>
-          /* sql */ `SELECT \`blob\` as value FROM {${opts.tableName}} WHERE \`key\` = ${key}`
+          /* sql */ `SELECT \`blob\` as value FROM {${tableName}} WHERE \`key\` = ${key}`
         : await opts.database.sql<ResultSchema>
-          /* sql */ `SELECT blob as value FROM {${opts.tableName}} WHERE key = ${key}`;
+          /* sql */ `SELECT blob as value FROM {${tableName}} WHERE key = ${key}`;
       return rows?.[0]?.value ?? null;
     },
     setItem: async (key, value, tOptions) => {
       await ensureTable();
-      const wantsCAS =
-        tOptions?.ifMatch !== undefined || tOptions?.ifNoneMatch !== undefined;
+      const wantsCAS = tOptions?.ifMatch !== undefined || tOptions?.ifNoneMatch !== undefined;
       if (wantsCAS) {
         return writeWithCAS(key, value, "value", tOptions);
       }
       const etag = computeEtag(value);
       if (isMysql) {
         await opts.database.sql
-        /* sql */ `INSERT INTO {${opts.tableName}} (\`key\`, \`value\`, etag, created_at, updated_at) VALUES (${key}, ${value}, ${etag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE value = ${value}, etag = ${etag}, updated_at = CURRENT_TIMESTAMP`;
+        /* sql */ `INSERT INTO {${tableName}} (\`key\`, \`value\`, etag, created_at, updated_at) VALUES (${key}, ${value}, ${etag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE value = ${value}, etag = ${etag}, updated_at = CURRENT_TIMESTAMP`;
       } else {
         await opts.database.sql
-        /* sql */ `INSERT INTO {${opts.tableName}} (key, value, etag, created_at, updated_at) VALUES (${key}, ${value}, ${etag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = ${value}, etag = ${etag}, updated_at = CURRENT_TIMESTAMP`;
+        /* sql */ `INSERT INTO {${tableName}} (key, value, etag, created_at, updated_at) VALUES (${key}, ${value}, ${etag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = ${value}, etag = ${etag}, updated_at = CURRENT_TIMESTAMP`;
       }
     },
     async setItemRaw(key, value, tOptions) {
       await ensureTable();
-      const wantsCAS =
-        tOptions?.ifMatch !== undefined || tOptions?.ifNoneMatch !== undefined;
+      const wantsCAS = tOptions?.ifMatch !== undefined || tOptions?.ifNoneMatch !== undefined;
       if (wantsCAS) {
         const blob = isMysql ? (Buffer.from(value) as any) : value;
         return writeWithCAS(key, blob, "blob", tOptions);
@@ -210,27 +210,27 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
       if (isMysql) {
         const blob = Buffer.from(value) as any;
         await opts.database.sql
-        /* sql */ `INSERT INTO {${opts.tableName}} (\`key\`, \`blob\`, etag, created_at, updated_at) VALUES (${key}, ${blob}, ${etag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE \`blob\` = ${blob}, etag = ${etag}, updated_at = CURRENT_TIMESTAMP`;
+        /* sql */ `INSERT INTO {${tableName}} (\`key\`, \`blob\`, etag, created_at, updated_at) VALUES (${key}, ${blob}, ${etag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE \`blob\` = ${blob}, etag = ${etag}, updated_at = CURRENT_TIMESTAMP`;
       } else {
         await opts.database.sql
-        /* sql */ `INSERT INTO {${opts.tableName}} (key, blob, etag, created_at, updated_at) VALUES (${key}, ${value}, ${etag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET blob = ${value}, etag = ${etag}, updated_at = CURRENT_TIMESTAMP`;
+        /* sql */ `INSERT INTO {${tableName}} (key, blob, etag, created_at, updated_at) VALUES (${key}, ${value}, ${etag}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET blob = ${value}, etag = ${etag}, updated_at = CURRENT_TIMESTAMP`;
       }
     },
     removeItem: async (key) => {
       await ensureTable();
       if (isMysql) {
-        await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}} WHERE \`key\`=${key}`;
+        await opts.database.sql /* sql */ `DELETE FROM {${tableName}} WHERE \`key\`=${key}`;
       } else {
-        await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}} WHERE key=${key}`;
+        await opts.database.sql /* sql */ `DELETE FROM {${tableName}} WHERE key=${key}`;
       }
     },
     getMeta: async (key) => {
       await ensureTable();
       const { rows } = isMysql
         ? await opts.database.sql<ResultSchema>
-          /* sql */ `SELECT etag, created_at, updated_at FROM {${opts.tableName}} WHERE \`key\` = ${key}`
+          /* sql */ `SELECT etag, created_at, updated_at FROM {${tableName}} WHERE \`key\` = ${key}`
         : await opts.database.sql<ResultSchema>
-          /* sql */ `SELECT etag, created_at, updated_at FROM {${opts.tableName}} WHERE key = ${key}`;
+          /* sql */ `SELECT etag, created_at, updated_at FROM {${tableName}} WHERE key = ${key}`;
 
       const row = rows?.[0];
       return {
@@ -243,15 +243,15 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
       await ensureTable();
       const { rows } = isMysql
         ? await opts.database.sql<ResultSchema>
-          /* sql */ `SELECT \`key\` FROM {${opts.tableName}} WHERE \`key\` LIKE ${base + "%"}`
+          /* sql */ `SELECT \`key\` FROM {${tableName}} WHERE \`key\` LIKE ${base + "%"}`
         : await opts.database.sql<ResultSchema>
-          /* sql */ `SELECT key FROM {${opts.tableName}} WHERE key LIKE ${base + "%"}`;
+          /* sql */ `SELECT key FROM {${tableName}} WHERE key LIKE ${base + "%"}`;
 
       return rows?.map((r) => r.key);
     },
     clear: async () => {
       await ensureTable();
-      await opts.database.sql /* sql */ `DELETE FROM {${opts.tableName}}`;
+      await opts.database.sql /* sql */ `DELETE FROM {${tableName}}`;
     },
     dispose: async () => {
       await opts.database.dispose();
@@ -260,12 +260,12 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
 };
 
 /** Run database init/migration once */
-async function setupTable(opts: DB0DriverOptions) {
-  switch (opts.database.dialect) {
+async function setupTable(database: Database, tableName: string) {
+  switch (database.dialect) {
     case "sqlite":
     case "libsql": {
-      await opts.database.sql /* sql */ `
-      CREATE TABLE IF NOT EXISTS {${opts.tableName}} (
+      await database.sql /* sql */ `
+      CREATE TABLE IF NOT EXISTS {${tableName}} (
         key TEXT PRIMARY KEY,
         value TEXT,
         blob BLOB,
@@ -274,12 +274,12 @@ async function setupTable(opts: DB0DriverOptions) {
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       );
     `;
-      await addEtagColumn(opts, "TEXT");
+      await addEtagColumn(database, tableName, "TEXT");
       return;
     }
     case "postgresql": {
-      await opts.database.sql /* sql */ `
-      CREATE TABLE IF NOT EXISTS {${opts.tableName}} (
+      await database.sql /* sql */ `
+      CREATE TABLE IF NOT EXISTS {${tableName}} (
         key VARCHAR(255) NOT NULL PRIMARY KEY,
         value TEXT,
         blob BYTEA,
@@ -288,12 +288,12 @@ async function setupTable(opts: DB0DriverOptions) {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
-      await addEtagColumn(opts, "VARCHAR(64)");
+      await addEtagColumn(database, tableName, "VARCHAR(64)");
       return;
     }
     case "mysql": {
-      await opts.database.sql /* sql */ `
-      CREATE TABLE IF NOT EXISTS {${opts.tableName}} (
+      await database.sql /* sql */ `
+      CREATE TABLE IF NOT EXISTS {${tableName}} (
         \`key\` VARCHAR(255) NOT NULL PRIMARY KEY,
         \`value\` LONGTEXT,
         \`blob\` BLOB,
@@ -302,11 +302,11 @@ async function setupTable(opts: DB0DriverOptions) {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       );
     `;
-      await addEtagColumn(opts, "VARCHAR(64)");
+      await addEtagColumn(database, tableName, "VARCHAR(64)");
       return;
     }
     default: {
-      throw createError(DRIVER_NAME, `unsuppoted SQL dialect: ${opts.database.dialect}`);
+      throw createError(DRIVER_NAME, `unsuppoted SQL dialect: ${database.dialect}`);
     }
   }
 }
@@ -314,16 +314,12 @@ async function setupTable(opts: DB0DriverOptions) {
 // Best-effort migration for tables created before the etag column existed.
 // Existing rows will have NULL etag and `ifMatch:<etag>` will fail until they
 // are rewritten — a soft-breaking change documented in the changelog.
-async function addEtagColumn(opts: DB0DriverOptions, type: string): Promise<void> {
+async function addEtagColumn(database: Database, tableName: string, type: string): Promise<void> {
   try {
-    if (opts.database.dialect === "mysql") {
-      await opts.database.exec(
-        `ALTER TABLE \`${opts.tableName}\` ADD COLUMN \`etag\` ${type}`,
-      );
+    if (database.dialect === "mysql") {
+      await database.exec(`ALTER TABLE \`${tableName}\` ADD COLUMN \`etag\` ${type}`);
     } else {
-      await opts.database.exec(
-        `ALTER TABLE "${opts.tableName}" ADD COLUMN etag ${type}`,
-      );
+      await database.exec(`ALTER TABLE "${tableName}" ADD COLUMN etag ${type}`);
     }
   } catch {
     // Column already exists or dialect doesn't support IF NOT EXISTS for ALTER.

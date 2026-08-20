@@ -1,5 +1,13 @@
-import * as blob from "@vercel/blob";
-import { type DriverFactory, normalizeKey, joinKeys, createError } from "./utils/index.ts";
+import type * as blob from "@vercel/blob";
+import {
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  normalizeKey,
+  joinKeys,
+  createError,
+  type DriverDependencies,
+} from "./utils/index.ts";
 import { CASMismatchError } from "./utils/cas.ts";
 
 export interface VercelBlobOptions {
@@ -27,16 +35,30 @@ export interface VercelBlobOptions {
    * Default is `BLOB` (env name = `BLOB_READ_WRITE_TOKEN`).
    */
   envPrefix?: string;
+
+  /**
+   * Optionally provide the [`@vercel/blob`](https://www.npmjs.com/package/@vercel/blob) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("@vercel/blob")>;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "@vercel/blob", version: ">=0.27.3" },
+};
 
 const DRIVER_NAME = "vercel-blob";
 
-const driver: DriverFactory<VercelBlobOptions> = (opts) => {
+const driver: DriverFactory<VercelBlobOptions, Promise<typeof blob>> = (opts) => {
   const optsBase = normalizeKey(opts?.base);
 
   const r = (...keys: string[]) => joinKeys(optsBase, ...keys).replace(/:/g, "/");
 
   const envName = `${opts.envPrefix || "BLOB"}_READ_WRITE_TOKEN`;
+
+  let _blob: Promise<typeof blob> | undefined;
+  const getBlob = () =>
+    (_blob ??= importLib(DRIVER_NAME, "@vercel/blob", opts.lib, () => import("@vercel/blob")));
 
   const getToken = () => {
     const token = opts.token || globalThis.process?.env?.[envName];
@@ -46,7 +68,8 @@ const driver: DriverFactory<VercelBlobOptions> = (opts) => {
     return token;
   };
 
-  const get = (key: string) => blob.get(r(key), { token: getToken(), access: opts.access });
+  const get = async (key: string) =>
+    (await getBlob()).get(r(key), { token: getToken(), access: opts.access });
 
   // Vercel Blob exposes ETags and supports `ifMatch` natively on `put()`. The
   // `ifNoneMatch: "*"` precondition (create-only) is mapped onto
@@ -57,10 +80,7 @@ const driver: DriverFactory<VercelBlobOptions> = (opts) => {
   // race), but consistent with the fs/lru-cache CAS pattern.
   const writeWithCAS = async (
     key: string,
-    write: (putOpts: {
-      ifMatch?: string;
-      allowOverwrite?: boolean;
-    }) => Promise<{ etag: string }>,
+    write: (putOpts: { ifMatch?: string; allowOverwrite?: boolean }) => Promise<{ etag: string }>,
     casOpts: { ifMatch?: string; ifNoneMatch?: string },
   ): Promise<{ etag: string }> => {
     const { ifMatch, ifNoneMatch } = casOpts;
@@ -91,9 +111,7 @@ const driver: DriverFactory<VercelBlobOptions> = (opts) => {
 
     // Emulated paths (`ifMatch:*`, `ifNoneMatch:<etag>`, or combinations).
     // Best-effort: head() then write. Cross-process races are not prevented.
-    const head = await blob
-      .head(r(key), { token: getToken() })
-      .catch(() => null);
+    const head = await (await getBlob()).head(r(key), { token: getToken() }).catch(() => null);
     const exists = !!head;
     const curEtag = head?.etag;
 
@@ -128,9 +146,10 @@ const driver: DriverFactory<VercelBlobOptions> = (opts) => {
     name: DRIVER_NAME,
     options: opts,
     flags: { cas: true },
+    getInstance: getBlob,
     async hasItem(key: string) {
       try {
-        await blob.head(r(key), { token: getToken() });
+        await (await getBlob()).head(r(key), { token: getToken() });
         return true;
       } catch {
         return false;
@@ -148,7 +167,7 @@ const driver: DriverFactory<VercelBlobOptions> = (opts) => {
     },
     async getMeta(key) {
       try {
-        const blobHead = await blob.head(r(key), { token: getToken() });
+        const blobHead = await (await getBlob()).head(r(key), { token: getToken() });
         return {
           mtime: blobHead.uploadedAt,
           ...blobHead,
@@ -158,49 +177,53 @@ const driver: DriverFactory<VercelBlobOptions> = (opts) => {
       }
     },
     async setItem(key, value, callOpts) {
-      const wantsCAS =
-        callOpts?.ifMatch !== undefined || callOpts?.ifNoneMatch !== undefined;
-      const doPut = (extra: { ifMatch?: string; allowOverwrite?: boolean }) =>
-        blob
-          .put(r(key), value, {
-            access: opts.access,
-            addRandomSuffix: false,
-            token: getToken(),
-            ...callOpts,
-            ...extra,
-          })
-          .then((res) => ({ etag: res.etag }));
+      const wantsCAS = callOpts?.ifMatch !== undefined || callOpts?.ifNoneMatch !== undefined;
+      const doPut = async (extra: { ifMatch?: string; allowOverwrite?: boolean }) => {
+        const res = await (
+          await getBlob()
+        ).put(r(key), value, {
+          access: opts.access,
+          addRandomSuffix: false,
+          token: getToken(),
+          ...callOpts,
+          ...extra,
+        });
+        return { etag: res.etag };
+      };
       if (wantsCAS) {
         return writeWithCAS(key, doPut, callOpts);
       }
       await doPut({});
     },
     async setItemRaw(key, value, callOpts) {
-      const wantsCAS =
-        callOpts?.ifMatch !== undefined || callOpts?.ifNoneMatch !== undefined;
-      const doPut = (extra: { ifMatch?: string; allowOverwrite?: boolean }) =>
-        blob
-          .put(r(key), value, {
-            access: opts.access,
-            addRandomSuffix: false,
-            token: getToken(),
-            ...callOpts,
-            ...extra,
-          })
-          .then((res) => ({ etag: res.etag }));
+      const wantsCAS = callOpts?.ifMatch !== undefined || callOpts?.ifNoneMatch !== undefined;
+      const doPut = async (extra: { ifMatch?: string; allowOverwrite?: boolean }) => {
+        const res = await (
+          await getBlob()
+        ).put(r(key), value, {
+          access: opts.access,
+          addRandomSuffix: false,
+          token: getToken(),
+          ...callOpts,
+          ...extra,
+        });
+        return { etag: res.etag };
+      };
       if (wantsCAS) {
         return writeWithCAS(key, doPut, callOpts);
       }
       await doPut({});
     },
     async removeItem(key: string) {
-      await blob.del(r(key), { token: getToken() });
+      await (await getBlob()).del(r(key), { token: getToken() });
     },
     async getKeys(base: string) {
       const blobs: any[] = [];
       let cursor: string | undefined = undefined;
       do {
-        const listBlobResult: Awaited<ReturnType<typeof blob.list>> = await blob.list({
+        const listBlobResult: Awaited<ReturnType<typeof blob.list>> = await (
+          await getBlob()
+        ).list({
           token: getToken(),
           cursor,
           prefix: r(base),
@@ -218,7 +241,9 @@ const driver: DriverFactory<VercelBlobOptions> = (opts) => {
       let cursor: string | undefined = undefined;
       const blobs: any[] = [];
       do {
-        const listBlobResult: Awaited<ReturnType<typeof blob.list>> = await blob.list({
+        const listBlobResult: Awaited<ReturnType<typeof blob.list>> = await (
+          await getBlob()
+        ).list({
           token: getToken(),
           cursor,
           prefix: r(base),
@@ -228,7 +253,9 @@ const driver: DriverFactory<VercelBlobOptions> = (opts) => {
       } while (cursor);
 
       if (blobs.length > 0) {
-        await blob.del(
+        await (
+          await getBlob()
+        ).del(
           blobs.map((blob) => blob.url),
           {
             token: getToken(),

@@ -1,9 +1,15 @@
-import { createRequiredError, type DriverFactory } from "./utils/index.ts";
+import {
+  createRequiredError,
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
 import { CASMismatchError } from "./utils/cas.ts";
-import { Container, CosmosClient } from "@azure/cosmos";
-import { DefaultAzureCredential } from "@azure/identity";
+import { type AzureIdentityOptions, createDefaultAzureCredential } from "./utils/azure.ts";
+import type { Container } from "@azure/cosmos";
 
-export interface AzureCosmosOptions {
+export interface AzureCosmosOptions extends AzureIdentityOptions {
   /**
    * CosmosDB endpoint in the format of https://<account>.documents.azure.com:443/.
    */
@@ -25,7 +31,18 @@ export interface AzureCosmosOptions {
    * @default "unstorage"
    */
   containerName?: string;
+
+  /**
+   * Optionally provide the [`@azure/cosmos`](https://www.npmjs.com/package/@azure/cosmos) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("@azure/cosmos")>;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "@azure/cosmos", version: "^4.9.1" },
+  identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+};
 
 const DRIVER_NAME = "azure-cosmos";
 
@@ -55,42 +72,32 @@ const isStatus = (err: unknown, status: number): boolean =>
   !!err && typeof err === "object" && (err as { code?: number | string }).code === status;
 
 const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => {
-  let client: Container;
-  const getCosmosClient = async () => {
-    if (client) {
-      return client;
-    }
-    if (!opts.endpoint) {
-      throw createRequiredError(DRIVER_NAME, "endpoint");
-    }
-    if (opts.accountKey) {
-      const cosmosClient = new CosmosClient({
-        endpoint: opts.endpoint,
-        key: opts.accountKey,
-      });
+  let client: Promise<Container> | undefined;
+  const getCosmosClient = () =>
+    (client ??= (async () => {
+      if (!opts.endpoint) {
+        throw createRequiredError(DRIVER_NAME, "endpoint");
+      }
+      const { CosmosClient } = await importLib(
+        DRIVER_NAME,
+        "@azure/cosmos",
+        opts.lib,
+        () => import("@azure/cosmos"),
+      );
+      const cosmosClient = opts.accountKey
+        ? new CosmosClient({ endpoint: opts.endpoint, key: opts.accountKey })
+        : new CosmosClient({
+            endpoint: opts.endpoint,
+            aadCredentials: await createDefaultAzureCredential(DRIVER_NAME, opts),
+          });
       const { database } = await cosmosClient.databases.createIfNotExists({
         id: opts.databaseName || "unstorage",
       });
       const { container } = await database.containers.createIfNotExists({
         id: opts.containerName || "unstorage",
       });
-      client = container;
-    } else {
-      const credential = new DefaultAzureCredential();
-      const cosmosClient = new CosmosClient({
-        endpoint: opts.endpoint,
-        aadCredentials: credential,
-      });
-      const { database } = await cosmosClient.databases.createIfNotExists({
-        id: opts.databaseName || "unstorage",
-      });
-      const { container } = await database.containers.createIfNotExists({
-        id: opts.containerName || "unstorage",
-      });
-      client = container;
-    }
-    return client;
-  };
+      return container;
+    })());
 
   const setWithCAS = async (
     key: string,
@@ -161,13 +168,11 @@ const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => 
     const curEtag = existing.resource?._etag;
 
     if (ifNoneMatch !== undefined) {
-      const mismatch =
-        ifNoneMatch === "*" ? exists : exists && curEtag === ifNoneMatch;
+      const mismatch = ifNoneMatch === "*" ? exists : exists && curEtag === ifNoneMatch;
       if (mismatch) throw new CASMismatchError(DRIVER_NAME, key);
     }
     if (ifMatch !== undefined) {
-      const mismatch =
-        ifMatch === "*" ? !exists : !exists || curEtag !== ifMatch;
+      const mismatch = ifMatch === "*" ? !exists : !exists || curEtag !== ifMatch;
       if (mismatch) throw new CASMismatchError(DRIVER_NAME, key);
     }
 

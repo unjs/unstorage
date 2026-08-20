@@ -1,7 +1,13 @@
-import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
+import {
+  createError,
+  createRequiredError,
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
 import { CASMismatchError } from "./utils/cas.ts";
 import type { GetKeysOptions } from "../types.ts";
-import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
   Store,
   BlobResponseType,
@@ -11,6 +17,13 @@ import type {
   GetStoreOptions,
   GetDeployStoreOptions,
 } from "@netlify/blobs";
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: {
+    name: "@netlify/blobs",
+    version: "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0 || ^11.0.0",
+  },
+};
 
 const DRIVER_NAME = "netlify-blobs";
 
@@ -24,6 +37,12 @@ export type NetlifyStoreOptions =
 export interface ExtraOptions {
   /** If set to `true`, the store is scoped to the deploy. This means that it is only available from that deploy, and will be deleted or rolled-back alongside it. */
   deployScoped?: boolean;
+
+  /**
+   * Optionally provide the [`@netlify/blobs`](https://www.npmjs.com/package/@netlify/blobs) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("@netlify/blobs")>;
 }
 
 export interface NetlifyDeployStoreOptions extends GetDeployStoreOptions, ExtraOptions {
@@ -41,27 +60,30 @@ export interface NetlifyNamedStoreOptions extends GetStoreOptions, ExtraOptions 
   deployScoped?: false;
 }
 
-const driver: DriverFactory<NetlifyStoreOptions, Store> = (options) => {
-  const { deployScoped, name, ...opts } = options;
-  let store: Store;
+const driver: DriverFactory<NetlifyStoreOptions, Promise<Store>> = (options) => {
+  const { deployScoped, name, lib, ...opts } = options;
+  let store: Promise<Store> | undefined;
 
-  const getClient = () => {
-    if (!store) {
+  const getClient = () =>
+    (store ??= (async () => {
+      const { getStore, getDeployStore } = await importLib(
+        DRIVER_NAME,
+        "@netlify/blobs",
+        lib,
+        () => import("@netlify/blobs"),
+      );
       if (deployScoped) {
         if (name) {
           throw createError(DRIVER_NAME, "deploy-scoped stores cannot have a name");
         }
-        store = getDeployStore({ fetch, ...options });
-      } else {
-        if (!name) {
-          throw createRequiredError(DRIVER_NAME, "name");
-        }
-        // Ensures that reserved characters are encoded
-        store = getStore({ name: encodeURIComponent(name), fetch, ...opts });
+        return getDeployStore({ fetch, ...opts });
       }
-    }
-    return store;
-  };
+      if (!name) {
+        throw createRequiredError(DRIVER_NAME, "name");
+      }
+      // Ensures that reserved characters are encoded
+      return getStore({ name: encodeURIComponent(name), fetch, ...opts });
+    })());
 
   // Native conditional write. Maps `ifMatch:<etag>` to `onlyIfMatch` and
   // `ifNoneMatch:"*"` to `onlyIfNew`. The remaining shapes (`ifMatch:"*"` and
@@ -73,7 +95,7 @@ const driver: DriverFactory<NetlifyStoreOptions, Store> = (options) => {
     value: string | ArrayBuffer | Blob,
     opts: { ifMatch?: string; ifNoneMatch?: string } | undefined,
   ): Promise<{ etag: string }> => {
-    const client = getClient();
+    const client = await getClient();
     const ifMatch = opts?.ifMatch;
     const ifNoneMatch = opts?.ifNoneMatch;
 
@@ -117,26 +139,28 @@ const driver: DriverFactory<NetlifyStoreOptions, Store> = (options) => {
     options,
     getInstance: getClient,
     async hasItem(key) {
-      return getClient().getMetadata(key).then(Boolean);
+      return (await getClient()).getMetadata(key).then(Boolean);
     },
-    getItem: (key, tops?: GetOptions) => {
+    getItem: async (key, tops?: GetOptions) => {
       // @ts-expect-error has trouble with the overloaded types
-      return getClient().get(key, tops);
+      return (await getClient()).get(key, tops);
     },
     async getMeta(key) {
-      const m = await getClient().getMetadata(key);
+      const m = await (await getClient()).getMetadata(key);
       return m ? { ...m.metadata, etag: m.etag } : null;
     },
-    getItemRaw(key, topts?: GetOptions) {
+    async getItemRaw(key, topts?: GetOptions) {
       // @ts-expect-error has trouble with the overloaded types
-      return getClient().get(key, { type: topts?.type ?? "arrayBuffer" });
+      return (await getClient()).get(key, { type: topts?.type ?? "arrayBuffer" });
     },
     async setItem(key, value, topts?: SetOptions & { ifMatch?: string; ifNoneMatch?: string }) {
       if (topts?.ifMatch !== undefined || topts?.ifNoneMatch !== undefined) {
         return setWithCAS(key, value, topts);
       }
       // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
-      await getClient().set(key, value, topts);
+      // TODO(serhalp): Allow drivers to return a value from `setItem`. The @netlify/blobs v10
+      // functionality isn't usable without this.
+      await (await getClient()).set(key, value, topts);
     },
     async setItemRaw(
       key,
@@ -147,16 +171,19 @@ const driver: DriverFactory<NetlifyStoreOptions, Store> = (options) => {
         return setWithCAS(key, value, topts);
       }
       // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
-      await getClient().set(key, value, topts);
+      // See TODO above.
+      await (await getClient()).set(key, value, topts);
     },
-    removeItem(key) {
-      return getClient().delete(key);
+    async removeItem(key) {
+      return (await getClient()).delete(key);
     },
     async getKeys(base?: string, tops?: GetKeysOptions & Omit<ListOptions, "prefix" | "paginate">) {
-      return (await getClient().list({ ...tops, prefix: base })).blobs.map((item) => item.key);
+      return (await (await getClient()).list({ ...tops, prefix: base })).blobs.map(
+        (item) => item.key,
+      );
     },
     async clear(base?: string) {
-      const client = getClient();
+      const client = await getClient();
       return Promise.allSettled(
         (await client.list({ prefix: base })).blobs.map((item) => client.delete(item.key)),
       ).then(() => {});

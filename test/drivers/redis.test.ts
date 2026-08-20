@@ -40,6 +40,24 @@ describe("drivers: redis", () => {
 
         await client.disconnect();
       });
+
+      it("setItems with ttl sets each key with an expiry", async () => {
+        await ctx.storage.setItems(
+          [
+            { key: "s6:a", value: "a" },
+            { key: "s6:b", value: "b" },
+          ],
+          { ttl: 1000 },
+        );
+
+        const client = new (ioredisMock as any).default("ioredis://localhost:6379/0");
+
+        expect(await client.get("test:s6:a")).toBe("a");
+        expect(await client.get("test:s6:b")).toBe("b");
+        expect(await client.ttl("test:s6:a")).toBeGreaterThan(0);
+
+        await client.disconnect();
+      });
     },
   });
 });

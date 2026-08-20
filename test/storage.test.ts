@@ -149,6 +149,23 @@ describe("utils", () => {
     expect(await mntStorage.getKeys("foo")).toStrictEqual(["foo:x", "foo:y"]);
   });
 
+  it("prefixStorage watch strips base from callback key", async () => {
+    const storage = createStorage();
+    const pStorage = prefixStorage(storage, "foo");
+    const onChange = vi.fn();
+
+    await pStorage.watch(onChange);
+    await pStorage.setItem("x", "bar");
+    await storage.setItem("foo:y", "baz");
+    await storage.setItem("bar:x", "ignored");
+    await pStorage.removeItem("x");
+
+    expect(onChange).toHaveBeenCalledWith("update", "x");
+    expect(onChange).toHaveBeenCalledWith("update", "y");
+    expect(onChange).toHaveBeenCalledWith("remove", "x");
+    expect(onChange).toHaveBeenCalledTimes(3);
+  });
+
   it("stringify", () => {
     const storage = createStorage();
     expect(async () => await storage.setItem("foo", [])).not.toThrow();
@@ -209,6 +226,8 @@ describe("Regression", () => {
     expect(await pStorage.get("x")).toBe("foo");
     expect(await pStorage.has("x")).toBe(true);
     expect(await pStorage.get("y")).toBe("bar");
+
+    expect(await pStorage.keys()).toStrictEqual(["x", "y"]);
 
     await pStorage.del("x");
     expect(await pStorage.has("x")).toBe(false);

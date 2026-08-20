@@ -1,6 +1,6 @@
 import type { TransactionOptions } from "../types.ts";
 import { type DriverFactory } from "./utils/index.ts";
-import { type FetchError, $fetch as _fetch } from "ofetch";
+import { FetchError, fetchRequest } from "./utils/fetch.ts";
 import { joinURL } from "./utils/path.ts";
 import { CASMismatchError, CASUnsupportedError } from "./utils/cas.ts";
 
@@ -16,8 +16,8 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
 
   const rBase = (key: string = "") => joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
 
-  const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
-    if (error?.response?.status === 404) {
+  const catchFetchError = (error: unknown, fallbackVal: any = null) => {
+    if (error instanceof FetchError && error.status === 404) {
       return fallbackVal;
     }
     throw error;
@@ -52,7 +52,7 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
   ): Promise<{ etag: string } | undefined> => {
     const wantsCAS = topts?.ifMatch !== undefined || topts?.ifNoneMatch !== undefined;
     try {
-      const res = await _fetch.raw(r(key), {
+      const res = await fetchRequest(r(key), {
         method: "PUT",
         body: value,
         headers: getHeaders(topts, defaultHeaders),
@@ -68,11 +68,13 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
       }
       return { etag };
     } catch (error: any) {
-      if (error?.response?.status === 412) {
-        throw new CASMismatchError(DRIVER_NAME, key);
-      }
-      if (error?.response?.status === 501) {
-        throw new CASUnsupportedError(DRIVER_NAME);
+      if (error instanceof FetchError) {
+        if (error.status === 412) {
+          throw new CASMismatchError(DRIVER_NAME, key);
+        }
+        if (error.status === 501) {
+          throw new CASUnsupportedError(DRIVER_NAME);
+        }
       }
       throw error;
     }
@@ -82,31 +84,28 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
     name: DRIVER_NAME,
     flags: { cas: true },
     options: opts,
-    hasItem(key, topts) {
-      return _fetch(r(key), {
+    async hasItem(key, topts) {
+      return fetchRequest(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
       })
         .then(() => true)
-        .catch((err) => catchFetchError(err, false));
+        .catch((error) => catchFetchError(error, false));
     },
     async getItem(key, tops) {
-      const value = await _fetch(r(key), {
+      const res = await fetchRequest(r(key), {
         headers: getHeaders(tops),
       }).catch(catchFetchError);
-      return value;
+      return res ? await res.text() : null;
     },
     async getItemRaw(key, topts) {
-      const response = await _fetch
-        .raw(r(key), {
-          responseType: "arrayBuffer",
-          headers: getHeaders(topts, { accept: "application/octet-stream" }),
-        })
-        .catch(catchFetchError);
-      return response._data;
+      const res = await fetchRequest(r(key), {
+        headers: getHeaders(topts, { accept: "application/octet-stream" }),
+      }).catch(catchFetchError);
+      return res ? await res.arrayBuffer() : null;
     },
     async getMeta(key, topts) {
-      const res = await _fetch.raw(r(key), {
+      const res = await fetchRequest(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
       });
@@ -137,19 +136,20 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
       });
     },
     async removeItem(key, topts) {
-      await _fetch(r(key), {
+      await fetchRequest(r(key), {
         method: "DELETE",
         headers: getHeaders(topts),
       });
     },
     async getKeys(base, topts) {
-      const value = await _fetch(rBase(base), {
+      const res = await fetchRequest(rBase(base), {
         headers: getHeaders(topts),
       });
+      const value = await res.json();
       return Array.isArray(value) ? value : [];
     },
     async clear(base, topts) {
-      await _fetch(rBase(base), {
+      await fetchRequest(rBase(base), {
         method: "DELETE",
         headers: getHeaders(topts),
       });

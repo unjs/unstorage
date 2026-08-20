@@ -62,6 +62,34 @@ export interface DriverFlags {
   cas?: boolean;
 }
 
+export interface DriverDependency {
+  /**
+   * Name of the npm package.
+   *
+   * Can differ from the import specifier used by the driver (e.g. `uploadthing` for `uploadthing/server`).
+   */
+  name: string;
+
+  /**
+   * Supported version range of the package.
+   */
+  version: string;
+
+  /**
+   * The dependency is only needed for some driver features or configurations.
+   */
+  optional?: boolean;
+}
+
+/**
+ * Third-party packages a driver dynamically imports, keyed by the driver option
+ * that can be used to provide them (usually `lib`).
+ *
+ * Drivers expose this as a `DRIVER_DEPENDENCIES` export so that consumer frameworks
+ * can check or install what a configured driver needs.
+ */
+export type DriverDependencies = Record<string, DriverDependency>;
+
 export interface Driver<OptionsT = any, InstanceT = any> {
   name?: string;
   flags?: DriverFlags;

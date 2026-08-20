@@ -1,14 +1,16 @@
-import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
-import { CASMismatchError } from "./utils/cas.ts";
 import {
-  TableClient,
-  AzureNamedKeyCredential,
-  AzureSASCredential,
-  type TableEntity,
-} from "@azure/data-tables";
-import { DefaultAzureCredential } from "@azure/identity";
+  createError,
+  createRequiredError,
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
+import { CASMismatchError } from "./utils/cas.ts";
+import { type AzureIdentityOptions, createDefaultAzureCredential } from "./utils/azure.ts";
+import type { TableClient, TableEntity } from "@azure/data-tables";
 
-export interface AzureStorageTableOptions {
+export interface AzureStorageTableOptions extends AzureIdentityOptions {
   /**
    * The name of the Azure Storage account.
    */
@@ -45,11 +47,22 @@ export interface AzureStorageTableOptions {
    * @default 1000
    */
   pageSize?: number;
+
+  /**
+   * Optionally provide the [`@azure/data-tables`](https://www.npmjs.com/package/@azure/data-tables)
+   * library to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("@azure/data-tables")>;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "@azure/data-tables", version: "^13.3.2" },
+  identityLib: { name: "@azure/identity", version: "^4.13.0", optional: true },
+};
 
 const DRIVER_NAME = "azure-storage-table";
 
-const driver: DriverFactory<AzureStorageTableOptions, TableClient> = (opts) => {
+const driver: DriverFactory<AzureStorageTableOptions, Promise<TableClient>> = (opts) => {
   const {
     accountName = null,
     tableName = "unstorage",
@@ -60,45 +73,39 @@ const driver: DriverFactory<AzureStorageTableOptions, TableClient> = (opts) => {
     pageSize = 1000,
   } = opts;
 
-  let client: TableClient;
-  const getClient = () => {
-    if (client) {
-      return client;
-    }
-    if (!accountName) {
-      throw createRequiredError(DRIVER_NAME, "accountName");
-    }
-    if (pageSize > 1000) {
-      throw createError(DRIVER_NAME, "`pageSize` exceeds the maximum allowed value of `1000`");
-    }
-    if (accountKey) {
-      // AzureNamedKeyCredential is only available in Node.js runtime, not in browsers
-      const credential = new AzureNamedKeyCredential(accountName, accountKey);
-      client = new TableClient(
-        `https://${accountName}.table.core.windows.net`,
-        tableName,
-        credential,
+  let client: Promise<TableClient> | undefined;
+  const getClient = () =>
+    (client ??= (async () => {
+      if (!accountName) {
+        throw createRequiredError(DRIVER_NAME, "accountName");
+      }
+      if (pageSize > 1000) {
+        throw createError(DRIVER_NAME, "`pageSize` exceeds the maximum allowed value of `1000`");
+      }
+      const { TableClient, AzureNamedKeyCredential, AzureSASCredential } = await importLib(
+        DRIVER_NAME,
+        "@azure/data-tables",
+        opts.lib,
+        () => import("@azure/data-tables"),
       );
-    } else if (sasKey) {
-      const credential = new AzureSASCredential(sasKey);
-      client = new TableClient(
-        `https://${accountName}.table.core.windows.net`,
-        tableName,
-        credential,
-      );
-    } else if (connectionString) {
-      // fromConnectionString is only available in Node.js runtime, not in browsers
-      client = TableClient.fromConnectionString(connectionString, tableName);
-    } else {
-      const credential = new DefaultAzureCredential();
-      client = new TableClient(
-        `https://${accountName}.table.core.windows.net`,
-        tableName,
-        credential,
-      );
-    }
-    return client;
-  };
+      const url = `https://${accountName}.table.core.windows.net`;
+      if (accountKey) {
+        // AzureNamedKeyCredential is only available in Node.js runtime, not in browsers
+        return new TableClient(
+          url,
+          tableName,
+          new AzureNamedKeyCredential(accountName, accountKey),
+        );
+      }
+      if (sasKey) {
+        return new TableClient(url, tableName, new AzureSASCredential(sasKey));
+      }
+      if (connectionString) {
+        // fromConnectionString is only available in Node.js runtime, not in browsers
+        return TableClient.fromConnectionString(connectionString, tableName);
+      }
+      return new TableClient(url, tableName, await createDefaultAzureCredential(DRIVER_NAME, opts));
+    })());
 
   // CAS write path. Native ETag-based optimistic concurrency:
   //  - createEntity → 409 Conflict on existing rowKey       (ifNoneMatch:"*")
@@ -111,7 +118,7 @@ const driver: DriverFactory<AzureStorageTableOptions, TableClient> = (opts) => {
     value: unknown,
     tOptions: { ifMatch?: string; ifNoneMatch?: string },
   ): Promise<{ etag: string }> => {
-    const c = getClient();
+    const c = await getClient();
     const entity: TableEntity = { partitionKey, rowKey: key, unstorageValue: value };
     const { ifMatch, ifNoneMatch } = tOptions;
     try {
@@ -173,7 +180,7 @@ const driver: DriverFactory<AzureStorageTableOptions, TableClient> = (opts) => {
     getInstance: getClient,
     async hasItem(key) {
       try {
-        await getClient().getEntity(partitionKey, key);
+        await (await getClient()).getEntity(partitionKey, key);
         return true;
       } catch {
         return false;
@@ -181,7 +188,7 @@ const driver: DriverFactory<AzureStorageTableOptions, TableClient> = (opts) => {
     },
     async getItem(key) {
       try {
-        const entity = await getClient().getEntity(partitionKey, key);
+        const entity = await (await getClient()).getEntity(partitionKey, key);
         return entity.unstorageValue;
       } catch {
         return null;
@@ -196,13 +203,13 @@ const driver: DriverFactory<AzureStorageTableOptions, TableClient> = (opts) => {
         rowKey: key,
         unstorageValue: value,
       };
-      await getClient().upsertEntity(entity, "Replace");
+      await (await getClient()).upsertEntity(entity, "Replace");
     },
     async removeItem(key) {
-      await getClient().deleteEntity(partitionKey, key);
+      await (await getClient()).deleteEntity(partitionKey, key);
     },
     async getKeys() {
-      const iterator = getClient().listEntities().byPage({ maxPageSize: pageSize });
+      const iterator = (await getClient()).listEntities().byPage({ maxPageSize: pageSize });
       const keys: string[] = [];
       for await (const page of iterator) {
         const pageKeys = page.map((entity) => entity.rowKey).filter(Boolean) as string[];
@@ -211,7 +218,7 @@ const driver: DriverFactory<AzureStorageTableOptions, TableClient> = (opts) => {
       return keys;
     },
     async getMeta(key) {
-      const entity = await getClient().getEntity(partitionKey, key).catch(() => null);
+      const entity = await (await getClient()).getEntity(partitionKey, key).catch(() => null);
       if (!entity) return null;
       return {
         mtime: entity.timestamp ? new Date(entity.timestamp) : undefined,
@@ -219,12 +226,12 @@ const driver: DriverFactory<AzureStorageTableOptions, TableClient> = (opts) => {
       };
     },
     async clear() {
-      const iterator = getClient().listEntities().byPage({ maxPageSize: pageSize });
+      const iterator = (await getClient()).listEntities().byPage({ maxPageSize: pageSize });
       for await (const page of iterator) {
         await Promise.all(
           page.map(async (entity) => {
             if (entity.partitionKey && entity.rowKey) {
-              await getClient().deleteEntity(entity.partitionKey, entity.rowKey);
+              await (await getClient()).deleteEntity(entity.partitionKey, entity.rowKey);
             }
           }),
         );

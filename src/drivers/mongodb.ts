@@ -1,7 +1,13 @@
 import { createHash } from "node:crypto";
-import { createRequiredError, type DriverFactory } from "./utils/index.ts";
+import {
+  createRequiredError,
+  type DriverFactory,
+  importLib,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
 import { CASMismatchError } from "./utils/cas.ts";
-import { MongoClient, type Collection, type MongoClientOptions } from "mongodb";
+import type { Collection, MongoClient, MongoClientOptions } from "mongodb";
 
 export interface MongoDbOptions {
   /**
@@ -25,7 +31,17 @@ export interface MongoDbOptions {
    * @default "unstorage"
    */
   collectionName?: string;
+
+  /**
+   * Optionally provide the [`mongodb`](https://www.npmjs.com/package/mongodb) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("mongodb")>;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "mongodb", version: "^6 || ^7" },
+};
 
 const DRIVER_NAME = "mongodb";
 
@@ -38,29 +54,34 @@ const computeEtag = (value: unknown): string => {
 const isDuplicateKeyError = (err: unknown): boolean =>
   !!err && typeof err === "object" && (err as { code?: number }).code === 11_000;
 
-const driver: DriverFactory<MongoDbOptions, Collection> = (opts) => {
-  let collection: Collection;
-  let indexReady: Promise<unknown> | undefined;
-  const getMongoCollection = () => {
-    if (!collection) {
+const driver: DriverFactory<MongoDbOptions, Promise<Collection>> = (opts) => {
+  let collection: Promise<Collection> | undefined;
+  let client: MongoClient | undefined;
+  const getMongoCollection = () =>
+    (collection ??= (async () => {
       if (!opts.connectionString) {
         throw createRequiredError(DRIVER_NAME, "connectionString");
       }
-      const mongoClient = new MongoClient(opts.connectionString, opts.clientOptions);
-      const db = mongoClient.db(opts.databaseName || "unstorage");
-      collection = db.collection(opts.collectionName || "unstorage");
-      indexReady = collection.createIndex({ key: 1 }, { unique: true }).catch(() => {});
-    }
-    return collection;
-  };
+      const { MongoClient } = await importLib(
+        DRIVER_NAME,
+        "mongodb",
+        opts.lib,
+        () => import("mongodb"),
+      );
+      client = new MongoClient(opts.connectionString, opts.clientOptions);
+      const db = client.db(opts.databaseName || "unstorage");
+      const col = db.collection(opts.collectionName || "unstorage");
+      // Unique index on `key` is what makes create-only (`ifNoneMatch:"*"`) CAS atomic.
+      await col.createIndex({ key: 1 }, { unique: true }).catch(() => {});
+      return col;
+    })());
 
   const setWithCAS = async (
     key: string,
     value: unknown,
     tOptions: { ifMatch?: string; ifNoneMatch?: string },
   ): Promise<{ etag: string }> => {
-    const col = getMongoCollection();
-    await indexReady;
+    const col = await getMongoCollection();
     const now = new Date();
     const etag = computeEtag(value);
     const { ifMatch, ifNoneMatch } = tOptions;
@@ -155,19 +176,17 @@ const driver: DriverFactory<MongoDbOptions, Collection> = (opts) => {
     options: opts,
     getInstance: getMongoCollection,
     async hasItem(key) {
-      const result = await getMongoCollection().findOne({ key });
+      const result = await (await getMongoCollection()).findOne({ key });
       return !!result;
     },
     async getItem(key) {
-      const document = await getMongoCollection().findOne({ key });
+      const document = await (await getMongoCollection()).findOne({ key });
       return document?.value ?? null;
     },
     async getItems(items) {
       const keys = items.map((item) => item.key);
 
-      const result = await getMongoCollection()
-        .find({ key: { $in: keys } })
-        .toArray();
+      const result = await (await getMongoCollection()).find({ key: { $in: keys } }).toArray();
 
       // return result in correct order
       const resultMap = new Map(result.map((doc) => [doc.key, doc]));
@@ -180,7 +199,9 @@ const driver: DriverFactory<MongoDbOptions, Collection> = (opts) => {
         return setWithCAS(key, value, tOptions);
       }
       const now = new Date();
-      await getMongoCollection().updateOne(
+      await (
+        await getMongoCollection()
+      ).updateOne(
         { key },
         {
           $set: { key, value, _etag: computeEtag(value), modifiedAt: now },
@@ -201,20 +222,22 @@ const driver: DriverFactory<MongoDbOptions, Collection> = (opts) => {
           upsert: true,
         },
       }));
-      await getMongoCollection().bulkWrite(operations);
+      await (await getMongoCollection()).bulkWrite(operations);
     },
     async removeItem(key) {
-      await getMongoCollection().deleteOne({ key });
+      await (await getMongoCollection()).deleteOne({ key });
     },
     async getKeys() {
-      return await getMongoCollection()
+      return await (
+        await getMongoCollection()
+      )
         .find()
         .project({ key: true })
         .map((d) => d.key)
         .toArray();
     },
     async getMeta(key) {
-      const document = await getMongoCollection().findOne({ key });
+      const document = await (await getMongoCollection()).findOne({ key });
       return document
         ? {
             mtime: document.modifiedAt,
@@ -224,7 +247,16 @@ const driver: DriverFactory<MongoDbOptions, Collection> = (opts) => {
         : {};
     },
     async clear() {
-      await getMongoCollection().deleteMany({});
+      await (await getMongoCollection()).deleteMany({});
+    },
+    async dispose() {
+      if (collection) {
+        // Wait for any pending connection attempt to settle before closing it
+        await collection.catch(() => {});
+        collection = undefined;
+        await client?.close();
+        client = undefined;
+      }
     },
   };
 };

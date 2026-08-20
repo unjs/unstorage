@@ -94,6 +94,37 @@ describe("types", () => {
     expectTypeOf(await storage.getItems(["foo"])).toEqualTypeOf<
       { key: string; value: StorageValue }[]
     >();
+
+    // Per item `type` narrows the value type too
+    expectTypeOf(
+      await storage.getItems([{ key: "foo", options: { type: "bytes" } }]),
+    ).toEqualTypeOf<{ key: string; value: Uint8Array | null }[]>();
+
+    // Mixed items widen to the union of what was requested
+    expectTypeOf(
+      await storage.getItems([
+        { key: "foo", options: { type: "json" } },
+        { key: "bar", options: { type: "bytes" } },
+      ]),
+    ).toEqualTypeOf<{ key: string; value: JSONValue | Uint8Array | null }[]>();
+
+    // Items without a `type` fall back to the common options
+    expectTypeOf(
+      await storage.getItems(["foo", { key: "bar", options: { type: "bytes" } }], {
+        type: "text",
+      }),
+    ).toEqualTypeOf<{ key: string; value: string | Uint8Array | null }[]>();
+
+    // ...and to the storage value type when there are none
+    expectTypeOf(
+      await storage.getItems(["foo", { key: "bar", options: { ttl: 60 } }]),
+    ).toEqualTypeOf<{ key: string; value: StorageValue }[]>();
+
+    // A non literal list keeps the default value type
+    const keys: string[] = ["foo", "bar"];
+    expectTypeOf(await storage.getItems(keys, { type: "blob" })).toEqualTypeOf<
+      { key: string; value: Blob | null }[]
+    >();
   });
 
   it("rejects invalid getItem inputs", async () => {

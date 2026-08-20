@@ -47,6 +47,21 @@ type TypedGetItemOptions<K extends GetItemType> = TransactionOptions & { type: K
 /** {@link GetItemOptions} with no `type`, keeping the default return type. */
 type UntypedGetItemOptions = TransactionOptions & { type?: undefined };
 
+/** An entry accepted by {@link Storage.getItems}: a key, or a key with per item options. */
+export type GetItemsInput = string | { key: string; options?: GetItemOptions };
+
+/**
+ * Value type of a {@link GetItemsInput}, based on its per item `type`.
+ *
+ * Falls back to `Default` (the `type` of the common options, or the storage's value type)
+ * for entries that do not set one.
+ */
+type GetItemsValue<Item, Default> = Item extends {
+  options: { type: infer K extends GetItemType };
+}
+  ? GetItemTypeMap[K] | null
+  : Default;
+
 export type GetKeysOptions = TransactionOptions & {
   maxDepth?: number;
 };
@@ -150,16 +165,16 @@ export interface Storage<T extends StorageValue = StorageValue> {
   ): Promise<R | null>;
 
   /** @experimental */
-  getItems<K extends GetItemType>(
-    items: (string | { key: string; options?: GetItemOptions })[],
+  getItems<K extends GetItemType, const Items extends readonly GetItemsInput[] = GetItemsInput[]>(
+    items: Items,
     commonOptions: TypedGetItemOptions<K>,
-  ): Promise<{ key: string; value: GetItemTypeMap[K] | null }[]>;
+  ): Promise<{ key: string; value: GetItemsValue<Items[number], GetItemTypeMap[K] | null> }[]>;
 
   /** @experimental */
-  getItems<U extends T>(
-    items: (string | { key: string; options?: GetItemOptions })[],
+  getItems<U extends T = T, const Items extends readonly GetItemsInput[] = GetItemsInput[]>(
+    items: Items,
     commonOptions?: UntypedGetItemOptions,
-  ): Promise<{ key: string; value: U }[]>;
+  ): Promise<{ key: string; value: GetItemsValue<Items[number], U> }[]>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   getItemRaw: <T = any>(key: string, opts?: TransactionOptions) => Promise<MaybeDefined<T> | null>;
 

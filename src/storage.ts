@@ -201,11 +201,11 @@ export function createStorage<T extends StorageValue>(
         case "text": {
           return typeof value === "string" ? value : stringify(value);
         }
-        case "json": {
-          return typeof value === "string" ? JSON.parse(value) : value;
-        }
+        // `json` is intentionally lenient (same as the default): values are stored with
+        // `stringify()` which keeps strings bare, so `JSON.parse` would throw on them.
+        case "json":
         default: {
-          return destr(value);
+          return destr(value) as StorageValue;
         }
       }
     },

@@ -305,6 +305,15 @@ describe("get() with type option", () => {
     expect(result).toEqual(obj);
   });
 
+  it("should get bare stored values with type=json", async () => {
+    // Values are stored with `stringify()` which keeps strings bare (not JSON quoted)
+    await storage.setItem("bare-string-key", "hello world");
+    expect(await storage.get("bare-string-key", { type: "json" })).toBe("hello world");
+
+    await storage.setItem("bare-number-key", 42);
+    expect(await storage.get("bare-number-key", { type: "json" })).toBe(42);
+  });
+
   it("should get string with type=text", async () => {
     await storage.setItem("text-key", "hello world");
     const result = await storage.get("text-key", { type: "text" });

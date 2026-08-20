@@ -355,19 +355,43 @@ export function createStorage<T extends StorageValue>(
     // Utils
     async clear(base, opts = {}) {
       base = normalizeBaseKey(base);
-      await Promise.all(
-        getMounts(base, false).map(async (m) => {
-          if (m.driver.clear) {
-            return asyncCall(m.driver.clear, m.relativeBase, opts);
-          }
-          // Fallback to remove all keys if clear not implemented
-          if (m.driver.removeItem) {
-            const keys = await m.driver.getKeys(m.relativeBase || "", opts);
-            return Promise.all(keys.map((key) => m.driver.removeItem!(key, opts)));
-          }
-          // Readonly
-        }),
-      );
+      // includeParent so a prefix on the root mount is in scope (issue #801).
+      // Nested mounts are still processed first and then masked, so a parent
+      // mount is not asked to delete keys that belong to a child driver.
+      const mounts = getMounts(base, true);
+      let maskedMounts: string[] = [];
+      for (const mount of mounts) {
+        const relativeBase = mount.relativeBase || "";
+        const hasMaskedChild = maskedMounts.some((maskedMount) =>
+          maskedMount.startsWith(mount.mountpoint),
+        );
+        // driver.clear() wipes the whole mount. Skip it when a nested child
+        // mount is masking keys that should survive until unmount.
+        if (mount.driver.clear && !relativeBase && !hasMaskedChild) {
+          await asyncCall(mount.driver.clear, relativeBase, opts);
+        } else if (mount.driver.removeItem) {
+          const keys = await asyncCall(mount.driver.getKeys, relativeBase, opts);
+          await Promise.all(
+            keys
+              .filter((key) => {
+                const fullKey = mount.mountpoint + normalizeKey(key);
+                if (maskedMounts.some((p) => fullKey.startsWith(p))) {
+                  return false;
+                }
+                if (filterKeyByBase(fullKey, base)) {
+                  return true;
+                }
+                // Companion metadata is stored as `${key}$` and excluded by filterKeyByBase.
+                return fullKey.endsWith("$") && filterKeyByBase(fullKey.slice(0, -1), base);
+              })
+              .map((key) => mount.driver.removeItem!(key, opts)),
+          );
+        }
+        maskedMounts = [
+          mount.mountpoint,
+          ...maskedMounts.filter((p) => !p.startsWith(mount.mountpoint)),
+        ];
+      }
     },
     async dispose() {
       await Promise.all(Object.values(context.mounts).map((driver) => dispose(driver)));

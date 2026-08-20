@@ -2,6 +2,7 @@ import { destr } from "destr";
 import type {
   Storage,
   Driver,
+  GetItemType,
   WatchCallback,
   Unwatch,
   StorageValue,
@@ -9,7 +10,15 @@ import type {
   TransactionOptions,
 } from "./types.ts";
 import memory from "./drivers/memory.ts";
-import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils.ts";
+import {
+  asyncCall,
+  deserializeRaw,
+  serializeRaw,
+  stringify,
+  toBlob,
+  toBytes,
+  toStream,
+} from "./_utils.ts";
 import {
   normalizeKey,
   normalizeBaseKey,
@@ -17,7 +26,6 @@ import {
   filterKeyByDepth,
   filterKeyByBase,
 } from "./utils.ts";
-import { toBlob, toReadableStream, toUint8Array } from "undio";
 
 interface StorageCTX {
   mounts: Record<string, Driver>;
@@ -158,62 +166,43 @@ export function createStorage<T extends StorageValue>(
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem: async (
-      key: string,
-      opts: TransactionOptions & {
-        type?: "json" | "text" | "bytes" | "stream" | "blob";
-      } = {},
-    ) => {
+    getItem: async (key: string, opts: TransactionOptions = {}) => {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
 
-      const type = opts.type;
+      const type = opts.type as GetItemType | undefined;
 
-      if (type === "bytes" || type === "stream" || type === "blob") {
+      if (type === "bytes" || type === "blob" || type === "stream") {
         const raw = driver.getItemRaw
           ? await asyncCall(driver.getItemRaw, relativeKey, opts)
-          : await asyncCall(driver.getItem, relativeKey, opts).then((val) => deserializeRaw(val));
-
+          : deserializeRaw(await asyncCall(driver.getItem, relativeKey, opts));
         if (raw === null || raw === undefined) {
           return null;
         }
-
         switch (type) {
           case "bytes": {
-            return await toUint8Array(raw);
+            return await toBytes(raw);
           }
           case "blob": {
-            if (typeof Blob === "undefined") {
-              throw new TypeError("Blob is not supported in this environment.");
-            }
             return await toBlob(raw);
           }
           case "stream": {
-            if (typeof ReadableStream === "undefined") {
-              throw new TypeError("ReadableStream is not supported in this environment.");
-            }
-            return await toReadableStream(raw);
-          }
-          default: {
-            throw new Error(`Invalid binary type: ${type}`);
+            return await toStream(raw);
           }
         }
       }
 
       const value = await asyncCall(driver.getItem, relativeKey, opts);
-      if (value == null) {
+      if (value === null || value === undefined) {
         return null;
       }
 
       switch (type) {
         case "text": {
-          return typeof value === "string" ? value : String(value);
+          return typeof value === "string" ? value : stringify(value);
         }
         case "json": {
-          if (typeof value === "string") {
-            return JSON.parse(value);
-          }
-          return value;
+          return typeof value === "string" ? JSON.parse(value) : value;
         }
         default: {
           return destr(value);
@@ -495,8 +484,7 @@ export function createStorage<T extends StorageValue>(
     },
     // Aliases
     keys: (base, opts = {}) => storage.getKeys(base, opts),
-    get: ((key: string, opts: TransactionOptions = {}) =>
-      storage.getItem(key, opts)) as Storage<T>["get"],
+    get: (key: string, opts: TransactionOptions = {}) => storage.getItem(key, opts),
     set: (key: string, value: T, opts = {}) => storage.setItem(key, value, opts),
     has: (key: string, opts = {}) => storage.hasItem(key, opts),
     del: (key: string, opts = {}) => storage.removeItem(key, opts),

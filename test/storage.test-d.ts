@@ -1,6 +1,6 @@
 import { describe, it, expectTypeOf } from "vitest";
 import { createStorage, prefixStorage } from "../src/index.ts";
-import type { Storage, StorageValue } from "../src/index.ts";
+import type { JSONValue, Storage, StorageValue } from "../src/index.ts";
 
 describe("types", () => {
   it("default types for storage", async () => {
@@ -65,6 +65,21 @@ describe("types", () => {
     await storage.removeItem("foo");
     await storage.remove("bar");
     await storage.del("baz");
+  });
+
+  it("typed getItem", async () => {
+    const storage = createStorage();
+
+    expectTypeOf(await storage.getItem("foo", { type: "text" })).toEqualTypeOf<string | null>();
+    expectTypeOf(await storage.getItem("foo", { type: "json" })).toEqualTypeOf<JSONValue | null>();
+    expectTypeOf(
+      await storage.getItem("foo", { type: "bytes" }),
+    ).toEqualTypeOf<Uint8Array | null>();
+    expectTypeOf(await storage.getItem("foo", { type: "blob" })).toEqualTypeOf<Blob | null>();
+    expectTypeOf(
+      await storage.getItem("foo", { type: "stream" }),
+    ).toEqualTypeOf<ReadableStream<Uint8Array> | null>();
+    expectTypeOf(await storage.get("foo", { type: "bytes" })).toEqualTypeOf<Uint8Array | null>();
   });
 
   it("prefix storage", () => {

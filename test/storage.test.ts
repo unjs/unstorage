@@ -348,3 +348,84 @@ describe("get() with type option", () => {
     expect(new Uint8Array(arrayBuffer || [])).toEqual(bytes);
   });
 });
+
+describe("get() raw value normalization", () => {
+  const bytes = new Uint8Array([1, 2, 3, 4]);
+
+  const rawStorage = (value: unknown) =>
+    createStorage({
+      driver: {
+        name: "raw-test",
+        hasItem: () => true,
+        getItem: () => null,
+        getItemRaw: () => value,
+        getKeys: () => [],
+      },
+    });
+
+  const rawValues: Record<string, () => unknown> = {
+    Uint8Array: () => bytes.slice(),
+    Buffer: () => Buffer.from(bytes),
+    ArrayBuffer: () => bytes.slice().buffer,
+    DataView: () => new DataView(bytes.slice().buffer),
+    Blob: () => new Blob([bytes]),
+    ReadableStream: () => new Blob([bytes]).stream(),
+    Response: () => new Response(bytes),
+    AsyncIterable: () => ({
+      async *[Symbol.asyncIterator]() {
+        yield bytes.slice(0, 2);
+        yield bytes.slice(2);
+      },
+    }),
+  };
+
+  for (const [name, createValue] of Object.entries(rawValues)) {
+    it(`normalizes ${name}`, async () => {
+      expect(await rawStorage(createValue()).getItem("key", { type: "bytes" })).toEqual(bytes);
+
+      const blob = await rawStorage(createValue()).getItem("key", { type: "blob" });
+      expect(new Uint8Array(await blob!.arrayBuffer())).toEqual(bytes);
+
+      const stream = await rawStorage(createValue()).getItem("key", { type: "stream" });
+      expect(new Uint8Array(await new Response(stream).arrayBuffer())).toEqual(bytes);
+    });
+  }
+
+  it("normalizes strings as utf-8", async () => {
+    expect(await rawStorage("héllo").getItem("key", { type: "bytes" })).toEqual(
+      new TextEncoder().encode("héllo"),
+    );
+  });
+
+  it("passes streams and blobs through", async () => {
+    const stream = new Blob([bytes]).stream();
+    expect(await rawStorage(stream).getItem("key", { type: "stream" })).toBe(stream);
+
+    const blob = new Blob([bytes]);
+    expect(await rawStorage(blob).getItem("key", { type: "blob" })).toBe(blob);
+  });
+
+  it("decodes base64 values from drivers without getItemRaw", async () => {
+    const storage = createStorage({
+      driver: {
+        name: "raw-test",
+        hasItem: () => true,
+        getItem: () => "base64:AQIDBA==",
+        getKeys: () => [],
+      },
+    });
+    expect(await storage.getItem("key", { type: "bytes" })).toEqual(bytes);
+  });
+
+  it("returns null for missing values", async () => {
+    for (const type of ["text", "json", "bytes", "blob", "stream"] as const) {
+      expect(await rawStorage(null).getItem("key", { type })).toBe(null);
+    }
+  });
+
+  it("throws for unsupported values", async () => {
+    await expect(rawStorage({ foo: "bar" }).getItem("key", { type: "bytes" })).rejects.toThrow(
+      /Cannot convert `Object` to bytes/,
+    );
+  });
+});

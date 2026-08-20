@@ -80,3 +80,107 @@ function base64Encode(input: Uint8Array) {
   }
   return globalThis.btoa(String.fromCodePoint(...input));
 }
+
+/**
+ * Normalizes the possible raw values that drivers might emit to an `Uint8Array`.
+ *
+ * Supported inputs: `Uint8Array` (and `Buffer`), `ArrayBuffer`, `ArrayBufferView`,
+ * `string`, `Blob` (and any `.arrayBuffer()` like `Response`), `ReadableStream`
+ * and async iterables (Node.js streams).
+ */
+export async function toBytes(value: any): Promise<Uint8Array> {
+  if (typeof value === "string") {
+    return new TextEncoder().encode(value);
+  }
+  if (ArrayBuffer.isView(value)) {
+    // Normalize Buffer, DataView and other typed arrays to a plain Uint8Array view (no copy)
+    return value.constructor === Uint8Array
+      ? (value as Uint8Array)
+      : new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+  }
+  if (value instanceof ArrayBuffer) {
+    return new Uint8Array(value);
+  }
+  if (typeof value?.arrayBuffer === "function") {
+    // Blob and Response like
+    return new Uint8Array(await value.arrayBuffer());
+  }
+  if (
+    typeof value?.getReader === "function" ||
+    typeof value?.[Symbol.asyncIterator] === "function"
+  ) {
+    return concatBytes(await readChunks(value));
+  }
+  throw new TypeError(`[unstorage] Cannot convert \`${typeName(value)}\` to bytes.`);
+}
+
+/**
+ * Normalizes the possible raw values that drivers might emit to a `Blob`.
+ *
+ * @see {@link toBytes} for the supported inputs.
+ */
+export async function toBlob(value: any): Promise<Blob> {
+  if (value instanceof Blob) {
+    return value;
+  }
+  return new Blob([(await toBytes(value)) as BlobPart]);
+}
+
+/**
+ * Normalizes the possible raw values that drivers might emit to a `ReadableStream`.
+ *
+ * Streams and blobs are passed through without buffering their contents.
+ *
+ * @see {@link toBytes} for the supported inputs.
+ */
+export async function toStream(value: any): Promise<ReadableStream<Uint8Array>> {
+  if (value instanceof ReadableStream) {
+    return value;
+  }
+  if (value instanceof Blob) {
+    return value.stream();
+  }
+  const bytes = await toBytes(value);
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(bytes);
+      controller.close();
+    },
+  });
+}
+
+async function readChunks(value: any): Promise<Uint8Array[]> {
+  const chunks: Uint8Array[] = [];
+  if (typeof value.getReader === "function") {
+    const reader = value.getReader();
+    while (true) {
+      const { done, value: chunk } = await reader.read();
+      if (done) {
+        break;
+      }
+      chunks.push(await toBytes(chunk));
+    }
+  } else {
+    for await (const chunk of value) {
+      chunks.push(await toBytes(chunk));
+    }
+  }
+  return chunks;
+}
+
+function concatBytes(chunks: Uint8Array[]): Uint8Array {
+  if (chunks.length === 1) {
+    return chunks[0]!;
+  }
+  const bytes = new Uint8Array(chunks.reduce((size, chunk) => size + chunk.length, 0));
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return bytes;
+}
+
+function typeName(value: any): string {
+  return value?.constructor?.name || typeof value;
+}

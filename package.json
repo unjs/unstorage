@@ -81,7 +81,6 @@
     "scule": "^1.3.0",
     "srvx": "^0.12.5",
     "typescript": "^7.0.2",
-    "undio": "^0.2.0",
     "uploadthing": "^7.7.4",
     "vite": "^8.2.1",
     "vitest": "^4.1.11",

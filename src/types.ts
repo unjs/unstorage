@@ -6,6 +6,17 @@ type MaybePromise<T> = T | Promise<T>;
 
 type MaybeDefined<T> = T extends any ? T : any;
 
+/** Types that {@link Storage.getItem} can convert the stored value to. */
+export type GetItemType = keyof GetItemTypeMap;
+
+export interface GetItemTypeMap {
+  text: string;
+  json: JSONValue;
+  bytes: Uint8Array;
+  stream: ReadableStream<Uint8Array>;
+  blob: Blob;
+}
+
 export type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
 export interface JSONObject {
   [key: string]: JSONValue;
@@ -116,18 +127,10 @@ export interface Storage<T extends StorageValue = StorageValue> {
     opts?: TransactionOptions & { type?: undefined },
   ): Promise<StorageItemType<T, K> | null>;
 
-  getItem(key: string, opts: { type: "text" } & TransactionOptions): Promise<string | null>;
-
-  getItem(key: string, opts: { type: "json" } & TransactionOptions): Promise<JSONValue | null>;
-
-  getItem(key: string, opts: { type: "bytes" } & TransactionOptions): Promise<Uint8Array | null>;
-
-  getItem(
+  getItem<K extends GetItemType>(
     key: string,
-    opts: { type: "stream" } & TransactionOptions,
-  ): Promise<ReadableStream | null>;
-
-  getItem(key: string, opts: { type: "blob" } & TransactionOptions): Promise<Blob | null>;
+    opts: TransactionOptions & { type: K },
+  ): Promise<GetItemTypeMap[K] | null>;
 
   getItem<R = StorageItemType<T, string>>(
     key: string,

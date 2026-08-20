@@ -149,9 +149,6 @@ importers:
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
-      undio:
-        specifier: ^0.2.0
-        version: 0.2.0
       uploadthing:
         specifier: ^7.7.4
         version: 7.7.4(express@4.22.2(supports-color@10.2.2))
@@ -4229,9 +4226,6 @@ packages:
   undici@8.10.0:
     resolution: {integrity: sha512-HvltHd7avK13QIw/oLe4qoOLyoVSoafqJ2jYOrtMRBkbYT31eiBQ8O0ehRKZiEZCMEyLFQNIADpgCWC5fALvYQ==}
     engines: {node: '>=22.19.0'}
-
-  undio@0.2.0:
-    resolution: {integrity: sha512-1LH824ipsUNqX1qsO6qpcusv0oGPlfFWVykwWq5jJB0Mq6x4kEHO/izSq2KLjGZvOosEd91+HXoxYUSoVI0zPg==}
 
   unenv@2.0.0-rc.24:
     resolution: {integrity: sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw==}
@@ -8723,8 +8717,6 @@ snapshots:
   undici@7.29.0: {}
 
   undici@8.10.0: {}
-
-  undio@0.2.0: {}
 
   unenv@2.0.0-rc.24:
     dependencies:

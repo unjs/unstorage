@@ -30,6 +30,7 @@ const storage = createStorage({
   driver: denoKVdriver({
     // path: ":memory:",
     // base: "",
+    // ttl: 60, // in seconds
   }),
 });
 ```
@@ -38,7 +39,17 @@ const storage = createStorage({
 
 - `path`: (optional) File system path to where you'd like to store your database, otherwise one will be created for you based on the current working directory of your script by Deno. You can pass `:memory:` for testing.
 - `base`: (optional) Prefix key added to all operations.
-- `openKV`: (advanced) Custom method that returns a Deno KV instance.
+- `openKv`: Optional custom function that returns a Deno KV instance.
+- `ttl`: (optional) Default TTL for all items in seconds.
+
+**Per-call options:**
+
+- `ttl`: Add TTL (in seconds) for this `setItem` call.
+
+::note
+Expiration is not strictly enforced by Deno: keys may persist after their expire time. For strict expiry, store the timestamp in your value and check it after retrieval.
+See [Deno KV Key Expiration](https://docs.deno.com/deploy/kv/manual/key_expiration/) for more information.
+::
 
 ## Usage (Node.js)
 
@@ -57,7 +68,7 @@ Deno provides [`@deno/kv`](https://www.npmjs.com/package/@deno/kv) npm package, 
 - Create ephemeral in-memory KV instances backed by SQLite memory files or by a
   lightweight JS-only implementation for testing.
 
-Install `@deno/kv` peer dependency:
+Install the `@deno/kv` dependency:
 
 :pm-install{name="@deno/kv"}
 
@@ -75,6 +86,6 @@ const storage = createStorage({
 
 **Options:**
 
-- `path`: (same as `deno-kv`)
-- `base`: (same as `deno-kv`)
-- `openKvOptions`: Check [docs](https://www.npmjs.com/package/@deno/kv#api) for available options.
+- `path`: File path, remote URL, or `:memory:` value supported by `@deno/kv`.
+- `base`: Prefix added to all keys.
+- `openKvOptions`: See the [`@deno/kv` API documentation](https://www.npmjs.com/package/@deno/kv#api) for available options.

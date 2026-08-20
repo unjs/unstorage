@@ -1,6 +1,6 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
-import { $fetch } from "ofetch";
-import { withTrailingSlash, joinURL } from "ufo";
+import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
+import { fetchRequest } from "./utils/fetch.ts";
+import { withTrailingSlash, joinURL } from "./utils/path.ts";
 
 export interface GithubOptions {
   /**
@@ -55,9 +55,9 @@ const defaultOptions: GithubOptions = {
 
 const DRIVER_NAME = "github";
 
-export default defineDriver<GithubOptions>((_opts) => {
+const driver: DriverFactory<GithubOptions> = (_opts) => {
   const opts: GithubOptions = { ...defaultOptions, ..._opts };
-  const rawUrl = joinURL(opts.cdnURL!, opts.repo, opts.branch!, opts.dir!);
+  const rawUrl = joinURL(opts.cdnURL!, [opts.repo, opts.branch!, opts.dir!].join("/"));
 
   let files: Record<string, GithubFile> = {};
   let lastCheck = 0;
@@ -103,20 +103,17 @@ export default defineDriver<GithubOptions>((_opts) => {
 
       if (!item.body) {
         try {
-          item.body = await $fetch(key.replace(/:/g, "/"), {
+          const res = await fetchRequest(key.replace(/:/g, "/"), {
             baseURL: rawUrl,
-            headers: opts.token
-              ? {
-                  Authorization: `token ${opts.token}`,
-                }
-              : undefined,
+            headers: {
+              Authorization: opts.token ? `token ${opts.token}` : undefined,
+            },
           });
+          item.body = await res.text();
         } catch (error) {
-          throw createError(
-            "github",
-            `Failed to fetch \`${JSON.stringify(key)}\``,
-            { cause: error }
-          );
+          throw createError("github", `Failed to fetch \`${JSON.stringify(key)}\``, {
+            cause: error,
+          });
         }
       }
       return item.body;
@@ -127,23 +124,23 @@ export default defineDriver<GithubOptions>((_opts) => {
       return item ? item.meta : null;
     },
   };
-});
+};
 
 async function fetchFiles(opts: GithubOptions) {
   const prefix = withTrailingSlash(opts.dir).replace(/^\//, "");
   const files: Record<string, GithubFile> = {};
   try {
-    const trees = await $fetch(
-      `/repos/${opts.repo}/git/trees/${opts.branch}?recursive=1`,
-      {
-        baseURL: opts.apiURL,
-        headers: opts.token
-          ? {
-              Authorization: `token ${opts.token}`,
-            }
-          : undefined,
-      }
-    );
+    const res = await fetchRequest(`/repos/${opts.repo}/git/trees/${opts.branch}`, {
+      baseURL: opts.apiURL,
+      query: { recursive: 1 },
+      headers: {
+        "User-Agent": "unstorage",
+        Authorization: opts.token ? `token ${opts.token}` : undefined,
+      },
+    });
+    const trees = (await res.json()) as {
+      tree: { type: string; path: string; sha: string; mode: string; size: number }[];
+    };
 
     for (const node of trees.tree) {
       if (node.type !== "blob" || !node.path.startsWith(prefix)) {
@@ -166,3 +163,5 @@ async function fetchFiles(opts: GithubOptions) {
     });
   }
 }
+
+export default driver;

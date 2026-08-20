@@ -1,0 +1,40 @@
+/// <reference types="@cloudflare/workers-types" />
+import { describe, expect, test, afterAll } from "vitest";
+import CloudflareCacheBinding from "../../src/drivers/cloudflare-cache-binding.ts";
+import { testDriver } from "./utils.ts";
+import { getPlatformProxy } from "wrangler";
+
+/*
+Wrangler platform proxy does seems has no real implementation of caches API so implementation had been manually tested
+
+export default {
+  async fetch(request, env, ctx) {
+    const cache = caches.default
+    await cache.put("unstorage://test/key", new Response("foobar"))
+    const value = await cache.match("unstorage://test/key")
+    return Response.json({
+      cacheValue: await value.text()
+    })
+  },
+};
+*/
+
+describe.skip("drivers: cloudflare-cache-binding", async () => {
+  const cfProxy = await getPlatformProxy();
+  (globalThis as any).caches = cfProxy.caches;
+  afterAll(async () => {
+    (globalThis as any).caches = undefined;
+    await cfProxy.dispose();
+  });
+  testDriver({
+    driver: CloudflareCacheBinding({ base: "base" }),
+    async additionalTests(ctx) {
+      test.only("basic", async () => {
+        console.log(cfProxy.caches.default.match.toString());
+        await ctx.driver!.setItem!("key", "value", {});
+        const value = await ctx.driver!.getItem!("key");
+        expect(value).toBe("value");
+      });
+    },
+  });
+});

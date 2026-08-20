@@ -1,7 +1,7 @@
-import type { TransactionOptions } from "../types";
-import { defineDriver } from "./utils";
-import { type FetchError, $fetch as _fetch } from "ofetch";
-import { joinURL } from "ufo";
+import type { TransactionOptions } from "../types.ts";
+import { type DriverFactory } from "./utils/index.ts";
+import { FetchError, fetchRequest } from "./utils/fetch.ts";
+import { joinURL } from "./utils/path.ts";
 
 export interface HTTPOptions {
   base: string;
@@ -10,14 +10,13 @@ export interface HTTPOptions {
 
 const DRIVER_NAME = "http";
 
-export default defineDriver((opts: HTTPOptions) => {
+const driver: DriverFactory<HTTPOptions> = (opts) => {
   const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
 
-  const rBase = (key: string = "") =>
-    joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
+  const rBase = (key: string = "") => joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
 
-  const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
-    if (error?.response?.status === 404) {
+  const catchFetchError = (error: unknown, fallbackVal: any = null) => {
+    if (error instanceof FetchError && error.status === 404) {
       return fallbackVal;
     }
     throw error;
@@ -25,7 +24,7 @@ export default defineDriver((opts: HTTPOptions) => {
 
   const getHeaders = (
     topts: TransactionOptions | undefined,
-    defaultHeaders?: Record<string, string>
+    defaultHeaders?: Record<string, string>,
   ) => {
     const headers = {
       ...defaultHeaders,
@@ -41,36 +40,33 @@ export default defineDriver((opts: HTTPOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    hasItem(key, topts) {
-      return _fetch(r(key), {
+    async hasItem(key, topts) {
+      return fetchRequest(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
       })
         .then(() => true)
-        .catch((err) => catchFetchError(err, false));
+        .catch((error) => catchFetchError(error, false));
     },
     async getItem(key, tops) {
-      const value = await _fetch(r(key), {
+      const res = await fetchRequest(r(key), {
         headers: getHeaders(tops),
       }).catch(catchFetchError);
-      return value;
+      return res ? await res.text() : null;
     },
     async getItemRaw(key, topts) {
-      const response = await _fetch
-        .raw(r(key), {
-          responseType: "arrayBuffer",
-          headers: getHeaders(topts, { accept: "application/octet-stream" }),
-        })
-        .catch(catchFetchError);
-      return response._data;
+      const res = await fetchRequest(r(key), {
+        headers: getHeaders(topts, { accept: "application/octet-stream" }),
+      }).catch(catchFetchError);
+      return res ? await res.arrayBuffer() : null;
     },
     async getMeta(key, topts) {
-      const res = await _fetch.raw(r(key), {
+      const res = await fetchRequest(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
       });
-      let mtime = undefined;
-      let ttl = undefined;
+      let mtime: Date | undefined;
+      let ttl: number | undefined;
       const _lastModified = res.headers.get("last-modified");
       if (_lastModified) {
         mtime = new Date(_lastModified);
@@ -86,14 +82,14 @@ export default defineDriver((opts: HTTPOptions) => {
       };
     },
     async setItem(key, value, topts) {
-      await _fetch(r(key), {
+      await fetchRequest(r(key), {
         method: "PUT",
         body: value,
         headers: getHeaders(topts),
       });
     },
     async setItemRaw(key, value, topts) {
-      await _fetch(r(key), {
+      await fetchRequest(r(key), {
         method: "PUT",
         body: value,
         headers: getHeaders(topts, {
@@ -102,22 +98,25 @@ export default defineDriver((opts: HTTPOptions) => {
       });
     },
     async removeItem(key, topts) {
-      await _fetch(r(key), {
+      await fetchRequest(r(key), {
         method: "DELETE",
         headers: getHeaders(topts),
       });
     },
     async getKeys(base, topts) {
-      const value = await _fetch(rBase(base), {
+      const res = await fetchRequest(rBase(base), {
         headers: getHeaders(topts),
       });
+      const value = await res.json();
       return Array.isArray(value) ? value : [];
     },
     async clear(base, topts) {
-      await _fetch(rBase(base), {
+      await fetchRequest(rBase(base), {
         method: "DELETE",
         headers: getHeaders(topts),
       });
     },
   };
-});
+};
+
+export default driver;

@@ -1,6 +1,6 @@
 import { it, describe, expect } from "vitest";
-import driver from "../../src/drivers/lru-cache";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/lru-cache.ts";
+import { testDriver } from "./utils.ts";
 
 describe("drivers: lru-cache", () => {
   testDriver({
@@ -17,7 +17,7 @@ describe("drivers: lru-cache with size", () => {
       it("should not store large items", async () => {
         await ctx.storage.setItem(
           "big",
-          "0123456789012345678901234567890123456789012345678901234567890123456789"
+          "0123456789012345678901234567890123456789012345678901234567890123456789",
         );
         expect(await ctx.storage.getItem("big")).toBe(null);
 

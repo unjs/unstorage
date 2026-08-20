@@ -1,7 +1,7 @@
-import { createServer } from "node:http";
-import { createStorage } from "../../src";
+import { serve } from "srvx";
+import { createStorage } from "../../src/index.ts";
 import denoKV from "../../src/drivers/deno-kv.ts";
-import { createStorageServer } from "../../src/server";
+import { createStorageHandler } from "../../src/server.ts";
 
 const storage = createStorage({
   driver: denoKV({
@@ -10,8 +10,4 @@ const storage = createStorage({
   }),
 });
 
-const port = Number(process.env.PORT) || 3000;
-
-createServer(createStorageServer(storage).handle).listen(port, () => {
-  console.log(`Server running at http://localhost:${port}/`);
-});
+serve({ fetch: createStorageHandler(storage) });

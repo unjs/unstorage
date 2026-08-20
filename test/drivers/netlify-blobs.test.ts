@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe } from "vitest";
-import driver from "../../src/drivers/netlify-blobs";
-import { testDriver } from "./utils";
+import driver from "../../src/drivers/netlify-blobs.ts";
+import { testDriver } from "./utils.ts";
 import { BlobsServer } from "@netlify/blobs/server";
 import { resolve } from "node:path";
 import { rm, mkdir } from "node:fs/promises";

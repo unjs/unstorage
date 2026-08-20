@@ -2,6 +2,74 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-alpha.8
+
+[compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.7...v2.0.0-alpha.8)
+
+### 🚀 Enhancements
+
+- **redis:** Support setItems ([#705](https://github.com/unjs/unstorage/pull/705), [#782](https://github.com/unjs/unstorage/pull/782))
+- **fs:** Opt-in atomic writes via `atomic` option ([#798](https://github.com/unjs/unstorage/pull/798))
+
+### 🩹 Fixes
+
+- PrefixStorage should strip base and emit only related event with `.watch` ([#793](https://github.com/unjs/unstorage/pull/793))
+- **cloudflare-cache-binding:** Use closure instead of detached this in setItem ([#794](https://github.com/unjs/unstorage/pull/794))
+- **mongodb:** Close client connection on dispose ([#792](https://github.com/unjs/unstorage/pull/792))
+- **drivers:** Avoid mutating caller input options in fs-lite and db0 ([#788](https://github.com/unjs/unstorage/pull/788))
+- **s3:** Implement pagination and fix prefix filtering in listObjects ([#729](https://github.com/unjs/unstorage/pull/729))
+- **s3:** Respect prefix parameter and add pagination for getKeys() ([#760](https://github.com/unjs/unstorage/pull/760))
+
+### 💅 Refactors
+
+- ⚠️  Remove optional peer deps ([0b635e2](https://github.com/unjs/unstorage/commit/0b635e2))
+- Inline fetch util ([63e71f9](https://github.com/unjs/unstorage/commit/63e71f9))
+- **prefixStorage:** Prefix keys alias ([#655](https://github.com/unjs/unstorage/pull/655))
+- **server:** Rewrite with web apis ([61b2df1](https://github.com/unjs/unstorage/commit/61b2df1))
+
+### 📖 Documentation
+
+- Improvements ([b0fdd58](https://github.com/unjs/unstorage/commit/b0fdd58))
+- **azure:** Fix Azure Table Storage package name and complete options list ([#791](https://github.com/unjs/unstorage/pull/791))
+- **github:** Document authentication for private repositories ([#516](https://github.com/unjs/unstorage/pull/516), [#783](https://github.com/unjs/unstorage/pull/783))
+- **azure:** Complete azure table storage documentation ([#682](https://github.com/unjs/unstorage/pull/682))
+
+### 📦 Build
+
+- Bundle driver entries ([6f80996](https://github.com/unjs/unstorage/commit/6f80996))
+
+### 🏡 Chore
+
+- Update deps ([7a0557f](https://github.com/unjs/unstorage/commit/7a0557f))
+- Lint ([4e062a2](https://github.com/unjs/unstorage/commit/4e062a2))
+- Fix type issues ([2896107](https://github.com/unjs/unstorage/commit/2896107))
+- Update deps ([3f30232](https://github.com/unjs/unstorage/commit/3f30232))
+- Apply automated updates ([1872d9d](https://github.com/unjs/unstorage/commit/1872d9d))
+- Update undocs ([a6c4c2e](https://github.com/unjs/unstorage/commit/a6c4c2e))
+- Update undocs ([869bcf8](https://github.com/unjs/unstorage/commit/869bcf8))
+- Update deps ([b001632](https://github.com/unjs/unstorage/commit/b001632))
+- Sync netlify blob dep range ([5e8caa8](https://github.com/unjs/unstorage/commit/5e8caa8))
+- Fix cf tests ([53510a9](https://github.com/unjs/unstorage/commit/53510a9))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️  Remove optional peer deps ([0b635e2](https://github.com/unjs/unstorage/commit/0b635e2))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- S Van Driel <sander.vandriel@gmail.com>
+- Guoyangzhen <upgyz@qq.com>
+- Demo Macro ([@DemoMacro](https://github.com/DemoMacro))
+- Matthew Messinger <mattmess1221@gmail.com>
+- Lazizbek Ergashev ([@lazerg](https://github.com/lazerg))
+- Shaurya Singh ([@LeSingh1](https://github.com/LeSingh1))
+- Ruby-Leung <xleung999@gmail.com>
+- Mahiro Hirakawa ([@mahirhir](https://github.com/mahirhir))
+- M.M ([@momomuchu](https://github.com/momomuchu))
+- Mochammad Fadhlan Al-Ghiffari ([@MFA-G](https://github.com/MFA-G))
+- Sébastien Chopin <seb@nuxt.com>
+
 ## v2.0.0-alpha.7
 
 [compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.6...v2.0.0-alpha.7)

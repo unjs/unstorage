@@ -12,12 +12,14 @@ import {
 import {
   readFile,
   writeFile,
+  writeFileExclusive,
   readdirRecursive,
   rmRecursive,
   unlink,
   ensuredir,
   isTmpFile,
 } from "./utils/node-fs.ts";
+import { CASMismatchError, checkCAS } from "./utils/cas.ts";
 
 export interface FSStorageOptions {
   base?: string;
@@ -84,6 +86,30 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
     return resolved;
   };
 
+  // Per-key in-process write serialization for non-O_EXCL CAS paths.
+  // POSIX has no portable file-CAS primitive; this protects against races
+  // within a single process. Cross-process correctness for `ifMatch` is not
+  // guaranteed — use an external lock or a CAS-native driver for that.
+  const writeLocks = new Map<string, Promise<void>>();
+  const withLock = async <T>(key: string, fn: () => Promise<T>): Promise<T> => {
+    const previous = writeLocks.get(key) || Promise.resolve();
+    let release!: () => void;
+    const next = new Promise<void>((r) => {
+      release = r;
+    });
+    const chained = previous.then(() => next);
+    writeLocks.set(key, chained);
+    await previous;
+    try {
+      return await fn();
+    } finally {
+      release();
+      if (writeLocks.get(key) === chained) {
+        writeLocks.delete(key);
+      }
+    }
+  };
+
   let _watcher: FSWatcher | undefined;
   const _unwatch = async () => {
     if (_watcher) {
@@ -92,11 +118,51 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
     }
   };
 
+  const writeWithCAS = async (
+    key: string,
+    plainWrite: (path: string) => Promise<void>,
+    exclusiveWrite: (path: string) => Promise<void>,
+    opts: { ifMatch?: string; ifNoneMatch?: string } | undefined,
+  ): Promise<{ etag: string } | undefined> => {
+    const path = r(key);
+    const wantsCAS = !!(opts && (opts.ifMatch !== undefined || opts.ifNoneMatch !== undefined));
+
+    if (!wantsCAS) {
+      await plainWrite(path);
+      return undefined;
+    }
+
+    // Atomic create-only via `link()`; correct across processes.
+    if (opts!.ifNoneMatch === "*" && opts!.ifMatch === undefined) {
+      try {
+        await exclusiveWrite(path);
+      } catch (err: any) {
+        if (err?.code === "EEXIST") {
+          throw new CASMismatchError(DRIVER_NAME, key);
+        }
+        throw err;
+      }
+      const stats = await fsp.stat(path);
+      return { etag: statEtag(stats) };
+    }
+
+    // Etag-based CAS: best-effort, single-process. POSIX has no portable
+    // file-CAS primitive; cross-process callers should layer an external lock.
+    return withLock(path, async () => {
+      const stats = await fsp.stat(path).catch(() => null);
+      const prevEtag = stats ? statEtag(stats) : undefined;
+      checkCAS(DRIVER_NAME, key, { exists: !!stats, etag: prevEtag }, opts!);
+      await plainWrite(path);
+      return { etag: await distinctEtag(path, prevEtag) };
+    });
+  };
+
   return {
     name: DRIVER_NAME,
     options: userOptions,
     flags: {
       maxDepth: true,
+      cas: true,
     },
     hasItem(key) {
       return existsSync(r(key));
@@ -108,22 +174,32 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
       return readFile(r(key));
     },
     async getMeta(key) {
-      const { atime, mtime, size, birthtime, ctime } = await fsp
-        .stat(r(key))
-        .catch(() => ({}) as Stats);
-      return { atime, mtime, size, birthtime, ctime };
+      const stats = await fsp.stat(r(key)).catch(() => ({}) as Stats);
+      const { atime, mtime, size, birthtime, ctime } = stats;
+      const etag = stats && stats.mtimeMs ? statEtag(stats) : undefined;
+      return { atime, mtime, size, birthtime, ctime, etag };
     },
-    setItem(key, value) {
+    async setItem(key, value, opts) {
       if (userOptions.readOnly) {
         return;
       }
-      return writeFile(r(key), value, "utf8", userOptions.atomic);
+      return writeWithCAS(
+        key,
+        (path) => writeFile(path, value, "utf8", userOptions.atomic),
+        (path) => writeFileExclusive(path, value, "utf8"),
+        opts,
+      );
     },
-    setItemRaw(key, value) {
+    async setItemRaw(key, value, opts) {
       if (userOptions.readOnly) {
         return;
       }
-      return writeFile(r(key), value, undefined, userOptions.atomic);
+      return writeWithCAS(
+        key,
+        (path) => writeFile(path, value, undefined, userOptions.atomic),
+        (path) => writeFileExclusive(path, value),
+        opts,
+      );
     },
     removeItem(key) {
       if (userOptions.readOnly) {
@@ -188,5 +264,26 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
     },
   };
 };
+
+function statEtag(stats: { mtimeMs: number; size: number; ino: number }): string {
+  return `${stats.mtimeMs.toString(16)}-${stats.size.toString(16)}-${stats.ino.toString(16)}`;
+}
+
+// The etag is derived from (mtime, size, ino), and filesystem timestamp
+// granularity can be coarser than the gap between two writes. A same-size
+// overwrite can therefore land on the exact triple it replaced, which would
+// let a stale `ifMatch` succeed. Nudge mtime forward until the etag actually
+// differs, doubling the step so filesystems with second-level granularity
+// converge too.
+async function distinctEtag(path: string, prevEtag: string | undefined): Promise<string> {
+  let stats = await fsp.stat(path);
+  let etag = statEtag(stats);
+  for (let step = 1; etag === prevEtag && step <= 4096; step *= 2) {
+    await fsp.utimes(path, stats.atime, new Date(stats.mtimeMs + step));
+    stats = await fsp.stat(path);
+    etag = statEtag(stats);
+  }
+  return etag;
+}
 
 export default driver;

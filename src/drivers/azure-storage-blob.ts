@@ -5,6 +5,7 @@ import {
   type LibImport,
   type DriverDependencies,
 } from "./utils/index.ts";
+import { CASMismatchError } from "./utils/cas.ts";
 import { type AzureIdentityOptions, createDefaultAzureCredential } from "./utils/azure.ts";
 import type { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
 
@@ -111,8 +112,38 @@ const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> =
       return client;
     })());
 
+  const uploadWithCAS = async (
+    key: string,
+    value: any,
+    length: number,
+    topts: { ifMatch?: string; ifNoneMatch?: string } | undefined,
+  ): Promise<{ etag: string } | undefined> => {
+    const wantsCAS = topts?.ifMatch !== undefined || topts?.ifNoneMatch !== undefined;
+    const conditions: { ifMatch?: string; ifNoneMatch?: string } = {};
+    if (topts?.ifMatch !== undefined) {
+      conditions.ifMatch = topts.ifMatch === "*" ? "*" : `"${topts.ifMatch}"`;
+    }
+    if (topts?.ifNoneMatch !== undefined) {
+      conditions.ifNoneMatch = topts.ifNoneMatch === "*" ? "*" : `"${topts.ifNoneMatch}"`;
+    }
+    try {
+      const res = await (
+        await getContainerClient()
+      )
+        .getBlockBlobClient(key)
+        .upload(value, length, wantsCAS ? { conditions } : undefined);
+      return wantsCAS ? { etag: stripQuotes(res.etag) } : undefined;
+    } catch (err: any) {
+      if (wantsCAS && (err?.statusCode === 412 || err?.statusCode === 409)) {
+        throw new CASMismatchError(DRIVER_NAME, key);
+      }
+      throw err;
+    }
+  };
+
   return {
     name: DRIVER_NAME,
+    flags: { cas: true },
     options: opts,
     getInstance: getContainerClient,
     async hasItem(key) {
@@ -142,19 +173,11 @@ const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> =
         return null;
       }
     },
-    async setItem(key, value) {
-      await (
-        await getContainerClient()
-      )
-        .getBlockBlobClient(key)
-        .upload(value, Buffer.byteLength(value));
+    async setItem(key, value, topts?: { ifMatch?: string; ifNoneMatch?: string }) {
+      return uploadWithCAS(key, value, Buffer.byteLength(value), topts);
     },
-    async setItemRaw(key, value) {
-      await (
-        await getContainerClient()
-      )
-        .getBlockBlobClient(key)
-        .upload(value, Buffer.byteLength(value));
+    async setItemRaw(key, value, topts?: { ifMatch?: string; ifNoneMatch?: string }) {
+      return uploadWithCAS(key, value, Buffer.byteLength(value), topts);
     },
     async removeItem(key) {
       await (
@@ -177,11 +200,14 @@ const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> =
         await getContainerClient()
       )
         .getBlockBlobClient(key)
-        .getProperties();
+        .getProperties()
+        .catch(() => null);
+      if (!blobProperties) return null;
       return {
         mtime: blobProperties.lastModified,
         atime: blobProperties.lastAccessed,
         cr: blobProperties.createdOn,
+        etag: stripQuotes(blobProperties.etag),
         ...blobProperties.metadata,
       };
     },
@@ -204,6 +230,11 @@ const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> =
 };
 
 const isBrowser = typeof window !== "undefined";
+
+function stripQuotes(value: string | null | undefined): string {
+  if (!value) return "";
+  return value.startsWith('"') && value.endsWith('"') ? value.slice(1, -1) : value;
+}
 
 // Helper function to read a Node.js readable stream into a Buffer. (https://github.com/Azure/azure-sdk-for-js/tree/main/sdk/storage/storage-blob)
 async function streamToBuffer(readableStream: NodeJS.ReadableStream): Promise<Buffer> {

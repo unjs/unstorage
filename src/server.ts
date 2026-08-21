@@ -1,6 +1,7 @@
-import type { Storage, TransactionOptions, StorageMeta } from "./types.ts";
+import type { Storage, TransactionOptions, StorageMeta, SetItemResult } from "./types.ts";
 import { stringify } from "./_utils.ts";
 import { normalizeKey, normalizeBaseKey } from "./utils.ts";
+import { CASMismatchError, CASUnsupportedError } from "./errors.ts";
 
 export type StorageServerRequest = {
   request: globalThis.Request;
@@ -99,7 +100,7 @@ async function handleRequest(
     });
   }
 
-  // HEAD => hasItem + meta (mtime, ttl)
+  // HEAD => hasItem + meta (mtime, ttl, etag)
   if (req.method === "HEAD") {
     if (!(await storage.hasItem(key))) {
       throw new HTTPError(404, "KV value not found");
@@ -107,18 +108,30 @@ async function handleRequest(
     return new Response(null, { headers: metaHeaders(await storage.getMeta(key)) });
   }
 
-  // PUT => setItem
+  // PUT => setItem (with optional If-Match / If-None-Match CAS)
   if (req.method === "PUT") {
     const isRaw = req.headers.get("content-type") === "application/octet-stream";
     const topts: TransactionOptions = {
       ttl: Number(req.headers.get("x-ttl")) || undefined,
+      ifMatch: parseConditionHeader(req.headers.get("if-match")),
+      ifNoneMatch: parseConditionHeader(req.headers.get("if-none-match")),
     };
-    if (isRaw) {
-      await storage.setItemRaw(key, await req.bytes(), topts);
-    } else {
-      await storage.setItem(key, await req.text(), topts);
+    let result: void | SetItemResult | undefined;
+    try {
+      result = await (isRaw
+        ? storage.setItemRaw(key, await req.bytes(), topts)
+        : storage.setItem(key, await req.text(), topts));
+    } catch (error: any) {
+      if (CASMismatchError.is(error)) {
+        throw new HTTPError(412, "Precondition Failed", { cause: error });
+      }
+      if (CASUnsupportedError.is(error)) {
+        throw new HTTPError(501, "Not Implemented", { cause: error });
+      }
+      throw error;
     }
-    return new Response("OK");
+    const etag = (result as SetItemResult | undefined)?.etag;
+    return new Response("OK", etag ? { headers: { etag: formatEtag(etag) } } : undefined);
   }
 
   // DELETE => removeItem
@@ -135,7 +148,32 @@ function metaHeaders(meta: StorageMeta): Headers {
     headers.set("x-ttl", `${meta.ttl}`);
     headers.set("cache-control", `max-age=${meta.ttl}`);
   }
+  if (meta.etag) {
+    headers.set("etag", formatEtag(meta.etag));
+  }
   return headers;
+}
+
+// Parse a single-value `If-Match` / `If-None-Match` header into the value
+// understood by drivers (`*` or the bare etag with surrounding quotes
+// stripped). We don't support multi-value lists or weak validators (`W/"..."`)
+// — the storage CAS contract is exact equality.
+function parseConditionHeader(raw: string | null | undefined): string | undefined {
+  if (!raw) {
+    return undefined;
+  }
+  const v = raw.trim();
+  if (v === "*") {
+    return "*";
+  }
+  if (v.length >= 2 && v.startsWith('"') && v.endsWith('"')) {
+    return v.slice(1, -1);
+  }
+  return v;
+}
+
+function formatEtag(etag: string): string {
+  return etag === "*" || (etag.startsWith('"') && etag.endsWith('"')) ? etag : `"${etag}"`;
 }
 
 /** Extract the pathname without parsing the whole URL. */

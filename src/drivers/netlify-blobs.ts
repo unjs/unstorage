@@ -6,6 +6,7 @@ import {
   type LibImport,
   type DriverDependencies,
 } from "./utils/index.ts";
+import { CASMismatchError } from "./utils/cas.ts";
 import type { GetKeysOptions } from "../types.ts";
 import type {
   Store,
@@ -84,31 +85,90 @@ const driver: DriverFactory<NetlifyStoreOptions, Promise<Store>> = (options) => 
       return getStore({ name: encodeURIComponent(name), fetch, ...opts });
     })());
 
+  // Native conditional write. Maps `ifMatch:<etag>` to `onlyIfMatch` and
+  // `ifNoneMatch:"*"` to `onlyIfNew`. The remaining shapes (`ifMatch:"*"` and
+  // `ifNoneMatch:<etag>`) are emulated by reading current metadata then
+  // submitting an etag-pinned `onlyIfMatch` write so the precondition is still
+  // checked atomically server-side. Throws CASMismatchError on failure.
+  const setWithCAS = async (
+    key: string,
+    value: string | ArrayBuffer | Blob,
+    opts: { ifMatch?: string; ifNoneMatch?: string } | undefined,
+  ): Promise<{ etag: string }> => {
+    const client = await getClient();
+    const ifMatch = opts?.ifMatch;
+    const ifNoneMatch = opts?.ifNoneMatch;
+
+    // Native fast paths.
+    if (ifNoneMatch === "*" && ifMatch === undefined) {
+      const r = await client.set(key, value as any, { onlyIfNew: true });
+      if (!r.modified) throw new CASMismatchError(DRIVER_NAME, key);
+      return { etag: r.etag ?? "" };
+    }
+    if (ifMatch !== undefined && ifMatch !== "*" && ifNoneMatch === undefined) {
+      const r = await client.set(key, value as any, { onlyIfMatch: ifMatch });
+      if (!r.modified) throw new CASMismatchError(DRIVER_NAME, key);
+      return { etag: r.etag ?? "" };
+    }
+
+    // Emulated paths: derive an etag-pinned write from the current metadata.
+    const meta = await client.getMetadata(key);
+    const exists = meta !== null;
+    const curEtag = meta?.etag;
+
+    if (ifNoneMatch === "*" && exists) throw new CASMismatchError(DRIVER_NAME, key);
+    if (ifNoneMatch !== undefined && ifNoneMatch !== "*" && exists && curEtag === ifNoneMatch) {
+      throw new CASMismatchError(DRIVER_NAME, key);
+    }
+    if (ifMatch === "*" && !exists) throw new CASMismatchError(DRIVER_NAME, key);
+    if (ifMatch !== undefined && ifMatch !== "*" && (!exists || curEtag !== ifMatch)) {
+      throw new CASMismatchError(DRIVER_NAME, key);
+    }
+
+    const setOpts: SetOptions = exists
+      ? ({ onlyIfMatch: curEtag } as SetOptions)
+      : ({ onlyIfNew: true } as SetOptions);
+    const r = await client.set(key, value as any, setOpts);
+    if (!r.modified) throw new CASMismatchError(DRIVER_NAME, key);
+    return { etag: r.etag ?? "" };
+  };
+
   return {
     name: DRIVER_NAME,
+    flags: { cas: true },
     options,
     getInstance: getClient,
     async hasItem(key) {
       return (await getClient()).getMetadata(key).then(Boolean);
     },
-    getItem: async (key, tops?: GetOptions) => {
+    getItem: async (key, tops) => {
       // @ts-expect-error has trouble with the overloaded types
-      return (await getClient()).get(key, tops);
+      return (await getClient()).get(key, tops as GetOptions);
     },
     async getMeta(key) {
-      return (await getClient()).getMetadata(key);
+      const m = await (await getClient()).getMetadata(key);
+      return m ? { ...m.metadata, etag: m.etag } : null;
     },
-    async getItemRaw(key, topts?: GetOptions) {
-      // @ts-expect-error has trouble with the overloaded types
+    async getItemRaw(key, topts) {
       return (await getClient()).get(key, { type: topts?.type ?? "arrayBuffer" });
     },
-    async setItem(key, value, topts?: SetOptions) {
+    async setItem(key, value, topts?: SetOptions & { ifMatch?: string; ifNoneMatch?: string }) {
+      if (topts?.ifMatch !== undefined || topts?.ifNoneMatch !== undefined) {
+        return setWithCAS(key, value, topts);
+      }
       // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
       // TODO(serhalp): Allow drivers to return a value from `setItem`. The @netlify/blobs v10
       // functionality isn't usable without this.
       await (await getClient()).set(key, value, topts);
     },
-    async setItemRaw(key, value: string | ArrayBuffer | Blob, topts?: SetOptions) {
+    async setItemRaw(
+      key,
+      value: string | ArrayBuffer | Blob,
+      topts?: SetOptions & { ifMatch?: string; ifNoneMatch?: string },
+    ) {
+      if (topts?.ifMatch !== undefined || topts?.ifNoneMatch !== undefined) {
+        return setWithCAS(key, value, topts);
+      }
       // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
       // See TODO above.
       await (await getClient()).set(key, value, topts);

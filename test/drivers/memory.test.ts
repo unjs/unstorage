@@ -5,6 +5,7 @@ import { testDriver } from "./utils.ts";
 describe("drivers: memory", () => {
   testDriver({
     driver: driver(),
+    supportsCAS: true,
   });
 
   // Regression: nitrojs/nitro#2138 — expired entries should be proactively

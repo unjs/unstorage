@@ -7,7 +7,9 @@ import type {
   StorageValue,
   WatchEvent,
   TransactionOptions,
+  SetItemResult,
 } from "./types.ts";
+import { CASUnsupportedError } from "./errors.ts";
 import memory from "./drivers/memory.ts";
 import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils.ts";
 import {
@@ -204,19 +206,24 @@ export function createStorage<T extends StorageValue>(
       }
       return asyncCall(driver.getItem, relativeKey, opts).then((value) => deserializeRaw(value));
     },
-    async setItem(key: string, value: T, opts = {}) {
+    async setItem(key: string, value: T, opts: TransactionOptions = {}) {
       if (value === undefined) {
         return storage.removeItem(key);
       }
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
+      const wantsCAS = opts.ifMatch !== undefined || opts.ifNoneMatch !== undefined;
+      if (wantsCAS && !driver.flags?.cas) {
+        throw new CASUnsupportedError(driver.name || "unknown");
+      }
       if (!driver.setItem) {
         return; // Readonly
       }
-      await asyncCall(driver.setItem, relativeKey, stringify(value), opts);
+      const result = await asyncCall(driver.setItem, relativeKey, stringify(value), opts);
       if (!driver.watch) {
         onChange("update", key);
       }
+      return result as SetItemResult | void;
     },
     async setItems(items, commonOptions) {
       await runBatch(items, commonOptions, async (batch) => {
@@ -252,16 +259,22 @@ export function createStorage<T extends StorageValue>(
       }
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
+      const wantsCAS = opts.ifMatch !== undefined || opts.ifNoneMatch !== undefined;
+      if (wantsCAS && !driver.flags?.cas) {
+        throw new CASUnsupportedError(driver.name || "unknown");
+      }
+      let result: void | SetItemResult;
       if (driver.setItemRaw) {
-        await asyncCall(driver.setItemRaw, relativeKey, value, opts);
+        result = await asyncCall(driver.setItemRaw, relativeKey, value, opts);
       } else if (driver.setItem) {
-        await asyncCall(driver.setItem, relativeKey, serializeRaw(value), opts);
+        result = await asyncCall(driver.setItem, relativeKey, serializeRaw(value), opts);
       } else {
         return; // Readonly
       }
       if (!driver.watch) {
         onChange("update", key);
       }
+      return result;
     },
     async removeItem(
       key: string,

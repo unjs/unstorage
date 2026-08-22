@@ -46,7 +46,11 @@ describe("drivers: azure-cosmos (dispose)", () => {
 
   it("disposes the CosmosClient", async () => {
     const { clients, lib } = createFakeLib();
-    const opts = { endpoint: "https://example.documents.azure.com:443/", accountKey: "key", lib };
+    const opts = {
+      endpoint: "https://example.documents.azure.com:443/",
+      accountKey: "key",
+      lib,
+    };
 
     // Disposing before connecting is a no-op
     await driver(opts).dispose!();
@@ -68,5 +72,35 @@ describe("drivers: azure-cosmos (dispose)", () => {
     expect(clients.length).toBe(2);
     await cosmosDriver.dispose!();
     expect(clients[1]!.disposeCalls).toBe(1);
+  });
+
+  it("disposes a client created while initialization is pending", async () => {
+    const { clients, lib } = createFakeLib();
+    let releaseLib!: () => void;
+    const libLoaded = new Promise<void>((resolve) => {
+      releaseLib = resolve;
+    });
+
+    const cosmosDriver = driver({
+      endpoint: "https://example.documents.azure.com:443/",
+      accountKey: "key",
+      lib: async () => {
+        await libLoaded;
+        return lib;
+      },
+    });
+
+    // Start initialization, then dispose while it is still in-flight
+    const pending = cosmosDriver.setItem!("a", "test_data", {});
+    expect(clients.length).toBe(0);
+    const disposed = cosmosDriver.dispose!();
+
+    releaseLib();
+    await pending;
+    await disposed;
+
+    // The client created by the in-flight initialization is disposed exactly once
+    expect(clients.length).toBe(1);
+    expect(clients[0]!.disposeCalls).toBe(1);
   });
 });

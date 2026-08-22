@@ -6,6 +6,23 @@ type MaybePromise<T> = T | Promise<T>;
 
 type MaybeDefined<T> = T extends any ? T : any;
 
+/** Types that {@link Storage.getItem} can convert the stored value to. */
+export type GetItemType = keyof GetItemTypeMap;
+
+export interface GetItemTypeMap {
+  text: string;
+  json: JSONValue;
+  bytes: Uint8Array;
+  stream: ReadableStream<Uint8Array>;
+  blob: Blob;
+}
+
+export type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
+export interface JSONObject {
+  [key: string]: JSONValue;
+}
+export type JSONArray = JSONValue[];
+
 export type Unwatch = () => MaybePromise<void>;
 
 export interface StorageMeta {
@@ -17,6 +34,33 @@ export interface StorageMeta {
 
 // TODO: type ttl
 export type TransactionOptions = Record<string, any>;
+
+/** Options accepted when reading items, adding the `type` conversion option. */
+export type GetItemOptions<K extends GetItemType = GetItemType> = TransactionOptions & {
+  /** Convert the stored value to this type. Defaults to lenient JSON parsing. */
+  type?: K;
+};
+
+/** {@link GetItemOptions} with a `type` that is required, selecting the return type. */
+type TypedGetItemOptions<K extends GetItemType> = TransactionOptions & { type: K };
+
+/** {@link GetItemOptions} with no `type`, keeping the default return type. */
+type UntypedGetItemOptions = TransactionOptions & { type?: undefined };
+
+/** An entry accepted by {@link Storage.getItems}: a key, or a key with per item options. */
+export type GetItemsInput = string | { key: string; options?: GetItemOptions };
+
+/**
+ * Value type of a {@link GetItemsInput}, based on its per item `type`.
+ *
+ * Falls back to `Default` (the `type` of the common options, or the storage's value type)
+ * for entries that do not set one.
+ */
+type GetItemsValue<Item, Default> = Item extends {
+  options: { type: infer K extends GetItemType };
+}
+  ? GetItemTypeMap[K] | null
+  : Default;
 
 export type GetKeysOptions = TransactionOptions & {
   maxDepth?: number;
@@ -107,18 +151,30 @@ export interface Storage<T extends StorageValue = StorageValue> {
 
   getItem<U extends Extract<T, StorageDefinition>, K extends string & keyof StorageItemMap<U>>(
     key: K,
-    ops?: TransactionOptions,
+    opts?: UntypedGetItemOptions,
   ): Promise<StorageItemType<T, K> | null>;
+
+  getItem<K extends GetItemType>(
+    key: string,
+    opts: TypedGetItemOptions<K>,
+  ): Promise<GetItemTypeMap[K] | null>;
+
   getItem<R = StorageItemType<T, string>>(
     key: string,
-    opts?: TransactionOptions,
+    opts?: UntypedGetItemOptions,
   ): Promise<R | null>;
 
   /** @experimental */
-  getItems: <U extends T>(
-    items: (string | { key: string; options?: TransactionOptions })[],
-    commonOptions?: TransactionOptions,
-  ) => Promise<{ key: string; value: U }[]>;
+  getItems<K extends GetItemType, const Items extends readonly GetItemsInput[] = GetItemsInput[]>(
+    items: Items,
+    commonOptions: TypedGetItemOptions<K>,
+  ): Promise<{ key: string; value: GetItemsValue<Items[number], GetItemTypeMap[K] | null> }[]>;
+
+  /** @experimental */
+  getItems<U extends T = T, const Items extends readonly GetItemsInput[] = GetItemsInput[]>(
+    items: Items,
+    commonOptions?: UntypedGetItemOptions,
+  ): Promise<{ key: string; value: GetItemsValue<Items[number], U> }[]>;
   /** @experimental See https://github.com/unjs/unstorage/issues/142 */
   getItemRaw: <T = any>(key: string, opts?: TransactionOptions) => Promise<MaybeDefined<T> | null>;
 

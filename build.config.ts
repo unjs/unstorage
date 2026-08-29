@@ -7,7 +7,7 @@ const driverEntries = [...new Set(Object.values(builtinDrivers))]
   .sort();
 
 /**
- * Dependencies bundled into `dist` (they are not declared in `package.json` dependencies).
+ * Dependencies bundled into `dist` (e.g. `destr` is bundled for runtime standalone usage).
  * Optional driver deps are lazily imported and stay external.
  */
 const inlinedDeps = new Set(["destr"]);
@@ -26,7 +26,7 @@ export default defineBuildConfig({
       input,
       rolldown: {
         // Keep bare imports (node builtins and optional driver deps) external, except
-        // the few runtime deps that are bundled in (there are no `dependencies`).
+        // the runtime deps configured in inlinedDeps.
         external: (id) => !isInlined(id) && !/^[.\0/]/.test(id) && !/^[a-zA-Z]:[/\\]/.test(id),
       },
     },

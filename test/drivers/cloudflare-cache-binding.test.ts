@@ -20,7 +20,7 @@ export default {
 */
 
 describe.skip("drivers: cloudflare-cache-binding", async () => {
-  const cfProxy = await getPlatformProxy();
+  const cfProxy = await getPlatformProxy({ persist: false });
   (globalThis as any).caches = cfProxy.caches;
   afterAll(async () => {
     (globalThis as any).caches = undefined;

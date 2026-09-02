@@ -6,6 +6,15 @@ const driverEntries = [...new Set(Object.values(builtinDrivers))]
   .map((id) => `src/drivers/${id.slice("unstorage/drivers/".length)}.ts`)
   .sort();
 
+/**
+ * Dependencies bundled into `dist` (they are not declared in `package.json` dependencies).
+ * Optional driver deps are lazily imported and stay external.
+ */
+const inlinedDeps = new Set(["destr"]);
+
+const isInlined = (id: string): boolean =>
+  inlinedDeps.has(id) || [...inlinedDeps].some((dep) => id.startsWith(`${dep}/`));
+
 const input = ["src/index.ts", "src/server.ts", "src/tracing.ts", ...driverEntries];
 
 validatePkg(input);
@@ -16,8 +25,9 @@ export default defineBuildConfig({
       type: "bundle",
       input,
       rolldown: {
-        // Keep all bare imports (node builtins and optional driver deps) external
-        external: (id) => !/^[.\0/]/.test(id) && !/^[a-zA-Z]:[/\\]/.test(id),
+        // Keep bare imports (node builtins and optional driver deps) external, except
+        // the few runtime deps that are bundled in (there are no `dependencies`).
+        external: (id) => !isInlined(id) && !/^[.\0/]/.test(id) && !/^[a-zA-Z]:[/\\]/.test(id),
       },
     },
   ],

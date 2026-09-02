@@ -29,11 +29,18 @@ export interface DriverFlags {
 
 export interface DriverDependency {
   /**
-   * Name of the npm package.
+   * Name of the npm package to install.
    *
    * Can differ from the import specifier used by the driver (e.g. `uploadthing` for `uploadthing/server`).
    */
   name: string;
+
+  /**
+   * Import specifier the driver uses, when it differs from `name` (e.g. `uploadthing/server`).
+   *
+   * Defaults to `name` when not set.
+   */
+  import?: string;
 
   /**
    * Supported version range of the package.

@@ -236,7 +236,7 @@ export const builtinDriverDependencies: Partial<Record<BuiltinDriverName, Driver
     lib: { name: "aws4fetch", version: "^1.0.20" },
   },
   "uploadthing": {
-    lib: { name: "uploadthing", version: "^7.7.4" },
+    lib: { name: "uploadthing", import: "uploadthing/server", version: "^7.7.4" },
   },
   "upstash": {
     lib: { name: "@upstash/redis", version: "^1.36.2" },

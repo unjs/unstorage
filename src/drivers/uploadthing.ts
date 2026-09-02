@@ -28,7 +28,7 @@ export interface UploadThingOptions extends UTApiOptions {
 }
 
 export const DRIVER_DEPENDENCIES: DriverDependencies = {
-  lib: { name: "uploadthing", version: "^7.7.4" },
+  lib: { name: "uploadthing", import: "uploadthing/server", version: "^7.7.4" },
 };
 
 const DRIVER_NAME = "uploadthing";

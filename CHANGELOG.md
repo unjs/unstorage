@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-alpha.10
+
+[compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.9...v2.0.0-alpha.10)
+
+### 🚀 Enhancements
+
+- **drivers:** Declare `import` specifier in driver dependencies ([057e60b](https://github.com/unjs/unstorage/commit/057e60b))
+
+### 🏡 Chore
+
+- Update release script ([51f91ec](https://github.com/unjs/unstorage/commit/51f91ec))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
 ## v2.0.0-alpha.9
 
 [compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.8...v2.0.0-alpha.9)

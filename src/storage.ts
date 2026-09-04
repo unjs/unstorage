@@ -221,7 +221,7 @@ export function createStorage<T extends StorageValue>(
     async setItems(items, commonOptions) {
       await runBatch(items, commonOptions, async (batch) => {
         if (batch.driver.setItems) {
-          return asyncCall(
+          await asyncCall(
             batch.driver.setItems,
             batch.items.map((item) => ({
               key: item.relativeKey,
@@ -230,20 +230,25 @@ export function createStorage<T extends StorageValue>(
             })),
             commonOptions,
           );
+        } else if (batch.driver.setItem) {
+          await Promise.all(
+            batch.items.map((item) => {
+              return asyncCall(
+                batch.driver.setItem!,
+                item.relativeKey,
+                stringify(item.value),
+                item.options,
+              );
+            }),
+          );
+        } else {
+          return; // Readonly
         }
-        if (!batch.driver.setItem) {
-          return;
+        if (!batch.driver.watch) {
+          for (const item of batch.items) {
+            onChange("update", item.key);
+          }
         }
-        await Promise.all(
-          batch.items.map((item) => {
-            return asyncCall(
-              batch.driver.setItem!,
-              item.relativeKey,
-              stringify(item.value),
-              item.options,
-            );
-          }),
-        );
       });
     },
     async setItemRaw(key, value, opts = {}) {

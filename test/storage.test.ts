@@ -74,6 +74,42 @@ describe("storage", () => {
     expect(onChange).toHaveBeenCalledTimes(2);
   });
 
+  it("watch: setItems", async () => {
+    const onChange = vi.fn();
+    const storage = createStorage().mount("/mnt", memory());
+    await storage.watch(onChange);
+    await storage.setItems([
+      { key: "mnt:etc:conf", value: "test" },
+      { key: "mnt:data:foo", value: "123" },
+    ]);
+    expect(onChange).toHaveBeenCalledWith("update", "mnt:etc:conf");
+    expect(onChange).toHaveBeenCalledWith("update", "mnt:data:foo");
+    expect(onChange).toHaveBeenCalledTimes(2);
+  });
+
+  it("watch: setItems with a driver implementing setItems", async () => {
+    const onChange = vi.fn();
+    const store = new Map<string, any>();
+    const storage = createStorage().mount("/mnt", {
+      name: "batch-memory",
+      hasItem: (key) => store.has(key),
+      getItem: (key) => store.get(key) ?? null,
+      getKeys: () => [...store.keys()],
+      setItem: (key, value) => {
+        store.set(key, value);
+      },
+      setItems: (items) => {
+        for (const item of items) {
+          store.set(item.key, item.value);
+        }
+      },
+    });
+    await storage.watch(onChange);
+    await storage.setItems([{ key: "mnt:data:foo", value: 123 }]);
+    expect(onChange).toHaveBeenCalledWith("update", "mnt:data:foo");
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
   it("unwatch return", async () => {
     const onChange = vi.fn();
     const storage = createStorage().mount("/mnt", memory());

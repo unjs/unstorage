@@ -1,8 +1,9 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll } from "vitest";
 import { resolve } from "node:path";
 import { createStorage, snapshot, restoreSnapshot, prefixStorage } from "../src/index.ts";
 import memory from "../src/drivers/memory.ts";
 import fs from "../src/drivers/fs.ts";
+import { serializeRaw } from "../src/_utils.ts";
 
 const data = {
   "etc:conf": "test",
@@ -291,6 +292,344 @@ describe("Regression", () => {
     expect(prefixedResult).toEqual([
       { key: "key1", value: "value1" },
       { key: "key2", value: "value2" },
+    ]);
+  });
+});
+
+describe("get() with type option", () => {
+  const storage = createStorage();
+
+  it("should get JSON object with type=json", async () => {
+    const obj = { foo: "bar", num: 42 };
+    await storage.setItem("json-key", obj);
+    const result = await storage.get("json-key", { type: "json" });
+    expect(result).toEqual(obj);
+  });
+
+  it("should get bare stored values with type=json", async () => {
+    // Values are stored with `stringify()` which keeps strings bare (not JSON quoted)
+    await storage.setItem("bare-string-key", "hello world");
+    expect(await storage.get("bare-string-key", { type: "json" })).toBe("hello world");
+
+    await storage.setItem("bare-number-key", 42);
+    expect(await storage.get("bare-number-key", { type: "json" })).toBe(42);
+  });
+
+  it("should get string with type=text", async () => {
+    await storage.setItem("text-key", "hello world");
+    const result = await storage.get("text-key", { type: "text" });
+    expect(result).toBe("hello world");
+  });
+
+  it("should get bytes with type=bytes", async () => {
+    const bytes = new Uint8Array([1, 2, 3, 4]);
+    await storage.setItemRaw("bytes-key", bytes);
+    const result = await storage.get("bytes-key", { type: "bytes" });
+    const len = result?.length || result?.byteLength;
+    expect(len).toBe(4);
+  });
+
+  it("should get bytes with type=stream", async () => {
+    const bytes = new Uint8Array([1, 2, 3, 4]);
+    await storage.setItemRaw("stream-key", bytes);
+    const result = await storage.get("stream-key", { type: "stream" });
+    expect(result).toBeInstanceOf(ReadableStream);
+    const reader = result?.getReader();
+    if (!reader) {
+      throw new Error("Reader is not defined");
+    }
+    const { done, value } = await reader.read();
+    expect(done).toBe(false);
+    expect(value).toEqual(bytes);
+    const len = value?.length || value?.byteLength;
+    expect(len).toBe(4);
+
+    const { done: doneAfter, value: valueAfter } = await reader.read();
+    expect(doneAfter).toBe(true);
+    expect(valueAfter).toBeUndefined();
+  });
+
+  it("should get bytes with type=blob", async () => {
+    const bytes = new Uint8Array([1, 2, 3, 4]);
+    await storage.setItemRaw("blob-key", bytes);
+    const result = await storage.get("blob-key", { type: "blob" });
+    expect(result).toBeInstanceOf(Blob);
+    const arrayBuffer = await result?.arrayBuffer();
+    expect(new Uint8Array(arrayBuffer || [])).toEqual(bytes);
+  });
+});
+
+describe("get() raw value normalization", () => {
+  const bytes = new Uint8Array([1, 2, 3, 4]);
+
+  const rawStorage = (value: unknown) =>
+    createStorage({
+      driver: {
+        name: "raw-test",
+        hasItem: () => true,
+        getItem: () => null,
+        getItemRaw: () => value,
+        getKeys: () => [],
+      },
+    });
+
+  const rawValues: Record<string, () => unknown> = {
+    Uint8Array: () => bytes.slice(),
+    Buffer: () => Buffer.from(bytes),
+    ArrayBuffer: () => bytes.slice().buffer,
+    DataView: () => new DataView(bytes.slice().buffer),
+    Blob: () => new Blob([bytes]),
+    ReadableStream: () => new Blob([bytes]).stream(),
+    Response: () => new Response(bytes),
+    AsyncIterable: () => ({
+      async *[Symbol.asyncIterator]() {
+        yield bytes.slice(0, 2);
+        yield bytes.slice(2);
+      },
+    }),
+  };
+
+  for (const [name, createValue] of Object.entries(rawValues)) {
+    it(`normalizes ${name}`, async () => {
+      expect(await rawStorage(createValue()).getItem("key", { type: "bytes" })).toEqual(bytes);
+
+      const blob = await rawStorage(createValue()).getItem("key", { type: "blob" });
+      expect(new Uint8Array(await blob!.arrayBuffer())).toEqual(bytes);
+
+      const stream = await rawStorage(createValue()).getItem("key", { type: "stream" });
+      expect(new Uint8Array(await new Response(stream).arrayBuffer())).toEqual(bytes);
+    });
+  }
+
+  it("normalizes strings as utf-8", async () => {
+    expect(await rawStorage("héllo").getItem("key", { type: "bytes" })).toEqual(
+      new TextEncoder().encode("héllo"),
+    );
+  });
+
+  it("passes streams and blobs through", async () => {
+    const stream = new Blob([bytes]).stream();
+    expect(await rawStorage(stream).getItem("key", { type: "stream" })).toBe(stream);
+
+    const blob = new Blob([bytes]);
+    expect(await rawStorage(blob).getItem("key", { type: "blob" })).toBe(blob);
+  });
+
+  it("decodes base64 values from drivers without getItemRaw", async () => {
+    const storage = createStorage({
+      driver: {
+        name: "raw-test",
+        hasItem: () => true,
+        getItem: () => "base64:AQIDBA==",
+        getKeys: () => [],
+      },
+    });
+    expect(await storage.getItem("key", { type: "bytes" })).toEqual(bytes);
+  });
+
+  it("returns null for missing values", async () => {
+    for (const type of ["text", "json", "bytes", "blob", "stream"] as const) {
+      expect(await rawStorage(null).getItem("key", { type })).toBe(null);
+    }
+  });
+
+  it("throws for unsupported values", async () => {
+    await expect(rawStorage({ foo: "bar" }).getItem("key", { type: "bytes" })).rejects.toThrow(
+      /Cannot convert `Object` to bytes/,
+    );
+  });
+
+  it("releases the reader lock when reading throws", async () => {
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue({ not: "bytes" });
+        controller.close();
+      },
+    });
+
+    await expect(rawStorage(stream).getItem("key", { type: "bytes" })).rejects.toThrow(
+      /Cannot convert `Object` to bytes/,
+    );
+    expect(stream.locked).toBe(false);
+  });
+});
+
+describe("get() text and json of raw values", () => {
+  const text = "hello wörld";
+  const bytes = new TextEncoder().encode(text);
+
+  it("decodes base64 values from drivers that store strings", async () => {
+    const storage = createStorage({
+      driver: {
+        name: "string-only",
+        hasItem: () => true,
+        getItem: () => serializeRaw(bytes),
+        getKeys: () => [],
+      },
+    });
+
+    // Sanity check: the driver really does hold a `base64:` wrapped value
+    expect(await storage.getItem("key")).toBe(`base64:${Buffer.from(bytes).toString("base64")}`);
+
+    expect(await storage.getItem("key", { type: "text" })).toBe(text);
+    expect(await storage.getItem("key", { type: "json" })).toBe(text);
+  });
+
+  it("decodes binary values from drivers that store them natively", async () => {
+    // The memory driver keeps the `Uint8Array` given to `setItemRaw` as-is
+    const storage = createStorage();
+    await storage.setItemRaw("key", bytes);
+
+    expect(await storage.getItem("key", { type: "text" })).toBe(text);
+    expect(await storage.getItem("key", { type: "json" })).toBe(text);
+  });
+
+  it("parses json stored as raw bytes", async () => {
+    const storage = createStorage();
+    await storage.setItemRaw("key", new TextEncoder().encode('{"foo":"bar"}'));
+
+    expect(await storage.getItem("key", { type: "json" })).toEqual({ foo: "bar" });
+    expect(await storage.getItem("key", { type: "text" })).toBe('{"foo":"bar"}');
+  });
+
+  it("leaves plain values untouched", async () => {
+    const storage = createStorage();
+    await storage.setItem("text-key", "base64 is not a prefix here");
+    await storage.setItem("json-key", { foo: "bar" });
+
+    expect(await storage.getItem("text-key", { type: "text" })).toBe("base64 is not a prefix here");
+    expect(await storage.getItem("json-key", { type: "json" })).toEqual({ foo: "bar" });
+  });
+
+  it("keeps the default behavior of returning raw values as-is", async () => {
+    const storage = createStorage();
+    await storage.setItemRaw("key", bytes);
+    expect(await storage.getItem("key")).toEqual(bytes);
+  });
+});
+
+describe("getItems() with type option", () => {
+  const bytes = new Uint8Array([1, 2, 3, 4]);
+
+  // The memory driver has no `getItems`, this one exercises the batch path.
+  const batchDriver = () => {
+    const data = new Map<string, any>();
+    return {
+      name: "batch-test",
+      hasItem: (key: string) => data.has(key),
+      getItem: (key: string) => data.get(key) ?? null,
+      getItemRaw: (key: string) => data.get(key) ?? null,
+      getItems: (items: { key: string }[]) =>
+        items.map((item) => ({ key: item.key, value: data.get(item.key) ?? null })),
+      setItem: (key: string, value: string) => void data.set(key, value),
+      setItemRaw: (key: string, value: any) => void data.set(key, value),
+      getKeys: () => [...data.keys()],
+    };
+  };
+
+  const drivers = { "without driver.getItems": undefined, "with driver.getItems": batchDriver() };
+
+  for (const [name, driver] of Object.entries(drivers)) {
+    describe(name, () => {
+      const storage = createStorage({ driver });
+      const valueOf = (results: { key: string; value: unknown }[], key: string): any =>
+        results.find((r) => r.key === key)?.value;
+
+      beforeAll(async () => {
+        await storage.setItem("text-key", "hello world");
+        await storage.setItem("json-key", { foo: "bar" });
+        await storage.setItemRaw("bytes-key", bytes);
+      });
+
+      it("applies type from commonOptions", async () => {
+        expect(await storage.getItems(["text-key", "json-key"], { type: "text" })).toEqual([
+          { key: "text-key", value: "hello world" },
+          { key: "json-key", value: '{"foo":"bar"}' },
+        ]);
+
+        expect(await storage.getItems(["json-key", "text-key"], { type: "json" })).toEqual([
+          { key: "json-key", value: { foo: "bar" } },
+          { key: "text-key", value: "hello world" },
+        ]);
+
+        const asBytes = await storage.getItems(["bytes-key"], { type: "bytes" });
+        expect(valueOf(asBytes, "bytes-key")).toEqual(bytes);
+      });
+
+      it("applies type from per-item options", async () => {
+        const results = await storage.getItems([
+          { key: "text-key", options: { type: "text" } },
+          { key: "json-key", options: { type: "json" } },
+          { key: "bytes-key", options: { type: "bytes" } },
+        ]);
+        expect(results).toHaveLength(3);
+        expect(valueOf(results, "text-key")).toBe("hello world");
+        expect(valueOf(results, "json-key")).toEqual({ foo: "bar" });
+        expect(valueOf(results, "bytes-key")).toEqual(bytes);
+      });
+
+      it("lets per-item options override commonOptions", async () => {
+        const results = await storage.getItems(
+          ["json-key", { key: "bytes-key", options: { type: "blob" } }],
+          { type: "text" },
+        );
+        expect(valueOf(results, "json-key")).toBe('{"foo":"bar"}');
+        const blob = valueOf(results, "bytes-key");
+        expect(blob).toBeInstanceOf(Blob);
+        expect(new Uint8Array(await blob.arrayBuffer())).toEqual(bytes);
+      });
+
+      it("keeps the default behavior without a type", async () => {
+        expect(await storage.getItems(["text-key", "json-key"])).toEqual([
+          { key: "text-key", value: "hello world" },
+          { key: "json-key", value: { foo: "bar" } },
+        ]);
+      });
+
+      it("returns null for missing keys", async () => {
+        for (const type of ["text", "json", "bytes", "blob", "stream"] as const) {
+          expect(await storage.getItems(["missing-key"], { type })).toEqual([
+            { key: "missing-key", value: null },
+          ]);
+        }
+      });
+
+      it("keeps the input order when raw and plain types are mixed", async () => {
+        const results = await storage.getItems([
+          "text-key",
+          { key: "bytes-key", options: { type: "bytes" } },
+          "json-key",
+          { key: "bytes-key", options: { type: "blob" } },
+        ]);
+        expect(results.map((r) => r.key)).toEqual([
+          "text-key",
+          "bytes-key",
+          "json-key",
+          "bytes-key",
+        ]);
+        expect(results[1]!.value).toEqual(bytes);
+        expect(results[3]!.value).toBeInstanceOf(Blob);
+      });
+    });
+  }
+});
+
+describe("getItems() with drivers that normalize keys", () => {
+  const storage = createStorage({
+    driver: {
+      name: "normalizing",
+      hasItem: () => true,
+      getItem: () => ({ foo: "bar" }),
+      // Echoes back a key that is not exactly the one it was given
+      getItems: (items) =>
+        items.map((item) => ({ key: item.key.toUpperCase(), value: { foo: "bar" } })),
+      getKeys: () => [],
+    },
+  });
+
+  it("still applies the type from commonOptions", async () => {
+    expect(await storage.getItems(["a"], { type: "text" })).toEqual([
+      { key: "A", value: '{"foo":"bar"}' },
     ]);
   });
 });

@@ -39,6 +39,22 @@ describe("drivers: localstorage", () => {
 
         expect(watcher).toHaveBeenCalledWith("update", "s1:random_file");
       });
+      it("reports empty string writes as updates", async () => {
+        const watcher = vi.fn();
+        const unwatch = await ctx.driver.watch!(watcher);
+
+        const ev = new jsdom.window.StorageEvent("storage", {
+          key: "test:empty",
+          newValue: "",
+          oldValue: null,
+          storageArea: jsdom.window.localStorage,
+          url: jsdom.window.location.href,
+        });
+        jsdom.window.dispatchEvent(ev);
+
+        await unwatch();
+        expect(watcher).toHaveBeenCalledWith("update", "test:empty");
+      });
       it("unwatch localstorage", async () => {
         const watcher = vi.fn();
         const unwatch = await ctx.storage.watch(watcher);

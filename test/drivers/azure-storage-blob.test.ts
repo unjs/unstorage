@@ -22,6 +22,7 @@ describe.skip("drivers: azure-storage-blob", () => {
     azuriteProcess.kill(9);
   });
   testDriver({
+    supportsCAS: true,
     driver: driver({
       connectionString: "UseDevelopmentStorage=true;",
       accountName: "devstoreaccount1",

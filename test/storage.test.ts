@@ -127,6 +127,55 @@ describe("storage", () => {
     expect(await storage.getKeys()).toMatchObject(initialKeys);
     expect(await storage.getItem("/mnt/test.txt")).toBe("v1");
   });
+
+  it("clear(base) removes matching keys on the root mount (issue #801)", async () => {
+    const storage = createStorage();
+    await storage.setItem("foo:a", 1);
+    await storage.setItem("bar:b", 2);
+    await storage.clear("foo");
+    expect(await storage.getKeys()).toEqual(["bar:b"]);
+    expect(await storage.getItem("foo:a")).toBe(null);
+    expect(await storage.getItem("bar:b")).toBe(2);
+  });
+
+  it("clear(base) also removes companion metadata for matching keys", async () => {
+    const storage = createStorage();
+    await storage.setItem("foo:a", 1);
+    await storage.setMeta("foo:a", { note: "x" });
+    await storage.setItem("bar:b", 2);
+    await storage.setMeta("bar:b", { note: "y" });
+    await storage.clear("foo");
+    expect(await storage.getMeta("foo:a")).toEqual({});
+    expect(await storage.getMeta("bar:b")).toEqual({ note: "y" });
+  });
+
+  it("clear(base) does not wipe keys hidden under a nested mount", async () => {
+    const storage = createStorage();
+    await storage.setItem("mnt:hidden", "keep");
+    storage.mount("/mnt", memory());
+    await storage.setItem("mnt:visible", "drop");
+    await storage.clear("/mnt");
+    expect(await storage.getItem("mnt:visible")).toBe(null);
+    await storage.unmount("/mnt");
+    expect(await storage.getItem("mnt:hidden")).toBe("keep");
+  });
+
+  it("clear(base) does not wipe parent-driver keys hidden by a nested child mount", async () => {
+    const storage = createStorage();
+    storage.mount("/mnt", memory());
+    await storage.setItem("/mnt/keep", "keep");
+    await storage.setItem("/mnt/foo/hidden", "hidden");
+    storage.mount("/mnt/foo", memory());
+    await storage.setItem("/mnt/foo/child", "child");
+
+    await storage.clear("/mnt");
+
+    expect(await storage.getItem("/mnt/keep")).toBe(null);
+    expect(await storage.getItem("/mnt/foo/child")).toBe(null);
+
+    await storage.unmount("/mnt/foo");
+    expect(await storage.getItem("/mnt/foo/hidden")).toBe("hidden");
+  });
 });
 
 describe("utils", () => {
@@ -292,5 +341,15 @@ describe("Regression", () => {
       { key: "key1", value: "value1" },
       { key: "key2", value: "value2" },
     ]);
+  });
+
+  it("prefixStorage clear only removes the prefixed subset (issue #801)", async () => {
+    const storage = createStorage();
+    await storage.setItem("users:1", "a");
+    await storage.setItem("orders:1", "b");
+    const users = prefixStorage(storage, "users");
+    await users.clear();
+    expect(await storage.getItem("users:1")).toBe(null);
+    expect(await storage.getItem("orders:1")).toBe("b");
   });
 });

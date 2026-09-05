@@ -79,6 +79,12 @@ describe.each(["fs", "fs-lite"])("%s prefix traversal", (name) => {
     }
   });
 
+  it("excludes sibling files while traversing a prefix ancestor", async () => {
+    await Promise.all([write("foo/sibling"), write("foo/bar/item")]);
+    const driver = storage.getMount().driver;
+    expect(await driver.getKeys!("foo:bar", {})).toEqual(["foo/bar/item"]);
+  });
+
   it("preserves ancestor ignores and atomic-file exclusions", async () => {
     const ignored = join(base, "foo", "ignored");
     await storage.dispose();

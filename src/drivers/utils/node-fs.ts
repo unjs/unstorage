@@ -131,6 +131,12 @@ export async function readdirRecursive(
         }
       } else {
         if (!(ignore && ignore(entryPath)) && !TMP_FILE_RE.test(entry.name)) {
+          if (keyBase) {
+            const normalized = normalizeKey(parentKey + "/" + entry.name);
+            if (normalized !== keyBase && !normalized.startsWith(keyBase + ":")) {
+              return;
+            }
+          }
           files.push(entry.name);
         }
       }

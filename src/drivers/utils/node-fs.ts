@@ -95,6 +95,7 @@ export async function readdirRecursive(
   keyBase?: string,
   parentKey = "",
 ): Promise<string[]> {
+  keyBase = normalizeKey(keyBase);
   if (ignore && ignore(dir)) {
     return [];
   }
@@ -111,8 +112,9 @@ export async function readdirRecursive(
           // Keep ancestors and descendants that can produce keys under the requested prefix.
           if (
             normalized &&
+            normalized !== keyBase &&
             !keyBase.startsWith(normalized + ":") &&
-            !normalized.startsWith(keyBase)
+            !normalized.startsWith(keyBase + ":")
           ) {
             return;
           }

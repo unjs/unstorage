@@ -100,7 +100,12 @@ describe.each(["fs", "fs-lite"])("%s prefix traversal", (name) => {
   });
 
   it("retains failures on the root and selected path but skips unrelated failures", async () => {
-    await Promise.all([write("selected/item"), write("unrelated/item")]);
+    await Promise.all([
+      write("selected/item"),
+      write("unrelated/item"),
+      write("foo/item"),
+      write("foobar/item"),
+    ]);
     const original = fs.readdir;
     let failingPath = base;
     const reads = vi.spyOn(fs, "readdir").mockImplementation(async (...args) => {
@@ -115,6 +120,12 @@ describe.each(["fs", "fs-lite"])("%s prefix traversal", (name) => {
     failingPath = join(base, "unrelated");
     reads.mockClear();
     expect(await storage.getKeys("selected")).toEqual(["selected:item"]);
+    expect(reads.mock.calls.map(([path]) => String(path))).not.toContain(failingPath);
+
+    failingPath = join(base, "foobar");
+    reads.mockClear();
+    const driver = storage.getMount().driver;
+    expect(await driver.getKeys!("foo", {})).toEqual(["foo/item"]);
     expect(reads.mock.calls.map(([path]) => String(path))).not.toContain(failingPath);
     await expect(storage.getKeys()).rejects.toThrow();
   });

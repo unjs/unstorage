@@ -1,6 +1,7 @@
 import { Dirent, existsSync, promises as fsPromises } from "node:fs";
 import { resolve, dirname, join, basename } from "node:path";
 import { randomUUID } from "node:crypto";
+import { normalizeKey } from "../../utils.ts";
 
 function ignoreNotfound(err: any) {
   return err.code === "ENOENT" || err.code === "EISDIR" ? null : err;
@@ -91,7 +92,10 @@ export async function readdirRecursive(
   dir: string,
   ignore?: (p: string) => boolean,
   maxDepth?: number,
+  keyBase?: string,
+  parentKey = "",
 ): Promise<string[]> {
+  keyBase = normalizeKey(keyBase);
   if (ignore && ignore(dir)) {
     return [];
   }
@@ -101,16 +105,38 @@ export async function readdirRecursive(
     entries.map(async (entry) => {
       const entryPath = resolve(dir, entry.name);
       if (entry.isDirectory()) {
+        let directoryKey = "";
+        if (keyBase) {
+          directoryKey = parentKey + "/" + entry.name;
+          const normalized = normalizeKey(directoryKey);
+          // Keep ancestors and descendants that can produce keys under the requested prefix.
+          if (
+            normalized &&
+            normalized !== keyBase &&
+            !keyBase.startsWith(normalized + ":") &&
+            !normalized.startsWith(keyBase + ":")
+          ) {
+            return;
+          }
+        }
         if (maxDepth === undefined || maxDepth > 0) {
           const dirFiles = await readdirRecursive(
             entryPath,
             ignore,
             maxDepth === undefined ? undefined : maxDepth - 1,
+            keyBase,
+            directoryKey,
           );
           files.push(...dirFiles.map((f) => entry.name + "/" + f));
         }
       } else {
         if (!(ignore && ignore(entryPath)) && !TMP_FILE_RE.test(entry.name)) {
+          if (keyBase) {
+            const normalized = normalizeKey(parentKey + "/" + entry.name);
+            if (normalized !== keyBase && !normalized.startsWith(keyBase + ":")) {
+              return;
+            }
+          }
           files.push(entry.name);
         }
       }

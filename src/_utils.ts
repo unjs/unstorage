@@ -26,8 +26,13 @@ function isPrimitive(value: any) {
 
 function isPureObject(value: any) {
   const proto = Object.getPrototypeOf(value);
-  // eslint-disable-next-line no-prototype-builtins
-  return !proto || proto.isPrototypeOf(Object);
+  // A pure object is `{}`-like: either it has no prototype at all, or its
+  // prototype is an `Object.prototype` (which itself has no prototype). The
+  // second form is checked structurally rather than only with
+  // `=== Object.prototype` so that plain objects coming from another realm
+  // (`node:vm`, a worker, an iframe) are recognized too.
+  // Same shape as https://github.com/sindresorhus/is-plain-obj.
+  return proto === null || proto === Object.prototype || Object.getPrototypeOf(proto) === null;
 }
 
 export function stringify(value: any): string {

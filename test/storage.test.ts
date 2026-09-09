@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { resolve } from "node:path";
+import { runInNewContext } from "node:vm";
 import { createStorage, snapshot, restoreSnapshot, prefixStorage } from "../src/index.ts";
 import memory from "../src/drivers/memory.ts";
 import fs from "../src/drivers/fs.ts";
@@ -169,6 +170,36 @@ describe("utils", () => {
   it("stringify", () => {
     const storage = createStorage();
     expect(async () => await storage.setItem("foo", [])).not.toThrow();
+  });
+
+  it("stringify accepts a plain object from another realm", async () => {
+    const storage = createStorage();
+    // A `{}` built in another realm (`node:vm`, a worker, an iframe) does not
+    // share this realm's `Object.prototype`, but it is still a plain object.
+    const foreignObject = runInNewContext("({ foo: 'bar' })");
+    await storage.setItem("foo", foreignObject);
+    expect(await storage.getItem("foo")).toEqual({ foo: "bar" });
+  });
+
+  it("stringify rejects a non-plain object without a toJSON", async () => {
+    const storage = createStorage();
+    // `Object.create(Function.prototype)` is not a plain object: its prototype
+    // chain does not end right after it.
+    await expect(storage.setItem("foo", Object.create(Function.prototype))).rejects.toThrow(
+      "[unstorage] Cannot stringify value!",
+    );
+    await expect(storage.setItem("foo", Object.create({}))).rejects.toThrow(
+      "[unstorage] Cannot stringify value!",
+    );
+  });
+
+  it("stringify accepts an object whose prototype is null-prototyped", async () => {
+    const storage = createStorage();
+    // Used to throw `TypeError: proto.isPrototypeOf is not a function`.
+    const value = Object.create(Object.create(null));
+    value.foo = "bar";
+    await storage.setItem("foo", value);
+    expect(await storage.getItem("foo")).toEqual({ foo: "bar" });
   });
 
   it("has aliases", async () => {

@@ -70,8 +70,9 @@ const driver: DriverFactory<OverlayStorageOptions> = (options) => {
       // TODO: Graceful error handling
       await Promise.all(
         options.layers.map(async (layer) => {
-          if (layer.dispose) {
-            await layer.dispose();
+          const disposeFn = layer.dispose ?? layer[Symbol.asyncDispose];
+          if (typeof disposeFn === "function") {
+            await disposeFn.call(layer);
           }
         }),
       );

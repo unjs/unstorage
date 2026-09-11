@@ -76,6 +76,9 @@ const driver: DriverFactory<OverlayStorageOptions> = (options) => {
         }),
       );
     },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
+    },
   };
 };
 

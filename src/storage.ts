@@ -372,6 +372,9 @@ export function createStorage<T extends StorageValue>(
     async dispose() {
       await Promise.all(Object.values(context.mounts).map((driver) => dispose(driver)));
     },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
+    },
     async watch(callback) {
       await startWatch();
       context.watchListeners.push(callback);

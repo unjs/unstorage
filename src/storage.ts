@@ -231,7 +231,9 @@ export function createStorage<T extends StorageValue>(
             commonOptions,
           );
         } else if (batch.driver.setItem) {
-          await Promise.all(
+          // A rejected sibling write must not suppress the events for the
+          // writes that did land: those values are in the driver either way.
+          const results = await Promise.allSettled(
             batch.items.map((item) => {
               return asyncCall(
                 batch.driver.setItem!,
@@ -241,6 +243,18 @@ export function createStorage<T extends StorageValue>(
               );
             }),
           );
+          if (!batch.driver.watch) {
+            for (const [index, item] of batch.items.entries()) {
+              if (results[index]?.status === "fulfilled") {
+                onChange("update", item.key);
+              }
+            }
+          }
+          const rejected = results.find((r) => r.status === "rejected");
+          if (rejected) {
+            throw (rejected as PromiseRejectedResult).reason;
+          }
+          return;
         } else {
           return; // Readonly
         }

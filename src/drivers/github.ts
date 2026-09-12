@@ -1,5 +1,5 @@
 import { createError, createRequiredError, type DriverFactory } from "./utils/index.ts";
-import { fetchRequest } from "./utils/fetch.ts";
+import { FetchError, fetchRequest } from "./utils/fetch.ts";
 import { withTrailingSlash, joinURL } from "./utils/path.ts";
 
 export interface GithubOptions {
@@ -9,7 +9,7 @@ export interface GithubOptions {
    */
   repo: string;
   /**
-   * The branch to fetch. (e.g. `dev`)
+   * The target branch. (e.g. `dev`)
    * @default "main"
    */
   branch?: string;
@@ -22,7 +22,7 @@ export interface GithubOptions {
    */
   ttl?: number;
   /**
-   * Github API token (recommended)
+   * Github API token (required for writes)
    */
   token?: string;
   /**
@@ -39,7 +39,7 @@ interface GithubFile {
   body?: string;
   meta: {
     sha: string;
-    mode: string;
+    mode?: string;
     size: number;
   };
 }
@@ -61,25 +61,106 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
 
   let files: Record<string, GithubFile> = {};
   let lastCheck = 0;
-  let syncPromise: undefined | Promise<any>;
+  let pendingOperation = Promise.resolve();
 
-  const syncFiles = async () => {
-    if (!opts.repo) {
-      throw createRequiredError(DRIVER_NAME, "repo");
-    }
-
-    if (lastCheck + opts.ttl! * 1000 > Date.now()) {
-      return;
-    }
-
-    if (!syncPromise) {
-      syncPromise = fetchFiles(opts);
-    }
-
-    files = await syncPromise;
-    lastCheck = Date.now();
-    syncPromise = undefined;
+  // Serialize mutations with tree refreshes so neither can overwrite the other's cache changes.
+  const enqueue = (operation: () => Promise<void>) => {
+    const result = pendingOperation.then(operation);
+    pendingOperation = result.catch(() => undefined);
+    return result;
   };
+
+  const syncFiles = () =>
+    enqueue(async () => {
+      if (!opts.repo) {
+        throw createRequiredError(DRIVER_NAME, "repo");
+      }
+
+      if (lastCheck + opts.ttl! * 1000 > Date.now()) {
+        return;
+      }
+
+      const updatedFiles = await fetchFiles(opts);
+      for (const [key, file] of Object.entries(updatedFiles)) {
+        if (file.meta.sha === files[key]?.meta.sha) {
+          file.body = files[key]?.body;
+        }
+      }
+      files = updatedFiles;
+      lastCheck = Date.now();
+    });
+
+  const writeFile = (key: string, value?: string) =>
+    enqueue(async () => {
+      if (!opts.repo || !opts.token) {
+        throw createRequiredError(DRIVER_NAME, !opts.repo ? "repo" : "token");
+      }
+      if (new URL(opts.apiURL!).protocol !== "https:") {
+        throw createError(DRIVER_NAME, "apiURL must use HTTPS when writing with a token");
+      }
+
+      const path = withTrailingSlash(opts.dir).replace(/^\//, "") + key.replace(/:/g, "/");
+      const segments = path.split("/");
+      if (segments.some((segment) => segment === "." || segment === "..")) {
+        throw createError(DRIVER_NAME, "File paths must not contain dot segments");
+      }
+      const url = `/repos/${opts.repo}/contents/${segments.map(encodeURIComponent).join("/")}`;
+      const requestOptions = {
+        baseURL: opts.apiURL,
+        headers: {
+          "User-Agent": "unstorage",
+          Authorization: `token ${opts.token}`,
+          Accept: "application/vnd.github.object+json",
+        },
+      };
+      let sha: string | undefined;
+      try {
+        const res = await fetchRequest(url, {
+          ...requestOptions,
+          query: { ref: opts.branch },
+        });
+        sha = ((await res.json()) as { sha: string }).sha;
+      } catch (error) {
+        if (!(error instanceof FetchError) || error.status !== 404) {
+          throw error;
+        }
+        // A 404 can also mean that the repository or branch is inaccessible.
+        // Confirm that the target tree exists before treating the file as missing.
+        await fetchFiles(opts);
+      }
+
+      if (value === undefined && !sha) {
+        delete files[key];
+        lastCheck = -Infinity;
+        return;
+      }
+
+      const res = await fetchRequest(url, {
+        ...requestOptions,
+        method: value === undefined ? "DELETE" : "PUT",
+        body: {
+          branch: opts.branch,
+          sha,
+          message: `unstorage: ${value === undefined ? "remove" : "set"} ${path}`,
+          content:
+            value === undefined
+              ? undefined
+              : btoa(
+                  Array.from(new TextEncoder().encode(value), (byte) =>
+                    String.fromCodePoint(byte),
+                  ).join(""),
+                ),
+        },
+      });
+      if (value === undefined) {
+        delete files[key];
+      } else {
+        const { content } = (await res.json()) as { content: { sha: string; size: number } };
+        files[key] = { body: value, meta: { sha: content.sha, size: content.size } };
+      }
+      // The contents API omits mode; refresh the tree before exposing metadata.
+      lastCheck = -Infinity;
+    });
 
   return {
     name: DRIVER_NAME,
@@ -101,7 +182,7 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
         return null;
       }
 
-      if (!item.body) {
+      if (item.body === undefined) {
         try {
           const res = await fetchRequest(key.replace(/:/g, "/"), {
             baseURL: rawUrl,
@@ -117,6 +198,12 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
         }
       }
       return item.body;
+    },
+    setItem(key, value) {
+      return writeFile(key, value);
+    },
+    removeItem(key) {
+      return writeFile(key);
     },
     async getMeta(key) {
       await syncFiles();

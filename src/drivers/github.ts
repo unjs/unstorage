@@ -95,6 +95,9 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
       if (!opts.repo || !opts.token) {
         throw createRequiredError(DRIVER_NAME, !opts.repo ? "repo" : "token");
       }
+      if (new URL(opts.apiURL!).protocol !== "https:") {
+        throw createError(DRIVER_NAME, "apiURL must use HTTPS when writing with a token");
+      }
 
       const path = withTrailingSlash(opts.dir).replace(/^\//, "") + key.replace(/:/g, "/");
       const segments = path.split("/");
@@ -121,6 +124,9 @@ const driver: DriverFactory<GithubOptions> = (_opts) => {
         if (!(error instanceof FetchError) || error.status !== 404) {
           throw error;
         }
+        // A 404 can also mean that the repository or branch is inaccessible.
+        // Confirm that the target tree exists before treating the file as missing.
+        await fetchFiles(opts);
       }
 
       if (value === undefined && !sha) {

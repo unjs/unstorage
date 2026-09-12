@@ -42,6 +42,7 @@ describe("drivers: github writes", () => {
     const value = "é🌍".repeat(30_000);
     const size = Buffer.byteLength(value);
     reply({}, 404);
+    reply({ tree: [] });
     reply({ content: { sha: "created", size } }, 201);
     reply({ tree: [blob("dir/a#b.txt", "created", size)] });
 
@@ -60,10 +61,15 @@ describe("drivers: github writes", () => {
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
+      `${apiURL}/repos/owner/repo/git/trees/drafts?recursive=1`,
+      expect.anything(),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
       `${contentsURL}/dir/a%23b.txt`,
       expect.objectContaining({ method: "PUT" }),
     );
-    expect(body(1)).toEqual({
+    expect(body(2)).toEqual({
       branch: "drafts",
       message: "unstorage: set content/dir/a#b.txt",
       content: Buffer.from(value).toString("base64"),
@@ -71,7 +77,7 @@ describe("drivers: github writes", () => {
     expect(await storage.getItem("dir/a#b.txt")).toBe(value);
     expect(await storage.hasItem("dir/a#b.txt")).toBe(true);
     expect(await storage.getKeys()).toEqual(["dir:a#b.txt"]);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
   it("updates with a fresh SHA and retains empty content across tree refreshes", async () => {
@@ -109,6 +115,7 @@ describe("drivers: github writes", () => {
     reply({});
     reply({ tree: [blob("b", "kept")] });
     reply({}, 404);
+    reply({ tree: [blob("b", "kept")] });
 
     await storage.removeItem("a");
 
@@ -122,8 +129,17 @@ describe("drivers: github writes", () => {
     expect(await storage.getKeys()).toEqual(["b"]);
     await storage.removeItem("a");
     expect(fetchMock.mock.calls.map(([, init]) => init?.method || "GET").join(" ")).toBe(
-      "GET GET DELETE GET GET",
+      "GET GET DELETE GET GET GET",
     );
+  });
+
+  it("propagates a 404 when the repository or branch is inaccessible", async () => {
+    const storage = storageFor();
+    reply({}, 404);
+    reply({}, 404);
+
+    await expect(storage.setItem("a", "value")).rejects.toThrow("Failed to fetch git tree");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it.each([403, 409])(
@@ -160,6 +176,12 @@ describe("drivers: github writes", () => {
   it("rejects dot segments instead of escaping the configured directory", async () => {
     const storage = storageFor();
     await expect(storage.setItem("../outside.txt", "value")).rejects.toThrow("dot segments");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects an insecure API URL before sending the token", async () => {
+    const storage = storageFor({ apiURL: "http://api.example.test" });
+    await expect(storage.setItem("a", "value")).rejects.toThrow("apiURL must use HTTPS");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

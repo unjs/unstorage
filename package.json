@@ -54,7 +54,7 @@
     "@upstash/redis": "^1.38.2",
     "@vercel/blob": "^2.8.0",
     "@vercel/functions": "^3.9.3",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "aws4fetch": "^1.0.20",
     "azurite": "^3.36.0",
     "changelogen": "^0.6.2",
@@ -83,7 +83,7 @@
     "typescript": "^7.0.2",
     "uploadthing": "^7.7.4",
     "vite": "^8.2.1",
-    "vitest": "^4.1.11",
+    "vitest": "^5.0.0",
     "wrangler": "^4.124.0"
   },
   "packageManager": "pnpm@11.22.0"

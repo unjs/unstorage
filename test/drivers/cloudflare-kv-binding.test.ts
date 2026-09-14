@@ -7,9 +7,9 @@ import { getPlatformProxy } from "wrangler";
 
 describe("drivers: cloudflare-kv", async () => {
   const cfProxy = await getPlatformProxy({ persist: false });
-  (globalThis as any).__env__ = cfProxy.env;
+  (globalThis as any).STORAGE = cfProxy.env.STORAGE;
   afterAll(async () => {
-    (globalThis as any).__env__ = undefined;
+    (globalThis as any).STORAGE = undefined;
     await cfProxy.dispose();
   });
   testDriver({

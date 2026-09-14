@@ -6,9 +6,7 @@ export function getBinding(binding: KVNamespace | R2Bucket | string): KVNamespac
 
   if (typeof binding === "string") {
     bindingName = binding;
-    binding = ((globalThis as any)[bindingName] || (globalThis as any).__env__?.[bindingName]) as
-      | KVNamespace
-      | R2Bucket;
+    binding = (globalThis as any)[bindingName] as KVNamespace | R2Bucket;
   }
 
   if (!binding) {

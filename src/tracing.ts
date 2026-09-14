@@ -133,7 +133,10 @@ export function withTracing<T extends StorageValue>(storage: MaybeTracedStorage<
       return normalizer(typeof i === "string" ? i : i.key);
     };
 
-    return Array.isArray(keyArg) ? keyArg.map((i) => getKeyValue(i)) : [getKeyValue(keyArg)];
+    return Array.isArray(keyArg)
+      ? keyArg.map((i) => getKeyValue(i))
+      : // `Array.isArray` does not narrow out the readonly array accepted by `getItems`
+        [getKeyValue(keyArg as string | { key: string })];
   };
 
   function wrapOperation<

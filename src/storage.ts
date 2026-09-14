@@ -221,7 +221,7 @@ export function createStorage<T extends StorageValue>(
     async setItems(items, commonOptions) {
       await runBatch(items, commonOptions, async (batch) => {
         if (batch.driver.setItems) {
-          return asyncCall(
+          await asyncCall(
             batch.driver.setItems,
             batch.items.map((item) => ({
               key: item.relativeKey,
@@ -230,20 +230,39 @@ export function createStorage<T extends StorageValue>(
             })),
             commonOptions,
           );
-        }
-        if (!batch.driver.setItem) {
+        } else if (batch.driver.setItem) {
+          // A rejected sibling write must not suppress the events for the
+          // writes that did land: those values are in the driver either way.
+          const results = await Promise.allSettled(
+            batch.items.map((item) => {
+              return asyncCall(
+                batch.driver.setItem!,
+                item.relativeKey,
+                stringify(item.value),
+                item.options,
+              );
+            }),
+          );
+          if (!batch.driver.watch) {
+            for (const [index, item] of batch.items.entries()) {
+              if (results[index]?.status === "fulfilled") {
+                onChange("update", item.key);
+              }
+            }
+          }
+          const rejected = results.find((r) => r.status === "rejected");
+          if (rejected) {
+            throw (rejected as PromiseRejectedResult).reason;
+          }
           return;
+        } else {
+          return; // Readonly
         }
-        await Promise.all(
-          batch.items.map((item) => {
-            return asyncCall(
-              batch.driver.setItem!,
-              item.relativeKey,
-              stringify(item.value),
-              item.options,
-            );
-          }),
-        );
+        if (!batch.driver.watch) {
+          for (const item of batch.items) {
+            onChange("update", item.key);
+          }
+        }
       });
     },
     async setItemRaw(key, value, opts = {}) {

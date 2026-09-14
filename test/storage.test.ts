@@ -74,6 +74,75 @@ describe("storage", () => {
     expect(onChange).toHaveBeenCalledTimes(2);
   });
 
+  it("watch: setItems", async () => {
+    const onChange = vi.fn();
+    const storage = createStorage().mount("/mnt", memory());
+    await storage.watch(onChange);
+    await storage.setItems([
+      { key: "mnt:etc:conf", value: "test" },
+      { key: "mnt:data:foo", value: "123" },
+    ]);
+    expect(onChange).toHaveBeenCalledWith("update", "mnt:etc:conf");
+    expect(onChange).toHaveBeenCalledWith("update", "mnt:data:foo");
+    expect(onChange).toHaveBeenCalledTimes(2);
+  });
+
+  it("watch: setItems with a driver implementing setItems", async () => {
+    const onChange = vi.fn();
+    const store = new Map<string, any>();
+    const setItems = vi.fn((items: { key: string; value: any }[]) => {
+      for (const item of items) {
+        store.set(item.key, item.value);
+      }
+    });
+    const storage = createStorage().mount("/mnt", {
+      name: "batch-memory",
+      hasItem: (key) => store.has(key),
+      getItem: (key) => store.get(key) ?? null,
+      getKeys: () => [...store.keys()],
+      // Present so the driver is not read-only, and fatal so a regression
+      // that routes a batch through the per-item path cannot pass by writing
+      // the same value and emitting the same event.
+      setItem: () => {
+        throw new Error("setItem must not be used when setItems exists");
+      },
+      setItems,
+    });
+    await storage.watch(onChange);
+    await storage.setItems([{ key: "mnt:data:foo", value: 123 }]);
+    expect(setItems).toHaveBeenCalledTimes(1);
+    expect(store.get("data:foo")).toBe("123");
+    expect(onChange).toHaveBeenCalledWith("update", "mnt:data:foo");
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("watch: setItems emits for writes that landed when a sibling write fails", async () => {
+    const onChange = vi.fn();
+    const store = new Map<string, any>();
+    const storage = createStorage().mount("/mnt", {
+      name: "per-item-memory",
+      hasItem: (key) => store.has(key),
+      getItem: (key) => store.get(key) ?? null,
+      getKeys: () => [...store.keys()],
+      setItem: (key, value) => {
+        if (key === "data:bad") {
+          throw new Error("nope");
+        }
+        store.set(key, value);
+      },
+    });
+    await storage.watch(onChange);
+    await expect(
+      storage.setItems([
+        { key: "mnt:data:good", value: 1 },
+        { key: "mnt:data:bad", value: 2 },
+      ]),
+    ).rejects.toThrow("nope");
+    expect(store.get("data:good")).toBe("1");
+    expect(onChange).toHaveBeenCalledWith("update", "mnt:data:good");
+    expect(onChange).not.toHaveBeenCalledWith("update", "mnt:data:bad");
+  });
+
   it("unwatch return", async () => {
     const onChange = vi.fn();
     const storage = createStorage().mount("/mnt", memory());

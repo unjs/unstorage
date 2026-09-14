@@ -1,15 +1,19 @@
 /// <reference types="@cloudflare/workers-types" />
-import { describe, test, expect, afterAll } from "vitest";
+import { describe, test, expect, afterAll, vi } from "vitest";
 import { createStorage, snapshot } from "../../src/index.ts";
 import CloudflareR2Binding from "../../src/drivers/cloudflare-r2-binding.ts";
 import { testDriver } from "./utils.ts";
 import { getPlatformProxy } from "wrangler";
 
+// Resolve the binding by name through the `cloudflare:workers` builtin module
+const env = vi.hoisted(() => ({}) as Record<string, unknown>);
+vi.mock("cloudflare:workers", () => ({ env }));
+
 describe("drivers: cloudflare-r2-binding", async () => {
   const cfProxy = await getPlatformProxy({ persist: false });
-  (globalThis as any).BUCKET = cfProxy.env.BUCKET;
+  env.BUCKET = cfProxy.env.BUCKET;
   afterAll(async () => {
-    (globalThis as any).BUCKET = undefined;
+    delete env.BUCKET;
     await cfProxy.dispose();
   });
 

@@ -1,14 +1,30 @@
 import type { KVNamespace, R2Bucket } from "@cloudflare/workers-types";
 import { createError } from "./index.ts";
 
-export function getBinding(binding: KVNamespace | R2Bucket | string): KVNamespace | R2Bucket {
-  let bindingName = "[binding]";
+type Binding = KVNamespace | R2Bucket;
 
-  if (typeof binding === "string") {
-    bindingName = binding;
-    binding = (globalThis as any)[bindingName] as KVNamespace | R2Bucket;
+let _env: Promise<Record<string, unknown> | undefined> | undefined;
+
+/**
+ * Lazily import `env` from the `cloudflare:workers` builtin module.
+ *
+ * Resolves to `undefined` outside of Cloudflare Workers.
+ */
+function importEnv(): Promise<Record<string, unknown> | undefined> {
+  return (_env ??= import("cloudflare:workers").then(
+    (m) => m.env as unknown as Record<string, unknown>,
+    () => undefined,
+  ));
+}
+
+export function getBinding<T extends Binding>(binding: T | string): T | Promise<T> {
+  if (typeof binding !== "string") {
+    return validateBinding(binding, "[binding]");
   }
+  return importEnv().then((env) => validateBinding(env?.[binding] as T, binding));
+}
 
+function validateBinding<T extends Binding>(binding: T | undefined, bindingName: string): T {
   if (!binding) {
     throw createError("cloudflare", `Invalid binding \`${bindingName}\`: \`${binding}\``);
   }
@@ -25,10 +41,12 @@ export function getBinding(binding: KVNamespace | R2Bucket | string): KVNamespac
   return binding;
 }
 
-export function getKVBinding(binding: KVNamespace | string = "STORAGE") {
-  return getBinding(binding) as KVNamespace;
+export function getKVBinding(
+  binding: KVNamespace | string = "STORAGE",
+): KVNamespace | Promise<KVNamespace> {
+  return getBinding(binding);
 }
 
-export function getR2Binding(binding: R2Bucket | string = "BUCKET") {
-  return getBinding(binding) as R2Bucket;
+export function getR2Binding(binding: R2Bucket | string = "BUCKET"): R2Bucket | Promise<R2Bucket> {
+  return getBinding(binding);
 }

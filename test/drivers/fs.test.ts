@@ -24,6 +24,12 @@ describe("drivers: fs", () => {
         await ctx.storage.setItem("inplace:key", "overwritten");
         expect((await stat(filePath)).ino).toBe(before);
       });
+      it("throws ENOTDIR when a key prefix is an existing file", async () => {
+        await ctx.storage.setItem("conflict", "value");
+        await expect(ctx.storage.setItem("conflict:child", "value")).rejects.toThrow(
+          /ENOTDIR/,
+        );
+      });
       it("native meta", async () => {
         await ctx.storage.setItem("s1:a", "test_data");
         const meta = await ctx.storage.getMeta("/s1/a");

@@ -47,6 +47,7 @@
     "@libsql/client": "^0.17.4",
     "@netlify/blobs": "^11",
     "@planetscale/database": "^1.20.1",
+    "@tauri-apps/plugin-store": "^2.4.4",
     "@types/deno": "^2.7.0",
     "@types/ioredis-mock": "^8.2.8",
     "@types/jsdom": "^30.0.0",

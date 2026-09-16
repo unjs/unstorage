@@ -6,7 +6,7 @@ import {
   type DriverDependencies,
 } from "./utils/index.ts";
 import { type AzureIdentityOptions, createDefaultAzureCredential } from "./utils/azure.ts";
-import type { Container } from "@azure/cosmos";
+import type { Container, CosmosClient as CosmosClientType } from "@azure/cosmos";
 
 export interface AzureCosmosOptions extends AzureIdentityOptions {
   /**
@@ -64,6 +64,7 @@ export interface AzureCosmosItem {
 
 const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => {
   let client: Promise<Container> | undefined;
+  let cosmosClient: CosmosClientType | undefined;
   const getCosmosClient = () =>
     (client ??= (async () => {
       if (!opts.endpoint) {
@@ -75,7 +76,7 @@ const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => 
         opts.lib,
         () => import("@azure/cosmos"),
       );
-      const cosmosClient = opts.accountKey
+      cosmosClient = opts.accountKey
         ? new CosmosClient({ endpoint: opts.endpoint, key: opts.accountKey })
         : new CosmosClient({
             endpoint: opts.endpoint,
@@ -141,6 +142,16 @@ const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => 
         )
           .item(item.id)
           .delete<AzureCosmosItem>({ consistencyLevel: "Session" });
+      }
+    },
+    async dispose() {
+      if (client) {
+        // Wait for any pending connection attempt to settle before disposing it
+        await client.catch(() => {});
+        client = undefined;
+        // Clears the background endpoint refresher kept alive by the client
+        cosmosClient?.dispose();
+        cosmosClient = undefined;
       }
     },
   };

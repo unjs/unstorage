@@ -85,8 +85,8 @@ export async function ensuredir(dir: string): Promise<void> {
     // a previous setItem with a key that is a prefix of the current key
     // (e.g. key "foo" then "foo/bar"). Report a clear error instead of
     // letting the subsequent mkdir/write fail with a confusing ENOTDIR.
-    const stat = await stat(dir);
-    if (stat && !stat.isDirectory()) {
+    const dirStat = await stat(dir);
+    if (dirStat && !dirStat.isDirectory()) {
       const err: any = new Error(
         `ENOTDIR: path is a file, not a directory, mkdir '${dir}'`,
       );

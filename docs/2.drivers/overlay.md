@@ -4,27 +4,40 @@ icon: carbon:overlay
 
 # Overlay
 
-This is a special driver that creates a multi-layer overlay driver.
+> Add a writable layer over one or more fallback drivers.
 
-All write operations happen on the top level layer while values are read from all layers.
+The overlay reads layers in order and returns the first matching value. All writes go to the first layer, so lower layers remain unchanged.
 
-When removing a key, a special value `__OVERLAY_REMOVED__` will be set on the top level layer internally.
-
-## Usage
-
-**Driver name:** `overlay`
-
-In the example below, we create an in-memory overlay on top of fs. No changes will be actually written to the disk when setting new keys.
-
-```js
+```ts
 import { createStorage } from "unstorage";
-import overlay from "unstorage/drivers/overlay";
-import memory from "unstorage/drivers/memory";
-import fs from "unstorage/drivers/fs";
+import fsDriver from "unstorage/drivers/fs";
+import memoryDriver from "unstorage/drivers/memory";
+import overlayDriver from "unstorage/drivers/overlay";
 
 const storage = createStorage({
-  driver: overlay({
-    layers: [memory(), fs({ base: "./data" })],
+  driver: overlayDriver({
+    layers: [
+      memoryDriver(), // writable top layer
+      fsDriver({ base: "./data" }), // read-only through the overlay
+    ],
   }),
 });
 ```
+
+Setting a value only changes the memory layer. Removing a key writes an internal tombstone to the first layer so a value with the same key in a lower layer stays hidden.
+
+```ts
+await storage.setItem("config:theme", "dark");
+await storage.removeItem("defaults:locale");
+```
+
+::caution
+The overlay uses the reserved string `__OVERLAY_REMOVED__` as its tombstone. Do not store that exact string as an application value in an overlay layer.
+::
+
+## Limitations
+
+- Put a writable driver first if the overlay will receive writes.
+- Native raw values, metadata, and backend watching are not implemented.
+- Clearing uses the storage fallback and writes tombstones for visible keys, which can be expensive.
+- Disposing the overlay disposes every layer.

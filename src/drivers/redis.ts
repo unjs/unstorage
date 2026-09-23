@@ -1,5 +1,11 @@
-import { type DriverFactory, joinKeys } from "./utils/index.ts";
-import { Cluster, Redis } from "ioredis";
+import {
+  type DriverFactory,
+  importLib,
+  joinKeys,
+  type LibImport,
+  type DriverDependencies,
+} from "./utils/index.ts";
+import type { Cluster, Redis } from "ioredis";
 import pkg from "../../package.json" with { type: "json" };
 
 import type { ClusterOptions, ClusterNode, RedisOptions as _RedisOptions } from "ioredis";
@@ -45,6 +51,12 @@ export interface RedisOptions extends _RedisOptions {
   preConnect?: boolean;
 
   /**
+   * Optionally provide the [`ioredis`](https://www.npmjs.com/package/ioredis) library
+   * to avoid dynamically importing it.
+   */
+  lib?: LibImport<typeof import("ioredis")>;
+
+  /**
    * Tag to append to the library name in CLIENT SETINFO (ioredis(tag)).
    * This helps identify the higher-level library using ioredis.
    * @link https://redis.io/docs/latest/commands/client-setinfo/
@@ -52,6 +64,10 @@ export interface RedisOptions extends _RedisOptions {
    */
   clientInfoTag?: string;
 }
+
+export const DRIVER_DEPENDENCIES: DriverDependencies = {
+  lib: { name: "ioredis", version: "^5.9.3 || ^6" },
+};
 
 const DRIVER_NAME = "redis";
 
@@ -66,50 +82,43 @@ function getDefaultClientInfoTag(): string {
   return "unstorage";
 }
 
-const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts: RedisOptions) => {
-  let redisClient: Redis | Cluster;
-  const getRedisClient = () => {
-    if (redisClient) {
-      return redisClient;
-    }
+const driver: DriverFactory<RedisOptions, Promise<Redis | Cluster>> = (opts) => {
+  let redisClient: Promise<Redis | Cluster> | undefined;
+  const getRedisClient = () =>
+    (redisClient ??= (async () => {
+      const { Redis } = await importLib(DRIVER_NAME, "ioredis", opts.lib, () => import("ioredis"));
 
-    // Set default clientInfoTag to "unstorage_vX.X.X" if not explicitly set
-    const options = {
-      ...opts,
-      clientInfoTag: opts.clientInfoTag ?? getDefaultClientInfoTag(),
-    };
-
-    if (options.cluster) {
-      const clusterOptions = {
-        ...options.clusterOptions,
-        redisOptions: {
-          ...options.clusterOptions?.redisOptions,
-          clientInfoTag: options.clientInfoTag,
-        },
+      // Set default clientInfoTag to "unstorage_vX.X.X" if not explicitly set
+      const options = {
+        ...opts,
+        clientInfoTag: opts.clientInfoTag ?? getDefaultClientInfoTag(),
       };
-      redisClient = new Redis.Cluster(options.cluster, clusterOptions);
-    } else if (options.url) {
-      redisClient = new Redis(options.url, options);
-    } else {
-      redisClient = new Redis(options);
-    }
-    return redisClient;
-  };
+
+      if (options.cluster) {
+        const clusterOptions = {
+          ...options.clusterOptions,
+          redisOptions: {
+            ...options.clusterOptions?.redisOptions,
+            clientInfoTag: options.clientInfoTag,
+          },
+        };
+        return new Redis.Cluster(options.cluster, clusterOptions);
+      }
+      return options.url ? new Redis(options.url, options) : new Redis(options);
+    })());
 
   const base = (opts.base || "").replace(/:$/, "");
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(`${base}:`, "") : key); // Deprefix a key
 
   if (opts.preConnect) {
-    try {
-      getRedisClient();
-    } catch (error) {
+    getRedisClient().catch((error) => {
       console.error(error);
-    }
+    });
   }
 
   const scan = async (pattern: string): Promise<string[]> => {
-    const client = getRedisClient();
+    const client = await getRedisClient();
     const keys: string[] = [];
     let cursor = "0";
     do {
@@ -127,19 +136,19 @@ const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts: RedisOptions
     options: opts,
     getInstance: getRedisClient,
     async hasItem(key) {
-      return Boolean(await getRedisClient().exists(p(key)));
+      return Boolean(await (await getRedisClient()).exists(p(key)));
     },
     async getItem(key) {
-      const value = await getRedisClient().get(p(key));
+      const value = await (await getRedisClient()).get(p(key));
       return value ?? null;
     },
     async getItemRaw(key: string) {
-      const value = await getRedisClient().getBuffer(p(key));
+      const value = await (await getRedisClient()).getBuffer(p(key));
       return value ?? null;
     },
     async getItems(items) {
       const keys = items.map((item) => p(item.key));
-      const data = await getRedisClient().mget(...keys);
+      const data = await (await getRedisClient()).mget(...keys);
 
       return keys.map((key, index) => {
         return {
@@ -151,22 +160,72 @@ const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts: RedisOptions
     async setItem(key, value, tOptions) {
       const ttl = tOptions?.ttl ?? opts.ttl;
       if (ttl) {
-        await getRedisClient().set(p(key), value, "EX", ttl);
+        await (await getRedisClient()).set(p(key), value, "EX", ttl);
       } else {
-        await getRedisClient().set(p(key), value);
+        await (await getRedisClient()).set(p(key), value);
+      }
+    },
+    async setItems(items, commonOptions) {
+      if (items.length === 0) {
+        return;
+      }
+      const client = await getRedisClient();
+      const defaultTtl = commonOptions?.ttl ?? opts.ttl;
+      const getTtl = (item: (typeof items)[number]) => item.options?.ttl ?? defaultTtl;
+
+      // In cluster mode both `MSET` and pipelines require all keys to hash to the
+      // same slot, so send individual `SET` commands (mirroring `setItem`).
+      if (opts.cluster) {
+        await Promise.all(
+          items.map((item) => {
+            const ttl = getTtl(item);
+            return ttl
+              ? client.set(p(item.key), item.value, "EX", ttl)
+              : client.set(p(item.key), item.value);
+          }),
+        );
+        return;
+      }
+
+      // `MSET` cannot set a per-key TTL, so fall back to a pipeline of
+      // `SET ... EX` (mirroring `setItem`) whenever a TTL applies; otherwise
+      // use a single `MSET` for efficiency.
+      const hasTtl = defaultTtl || items.some((item) => item.options?.ttl);
+      if (hasTtl) {
+        const pipeline = client.pipeline();
+        for (const item of items) {
+          const ttl = getTtl(item);
+          if (ttl) {
+            pipeline.set(p(item.key), item.value, "EX", ttl);
+          } else {
+            pipeline.set(p(item.key), item.value);
+          }
+        }
+        // Pipelines resolve with per-command errors instead of rejecting.
+        const results = await pipeline.exec();
+        const error = results?.find(([error]) => error)?.[0];
+        if (error) {
+          throw error;
+        }
+      } else {
+        const args: string[] = [];
+        for (const item of items) {
+          args.push(p(item.key), item.value);
+        }
+        await client.mset(...args);
       }
     },
     async setItemRaw(key, value, tOptions) {
       const _value = normalizeValue(value);
       const ttl = tOptions?.ttl ?? opts.ttl;
       if (ttl) {
-        await getRedisClient().set(p(key), _value, "EX", ttl);
+        await (await getRedisClient()).set(p(key), _value, "EX", ttl);
       } else {
-        await getRedisClient().set(p(key), _value);
+        await (await getRedisClient()).set(p(key), _value);
       }
     },
     async removeItem(key) {
-      await getRedisClient().unlink(p(key));
+      await (await getRedisClient()).unlink(p(key));
     },
     async getKeys(base) {
       const keys = await scan(p(base, "*"));
@@ -177,10 +236,10 @@ const driver: DriverFactory<RedisOptions, Redis | Cluster> = (opts: RedisOptions
       if (keys.length === 0) {
         return;
       }
-      await getRedisClient().unlink(keys);
+      await (await getRedisClient()).unlink(keys);
     },
-    dispose() {
-      return getRedisClient().disconnect();
+    async dispose() {
+      (await getRedisClient()).disconnect();
     },
   };
 };
@@ -191,7 +250,7 @@ function normalizeValue(value: unknown): Buffer | string | number {
     return value as string | number;
   }
   if (Buffer.isBuffer(value)) {
-    return value;
+    return value as Buffer;
   }
   if (isTypedArray(value)) {
     if (Buffer.copyBytesFrom) {

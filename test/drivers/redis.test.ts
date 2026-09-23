@@ -40,21 +40,39 @@ describe("drivers: redis", () => {
         await client.disconnect();
       });
 
-      it("sets default clientInfoTag with version", () => {
-        const instance = ctx.driver.getInstance?.();
+      it("setItems with ttl sets each key with an expiry", async () => {
+        await ctx.storage.setItems(
+          [
+            { key: "s6:a", value: "a" },
+            { key: "s6:b", value: "b" },
+          ],
+          { ttl: 1000 },
+        );
+
+        const client = new (ioredisMock as any).default("ioredis://localhost:6379/0");
+
+        expect(await client.get("test:s6:a")).toBe("a");
+        expect(await client.get("test:s6:b")).toBe("b");
+        expect(await client.ttl("test:s6:a")).toBeGreaterThan(0);
+
+        await client.disconnect();
+      });
+
+      it("sets default clientInfoTag with version", async () => {
+        const instance = await ctx.driver.getInstance?.();
         const tag = (instance?.options as any)?.clientInfoTag;
         // Should be either "unstorage_vX.X.X" or "unstorage" (fallback)
         expect(tag).toMatch(/^unstorage(_v[\d.]+.*)?$/);
       });
 
-      it("allows custom clientInfoTag", () => {
+      it("allows custom clientInfoTag", async () => {
         const customDriver = redisDriver({
           base: "test:",
           url: "ioredis://localhost:6379/0",
           lazyConnect: false,
           clientInfoTag: "my-custom-app",
         });
-        const instance = customDriver.getInstance?.();
+        const instance = await customDriver.getInstance?.();
         expect((instance?.options as any)?.clientInfoTag).toBe("my-custom-app");
       });
     },

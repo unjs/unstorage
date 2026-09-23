@@ -1,15 +1,19 @@
 /// <reference types="@cloudflare/workers-types" />
-import { describe, expect, test, afterAll } from "vitest";
+import { describe, expect, test, afterAll, vi } from "vitest";
 import { createStorage, snapshot } from "../../src/index.ts";
 import CloudflareKVBinding from "../../src/drivers/cloudflare-kv-binding.ts";
 import { testDriver } from "./utils.ts";
 import { getPlatformProxy } from "wrangler";
 
+// Resolve the binding by name through the `cloudflare:workers` builtin module
+const env = vi.hoisted(() => ({}) as Record<string, unknown>);
+vi.mock("cloudflare:workers", () => ({ env }));
+
 describe("drivers: cloudflare-kv", async () => {
-  const cfProxy = await getPlatformProxy();
-  (globalThis as any).__env__ = cfProxy.env;
+  const cfProxy = await getPlatformProxy({ persist: false });
+  env.STORAGE = cfProxy.env.STORAGE;
   afterAll(async () => {
-    (globalThis as any).__env__ = undefined;
+    delete env.STORAGE;
     await cfProxy.dispose();
   });
   testDriver({

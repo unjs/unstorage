@@ -1,8 +1,17 @@
 packages: []
+allowBuilds:
+  esbuild: false
+  mongodb-memory-server: false
+  msgpackr-extract: false
+  workerd: false
 ignoredBuiltDependencies:
   - "@parcel/watcher"
   - "@tailwindcss/oxide"
   - esbuild
   - vue-demi
+minimumReleaseAgeExclude:
+  - "@electric-sql/pglite@0.5.5"
+  - miniflare@5.20260811.1-alpha
+  - wrangler@4.123.0
 onlyBuiltDependencies:
   - better-sqlite3

@@ -11,16 +11,14 @@ Learn more about UploadThing.
 ::
 
 ::warning
-UploadThing support is currently experimental!
-<br>
-There is a known issue that same key, if deleted cannot be used again [tracker issue](https://github.com/pingdotgg/uploadthing/issues/948).
+UploadThing support is experimental. A deleted key currently cannot be reused; follow the [upstream issue](https://github.com/pingdotgg/uploadthing/issues/948) for updates.
 ::
 
 ## Usage
 
 **Driver name:** `uploadthing`
 
-To use, you will need to install `uploadthing` dependency in your project:
+Install the `uploadthing` dependency:
 
 :pm-install{name="uploadthing"}
 
@@ -37,4 +35,6 @@ const storage = createStorage({
 
 **Options:**
 
-- `token`: Your UploadThing API key. Will be automatically inferred from the `UPLOADTHING_SECRET` environment variable if not provided.
+- `token`: UploadThing API token. When omitted, UploadThing uses its supported environment configuration.
+- `base`: Optional prefix for all keys.
+- `lib`: An imported `uploadthing/server` module or a function that returns it.

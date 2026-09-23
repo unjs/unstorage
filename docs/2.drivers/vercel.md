@@ -24,7 +24,7 @@ const storage = createStorage({
   driver: vercelRuntimeCacheDriver({
     // base: "app",
     // ttl: 60, // seconds
-    // tags: ["v1"],
+    tags: ["v1"],
   }),
 });
 ```
@@ -56,18 +56,19 @@ await storage.setItem("user:123", JSON.stringify({ name: "Ana" }), {
 **To expire by tags:**
 
 ```js
-await storage.clear("", { tags: ["user:123"] });
+await storage.clear();
 ```
 
 ### Limitations
 
 - `getKeys`: The runtime cache API does not support listing keys; this returns `[]`.
-- `clear`: The runtime cache API does not support clearing by base; only tag-based expiration is supported.
+- `clear`: The runtime cache API does not support clearing by base. It expires the default `tags` configured on the driver; per-call clear options are not supported.
 - Metadata: Runtime cache does not expose metadata; `getMeta` is not implemented.
 - Persistence: This is not a persistent store; it’s intended for request-time caching inside Vercel Functions.
 
-> [!NOTE]
-> The Unstorage driver does not hash keys by default. To replicate the same behavior in `@vercel/functions` when using `getCache`, set the `keyHashFunction: (key) => key` option.
+::note
+The unstorage driver does not hash keys by default. To reproduce that behavior when calling `getCache` from `@vercel/functions` directly, set `keyHashFunction: (key) => key`.
+::
 
 ## Vercel Blob
 
@@ -125,5 +126,5 @@ const storage = createStorage({
 
 - `access`: Whether the blob should be publicly or privately accessible. Must be `"public"` or `"private"`.
 - `base`: Prefix to prepend to all keys. Can be used for namespacing.
-- `token`: Rest API token to use for connecting to your Vercel Blob store. If not provided, it will be read from the environment variable `BLOB_READ_WRITE_TOKEN`.
+- `token`: REST API token for the Vercel Blob store. When omitted, it is read from `BLOB_READ_WRITE_TOKEN`.
 - `envPrefix`: Prefix to use for token environment variable name. Default is `BLOB` (env name = `BLOB_READ_WRITE_TOKEN`).

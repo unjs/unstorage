@@ -6,6 +6,7 @@ import {
   type DriverDependencies,
 } from "./utils/index.ts";
 import type { Cluster, Redis } from "ioredis";
+import pkg from "../../package.json" with { type: "json" };
 
 import type { ClusterOptions, ClusterNode, RedisOptions as _RedisOptions } from "ioredis";
 
@@ -54,6 +55,14 @@ export interface RedisOptions extends _RedisOptions {
    * to avoid dynamically importing it.
    */
   lib?: LibImport<typeof import("ioredis")>;
+
+  /**
+   * Tag to append to the library name in CLIENT SETINFO (ioredis(tag)).
+   * This helps identify the higher-level library using ioredis.
+   * @link https://redis.io/docs/latest/commands/client-setinfo/
+   * @default "unstorage_vX.X.X" (with version) or "unstorage" (fallback)
+   */
+  clientInfoTag?: string;
 }
 
 export const DRIVER_DEPENDENCIES: DriverDependencies = {
@@ -62,15 +71,40 @@ export const DRIVER_DEPENDENCIES: DriverDependencies = {
 
 const DRIVER_NAME = "redis";
 
+/**
+ * Returns the default client info tag for Redis CLIENT SETINFO.
+ * Uses the package version if available, otherwise falls back to "unstorage".
+ */
+function getDefaultClientInfoTag(): string {
+  if (pkg.version) {
+    return `unstorage_v${pkg.version}`;
+  }
+  return "unstorage";
+}
+
 const driver: DriverFactory<RedisOptions, Promise<Redis | Cluster>> = (opts) => {
   let redisClient: Promise<Redis | Cluster> | undefined;
   const getRedisClient = () =>
     (redisClient ??= (async () => {
       const { Redis } = await importLib(DRIVER_NAME, "ioredis", opts.lib, () => import("ioredis"));
-      if (opts.cluster) {
-        return new Redis.Cluster(opts.cluster, opts.clusterOptions);
+
+      // Set default clientInfoTag to "unstorage_vX.X.X" if not explicitly set
+      const options = {
+        ...opts,
+        clientInfoTag: opts.clientInfoTag ?? getDefaultClientInfoTag(),
+      };
+
+      if (options.cluster) {
+        const clusterOptions = {
+          ...options.clusterOptions,
+          redisOptions: {
+            ...options.clusterOptions?.redisOptions,
+            clientInfoTag: options.clientInfoTag,
+          },
+        };
+        return new Redis.Cluster(options.cluster, clusterOptions);
       }
-      return opts.url ? new Redis(opts.url, opts) : new Redis(opts);
+      return options.url ? new Redis(options.url, options) : new Redis(options);
     })());
 
   const base = (opts.base || "").replace(/:$/, "");

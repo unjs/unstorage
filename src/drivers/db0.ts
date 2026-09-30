@@ -140,6 +140,9 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
     dispose: async () => {
       await opts.database.dispose();
     },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
+    },
   };
 };
 

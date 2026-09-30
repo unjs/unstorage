@@ -372,6 +372,9 @@ export function createStorage<T extends StorageValue>(
     async dispose() {
       await Promise.all(Object.values(context.mounts).map((driver) => dispose(driver)));
     },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
+    },
     async watch(callback) {
       await startWatch();
       context.watchListeners.push(callback);
@@ -477,7 +480,8 @@ function watch(driver: Driver, onChange: WatchCallback, base: string) {
 }
 
 async function dispose(driver: Driver) {
-  if (typeof driver.dispose === "function") {
-    await asyncCall(driver.dispose);
+  const disposeFn = driver.dispose ?? driver[Symbol.asyncDispose];
+  if (typeof disposeFn === "function") {
+    await disposeFn.call(driver);
   }
 }

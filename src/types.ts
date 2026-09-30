@@ -89,6 +89,7 @@ export interface Driver<OptionsT = any, InstanceT = any> {
   getKeys: (base: string, opts: GetKeysOptions) => MaybePromise<string[]>;
   clear?: (base: string, opts: TransactionOptions) => MaybePromise<void>;
   dispose?: () => MaybePromise<void>;
+  [Symbol.asyncDispose]?: () => MaybePromise<void>;
   watch?: (callback: WatchCallback) => MaybePromise<Unwatch>;
 }
 
@@ -169,6 +170,7 @@ export interface Storage<T extends StorageValue = StorageValue> {
   // Utils
   clear: (base?: string, opts?: TransactionOptions) => Promise<void>;
   dispose: () => Promise<void>;
+  [Symbol.asyncDispose]: () => Promise<void>;
   watch: (callback: WatchCallback) => Promise<Unwatch>;
   unwatch: () => Promise<void>;
   // Mount

@@ -67,7 +67,10 @@ const driver: DriverFactory<MongoDbOptions, Promise<Collection>> = (opts) => {
     options: opts,
     getInstance: getMongoCollection,
     async hasItem(key) {
-      const result = await (await getMongoCollection()).findOne({ key });
+      const result = await (await getMongoCollection()).findOne(
+        { key },
+        { projection: { _id: 1 } }
+      );
       return !!result;
     },
     async getItem(key) {
@@ -144,6 +147,9 @@ const driver: DriverFactory<MongoDbOptions, Promise<Collection>> = (opts) => {
         await client?.close();
         client = undefined;
       }
+    },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
     },
   };
 };

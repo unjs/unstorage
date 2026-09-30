@@ -76,7 +76,7 @@ export default {
 
 **Options:**
 
-- `binding`: KV namespace binding or a global binding name. Defaults to `STORAGE`.
+- `binding`: KV namespace binding, or the name of a binding. Defaults to `STORAGE`. Names are resolved from the Worker's bindings via `import { env } from "cloudflare:workers"`.
 - `base`: Prefixes all stored keys.
 - `minTTL`: Minimum TTL in seconds. Defaults to Cloudflare's minimum of `60`.
 
@@ -169,7 +169,7 @@ export default {
 
 **Options:**
 
-- `binding`: Bucket binding or name. Default is `BUCKET`.
+- `binding`: Bucket binding, or the name of a binding. Defaults to `BUCKET`. Names are resolved from the Worker's bindings via `import { env } from "cloudflare:workers"`.
 - `base`: Prefix all keys with base.
 
 **Transaction options:**

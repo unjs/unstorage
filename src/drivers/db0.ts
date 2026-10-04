@@ -13,6 +13,8 @@ interface ResultSchema {
 export interface DB0DriverOptions {
   database: Database;
   tableName?: string;
+  /** Automatically create the storage table before the first operation. Defaults to true. */
+  autoSetup?: boolean;
 }
 
 export const DRIVER_DEPENDENCIES: DriverDependencies = {
@@ -30,7 +32,7 @@ const driver: DriverFactory<DB0DriverOptions, Database<Connector<unknown>>> = (o
   let setupPromise: Promise<void> | undefined;
   let setupDone = false;
   const ensureTable = () => {
-    if (setupDone) {
+    if (opts.autoSetup === false || setupDone) {
       return;
     }
     if (!setupPromise) {

@@ -69,12 +69,7 @@ const driver: DriverFactory<AzureCosmosOptions, Promise<Container>> = (opts) => 
       if (!opts.endpoint) {
         throw createRequiredError(DRIVER_NAME, "endpoint");
       }
-      const { CosmosClient } = await importLib(
-        DRIVER_NAME,
-        "@azure/cosmos",
-        opts.lib,
-        () => import("@azure/cosmos"),
-      );
+      const { CosmosClient } = await importLib(DRIVER_NAME, "@azure/cosmos", opts.lib);
       const cosmosClient = opts.accountKey
         ? new CosmosClient({ endpoint: opts.endpoint, key: opts.accountKey })
         : new CosmosClient({

@@ -150,12 +150,7 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
         return _unwatch;
       }
       await ensuredir(base);
-      const { watch } = await importLib(
-        DRIVER_NAME,
-        "chokidar",
-        userOptions.lib,
-        () => import("chokidar"),
-      );
+      const { watch } = await importLib(DRIVER_NAME, "chokidar", userOptions.lib);
       await new Promise<void>((resolve, reject) => {
         const watchOptions: ChokidarOptions = {
           ignoreInitial: true,

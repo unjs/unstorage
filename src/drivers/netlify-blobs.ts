@@ -65,12 +65,7 @@ const driver: DriverFactory<NetlifyStoreOptions, Promise<Store>> = (options) => 
 
   const getClient = () =>
     (store ??= (async () => {
-      const { getStore, getDeployStore } = await importLib(
-        DRIVER_NAME,
-        "@netlify/blobs",
-        lib,
-        () => import("@netlify/blobs"),
-      );
+      const { getStore, getDeployStore } = await importLib(DRIVER_NAME, "@netlify/blobs", lib);
       if (deployScoped) {
         if (name) {
           throw createError(DRIVER_NAME, "deploy-scoped stores cannot have a name");

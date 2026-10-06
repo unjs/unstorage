@@ -56,8 +56,7 @@ const driver: DriverFactory<VercelBlobOptions, Promise<typeof blob>> = (opts) =>
   const envName = `${opts.envPrefix || "BLOB"}_READ_WRITE_TOKEN`;
 
   let _blob: Promise<typeof blob> | undefined;
-  const getBlob = () =>
-    (_blob ??= importLib(DRIVER_NAME, "@vercel/blob", opts.lib, () => import("@vercel/blob")));
+  const getBlob = () => (_blob ??= importLib(DRIVER_NAME, "@vercel/blob", opts.lib));
 
   const getToken = () => {
     const token = opts.token || globalThis.process?.env?.[envName];

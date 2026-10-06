@@ -30,20 +30,22 @@ export type LibImport<T> = T | (() => T | Promise<T>);
 /**
  * Resolve an optional (peer) library used by a driver.
  *
- * Uses the user provided `lib` when available, otherwise falls back to `load()` (a dynamic import).
+ * Uses the user provided `lib` when available, otherwise falls back to a runtime dynamic import of `name`.
+ *
+ * The fallback import specifier is intentionally not a string literal so that bundlers
+ * (rollup, rolldown, vite, esbuild, ...) do not try to eagerly resolve and bundle
+ * optional dependencies that may not be installed.
  */
 export async function importLib<T>(
   driver: string,
   name: string,
   lib: LibImport<T> | undefined,
-  // NOTE: `any` since dynamic import types of CJS libs can differ from `typeof import(...)`
-  load: () => Promise<any>,
 ): Promise<T> {
   if (lib) {
     return typeof lib === "function" ? await (lib as () => T | Promise<T>)() : lib;
   }
   try {
-    return await load();
+    return await import(/* @vite-ignore */ name);
   } catch (cause) {
     throw createError(
       driver,

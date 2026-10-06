@@ -46,12 +46,7 @@ const driver: DriverFactory<UpstashOptions, Promise<Redis>> = (options) => {
   let redisClient: Promise<Redis> | undefined;
   const getClient = () =>
     (redisClient ??= (async () => {
-      const { Redis } = await importLib(
-        DRIVER_NAME,
-        "@upstash/redis",
-        options.lib,
-        () => import("@upstash/redis"),
-      );
+      const { Redis } = await importLib(DRIVER_NAME, "@upstash/redis", options.lib);
       const url = options.url || globalThis.process?.env?.UPSTASH_REDIS_REST_URL;
       const token = options.token || globalThis.process?.env?.UPSTASH_REDIS_REST_TOKEN;
       return new Redis({ url, token, ...options } as RedisConfigNodejs);

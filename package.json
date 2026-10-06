@@ -46,7 +46,7 @@
     "@electric-sql/pglite": "^0.5.5",
     "@libsql/client": "^0.17.4",
     "@netlify/blobs": "^11",
-    "@planetscale/database": "^1.20.1",
+    "@planetscale/database": "^2.0.0",
     "@types/deno": "^2.7.0",
     "@types/ioredis-mock": "^8.2.8",
     "@types/jsdom": "^30.0.0",

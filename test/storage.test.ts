@@ -433,9 +433,44 @@ describe("get() raw value normalization", () => {
     }
   });
 
+  it("reads plain values as their text", async () => {
+    // Driver without `getItemRaw`, keeping values as-is
+    const nativeStorage = (value: any) =>
+      createStorage({
+        driver: {
+          name: "native-test",
+          hasItem: () => true,
+          getItem: () => value,
+          getKeys: () => [],
+        },
+      });
+
+    const plainValues: [unknown, string][] = [
+      [true, "true"],
+      [false, "false"],
+      [0, "0"],
+      [{ foo: "bar" }, '{"foo":"bar"}'],
+      [[1, 2], "[1,2]"],
+    ];
+    for (const [value, text] of plainValues) {
+      expect(await nativeStorage(value).getItem("key", { type: "text" })).toBe(text);
+
+      const expected = new TextEncoder().encode(text);
+      for (const storage of [rawStorage(value), nativeStorage(value)]) {
+        expect(await storage.getItem("key", { type: "bytes" })).toEqual(expected);
+
+        const blob = await storage.getItem("key", { type: "blob" });
+        expect(new Uint8Array(await blob!.arrayBuffer())).toEqual(expected);
+
+        const stream = await storage.getItem("key", { type: "stream" });
+        expect(new Uint8Array(await new Response(stream).arrayBuffer())).toEqual(expected);
+      }
+    }
+  });
+
   it("throws for unsupported values", async () => {
-    await expect(rawStorage({ foo: "bar" }).getItem("key", { type: "bytes" })).rejects.toThrow(
-      /Cannot convert `Object` to bytes/,
+    await expect(rawStorage(new Map()).getItem("key", { type: "bytes" })).rejects.toThrow(
+      /Cannot convert `Map` to bytes/,
     );
   });
 

@@ -30,6 +30,11 @@ function isPureObject(value: any) {
   return !proto || proto.isPrototypeOf(Object);
 }
 
+/** Whether `value` is a primitive, a plain object or an array. */
+function isPlainValue(value: any): boolean {
+  return isPrimitive(value) || isPureObject(value) || Array.isArray(value);
+}
+
 export function stringify(value: any): string {
   if (isPrimitive(value)) {
     return String(value);
@@ -86,7 +91,8 @@ function base64Encode(input: Uint8Array) {
  *
  * Supported inputs: `Uint8Array` (and `Buffer`), `ArrayBuffer`, `ArrayBufferView`,
  * `string`, `Blob` (and any `.arrayBuffer()` like `Response`), `ReadableStream`
- * and async iterables (Node.js streams).
+ * and async iterables (Node.js streams). Other plain values (numbers, booleans,
+ * objects and arrays) are encoded as their `stringify()` text.
  */
 export async function toBytes(value: any): Promise<Uint8Array> {
   if (typeof value === "string") {
@@ -110,6 +116,10 @@ export async function toBytes(value: any): Promise<Uint8Array> {
     typeof value?.[Symbol.asyncIterator] === "function"
   ) {
     return concatBytes(await readChunks(value));
+  }
+  if (isPlainValue(value)) {
+    // Drivers keeping values as-is are read as their text, same as `getItem(key, { type: "text" })`
+    return new TextEncoder().encode(stringify(value));
   }
   throw new TypeError(`[unstorage] Cannot convert \`${typeName(value)}\` to bytes.`);
 }
@@ -159,7 +169,7 @@ async function readChunks(value: any): Promise<Uint8Array[]> {
         if (done) {
           break;
         }
-        chunks.push(await toBytes(chunk));
+        chunks.push(await chunkToBytes(chunk));
       }
     } finally {
       // Leave the stream unlocked if reading throws mid-way
@@ -167,10 +177,18 @@ async function readChunks(value: any): Promise<Uint8Array[]> {
     }
   } else {
     for await (const chunk of value) {
-      chunks.push(await toBytes(chunk));
+      chunks.push(await chunkToBytes(chunk));
     }
   }
   return chunks;
+}
+
+/** Stream chunks must be binary or text, other values are not encoded as their text. */
+function chunkToBytes(chunk: any): Promise<Uint8Array> {
+  if (typeof chunk !== "string" && isPlainValue(chunk)) {
+    throw new TypeError(`[unstorage] Cannot convert \`${typeName(chunk)}\` to bytes.`);
+  }
+  return toBytes(chunk);
 }
 
 function concatBytes(chunks: Uint8Array[]): Uint8Array {

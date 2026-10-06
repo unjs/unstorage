@@ -41,12 +41,7 @@ const driver: DriverFactory<UploadThingOptions, Promise<UTApi>> = (opts = {}) =>
 
   const getClient = () =>
     (client ??= (async () => {
-      const { UTApi } = await importLib(
-        DRIVER_NAME,
-        "uploadthing/server",
-        opts.lib,
-        () => import("uploadthing/server"),
-      );
+      const { UTApi } = await importLib(DRIVER_NAME, "uploadthing/server", opts.lib);
       return new UTApi({
         ...opts,
         defaultKeyType: "customId",

@@ -31,12 +31,7 @@ const driver: DriverFactory<LRUDriverOptions, Promise<LRUCache<string, any, any>
   let _cache: Promise<LRUCache<string, any, any>> | undefined;
   const getCache = () =>
     (_cache ??= (async () => {
-      const { LRUCache } = await importLib(
-        DRIVER_NAME,
-        "lru-cache",
-        opts.lib,
-        () => import("lru-cache"),
-      );
+      const { LRUCache } = await importLib(DRIVER_NAME, "lru-cache", opts.lib);
       return new LRUCache({
         max: 1000,
         sizeCalculation:

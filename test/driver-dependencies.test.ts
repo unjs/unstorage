@@ -39,9 +39,9 @@ async function collectImports(
 
   const contents = await readFile(entry, "utf8");
 
-  // `importLib(<driver>, "<specifier>", <opts>.<option>, () => import("<specifier>"))`
+  // `importLib(<driver>, "<specifier>", <opts>.<option>)`
   for (const [, specifier, expression] of contents.matchAll(
-    /importLib\(\s*[\w.]+,\s*"([^"]+)",\s*([\w.?]+),/g,
+    /importLib\(\s*[\w.]+,\s*"([^"]+)",\s*([\w.?]+)\s*[,)]/g,
   )) {
     imports[optionName(expression!)] = specifier!;
   }

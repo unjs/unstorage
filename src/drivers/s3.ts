@@ -100,12 +100,7 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
       if (!options.region) {
         throw createRequiredError(DRIVER_NAME, "region");
       }
-      const { AwsClient } = await importLib(
-        DRIVER_NAME,
-        "aws4fetch",
-        options.lib,
-        () => import("aws4fetch"),
-      );
+      const { AwsClient } = await importLib(DRIVER_NAME, "aws4fetch", options.lib);
       return new AwsClient({
         service: "s3",
         accessKeyId: options.accessKeyId,

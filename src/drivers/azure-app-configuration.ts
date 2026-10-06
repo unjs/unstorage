@@ -72,7 +72,6 @@ const driver: DriverFactory<AzureAppConfigurationOptions, Promise<AppConfigurati
         DRIVER_NAME,
         "@azure/app-configuration",
         opts.lib,
-        () => import("@azure/app-configuration"),
       );
       if (opts.connectionString) {
         return new AppConfigurationClient(opts.connectionString);

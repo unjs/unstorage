@@ -86,7 +86,6 @@ const driver: DriverFactory<AzureStorageTableOptions, Promise<TableClient>> = (o
         DRIVER_NAME,
         "@azure/data-tables",
         opts.lib,
-        () => import("@azure/data-tables"),
       );
       const url = `https://${accountName}.table.core.windows.net`;
       if (accountKey) {

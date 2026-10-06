@@ -78,7 +78,7 @@ const driver: DriverFactory<RedisOptions, Promise<Redis | Cluster>> = (opts) => 
   let redisClient: Promise<Redis | Cluster> | undefined;
   const getRedisClient = () =>
     (redisClient ??= (async () => {
-      const { Redis } = await importLib(DRIVER_NAME, "ioredis", opts.lib, () => import("ioredis"));
+      const { Redis } = await importLib(DRIVER_NAME, "ioredis", opts.lib);
       if (opts.cluster) {
         return new Redis.Cluster(opts.cluster, opts.clusterOptions);
       }

@@ -52,12 +52,7 @@ const driver: DriverFactory<PlanetscaleDriverOptions, Promise<Connection>> = (op
       if (!opts.url) {
         throw createRequiredError(DRIVER_NAME, "url");
       }
-      const { connect } = await importLib(
-        DRIVER_NAME,
-        "@planetscale/database",
-        opts.lib,
-        () => import("@planetscale/database"),
-      );
+      const { connect } = await importLib(DRIVER_NAME, "@planetscale/database", opts.lib);
       // `connect` configures a connection class rather than initiating a connection
       const connection = connect({
         url: opts.url,

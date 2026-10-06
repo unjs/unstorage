@@ -106,14 +106,7 @@ function getContext(): Context {
 async function getCache(opts: VercelCacheOptions): Promise<RuntimeCache> {
   const cache =
     getContext()?.cache ||
-    (
-      await importLib(
-        DRIVER_NAME,
-        "@vercel/functions",
-        opts?.lib,
-        () => import("@vercel/functions"),
-      )
-    ).getCache?.({
+    (await importLib(DRIVER_NAME, "@vercel/functions", opts?.lib)).getCache?.({
       keyHashFunction: (key) => key,
       namespaceSeparator: ":",
     });

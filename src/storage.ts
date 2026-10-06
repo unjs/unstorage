@@ -2,6 +2,8 @@ import { destr } from "destr";
 import type {
   Storage,
   Driver,
+  GetItemOptions,
+  GetItemType,
   WatchCallback,
   Unwatch,
   StorageValue,
@@ -9,7 +11,16 @@ import type {
   TransactionOptions,
 } from "./types.ts";
 import memory from "./drivers/memory.ts";
-import { asyncCall, deserializeRaw, serializeRaw, stringify } from "./_utils.ts";
+import {
+  asyncCall,
+  BASE64_PREFIX,
+  deserializeRaw,
+  serializeRaw,
+  stringify,
+  toBlob,
+  toBytes,
+  toStream,
+} from "./_utils.ts";
 import {
   normalizeKey,
   normalizeBaseKey,
@@ -28,6 +39,84 @@ interface StorageCTX {
 
 export interface CreateStorageOptions {
   driver?: Driver;
+}
+
+/** Types that are read from the driver's raw value instead of its serialized one. */
+type RawItemType = Extract<GetItemType, "bytes" | "blob" | "stream">;
+
+function isRawType(type: unknown): type is RawItemType {
+  return type === "bytes" || type === "blob" || type === "stream";
+}
+
+/**
+ * Values written with `setItemRaw`, which `text` and `json` decode back to text.
+ *
+ * Most drivers store them base64 encoded, drivers that can hold binary keep it as-is.
+ *
+ * The `base64:` prefix is stored in-band, so a regular string starting with it is
+ * indistinguishable from a raw value. See the "Raw values" section of the guide.
+ */
+function isRawValue(value: StorageValue): boolean {
+  return typeof value === "string"
+    ? value.startsWith(BASE64_PREFIX)
+    : ArrayBuffer.isView(value) ||
+        value instanceof ArrayBuffer ||
+        value instanceof Blob ||
+        value instanceof ReadableStream;
+}
+
+/** Converts a driver value to the requested `text`/`json` type. */
+async function toValueType(
+  value: StorageValue,
+  type: GetItemType | undefined,
+): Promise<StorageValue> {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  // An explicit type never surfaces the `base64:` wrapper or a byte array. The default
+  // (no type) keeps returning raw values as-is for backwards compatibility.
+  if (type !== undefined && isRawValue(value)) {
+    value = new TextDecoder().decode(await toBytes(deserializeRaw(value)));
+  }
+
+  if (type === "text") {
+    return typeof value === "string" ? value : stringify(value);
+  }
+  // `json` is intentionally lenient (same as the default): values are stored with
+  // `stringify()` which keeps strings bare, so `JSON.parse` would throw on them.
+  return destr(value) as StorageValue;
+}
+
+/** Reads a single key from a driver and converts it to the `type` given in `opts`. */
+async function getTypedItem(
+  driver: Driver,
+  relativeKey: string,
+  opts: GetItemOptions = {},
+): Promise<StorageValue> {
+  const type = opts.type;
+
+  if (isRawType(type)) {
+    const raw = driver.getItemRaw
+      ? await asyncCall(driver.getItemRaw, relativeKey, opts)
+      : deserializeRaw(await asyncCall(driver.getItem, relativeKey, opts));
+    if (raw === null || raw === undefined) {
+      return null;
+    }
+    switch (type) {
+      case "bytes": {
+        return await toBytes(raw);
+      }
+      case "blob": {
+        return await toBlob(raw);
+      }
+      case "stream": {
+        return await toStream(raw);
+      }
+    }
+  }
+
+  return toValueType(await asyncCall(driver.getItem, relativeKey, opts), type);
 }
 
 export function createStorage<T extends StorageValue>(
@@ -157,42 +246,82 @@ export function createStorage<T extends StorageValue>(
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem(key: string, opts = {}) {
+    getItem: (key: string, opts: TransactionOptions = {}) => {
       key = normalizeKey(key);
       const { relativeKey, driver } = getMount(key);
-      return asyncCall(driver.getItem, relativeKey, opts).then(
-        (value) => destr(value) as StorageValue,
-      );
+      return getTypedItem(driver, relativeKey, opts);
     },
     getItems(
-      items: (string | { key: string; options?: TransactionOptions })[],
-      commonOptions = {},
+      items: (string | { key: string; options?: GetItemOptions })[],
+      commonOptions: GetItemOptions = {},
     ) {
-      return runBatch(items, commonOptions, (batch) => {
-        if (batch.driver.getItems) {
-          return asyncCall(
-            batch.driver.getItems,
-            batch.items.map((item) => ({
-              key: item.relativeKey,
-              options: item.options,
-            })),
-            commonOptions,
-          ).then((r) =>
-            r.map((item) => ({
-              key: joinKeys(batch.base, item.key),
-              value: destr(item.value),
+      return runBatch(items, commonOptions, async (batch) => {
+        if (!batch.driver.getItems) {
+          return Promise.all(
+            batch.items.map(async (item) => ({
+              key: item.key,
+              value: await getTypedItem(batch.driver, item.relativeKey, item.options),
             })),
           );
         }
-        return Promise.all(
-          batch.items.map((item) => {
-            return asyncCall(batch.driver.getItem, item.relativeKey, item.options).then(
-              (value) => ({
-                key: item.key,
-                value: destr(value),
+
+        // `bytes`, `blob` and `stream` read the driver's raw value, which has no batch
+        // equivalent, so they are resolved one by one alongside the batch call.
+        const rawItems = batch.items.filter((item) => isRawType(item.options?.type));
+        const plainItems =
+          rawItems.length === 0
+            ? batch.items
+            : batch.items.filter((item) => !isRawType(item.options?.type));
+
+        const [plain, raw] = await Promise.all([
+          plainItems.length === 0
+            ? []
+            : asyncCall(
+                batch.driver.getItems,
+                plainItems.map((item) => ({
+                  key: item.relativeKey,
+                  options: item.options,
+                })),
+                commonOptions,
+              ).then((r) => {
+                // Drivers are expected to return one entry per requested key, in order. Only
+                // fall back to a key lookup (and then to `commonOptions`) when they do not,
+                // otherwise a driver echoing back a normalized key would drop the type.
+                const types =
+                  r.length === plainItems.length
+                    ? undefined
+                    : new Map(plainItems.map((item) => [item.relativeKey, item.options?.type]));
+                return Promise.all(
+                  r.map(async (item, index) => ({
+                    key: joinKeys(batch.base, item.key),
+                    value: await toValueType(
+                      item.value,
+                      types
+                        ? types.has(item.key)
+                          ? types.get(item.key)
+                          : commonOptions.type
+                        : plainItems[index]!.options?.type,
+                    ),
+                  })),
+                );
               }),
-            );
-          }),
+          Promise.all(
+            rawItems.map(async (item) => ({
+              key: item.key,
+              value: await getTypedItem(batch.driver, item.relativeKey, item.options),
+            })),
+          ),
+        ]);
+
+        if (rawItems.length === 0 || plain.length !== plainItems.length) {
+          return [...plain, ...raw];
+        }
+
+        // Raw values are resolved outside of the batch call, restore the input order.
+        let plainIndex = 0;
+        let rawIndex = 0;
+        return batch.items.map((item) =>
+          isRawType(item.options?.type) ? raw[rawIndex++]! : plain[plainIndex++]!,
         );
       });
     },
@@ -439,7 +568,7 @@ export function createStorage<T extends StorageValue>(
     },
     // Aliases
     keys: (base, opts = {}) => storage.getKeys(base, opts),
-    get: (key: string, opts = {}) => storage.getItem(key, opts),
+    get: (key: string, opts: TransactionOptions = {}) => storage.getItem(key, opts),
     set: (key: string, value: T, opts = {}) => storage.setItem(key, value, opts),
     has: (key: string, opts = {}) => storage.hasItem(key, opts),
     del: (key: string, opts = {}) => storage.removeItem(key, opts),

@@ -30,7 +30,8 @@ export type LibImport<T> = T | (() => T | Promise<T>);
 /**
  * Resolve an optional (peer) library used by a driver.
  *
- * Uses the user provided `lib` when available, otherwise falls back to a runtime dynamic import of `name`.
+ * Uses the user provided `lib` when available, otherwise falls back to a runtime dynamic import of
+ * `name`, resolved from the current working directory first and then from unstorage itself.
  *
  * The fallback import specifier is intentionally not a string literal so that bundlers
  * (rollup, rolldown, vite, esbuild, ...) do not try to eagerly resolve and bundle
@@ -45,13 +46,34 @@ export async function importLib<T>(
     return typeof lib === "function" ? await (lib as () => T | Promise<T>)() : lib;
   }
   try {
-    return await import(/* @vite-ignore */ name);
+    const resolved = resolveFromCwd(name);
+    return await import(/* @vite-ignore */ resolved || name);
   } catch (cause) {
     throw createError(
       driver,
       `Cannot import \`${name}\`. Make sure it is installed or provide it via the \`lib\` option.`,
       { cause },
     );
+  }
+}
+
+/**
+ * Resolve `name` from the current working directory to a `file://` URL.
+ *
+ * Returns `undefined` when not running in a Node.js compatible runtime or when `name` cannot be resolved.
+ */
+function resolveFromCwd(name: string): string | undefined {
+  const proc = globalThis.process;
+  const nodeModule = proc?.getBuiltinModule?.("node:module");
+  const nodeURL = proc?.getBuiltinModule?.("node:url");
+  if (!nodeModule?.createRequire || !nodeURL?.pathToFileURL) {
+    return;
+  }
+  try {
+    const cwdURL = nodeURL.pathToFileURL(`${proc.cwd()}/`);
+    return nodeURL.pathToFileURL(nodeModule.createRequire(cwdURL).resolve(name)).href;
+  } catch {
+    // Not resolvable from cwd
   }
 }
 

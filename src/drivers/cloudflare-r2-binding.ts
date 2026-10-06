@@ -11,11 +11,13 @@ export interface CloudflareR2Options {
 
 const DRIVER_NAME = "cloudflare-r2-binding";
 
-const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
+const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket | Promise<CF.R2Bucket>> = (
+  opts = {},
+) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   const getKeys = async (base?: string) => {
-    const binding = getR2Binding(opts.binding);
+    const binding = await getR2Binding(opts.binding);
     const kvList = await binding.list(base || opts.base ? { prefix: r(base) } : undefined);
     return kvList.objects.map((obj) => obj.key);
   };
@@ -26,12 +28,12 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
     getInstance: () => getR2Binding(opts.binding),
     async hasItem(key) {
       key = r(key);
-      const binding = getR2Binding(opts.binding);
+      const binding = await getR2Binding(opts.binding);
       return (await binding.head(key)) !== null;
     },
     async getMeta(key) {
       key = r(key);
-      const binding = getR2Binding(opts.binding);
+      const binding = await getR2Binding(opts.binding);
       const obj = await binding.head(key);
       if (!obj) return null;
       return {
@@ -40,30 +42,30 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
         ...obj,
       };
     },
-    getItem(key, topts) {
+    async getItem(key, topts) {
       key = r(key);
-      const binding = getR2Binding(opts.binding);
+      const binding = await getR2Binding(opts.binding);
       return binding.get(key, topts).then((r) => r?.text() ?? null);
     },
     async getItemRaw(key, topts) {
       key = r(key);
-      const binding = getR2Binding(opts.binding);
+      const binding = await getR2Binding(opts.binding);
       const object = await binding.get(key, topts);
       return object ? getObjBody(object as any, topts?.type) : null;
     },
     async setItem(key, value, topts) {
       key = r(key);
-      const binding = getR2Binding(opts.binding);
+      const binding = await getR2Binding(opts.binding);
       await binding.put(key, value, topts);
     },
     async setItemRaw(key, value, topts) {
       key = r(key);
-      const binding = getR2Binding(opts.binding);
+      const binding = await getR2Binding(opts.binding);
       await binding.put(key, value, topts);
     },
     async removeItem(key) {
       key = r(key);
-      const binding = getR2Binding(opts.binding);
+      const binding = await getR2Binding(opts.binding);
       await binding.delete(key);
     },
     getKeys(base) {
@@ -72,7 +74,7 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket> = (opts = {}) => {
       );
     },
     async clear(base) {
-      const binding = getR2Binding(opts.binding);
+      const binding = await getR2Binding(opts.binding);
       const keys = await getKeys(base);
       await binding.delete(keys);
     },

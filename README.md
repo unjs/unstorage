@@ -79,7 +79,7 @@ If using `unstorage` via another tool in your project:
 
 - Clone repository
 - Install dependencies with `pnpm install`
-- Use `pnpm dev` to start jest watcher verifying changes
+- Use `pnpm dev` to start vitest watcher verifying changes
 - Use `pnpm test` before pushing to ensure all tests and lint checks passing
 
 ## License

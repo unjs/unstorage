@@ -99,7 +99,7 @@ export const builtinDriverDependencies: Partial<Record<BuiltinDriverName, Driver
           `"${name}": {\n    ${Object.entries(d.dependencies!)
             .map(
               ([option, dep]) =>
-                `${option}: { name: "${dep.name}", version: "${dep.version}"${dep.optional ? ", optional: true" : ""} },`,
+                `${option}: { name: "${dep.name}"${dep.import ? `, import: "${dep.import}"` : ""}, version: "${dep.version}"${dep.optional ? ", optional: true" : ""} },`,
             )
             .join("\n    ")}\n  }`,
       ),

@@ -28,7 +28,7 @@ export interface UploadThingOptions extends UTApiOptions {
 }
 
 export const DRIVER_DEPENDENCIES: DriverDependencies = {
-  lib: { name: "uploadthing", version: "^7.7.4" },
+  lib: { name: "uploadthing", import: "uploadthing/server", version: "^7.7.4" },
 };
 
 const DRIVER_NAME = "uploadthing";
@@ -41,12 +41,7 @@ const driver: DriverFactory<UploadThingOptions, Promise<UTApi>> = (opts = {}) =>
 
   const getClient = () =>
     (client ??= (async () => {
-      const { UTApi } = await importLib(
-        DRIVER_NAME,
-        "uploadthing/server",
-        opts.lib,
-        () => import("uploadthing/server"),
-      );
+      const { UTApi } = await importLib(DRIVER_NAME, "uploadthing/server", opts.lib);
       return new UTApi({
         ...opts,
         defaultKeyType: "customId",

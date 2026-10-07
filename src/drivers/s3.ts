@@ -277,7 +277,7 @@ function deleteKeysReq(keys: string[]) {
   return `<Delete>${keys
     .map((key) => {
       // prettier-ignore
-      key = key.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      key = key.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       return /* xml */ `<Object><Key>${key}</Key></Object>`;
     })
     .join("")}</Delete>`;

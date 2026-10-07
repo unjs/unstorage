@@ -32,7 +32,7 @@ export default defineDriver((userOptions: FSStorageOptions = {}) => {
 
   const ignore = anymatch(
     userOptions.ignore || ["**/node_modules/**", "**/.git/**"],
-    undefined,
+    null,
     { dot: true }
   );
 

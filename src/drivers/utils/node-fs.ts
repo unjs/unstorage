@@ -20,7 +20,7 @@ export async function writeFile(
 }
 
 export function readFile(path: string, encoding?: BufferEncoding) {
-  return fsPromises.readFile(path, encoding).catch(ignoreNotfound);
+  return fsPromises.readFile(path, encoding ?? null).catch(ignoreNotfound);
 }
 
 export function stat(path: string) {

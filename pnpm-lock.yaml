@@ -70,8 +70,8 @@ importers:
         specifier: ^11
         version: 11.1.3
       '@planetscale/database':
-        specifier: ^2
-        version: 2.0.0
+        specifier: ^1.20.1
+        version: 1.20.2
       '@types/deno':
         specifier: ^2.7.0
         version: 2.7.0
@@ -1549,9 +1549,9 @@ packages:
     bundledDependencies:
       - napi-wasm
 
-  '@planetscale/database@2.0.0':
-    resolution: {integrity: sha512-4owd8kDhcpTFWOB1bSviUdlY5cf9T4QKLQbawQd0IUOc16UQXlIhE/ELGZ/FRjvVzXYAB/Ls4rfhlaW1DxJaEQ==}
-    engines: {node: '>=22'}
+  '@planetscale/database@1.20.2':
+    resolution: {integrity: sha512-9WB0tgq+CAYuwpI9dvUY3AbudjLSsbJYiqhd9FxKnVkBLgzAo8/ik3OPkbT9JdUcoRKU4B9AFQF2K8lafsTgfA==}
+    engines: {node: '>=16'}
 
   '@poppinss/colors@4.1.6':
     resolution: {integrity: sha512-H9xkIdFswbS8n1d6vmRd8+c10t2Qe+rZITbbDHHkQixH5+2x1FDGmi/0K+WgWiqQFKPSlIYB7jlH6Kpfn6Fleg==}
@@ -6512,7 +6512,7 @@ snapshots:
       is-glob: 4.0.3
       picomatch: 4.0.7
 
-  '@planetscale/database@2.0.0': {}
+  '@planetscale/database@1.20.2': {}
 
   '@poppinss/colors@4.1.6':
     dependencies:

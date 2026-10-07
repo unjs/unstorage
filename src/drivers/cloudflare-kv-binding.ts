@@ -31,8 +31,7 @@ export default defineDriver((opts: KVOptions) => {
 
       keys.push(...kvList.keys);
       cursor = (kvList.list_complete ? undefined : kvList.cursor) as
-        | string
-        | undefined;
+        string | undefined;
     } while (cursor);
 
     return keys.map((key) => key.name);

@@ -88,13 +88,17 @@ export default defineDriver((opts: AzureCosmosOptions) => {
     options: opts,
     getInstance: getCosmosClient,
     async hasItem(key) {
-      const item = await (await getCosmosClient())
+      const item = await (
+        await getCosmosClient()
+      )
         .item(key)
         .read<AzureCosmosItem>();
       return item.resource ? true : false;
     },
     async getItem(key) {
-      const item = await (await getCosmosClient())
+      const item = await (
+        await getCosmosClient()
+      )
         .item(key)
         .read<AzureCosmosItem>();
       return item.resource ? item.resource.value : null;
@@ -109,7 +113,9 @@ export default defineDriver((opts: AzureCosmosOptions) => {
       );
     },
     async removeItem(key) {
-      await (await getCosmosClient())
+      await (
+        await getCosmosClient()
+      )
         .item(key)
         .delete<AzureCosmosItem>({ consistencyLevel: "Session" });
     },
@@ -120,7 +126,9 @@ export default defineDriver((opts: AzureCosmosOptions) => {
       return (await iterator.fetchAll()).resources.map((item) => item.id);
     },
     async getMeta(key) {
-      const item = await (await getCosmosClient())
+      const item = await (
+        await getCosmosClient()
+      )
         .item(key)
         .read<AzureCosmosItem>();
       return {
@@ -135,7 +143,9 @@ export default defineDriver((opts: AzureCosmosOptions) => {
       );
       const items = (await iterator.fetchAll()).resources;
       for (const item of items) {
-        await (await getCosmosClient())
+        await (
+          await getCosmosClient()
+        )
           .item(item.id)
           .delete<AzureCosmosItem>({ consistencyLevel: "Session" });
       }

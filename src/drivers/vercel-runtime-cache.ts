@@ -24,14 +24,10 @@ export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
   const base = normalizeKey(opts?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
 
-  let _cache: RuntimeCache;
+  let _fallback: RuntimeCache | undefined;
 
-  const getClient = () => {
-    if (!_cache) {
-      _cache = getCache();
-    }
-    return _cache;
-  };
+  const getClient = (): RuntimeCache =>
+    getContext()?.cache || (_fallback ??= getFallbackCache());
 
   return {
     name: DRIVER_NAME,
@@ -91,13 +87,11 @@ function getContext(): Context {
   return fromSymbol[SYMBOL_FOR_REQ_CONTEXT]?.get?.() ?? {};
 }
 
-function getCache(): RuntimeCache {
-  const cache =
-    getContext()?.cache ||
-    tryRequireVCFunctions()?.getCache?.({
-      keyHashFunction: (key) => key,
-      namespaceSeparator: ":",
-    });
+function getFallbackCache(): RuntimeCache {
+  const cache = tryRequireVCFunctions()?.getCache?.({
+    keyHashFunction: (key) => key,
+    namespaceSeparator: ":",
+  });
   if (!cache) {
     throw new Error("Runtime cache is not available!");
   }

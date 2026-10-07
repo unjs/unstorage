@@ -2,6 +2,57 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.17.5
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.17.4...v1.17.5)
+
+### 🏡 Chore
+
+- Update undocs ([a6d4235](https://github.com/unjs/unstorage/commit/a6d4235))
+- Update deps ([8cf2093](https://github.com/unjs/unstorage/commit/8cf2093))
+- Update deps (h3 and lru-cache) ([37e8958](https://github.com/unjs/unstorage/commit/37e8958))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
+## v1.17.4
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.17.3...v1.17.4)
+
+### 💅 Refactors
+
+- **fs:** Upgrade chokidar to v5 ([454a024](https://github.com/unjs/unstorage/commit/454a024))
+
+### 🏡 Chore
+
+- Lint ([667db75](https://github.com/unjs/unstorage/commit/667db75))
+- Update dependencies ([0444882](https://github.com/unjs/unstorage/commit/0444882))
+- Fix `@vercel/kv` peer dependency range ([b3dc1cf](https://github.com/unjs/unstorage/commit/b3dc1cf))
+- Update lru-cache to v11 ([b867a09](https://github.com/unjs/unstorage/commit/b867a09))
+- Update lockfile ([d6c0f2e](https://github.com/unjs/unstorage/commit/d6c0f2e))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+
+## v1.17.3
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.17.2...v1.17.3)
+
+### 📦 Build
+
+- Create `d.cts` and `d.mts` type declarations for `drivers/` ([#710](https://github.com/unjs/unstorage/pull/710))
+
+### 🏡 Chore
+
+- Update deps ([3ec1190](https://github.com/unjs/unstorage/commit/3ec1190))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Daniel Roe ([@danielroe](https://github.com/danielroe))
+
 ## v1.17.2
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.17.1...v1.17.2)

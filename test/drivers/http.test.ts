@@ -29,6 +29,7 @@ describe("drivers: http", async () => {
   });
 
   testDriver({
+    supportsCAS: true,
     driver: driver({
       base: listener!.url!,
       headers: { "x-global-header": "1" },

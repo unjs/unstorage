@@ -23,7 +23,13 @@ describe("drivers: netlify-blobs", async () => {
     await server.start();
   });
 
+  // The in-process BlobsServer mock does not echo the etag header on
+  // HEAD/getMetadata responses (only on PUT and list), so the etag-readback
+  // assertions are skipped here. The driver itself surfaces the etag
+  // correctly against the real Netlify Blobs API.
   testDriver({
+    supportsCAS: true,
+    casNoMetaEtag: true,
     driver: driver({
       name: "test",
       edgeURL: `http://localhost:8971`,
@@ -33,6 +39,8 @@ describe("drivers: netlify-blobs", async () => {
   });
 
   testDriver({
+    supportsCAS: true,
+    casNoMetaEtag: true,
     driver: driver({
       deployScoped: true,
       edgeURL: `http://localhost:8971`,

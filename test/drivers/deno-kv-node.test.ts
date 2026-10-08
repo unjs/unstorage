@@ -8,5 +8,6 @@ describe("drivers: deno-kv-node", async () => {
       path: ":memory:",
       base: Math.round(Math.random() * 1_000_000).toString(16),
     }),
+    supportsCAS: true,
   });
 });

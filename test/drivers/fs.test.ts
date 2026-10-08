@@ -12,6 +12,7 @@ describe("drivers: fs", () => {
 
   testDriver({
     driver: driver({ base: dir }),
+    supportsCAS: true,
     additionalTests(ctx) {
       it("check filesystem", async () => {
         await ctx.storage.setItem("s1:a", "test_data");
@@ -23,6 +24,19 @@ describe("drivers: fs", () => {
         const before = (await stat(filePath)).ino;
         await ctx.storage.setItem("inplace:key", "overwritten");
         expect((await stat(filePath)).ino).toBe(before);
+      });
+      it("CAS: same-size overwrites always produce a distinct etag", async () => {
+        // The etag is (mtime, size, ino); filesystem timestamp granularity can be
+        // coarser than two back-to-back writes, so this loops to catch a same-tick
+        // collision that would let a stale `ifMatch` clobber a newer value.
+        for (let i = 0; i < 50; i++) {
+          const key = `cas-etag:${i}`;
+          await ctx.storage.setItem(key, "v1");
+          const first = (await ctx.storage.getMeta(key)).etag as string;
+          const second = await ctx.storage.setItem(key, "v2", { ifMatch: first });
+          expect(second).toMatchObject({ etag: expect.any(String) });
+          expect((second as { etag: string }).etag).not.toBe(first);
+        }
       });
       it("native meta", async () => {
         await ctx.storage.setItem("s1:a", "test_data");
@@ -124,6 +138,7 @@ describe("drivers: fs (atomic)", () => {
 
   testDriver({
     driver: driver({ base: dir, atomic: true }),
+    supportsCAS: true,
     additionalTests(ctx) {
       it("reads concurrent with a write never observe a truncated value", async () => {
         const size = 256 * 1024;

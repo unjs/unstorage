@@ -17,6 +17,7 @@ describe("drivers: redis", () => {
 
   testDriver({
     driver: binaryDriver,
+    supportsCAS: true,
     additionalTests(ctx) {
       it("saves raw data as binary", async () => {
         const helloBuffer = Buffer.from("Hello, world!", "utf8");

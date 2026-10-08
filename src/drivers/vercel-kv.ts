@@ -2,7 +2,13 @@ import { createClient } from "@vercel/kv";
 import type { VercelKV } from "@vercel/kv";
 import type { RedisConfigNodejs } from "@upstash/redis";
 
-import { defineDriver, normalizeKey, joinKeys, createError } from "./utils";
+import {
+  defineDriver,
+  normalizeKey,
+  joinKeys,
+  createError,
+  escapeRedisGlob,
+} from "./utils";
 
 export interface VercelKVOptions extends Partial<RedisConfigNodejs> {
   /**
@@ -33,6 +39,11 @@ const DRIVER_NAME = "vercel-kv";
 export default defineDriver<VercelKVOptions, VercelKV>((opts) => {
   const base = normalizeKey(opts?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
+  const m = (base?: string) => {
+    // Match all keys under base (escaped so it is not interpreted as a glob)
+    const prefix = r(base || "");
+    return prefix ? `${escapeRedisGlob(prefix)}:*` : "*";
+  };
 
   let _client: VercelKV;
   const getClient = () => {
@@ -106,10 +117,10 @@ export default defineDriver<VercelKVOptions, VercelKV>((opts) => {
         .then(() => {});
     },
     getKeys(base) {
-      return scan(r(base, "*"));
+      return scan(m(base));
     },
     async clear(base) {
-      const keys = await scan(r(base, "*"));
+      const keys = await scan(m(base));
       if (keys.length === 0) {
         return;
       }

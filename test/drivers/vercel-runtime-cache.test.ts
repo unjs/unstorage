@@ -55,6 +55,26 @@ describe("drivers: vercel-runtime-cache (request context)", () => {
     );
     expect(later.delete).toHaveBeenCalledWith("test:key");
   });
+
+  it("encodes keys so they cannot escape the cache endpoint", async () => {
+    const cache = createFakeRequestCache();
+    setRequestCache(cache);
+    const storage = createStorage({ driver: vercelRuntimeCacheDriver({}) });
+
+    await storage.setItem("a#b", "x");
+    await storage.setItem("%2e%2e", "x");
+    await storage.setItem("x:.\t.", "x");
+    expect(cache.set.mock.calls.map((call) => call[0])).toEqual([
+      "a%23b",
+      "%252e%252e",
+      "x:.%09.",
+    ]);
+
+    for (const key of ["", ":", ".", ".."]) {
+      await expect(storage.removeItem(key)).rejects.toThrow("Invalid key");
+    }
+    expect(cache.delete).not.toHaveBeenCalled();
+  });
 });
 
 describe("drivers: vercel-runtime-cache", async () => {

@@ -76,6 +76,32 @@ export function encodeURLKey(
     .join("/");
 }
 
+/**
+ * Validate a key that a third-party SDK puts into a URL path *without*
+ * encoding it, so that the key can never escape its path.
+ *
+ * Throws for empty keys, `?` / `#`, and `.` / `..` segments, including the
+ * `%2e` and TAB/CR/LF spellings that URL parsers also collapse.
+ */
+export function assertURLPathKey(driver: string, key: string): string {
+  const hasDotSegment = key.split(/[/\\]|%2f|%5c/i).some((segment) => {
+    segment = segment.replace(/[\t\n\r]/g, "").replace(/%2e/gi, ".");
+    return segment === "." || segment === "..";
+  });
+  if (!key || /[?#]/.test(key) || hasDotSegment) {
+    throw createError(driver, `Invalid key: ${JSON.stringify(key)}`);
+  }
+  return key;
+}
+
+/**
+ * Escape glob special characters (`*`, `?`, `[`, `]`, `\`) so that a key
+ * prefix can be used literally in a redis `SCAN MATCH` pattern.
+ */
+export function escapeRedisGlob(pattern: string): string {
+  return pattern.replace(/[*?[\]\\]/g, String.raw`\$&`);
+}
+
 export function createError(
   driver: string,
   message: string,

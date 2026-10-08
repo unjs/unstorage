@@ -32,6 +32,17 @@ describe("drivers: redis", () => {
         await client.disconnect();
       });
 
+      it("clear(base) does not treat base as a glob", async () => {
+        await ctx.storage.setItem("s1:a", "test_data");
+        await ctx.storage.setItem("s2:a", "test_data");
+        // `storage.clear(base)` only clears whole mounts, so call the driver
+        await ctx.driver.clear!("*", {});
+        await ctx.driver.clear!("s[12]", {});
+        expect(await ctx.storage.getKeys()).toEqual(
+          expect.arrayContaining(["s1:a", "s2:a"])
+        );
+      });
+
       it("exposes instance", () => {
         expect(driver.getInstance?.()).toBeInstanceOf(ioredis.default);
       });

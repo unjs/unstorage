@@ -1,4 +1,9 @@
-import { createError, createRequiredError, defineDriver } from "./utils";
+import {
+  assertURLPathKey,
+  createError,
+  createRequiredError,
+  defineDriver,
+} from "./utils";
 import type { GetKeysOptions } from "..";
 import { getStore, getDeployStore } from "@netlify/blobs";
 import type {
@@ -68,29 +73,32 @@ export default defineDriver((options: NetlifyStoreOptions) => {
     return store;
   };
 
+  // `@netlify/blobs` puts keys into the request URL without encoding them
+  const k = (key: string) => assertURLPathKey(DRIVER_NAME, key);
+
   return {
     name: DRIVER_NAME,
     options,
     getInstance: getClient,
     async hasItem(key) {
-      return getClient().getMetadata(key).then(Boolean);
+      return getClient().getMetadata(k(key)).then(Boolean);
     },
-    getItem: (key, tops?: GetOptions) => {
+    getItem: async (key, tops?: GetOptions) => {
       // @ts-expect-error has trouble with the overloaded types
-      return getClient().get(key, tops);
+      return getClient().get(k(key), tops);
     },
-    getMeta(key) {
-      return getClient().getMetadata(key);
+    async getMeta(key) {
+      return getClient().getMetadata(k(key));
     },
-    getItemRaw(key, topts?: GetOptions) {
+    async getItemRaw(key, topts?: GetOptions) {
       // @ts-expect-error has trouble with the overloaded types
-      return getClient().get(key, { type: topts?.type ?? "arrayBuffer" });
+      return getClient().get(k(key), { type: topts?.type ?? "arrayBuffer" });
     },
     async setItem(key, value, topts?: SetOptions) {
       // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
       // TODO(serhalp): Allow drivers to return a value from `setItem`. The @netlify/blobs v10
       // functionality isn't usable without this.
-      await getClient().set(key, value, topts);
+      await getClient().set(k(key), value, topts);
     },
     async setItemRaw(
       key,
@@ -99,10 +107,10 @@ export default defineDriver((options: NetlifyStoreOptions) => {
     ) {
       // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
       // See TODO above.
-      await getClient().set(key, value, topts);
+      await getClient().set(k(key), value, topts);
     },
-    removeItem(key) {
-      return getClient().delete(key);
+    async removeItem(key) {
+      return getClient().delete(k(key));
     },
     async getKeys(
       base?: string,

@@ -1,4 +1,9 @@
-import { defineDriver, normalizeKey, joinKeys } from "./utils";
+import {
+  defineDriver,
+  normalizeKey,
+  joinKeys,
+  encodeURLSegment,
+} from "./utils";
 import type { RuntimeCache } from "@vercel/functions";
 
 export interface VercelCacheOptions {
@@ -22,7 +27,13 @@ const DRIVER_NAME = "vercel-runtime-cache";
 
 export default defineDriver<VercelCacheOptions, RuntimeCache>((opts) => {
   const base = normalizeKey(opts?.base);
-  const r = (...keys: string[]) => joinKeys(base, ...keys);
+  // The cache client puts keys into a request URL as-is, so encode them
+  // (`:` is kept readable as it is safe in a URL path segment)
+  const r = (key: string) =>
+    encodeURLSegment(DRIVER_NAME, joinKeys(base, key), key).replace(
+      /%3A/g,
+      ":"
+    );
 
   let _fallback: RuntimeCache | undefined;
 

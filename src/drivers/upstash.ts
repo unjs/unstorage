@@ -1,5 +1,5 @@
 import { type RedisConfigNodejs, Redis } from "@upstash/redis";
-import { defineDriver, normalizeKey, joinKeys } from "./utils";
+import { defineDriver, normalizeKey, joinKeys, escapeRedisGlob } from "./utils";
 
 export interface UpstashOptions extends Partial<RedisConfigNodejs> {
   /**
@@ -26,6 +26,11 @@ export default defineDriver<UpstashOptions, Redis>(
   (options: UpstashOptions = {}) => {
     const base = normalizeKey(options?.base);
     const r = (...keys: string[]) => joinKeys(base, ...keys);
+    const m = (base?: string) => {
+      // Match all keys under base (escaped so it is not interpreted as a glob)
+      const prefix = r(base || "");
+      return prefix ? `${escapeRedisGlob(prefix)}:*` : "*";
+    };
 
     let redisClient: Redis;
     const getClient = () => {
@@ -85,12 +90,12 @@ export default defineDriver<UpstashOptions, Redis>(
         await getClient().unlink(r(key));
       },
       async getKeys(_base) {
-        return await scan(r(_base, "*")).then((keys) =>
+        return await scan(m(_base)).then((keys) =>
           base ? keys.map((key) => key.slice(base.length + 1)) : keys
         );
       },
       async clear(base) {
-        const keys = await scan(r(base, "*"));
+        const keys = await scan(m(base));
         if (keys.length === 0) {
           return;
         }

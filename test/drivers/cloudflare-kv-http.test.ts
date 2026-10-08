@@ -89,6 +89,26 @@ describe("drivers: cloudflare-kv-http (key encoding)", async () => {
     });
   }
 
+  it("rejects empty keys when base is set", async () => {
+    requests.length = 0;
+    const storage = createStorage({
+      driver: cfKvHttpDriver({
+        accountId: "acc",
+        namespaceId: "ns",
+        apiToken: "token",
+        apiURL: `http://localhost:${(server.address() as AddressInfo).port}`,
+        base: "app",
+      }),
+    });
+    await storage.removeItem("a");
+    for (const key of ["", ":", "/"]) {
+      await expect(storage.removeItem(key)).rejects.toThrow("Invalid key");
+    }
+    expect(requests).toEqual([
+      { method: "DELETE", url: `${nsPath}/values/app%3Aa` },
+    ]);
+  });
+
   it("does not let raw driver keys escape /values/", async () => {
     requests.length = 0;
     const driver = cfKvHttpDriver({

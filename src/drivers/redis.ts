@@ -1,4 +1,4 @@
-import { defineDriver, joinKeys } from "./utils";
+import { defineDriver, escapeRedisGlob, joinKeys } from "./utils";
 // TODO: use named import in v2
 import Redis, {
   Cluster,
@@ -69,6 +69,11 @@ export default defineDriver((opts: RedisOptions) => {
   const base = (opts.base || "").replace(/:$/, "");
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(`${base}:`, "") : key); // Deprefix a key
+  const m = (base?: string) => {
+    // Match all keys under base (escaped so it is not interpreted as a glob)
+    const prefix = p(base || "");
+    return prefix ? `${escapeRedisGlob(prefix)}:*` : "*";
+  };
 
   if (opts.preConnect) {
     try {
@@ -126,11 +131,11 @@ export default defineDriver((opts: RedisOptions) => {
       await getRedisClient().unlink(p(key));
     },
     async getKeys(base) {
-      const keys = await scan(p(base, "*"));
+      const keys = await scan(m(base));
       return keys.map((key) => d(key));
     },
     async clear(base) {
-      const keys = await scan(p(base, "*"));
+      const keys = await scan(m(base));
       if (keys.length === 0) {
         return;
       }

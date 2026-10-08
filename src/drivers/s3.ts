@@ -1,7 +1,7 @@
 import {
   defineDriver,
   createRequiredError,
-  normalizeKey,
+  encodeURLKey,
   createError,
 } from "./utils";
 import { AwsClient } from "aws4fetch";
@@ -74,7 +74,8 @@ export default defineDriver((options: S3DriverOptions) => {
 
   const baseURL = `${options.endpoint.replace(/\/$/, "")}/${options.bucket || ""}`;
 
-  const url = (key: string = "") => `${baseURL}/${normalizeKey(key, "/")}`;
+  const url = (key: string = "") =>
+    `${baseURL}/${encodeURLKey(DRIVER_NAME, key)}`;
 
   const awsFetch = async (url: string, opts?: RequestInit) => {
     const request = await getAwsClient().sign(url, opts);
@@ -118,7 +119,7 @@ export default defineDriver((options: S3DriverOptions) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
-  const getObject = (key: string) => {
+  const getObject = async (key: string) => {
     return awsFetch(url(key));
   };
 

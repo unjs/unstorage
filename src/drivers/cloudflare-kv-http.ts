@@ -3,6 +3,7 @@ import {
   createError,
   createRequiredError,
   defineDriver,
+  encodeURLSegment,
   joinKeys,
 } from "./utils";
 
@@ -115,9 +116,13 @@ export default defineDriver<KVHTTPOptions>((opts) => {
 
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
+  // Encode key as a single URL path segment so it can never navigate out of
+  // `/values/` or `/metadata/` (Cloudflare expects percent-encoded key names)
+  const keyPath = (key: string) => encodeURLSegment(DRIVER_NAME, r(key), key);
+
   const hasItem = async (key: string) => {
     try {
-      const res = await kvFetch(`/metadata/${r(key)}`);
+      const res = await kvFetch(`/metadata/${keyPath(key)}`);
       return res?.success === true;
     } catch (err: any) {
       if (!err?.response) {
@@ -133,7 +138,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   const getItem = async (key: string) => {
     try {
       // Cloudflare API returns with `content-type: application/octet-stream`
-      return await kvFetch(`/values/${r(key)}`).then((r) => r.text());
+      return await kvFetch(`/values/${keyPath(key)}`).then((r) => r.text());
     } catch (err: any) {
       if (!err?.response) {
         throw err;
@@ -146,7 +151,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   };
 
   const setItem = async (key: string, value: any, topts: any) => {
-    return await kvFetch(`/values/${r(key)}`, {
+    return await kvFetch(`/values/${keyPath(key)}`, {
       method: "PUT",
       body: value,
       query: topts?.ttl
@@ -156,7 +161,7 @@ export default defineDriver<KVHTTPOptions>((opts) => {
   };
 
   const removeItem = async (key: string) => {
-    return await kvFetch(`/values/${r(key)}`, { method: "DELETE" });
+    return await kvFetch(`/values/${keyPath(key)}`, { method: "DELETE" });
   };
 
   const getKeys = async (base?: string) => {

@@ -45,7 +45,11 @@ export function createH3StorageHandler(
   opts: StorageServerOptions = {}
 ): EventHandler {
   return eventHandler(async (event) => {
-    const _path = opts.resolvePath?.(event) ?? event.path;
+    // h3 decodes the request path except for `%25`, so restore literal `%`
+    const _path = (opts.resolvePath?.(event) ?? event.path).replace(
+      /%25/g,
+      "%"
+    );
     const lastChar = _path[_path.length - 1];
     const isBaseKey = lastChar === ":" || lastChar === "/";
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);

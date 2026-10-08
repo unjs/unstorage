@@ -1,5 +1,5 @@
 import type { TransactionOptions } from "..";
-import { defineDriver } from "./utils";
+import { defineDriver, encodeURLKey } from "./utils";
 import { type FetchError, $fetch as _fetch } from "ofetch";
 import { joinURL } from "ufo";
 
@@ -11,10 +11,11 @@ export interface HTTPOptions {
 const DRIVER_NAME = "http";
 
 export default defineDriver((opts: HTTPOptions) => {
-  const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
+  const r = (key: string = "") =>
+    joinURL(opts.base!, encodeURLKey(DRIVER_NAME, key));
 
   const rBase = (key: string = "") =>
-    joinURL(opts.base!, (key || "/").replace(/:/g, "/"), ":");
+    joinURL(opts.base!, encodeURLKey(DRIVER_NAME, key, true) || "/", ":");
 
   const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
     if (error?.response?.status === 404) {
@@ -41,8 +42,8 @@ export default defineDriver((opts: HTTPOptions) => {
   return {
     name: DRIVER_NAME,
     options: opts,
-    hasItem(key, topts) {
-      return _fetch(r(key), {
+    async hasItem(key, topts) {
+      return await _fetch(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
       })

@@ -56,6 +56,8 @@ export default driver;
 
 // --- Internal helpers ---
 
+const MAX_TIMER_DELAY = 2 ** 31 - 1;
+
 function _clearTimer(timers: Map<string, ReturnType<typeof setTimeout>>, key: string) {
   const existing = timers.get(key);
   if (existing !== undefined) {
@@ -74,6 +76,10 @@ function _scheduleExpiry(
     return;
   }
   const ttlMs = ttl * 1000;
+  if (ttlMs > MAX_TIMER_DELAY && Number.isFinite(ttlMs)) {
+    _scheduleLongExpiry(data, timers, key, ttlMs);
+    return;
+  }
   const timer = setTimeout(() => {
     data.delete(key);
     timers.delete(key);
@@ -82,4 +88,33 @@ function _scheduleExpiry(
     timer.unref();
   }
   timers.set(key, timer);
+}
+
+function _scheduleLongExpiry(
+  data: Map<string, any>,
+  timers: Map<string, ReturnType<typeof setTimeout>>,
+  key: string,
+  ttlMs: number,
+) {
+  const clock = globalThis.performance;
+  const now = clock ? () => clock.now() : Date.now;
+  const deadline = now() + ttlMs;
+  const schedule = () => {
+    const timer = setTimeout(
+      () => {
+        if (now() < deadline) {
+          schedule();
+          return;
+        }
+        data.delete(key);
+        timers.delete(key);
+      },
+      Math.min(deadline - now(), MAX_TIMER_DELAY),
+    );
+    if (timer && typeof timer === "object" && "unref" in timer) {
+      timer.unref();
+    }
+    timers.set(key, timer);
+  };
+  schedule();
 }

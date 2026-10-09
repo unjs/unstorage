@@ -207,6 +207,9 @@ const driver: DriverFactory<RedisOptions, Promise<Redis | Cluster>> = (opts) => 
     async dispose() {
       (await getRedisClient()).disconnect();
     },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
+    },
   };
 };
 

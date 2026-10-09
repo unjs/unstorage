@@ -106,9 +106,12 @@ const driver: DriverFactory<DenoKvOptions, Promise<DenoKV.Kv>> = (opts) => {
     async dispose() {
       if (_kv) {
         const kv = await _kv;
-        await kv.close();
+        kv.close();
         _kv = undefined;
       }
+    },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
     },
   };
 };

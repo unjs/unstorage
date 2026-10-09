@@ -67,7 +67,7 @@ describe("drivers: cloudflare-cache-binding (fake caches)", () => {
   });
 
   test("applies ttl and tag as cache headers", async () => {
-    const storage = createStorage({
+    await using storage = createStorage({
       driver: CloudflareCacheBinding({ base: "nitro-cache", ttl: 30 }),
     });
 
@@ -81,7 +81,5 @@ describe("drivers: cloudflare-cache-binding (fake caches)", () => {
     const custom = fakeCaches.store.get("unstorage://nitro-cache/custom");
     expect(custom?.headers.get("Cache-Control")).toBe("max-age=60");
     expect(custom?.headers.get("Cache-Tag")).toBe("my-tag");
-
-    await storage.dispose();
   });
 });

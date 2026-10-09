@@ -75,6 +75,9 @@ const driver: DriverFactory<LRUDriverOptions, Promise<LRUCache<string, any, any>
     async dispose() {
       (await _cache)?.clear();
     },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
+    },
   };
 };
 

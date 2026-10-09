@@ -76,6 +76,9 @@ const driver: DriverFactory<LocalStorageOptions, Storage> = (opts = {}) => {
         opts.window.removeEventListener("storage", _storageListener);
       }
     },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
+    },
     watch(callback) {
       if (!opts.window) {
         return _unwatch;

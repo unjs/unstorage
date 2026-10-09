@@ -131,8 +131,8 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
       }
       return unlink(r(key)) as Promise<void>;
     },
-    getKeys(_base, topts) {
-      return readdirRecursive(r("."), ignore, topts?.maxDepth);
+    getKeys(keyBase, topts) {
+      return readdirRecursive(r("."), ignore, topts?.maxDepth, keyBase);
     },
     async clear() {
       if (userOptions.readOnly || userOptions.noClear) {

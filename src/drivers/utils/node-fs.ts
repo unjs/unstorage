@@ -81,6 +81,26 @@ export function readdir(dir: string): Promise<Dirent[]> {
 
 export async function ensuredir(dir: string): Promise<void> {
   if (existsSync(dir)) {
+    // If the path exists but is not a directory, it is likely a file left by
+    // a previous setItem with a key that is a prefix of the current key
+    // (e.g. key "foo" then "foo/bar"). Report a clear error instead of
+    // letting the subsequent mkdir/write fail with a confusing ENOTDIR.
+    // Note: the `stat` helper above resolves (rather than rejects) with the
+    // error object on unexpected failures, so stat directly here to let
+    // non-ENOENT errors (e.g. EACCES) propagate to the caller.
+    const dirStat = await fsPromises.stat(dir).catch((error: any) => {
+      if (error?.code === "ENOENT") {
+        return null;
+      }
+      throw error;
+    });
+    if (dirStat && !dirStat.isDirectory()) {
+      const err: any = new Error(
+        `ENOTDIR: path is a file, not a directory, mkdir '${dir}'`,
+      );
+      err.code = "ENOTDIR";
+      throw err;
+    }
     return;
   }
   await ensuredir(dirname(dir)).catch(ignoreExists);

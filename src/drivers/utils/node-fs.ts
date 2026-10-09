@@ -61,7 +61,7 @@ export async function writeFile(
 }
 
 export function readFile(path: string, encoding?: BufferEncoding): Promise<string | Buffer | null> {
-  return fsPromises.readFile(path, encoding).catch(ignoreNotfound);
+  return fsPromises.readFile(path, encoding ?? null).catch(ignoreNotfound);
 }
 
 export function stat(path: string): Promise<import("node:fs").Stats | null> {

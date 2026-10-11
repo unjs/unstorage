@@ -41,7 +41,7 @@
     "@azure/keyvault-secrets": "^4.11.2",
     "@azure/storage-blob": "^12.34.0",
     "@capacitor/preferences": "^8.0.1",
-    "@cloudflare/workers-types": "^5.20261007.1",
+    "@cloudflare/workers-types": "^5.20261008.1",
     "@deno/kv": "^0.14.0",
     "@electric-sql/pglite": "^0.5.8",
     "@libsql/client": "^0.18.0",
@@ -86,5 +86,5 @@
     "vitest": "^5.0.3",
     "wrangler": "^4.148.0"
   },
-  "packageManager": "pnpm@11.28.3"
+  "packageManager": "pnpm@11.28.5"
 }

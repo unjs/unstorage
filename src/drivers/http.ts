@@ -14,7 +14,7 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
   const r = (key: string = "") => joinURL(opts.base!, encodeURLKey(DRIVER_NAME, key));
 
   const rBase = (key: string = "") =>
-    joinURL(opts.base!, (encodeURLKey(DRIVER_NAME, key, true) || "/") + ":");
+    joinURL(opts.base!, (encodeURLKey(DRIVER_NAME, key) || "/") + ":");
 
   const catchFetchError = (error: unknown, fallbackVal: any = null) => {
     if (error instanceof FetchError && error.status === 404) {

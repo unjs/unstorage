@@ -22,6 +22,8 @@ const storageKeyProperties: StorageKeys = [
   "unmount",
 ];
 
+const nonItemKeyProperties = new Set<keyof Storage>(["clear", "mount", "unmount"]);
+
 export function prefixStorage<T extends StorageValue>(
   storage: Storage<T> | Storage<any>,
   base: string,
@@ -34,12 +36,23 @@ export function prefixStorage<T extends StorageValue>(
   if (!base) {
     return storage;
   }
+  // An empty key would target the item named exactly `base` in the parent
+  const itemKey = (key: string) => {
+    if (!normalizeKey(key)) {
+      throw new Error(`[unstorage] Invalid key: ${JSON.stringify(key)}`);
+    }
+    return base + key;
+  };
   const nsStorage: Storage<T> = { ...storage };
   for (const property of storageKeyProperties) {
     // @ts-ignore
-    nsStorage[property] = (key = "", ...args) =>
-      // @ts-ignore
-      storage[property](base + key, ...args);
+    nsStorage[property] = nonItemKeyProperties.has(property)
+      ? (key: string = "", ...args: any[]) =>
+          // @ts-ignore
+          storage[property](base + key, ...args)
+      : async (key: string = "", ...args: any[]) =>
+          // @ts-ignore
+          storage[property](itemKey(key), ...args);
   }
   nsStorage.getKeys = (key = "", ...arguments_) =>
     storage
@@ -61,7 +74,7 @@ export function prefixStorage<T extends StorageValue>(
     commonOptions?: TransactionOptions,
   ) => {
     const prefixedItems = items.map((item) =>
-      typeof item === "string" ? base + item : { ...item, key: base + item.key },
+      typeof item === "string" ? itemKey(item) : { ...item, key: itemKey(item.key) },
     );
     const results = await storage.getItems<U>(prefixedItems, commonOptions);
     return results.map((entry) => ({
@@ -75,7 +88,7 @@ export function prefixStorage<T extends StorageValue>(
     commonOptions?: TransactionOptions,
   ) => {
     const prefixedItems = items.map((item) => ({
-      key: base + item.key,
+      key: itemKey(item.key),
       value: item.value,
       options: item.options,
     }));
@@ -90,6 +103,14 @@ export function normalizeKey(key?: string): string {
     return "";
   }
   return key.split("?")[0]?.replace(/[/\\]/g, ":").replace(/:+/g, ":").replace(/^:|:$/g, "") || "";
+}
+
+/**
+ * Check if a normalized key has `.` or `..` segments, which drivers mapping
+ * keys to paths or URLs would resolve (and could escape their base with)
+ */
+export function hasDotSegment(key: string): boolean {
+  return key.split(":").some((segment) => segment === "." || segment === "..");
 }
 
 export function joinKeys(...keys: string[]): string {

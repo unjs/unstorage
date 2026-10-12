@@ -1,6 +1,6 @@
 import type { Storage, TransactionOptions, StorageMeta } from "./types.ts";
 import { stringify } from "./_utils.ts";
-import { normalizeKey, normalizeBaseKey } from "./utils.ts";
+import { normalizeKey, normalizeBaseKey, hasDotSegment } from "./utils.ts";
 
 export type StorageServerRequest = {
   request: globalThis.Request;
@@ -68,6 +68,10 @@ async function handleRequest(
   const type = MethodToTypeMap[req.method as keyof typeof MethodToTypeMap];
   if (!type) {
     throw new HTTPError(405, `Method Not Allowed: ${req.method}`);
+  }
+  // An empty item key would target the driver's root and `.` / `..` segments could escape it
+  if ((!isBaseKey && !key) || hasDotSegment(key)) {
+    throw new HTTPError(400, "Invalid key");
   }
   if (opts.authorize) {
     try {

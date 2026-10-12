@@ -115,15 +115,13 @@ export function encodeURLSegment(driver: string, segment: string, key: string = 
  * Encode a key as a URL path (`a:b` => `a/b`) with each segment
  * percent-encoded, so that the key can never escape the base URL or inject
  * a `?query` / `#hash`.
- *
- * Empty keys are only allowed with `isBase` (`getKeys` / `clear`).
  */
-export function encodeURLKey(driver: string, key: string | undefined, isBase = false): string {
-  const segments = (key || "").split(/[:/\\]/).filter(Boolean);
-  if (segments.length === 0 && !isBase) {
-    throw createError(driver, `Invalid key: ${JSON.stringify(key)}`);
-  }
-  return segments.map((segment) => encodeURLSegment(driver, segment, key)).join("/");
+export function encodeURLKey(driver: string, key: string | undefined): string {
+  return (key || "")
+    .split(/[:/\\]/)
+    .filter(Boolean)
+    .map((segment) => encodeURLSegment(driver, segment, key))
+    .join("/");
 }
 
 /**

@@ -154,6 +154,34 @@ function createTestStorage() {
 }
 
 describe("server (keys)", () => {
+  it("rejects empty and dot-segment keys before authorize", async () => {
+    const storage = createStorage();
+    await storage.setItem("a", "x");
+    const authorized: string[] = [];
+    const server = await serve({
+      port: 0,
+      fetch: createStorageHandler(storage, {
+        authorize(req) {
+          authorized.push(req.key);
+        },
+      }),
+    });
+    try {
+      // URL parsing already resolves `/..` and `/%2e%2e`, these survive it
+      for (const path of ["/a:..", "/..:", "/a/..%2Fb", "/%2E%2E%3A", "/..%5C?x", "/%E0%A4%A"]) {
+        for (const method of ["GET", "HEAD", "PUT", "DELETE"]) {
+          const status = await rawRequest(server.url!, path, method);
+          expect(status, `${method} ${path}`).toBe(400);
+        }
+      }
+      expect(authorized).toEqual([]);
+      // Listing the root still works
+      expect(await $fetch("/", { baseURL: server.url! })).toEqual(["a"]);
+    } finally {
+      await server.close();
+    }
+  });
+
   it("decodes percent-encoded keys", async () => {
     const storage = createStorage();
     const server = await serve({ port: 0, fetch: createStorageHandler(storage) });

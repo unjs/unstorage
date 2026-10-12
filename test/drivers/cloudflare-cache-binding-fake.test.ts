@@ -1,23 +1,25 @@
 import { describe, expect, test, beforeEach, afterEach } from "vitest";
-import { createStorage } from "../../src/index.ts";
+import { createStorage, prefixStorage } from "../../src/index.ts";
 import CloudflareCacheBinding from "../../src/drivers/cloudflare-cache-binding.ts";
 
 // Minimal Map-backed fake of the Cloudflare Workers Cache API, just enough
 // surface for the cloudflare-cache-binding driver (match/put/delete) without
 // requiring a real Cloudflare runtime or wrangler's platform proxy.
+// Like the real Cache API, entries are keyed by the parsed request URL.
 function createFakeCaches() {
   const store = new Map<string, Response>();
+  const url = (key: string) => new URL(key).href;
 
   const fakeCache = {
     async match(key: string) {
-      const hit = store.get(key);
+      const hit = store.get(url(key));
       return hit ? hit.clone() : undefined;
     },
     async put(key: string, value: Response) {
-      store.set(key, value.clone());
+      store.set(url(key), value.clone());
     },
     async delete(key: string) {
-      return store.delete(key);
+      return store.delete(url(key));
     },
   };
 
@@ -81,6 +83,26 @@ describe("drivers: cloudflare-cache-binding (fake caches)", () => {
     const custom = fakeCaches.store.get("unstorage://nitro-cache/custom");
     expect(custom?.headers.get("Cache-Control")).toBe("max-age=60");
     expect(custom?.headers.get("Cache-Tag")).toBe("my-tag");
+
+    await storage.dispose();
+  });
+
+  test("encodes keys so they cannot escape their path", async () => {
+    const storage = createStorage({
+      driver: CloudflareCacheBinding({ base: "app" }),
+    });
+    await storage.setItem("users:bob:secret", "bob's secret");
+
+    const alice = prefixStorage(storage, "users:alice");
+    expect(await alice.getItem("%2e%2e:bob:secret")).toBeNull();
+    await alice.setItem("%2e%2e:bob:secret", "overwritten");
+    await alice.setItem("a#b", "x");
+    expect(await storage.getItem("users:bob:secret")).toBe("bob's secret");
+    expect([...fakeCaches.store.keys()].sort()).toEqual([
+      "unstorage://app/users/alice/%252e%252e/bob/secret",
+      "unstorage://app/users/alice/a%23b",
+      "unstorage://app/users/bob/secret",
+    ]);
 
     await storage.dispose();
   });

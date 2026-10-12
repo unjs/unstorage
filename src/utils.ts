@@ -38,6 +38,11 @@ export function prefixStorage<T extends StorageValue>(
   storage: Storage<T>,
   base: string
 ): Storage<T> {
+  // Keys are truncated at `?`, so a base like `users:${id}` with an untrusted
+  // `id` of `alice?x` would resolve to another namespace (`users:alice:`)
+  if (base?.includes("?")) {
+    throw new Error(`[unstorage] Invalid base: ${JSON.stringify(base)}`);
+  }
   base = normalizeBaseKey(base);
   if (!base) {
     return storage;

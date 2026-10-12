@@ -389,4 +389,13 @@ describe("invalid keys", () => {
       );
     }
   );
+
+  it.each(["alice?x", "alice?", "?alice", "users:alice?:x"])(
+    "prefixStorage rejects base %j",
+    (base) => {
+      expect(() => prefixStorage(createStorage(), base)).toThrow(
+        "Invalid base"
+      );
+    }
+  );
 });

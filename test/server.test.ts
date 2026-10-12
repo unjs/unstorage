@@ -153,7 +153,7 @@ function createTestStorage() {
   return storage;
 }
 
-describe("server (keys)", () => {
+describe("server (invalid keys)", () => {
   it("rejects empty and dot-segment keys before authorize", async () => {
     const storage = createStorage();
     await storage.setItem("a", "x");
@@ -174,9 +174,65 @@ describe("server (keys)", () => {
           expect(status, `${method} ${path}`).toBe(400);
         }
       }
+      // The query is ignored, so these are the root base key
+      for (const path of ["/", "/?x", "/:?x", "/%3A?x", "/%3Fx"]) {
+        for (const method of ["HEAD", "PUT"]) {
+          const status = await rawRequest(server.url!, path, method);
+          expect(status, `${method} ${path}`).toBe(400);
+        }
+      }
       expect(authorized).toEqual([]);
       // Listing the root still works
       expect(await $fetch("/", { baseURL: server.url! })).toEqual(["a"]);
+      expect(await $fetch("/?x", { baseURL: server.url! })).toEqual(["a"]);
+    } finally {
+      await server.close();
+    }
+  });
+
+  it("authorizes the same key that is used", async () => {
+    const storage = createStorage();
+    await storage.setItem("users:alice", "admin");
+    await storage.setItem("users:alice:secret", "s");
+    await storage.setItem("users:alice:other", "o");
+    const authorized: string[] = [];
+    const server = await serve({
+      port: 0,
+      fetch: createStorageHandler(storage, {
+        authorize(req) {
+          authorized.push(`${req.type} ${req.key}`);
+          // Only allow access inside `users:alice:`
+          if (!req.key.startsWith("users:alice:")) {
+            throw new Error("Unauthorized");
+          }
+        },
+      }),
+    });
+    try {
+      // HEAD / PUT on a base key would reach the item `users:alice`
+      for (const path of [
+        "/users/alice/",
+        "/users/alice:",
+        "/users/alice?x=/",
+        "/users/alice?x=:",
+        "/users/alice%3Fx=%2F",
+      ]) {
+        for (const method of ["HEAD", "PUT"]) {
+          const status = await rawRequest(server.url!, path, method);
+          expect(status, `${method} ${path}`).toBeGreaterThanOrEqual(400);
+        }
+      }
+      expect(await storage.getItem("users:alice")).toBe("admin");
+
+      // A trailing `/` in the query does not turn removeItem into clear
+      for (const path of ["/users/alice/secret?/", "/users/alice/secret%3F%2F"]) {
+        await storage.setItem("users:alice:secret", "s");
+        authorized.length = 0;
+        expect(await rawRequest(server.url!, path, "DELETE"), path).toBe(200);
+        expect(authorized).toEqual(["write users:alice:secret"]);
+        expect(await storage.hasItem("users:alice:secret")).toBe(false);
+        expect(await storage.getItem("users:alice:other")).toBe("o");
+      }
     } finally {
       await server.close();
     }

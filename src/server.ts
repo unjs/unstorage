@@ -59,7 +59,8 @@ async function handleRequest(
   opts: StorageServerOptions,
   req: globalThis.Request,
 ): Promise<globalThis.Response> {
-  const _path = opts.resolvePath?.(req) ?? decodePath(requestPath(req.url));
+  // The query is dropped (also after decoding `%3F`) so that it cannot affect `isBaseKey`
+  const _path = (opts.resolvePath?.(req) ?? decodePath(requestPath(req.url))).split("?")[0]!;
   const lastChar = _path[_path.length - 1];
   const isBaseKey = lastChar === ":" || lastChar === "/";
   const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
@@ -72,6 +73,11 @@ async function handleRequest(
   // An empty item key would target the driver's root and `.` / `..` segments could escape it
   if ((!isBaseKey && !key) || hasDotSegment(key)) {
     throw new HTTPError(400, "Invalid key");
+  }
+  // HEAD and PUT are item operations, so a base key (e.g. `users:alice:`)
+  // would be authorized but then normalized to the item `users:alice`
+  if (isBaseKey && (req.method === "HEAD" || req.method === "PUT")) {
+    throw new HTTPError(400, `Invalid key: ${req.method} is not allowed on a base key`);
   }
   if (opts.authorize) {
     try {

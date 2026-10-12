@@ -238,6 +238,38 @@ describe("server (invalid keys)", () => {
     }
   });
 
+  it("decodes paths returned by resolvePath", async () => {
+    const storage = createStorage();
+    const authorized: string[] = [];
+    const server = await serve({
+      port: 0,
+      fetch: createStorageHandler(storage, {
+        resolvePath: (req) => new URL(req.url).pathname.replace(/^\/api/, ""),
+        authorize(req) {
+          authorized.push(`${req.type} ${req.key}`);
+        },
+      }),
+    });
+    try {
+      const remoteStorage = createStorage({
+        driver: httpDriver({ base: `${server.url!}api` }),
+      });
+      await remoteStorage.setItem("a@b:c d", "x");
+      await remoteStorage.setMeta("doc", { foo: "bar" });
+      expect(await storage.getItem("a@b:c d")).toBe("x");
+      expect(await storage.getMeta("doc")).toMatchObject({ foo: "bar" });
+      expect(await storage.getKeys()).toEqual(["a@b:c d"]);
+
+      // A decoded `%3F` does not turn an item request into a base request
+      authorized.length = 0;
+      expect(await rawRequest(server.url!, "/api/a@b/c%20d%3F%2F", "DELETE")).toBe(200);
+      expect(authorized).toEqual(["write a@b:c d"]);
+      expect(await storage.hasItem("a@b:c d")).toBe(false);
+    } finally {
+      await server.close();
+    }
+  });
+
   it("decodes percent-encoded keys", async () => {
     const storage = createStorage();
     const server = await serve({ port: 0, fetch: createStorageHandler(storage) });

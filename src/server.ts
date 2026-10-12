@@ -60,7 +60,7 @@ async function handleRequest(
   req: globalThis.Request,
 ): Promise<globalThis.Response> {
   // The query is dropped (also after decoding `%3F`) so that it cannot affect `isBaseKey`
-  const _path = (opts.resolvePath?.(req) ?? decodePath(requestPath(req.url))).split("?")[0]!;
+  const _path = decodePath(opts.resolvePath?.(req) ?? requestPath(req.url)).split("?")[0]!;
   const lastChar = _path[_path.length - 1];
   const isBaseKey = lastChar === ":" || lastChar === "/";
   const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);

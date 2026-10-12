@@ -4,6 +4,7 @@ import {
   type DriverFactory,
   encodeURLSegment,
   joinKeys,
+  normalizeKey,
 } from "./utils/index.ts";
 import { createFetch, FetchError } from "./utils/fetch.ts";
 
@@ -118,7 +119,13 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
 
   // Encode key as a single URL path segment so it can never navigate out of
   // `/values/` or `/metadata/` (Cloudflare expects percent-encoded key names)
-  const keyPath = (key: string) => encodeURLSegment(DRIVER_NAME, r(key), key);
+  const keyPath = (key: string) => {
+    // Without this, an empty key would target the key named exactly `base`
+    if (!normalizeKey(key)) {
+      throw createError(DRIVER_NAME, `Invalid key: ${JSON.stringify(key)}`);
+    }
+    return encodeURLSegment(DRIVER_NAME, r(key), key);
+  };
 
   const hasItem = async (key: string) => {
     try {

@@ -16,6 +16,7 @@ import {
   joinKeys,
   filterKeyByDepth,
   filterKeyByBase,
+  hasDotSegment,
 } from "./utils";
 
 interface StorageCTX {
@@ -39,6 +40,24 @@ export function createStorage<T extends StorageValue>(
     watching: false,
     watchListeners: [],
     unwatch: {},
+  };
+
+  // An empty key would target the driver's root (e.g. the item named `base`)
+  // and `.` / `..` segments could escape it (drivers mapping keys to paths)
+  const normalizeItemKey = (key: string) => {
+    const normalizedKey = normalizeKey(key);
+    if (!normalizedKey || hasDotSegment(normalizedKey)) {
+      throw new Error(`[unstorage] Invalid key: ${JSON.stringify(key)}`);
+    }
+    return normalizedKey;
+  };
+
+  const normalizeBase = (base: string | undefined) => {
+    const normalizedBase = normalizeBaseKey(base);
+    if (hasDotSegment(normalizedBase)) {
+      throw new Error(`[unstorage] Invalid base: ${JSON.stringify(base)}`);
+    }
+    return normalizedBase;
   };
 
   const getMount = (key: string) => {
@@ -145,7 +164,7 @@ export function createStorage<T extends StorageValue>(
 
     for (const item of items) {
       const isStringItem = typeof item === "string";
-      const key = normalizeKey(isStringItem ? item : item.key);
+      const key = normalizeItemKey(isStringItem ? item : item.key);
       const value = isStringItem ? undefined : item.value;
       const options =
         isStringItem || !item.options
@@ -167,19 +186,19 @@ export function createStorage<T extends StorageValue>(
 
   const storage: Storage = {
     // Item
-    hasItem(key: string, opts = {}) {
-      key = normalizeKey(key);
+    async hasItem(key: string, opts = {}) {
+      key = normalizeItemKey(key);
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.hasItem, relativeKey, opts);
     },
-    getItem(key: string, opts = {}) {
-      key = normalizeKey(key);
+    async getItem(key: string, opts = {}) {
+      key = normalizeItemKey(key);
       const { relativeKey, driver } = getMount(key);
       return asyncCall(driver.getItem, relativeKey, opts).then(
         (value) => destr(value) as StorageValue
       );
     },
-    getItems(
+    async getItems(
       items: (string | { key: string; options?: TransactionOptions })[],
       commonOptions = {}
     ) {
@@ -213,8 +232,8 @@ export function createStorage<T extends StorageValue>(
         );
       });
     },
-    getItemRaw(key, opts = {}) {
-      key = normalizeKey(key);
+    async getItemRaw(key, opts = {}) {
+      key = normalizeItemKey(key);
       const { relativeKey, driver } = getMount(key);
       if (driver.getItemRaw) {
         return asyncCall(driver.getItemRaw, relativeKey, opts);
@@ -227,7 +246,7 @@ export function createStorage<T extends StorageValue>(
       if (value === undefined) {
         return storage.removeItem(key);
       }
-      key = normalizeKey(key);
+      key = normalizeItemKey(key);
       const { relativeKey, driver } = getMount(key);
       if (!driver.setItem) {
         return; // Readonly
@@ -269,7 +288,7 @@ export function createStorage<T extends StorageValue>(
       if (value === undefined) {
         return storage.removeItem(key, opts);
       }
-      key = normalizeKey(key);
+      key = normalizeItemKey(key);
       const { relativeKey, driver } = getMount(key);
       if (driver.setItemRaw) {
         await asyncCall(driver.setItemRaw, relativeKey, value, opts);
@@ -292,7 +311,7 @@ export function createStorage<T extends StorageValue>(
       if (typeof opts === "boolean") {
         opts = { removeMeta: opts };
       }
-      key = normalizeKey(key);
+      key = normalizeItemKey(key);
       const { relativeKey, driver } = getMount(key);
       if (!driver.removeItem) {
         return; // Readonly
@@ -311,7 +330,7 @@ export function createStorage<T extends StorageValue>(
       if (typeof opts === "boolean") {
         opts = { nativeOnly: opts };
       }
-      key = normalizeKey(key);
+      key = normalizeItemKey(key);
       const { relativeKey, driver } = getMount(key);
       const meta = Object.create(null);
       if (driver.getMeta) {
@@ -336,15 +355,15 @@ export function createStorage<T extends StorageValue>(
       }
       return meta;
     },
-    setMeta(key: string, value: any, opts = {}) {
-      return this.setItem(key + "$", value, opts);
+    async setMeta(key: string, value: any, opts = {}) {
+      return this.setItem(normalizeItemKey(key) + "$", value, opts);
     },
-    removeMeta(key: string, opts = {}) {
-      return this.removeItem(key + "$", opts);
+    async removeMeta(key: string, opts = {}) {
+      return this.removeItem(normalizeItemKey(key) + "$", opts);
     },
     // Keys
     async getKeys(base, opts = {}) {
-      base = normalizeBaseKey(base);
+      base = normalizeBase(base);
       const mounts = getMounts(base, true);
       let maskedMounts: string[] = [];
       const allKeys = [];
@@ -382,7 +401,7 @@ export function createStorage<T extends StorageValue>(
     },
     // Utils
     async clear(base, opts = {}) {
-      base = normalizeBaseKey(base);
+      base = normalizeBase(base);
       await Promise.all(
         getMounts(base, false).map(async (m) => {
           if (m.driver.clear) {
@@ -422,7 +441,7 @@ export function createStorage<T extends StorageValue>(
     },
     // Mount
     mount(base, driver) {
-      base = normalizeBaseKey(base);
+      base = normalizeBase(base);
       if (base && context.mounts[base]) {
         throw new Error(`already mounted at ${base}`);
       }

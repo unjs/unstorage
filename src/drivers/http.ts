@@ -15,7 +15,7 @@ export default defineDriver((opts: HTTPOptions) => {
     joinURL(opts.base!, encodeURLKey(DRIVER_NAME, key));
 
   const rBase = (key: string = "") =>
-    joinURL(opts.base!, encodeURLKey(DRIVER_NAME, key, true) || "/", ":");
+    joinURL(opts.base!, encodeURLKey(DRIVER_NAME, key) || "/", ":");
 
   const catchFetchError = (error: FetchError, fallbackVal: any = null) => {
     if (error?.response?.status === 404) {

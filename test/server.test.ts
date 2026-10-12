@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { request } from "node:http";
 import { describe, it, expect } from "vitest";
 import { listen } from "listhen";
 import { $fetch } from "ofetch";
@@ -149,4 +150,54 @@ function createTestStorage() {
   });
 
   return storage;
+}
+
+describe("server (invalid keys)", () => {
+  it("rejects empty and dot-segment keys before authorize", async () => {
+    const storage = createStorage();
+    await storage.setItem("a", "x");
+    const authorized: string[] = [];
+    const storageServer = createStorageServer(storage, {
+      authorize(req) {
+        authorized.push(req.key);
+      },
+    });
+    const { close, url: serverURL } = await listen(storageServer.handle, {
+      port: { random: true },
+    });
+    try {
+      for (const path of [
+        "/?x",
+        "/:?x",
+        "/%3A?x",
+        "/..",
+        "/a:..",
+        "/a/%2e%2e",
+        "/..:",
+      ]) {
+        for (const method of ["GET", "HEAD", "PUT", "DELETE"]) {
+          const status = await rawRequest(serverURL, path, method);
+          expect(status, `${method} ${path}`).toBe(400);
+        }
+      }
+      expect(authorized).toEqual([]);
+      // Listing the root still works
+      expect(await $fetch("/", { baseURL: serverURL })).toEqual(["a"]);
+    } finally {
+      await close();
+    }
+  });
+});
+
+// Unlike `fetch`, does not resolve `.` / `..` segments in the path
+function rawRequest(baseURL: string, path: string, method: string) {
+  const { hostname, port } = new URL(baseURL);
+  return new Promise<number | undefined>((resolve, reject) => {
+    const req = request({ hostname, port, path, method }, (res) => {
+      res.resume();
+      resolve(res.statusCode);
+    });
+    req.on("error", reject);
+    req.end(method === "PUT" ? "x" : undefined);
+  });
 }

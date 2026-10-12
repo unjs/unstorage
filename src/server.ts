@@ -13,7 +13,7 @@ import {
 } from "h3";
 import type { Storage, TransactionOptions, StorageMeta } from "./types";
 import { stringify } from "./_utils";
-import { normalizeKey, normalizeBaseKey } from "./utils";
+import { normalizeKey, normalizeBaseKey, hasDotSegment } from "./utils";
 
 export type StorageServerRequest = {
   event: H3Event;
@@ -59,6 +59,14 @@ export function createH3StorageHandler(
       throw createError({
         statusCode: 405,
         statusMessage: `Method Not Allowed: ${event.method}`,
+      });
+    }
+    // An empty item key (e.g. `/?x`) would target the driver's root and
+    // `.` / `..` segments could escape it
+    if ((!isBaseKey && !key) || hasDotSegment(key)) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid key",
       });
     }
     try {

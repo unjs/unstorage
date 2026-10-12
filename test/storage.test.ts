@@ -758,4 +758,11 @@ describe("invalid keys", () => {
     // Listing the namespace still works
     expect(await pStorage.getKeys(key.startsWith("?") ? "" : key)).toEqual([]);
   });
+
+  it.each(["alice?x", "alice?", "?alice", "users:alice?:x"])(
+    "prefixStorage rejects base %j",
+    (base) => {
+      expect(() => prefixStorage(createStorage(), base)).toThrow("Invalid base");
+    },
+  );
 });

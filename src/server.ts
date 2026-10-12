@@ -45,11 +45,11 @@ export function createH3StorageHandler(
   opts: StorageServerOptions = {}
 ): EventHandler {
   return eventHandler(async (event) => {
-    // h3 decodes the request path except for `%25`, so restore literal `%`
-    const _path = (opts.resolvePath?.(event) ?? event.path).replace(
-      /%25/g,
-      "%"
-    );
+    // h3 decodes the request path except for `%25`, so restore literal `%`.
+    // The query is dropped first so that it cannot affect `isBaseKey`
+    const _path = (opts.resolvePath?.(event) ?? event.path)
+      .split("?")[0]!
+      .replace(/%25/g, "%");
     const lastChar = _path[_path.length - 1];
     const isBaseKey = lastChar === ":" || lastChar === "/";
     const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
@@ -61,12 +61,20 @@ export function createH3StorageHandler(
         statusMessage: `Method Not Allowed: ${event.method}`,
       });
     }
-    // An empty item key (e.g. `/?x`) would target the driver's root and
-    // `.` / `..` segments could escape it
+    // An empty item key would target the driver's root and `.` / `..`
+    // segments could escape it
     if ((!isBaseKey && !key) || hasDotSegment(key)) {
       throw createError({
         statusCode: 400,
         statusMessage: "Invalid key",
+      });
+    }
+    // HEAD and PUT are item operations, so a base key (e.g. `users:alice:`)
+    // would be authorized but then normalized to the item `users:alice`
+    if (isBaseKey && (event.method === "HEAD" || event.method === "PUT")) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: `Invalid key: ${event.method} is not allowed on a base key`,
       });
     }
     try {

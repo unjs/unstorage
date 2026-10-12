@@ -35,6 +35,25 @@ describe("drivers: cloudflare-kv", async () => {
           }
         `);
       });
+      test("does not list or clear keys of sibling prefixes", async () => {
+        const root = createStorage({ driver: CloudflareKVBinding({}) });
+        await root.setItem("basement:a", "sibling");
+        try {
+          await ctx.storage.setItem("foo:a", "x");
+          await ctx.storage.setItem("foobar:a", "x");
+
+          expect(await ctx.storage.getKeys("foo")).toEqual(["foo:a"]);
+          await ctx.driver.clear!("foo:", {});
+          expect(await ctx.storage.getKeys()).toEqual(["foobar:a"]);
+
+          expect(await ctx.storage.getKeys()).not.toContain("ment:a");
+
+          await ctx.storage.clear();
+          expect(await root.getItem("basement:a")).toBe("sibling");
+        } finally {
+          await root.removeItem("basement:a");
+        }
+      });
     },
   });
 });

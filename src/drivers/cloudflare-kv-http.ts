@@ -172,8 +172,10 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
     const keys: string[] = [];
 
     const query: Record<string, string | undefined> = {};
-    if (base || opts.base) {
-      query.prefix = r(base);
+    // Trailing `:` so that base `app` does not also match `apple:*`
+    const prefix = joinKeys(opts.base || "", base || "");
+    if (prefix) {
+      query.prefix = `${prefix}:`;
     }
 
     const firstPage: KeysResponse = await kvFetch("/keys", { query }).then((res) => res.json());
@@ -197,8 +199,8 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
     return keys;
   };
 
-  const clear = async () => {
-    const keys: string[] = await getKeys();
+  const clear = async (base?: string) => {
+    const keys: string[] = await getKeys(base);
     // Split into chunks of 10000, as the API only allows for 10,000 keys at a time
     // TODO: Avoid reduce
     // eslint-disable-next-line unicorn/no-array-reduce

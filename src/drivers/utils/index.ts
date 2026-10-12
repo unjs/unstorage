@@ -80,16 +80,32 @@ export function encodeURLKey(
  * Validate a key that a third-party SDK puts into a URL path *without*
  * encoding it, so that the key can never escape its path.
  *
- * Throws for empty keys, `?` / `#`, and `.` / `..` segments, including the
- * `%2e` and TAB/CR/LF spellings that URL parsers also collapse.
+ * Throws for empty keys, `?` / `#`, control characters, leading / trailing
+ * spaces and `.` / `..` segments (including the `%2e` spelling).
  */
 export function assertURLPathKey(driver: string, key: string): string {
+  const invalid = (reason: string) =>
+    createError(driver, `Invalid key: ${JSON.stringify(key)}. ${reason}`);
+  if (!key) {
+    throw invalid("Empty keys are not allowed");
+  }
+  if (/[?#]/.test(key)) {
+    throw invalid(`"?" and "#" are not allowed`);
+  }
+  // URL parsers remove TAB/CR/LF anywhere and strip leading/trailing C0
+  // controls and spaces, which could turn a key into a dot or empty segment
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001F]|^ | $/.test(key)) {
+    throw invalid(
+      "Control characters and leading/trailing spaces are not allowed"
+    );
+  }
   const hasDotSegment = key.split(/[/\\]|%2f|%5c/i).some((segment) => {
-    segment = segment.replace(/[\t\n\r]/g, "").replace(/%2e/gi, ".");
+    segment = segment.replace(/%2e/gi, ".");
     return segment === "." || segment === "..";
   });
-  if (!key || /[?#]/.test(key) || hasDotSegment) {
-    throw createError(driver, `Invalid key: ${JSON.stringify(key)}`);
+  if (hasDotSegment) {
+    throw invalid(`"." and ".." segments are not allowed`);
   }
   return key;
 }

@@ -98,6 +98,15 @@ describe("drivers: netlify-blobs (key validation)", () => {
     String.raw`a\..\b`,
     "a%2f..%2fb",
     "a%5C..",
+    // URL parsers strip leading/trailing C0 controls and spaces
+    ".. ",
+    " ",
+    "\t",
+    "a/.. ",
+    "..\u0000",
+    "\u0000",
+    ". ",
+    " ..",
   ])("rejects escaping key %j", async (key) => {
     requests.length = 0;
     await expect(blobsDriver.removeItem!(key, {})).rejects.toThrow(
@@ -109,5 +118,32 @@ describe("drivers: netlify-blobs (key validation)", () => {
       "Invalid key"
     );
     expect(requests).toEqual([]);
+  });
+
+  // Storage does not trim whitespace, so these reach the driver as-is
+  it.each([".. ", " ", "\t", "..\u0000", "\u0000", "x "])(
+    "rejects whitespace key %j through storage",
+    async (key) => {
+      requests.length = 0;
+      await expect(storage.removeItem(key)).rejects.toThrow("Invalid key");
+      await expect(storage.setItem(key, "x")).rejects.toThrow("Invalid key");
+      expect(requests).toEqual([]);
+    }
+  );
+
+  it("keeps keys with inner spaces", async () => {
+    requests.length = 0;
+    await storage.removeItem("a b");
+    await storage.removeItem("a:.. :b");
+    expect(requests).toEqual([
+      {
+        method: "delete",
+        url: "http://localhost/api/v1/blobs/1/site:test/a%20b",
+      },
+      {
+        method: "delete",
+        url: "http://localhost/api/v1/blobs/1/site:test/a:..%20:b",
+      },
+    ]);
   });
 });

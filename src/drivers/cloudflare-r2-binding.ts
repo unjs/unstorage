@@ -16,8 +16,10 @@ export default defineDriver((opts: CloudflareR2Options = {}) => {
 
   const getKeys = async (base?: string) => {
     const binding = getR2Binding(opts.binding);
+    // Trailing `:` so that base `app` does not also match `apple:*`
+    const prefix = joinKeys(opts.base || "", base || "");
     const kvList = await binding.list(
-      base || opts.base ? { prefix: r(base) } : undefined
+      prefix ? { prefix: `${prefix}:` } : undefined
     );
     return kvList.objects.map((obj) => obj.key);
   };

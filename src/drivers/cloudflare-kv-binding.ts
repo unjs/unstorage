@@ -22,12 +22,16 @@ export default defineDriver((opts: KVOptions) => {
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   async function getKeys(base: string = "") {
-    base = r(base);
+    // Trailing `:` so that base `app` does not also match `apple:*`
+    const prefix = joinKeys(opts.base || "", base);
     const binding = getKVBinding(opts.binding);
     const keys = [];
     let cursor: string | undefined = undefined;
     do {
-      const kvList = await binding.list({ prefix: base || undefined, cursor });
+      const kvList = await binding.list({
+        prefix: prefix ? `${prefix}:` : undefined,
+        cursor,
+      });
 
       keys.push(...kvList.keys);
       cursor = (kvList.list_complete ? undefined : kvList.cursor) as

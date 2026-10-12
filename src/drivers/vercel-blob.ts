@@ -33,6 +33,12 @@ export default defineDriver<VercelBlobOptions>((opts) => {
   const r = (...keys: string[]) =>
     joinKeys(optsBase, ...keys).replace(/:/g, "/");
 
+  // Trailing `/` so that base `app` does not also match `apple/*`
+  const listPrefix = (base?: string) => {
+    const prefix = r(base || "");
+    return prefix ? `${prefix}/` : undefined;
+  };
+
   const envName = `${opts.envPrefix || "BLOB"}_READ_WRITE_TOKEN`;
 
   const getToken = () => {
@@ -112,7 +118,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
         const listBlobResult: Awaited<ReturnType<typeof list>> = await list({
           token: getToken(),
           cursor,
-          prefix: r(base),
+          prefix: listPrefix(base),
         });
         cursor = listBlobResult.cursor;
         for (const blob of listBlobResult.blobs) {
@@ -133,7 +139,7 @@ export default defineDriver<VercelBlobOptions>((opts) => {
         const listBlobResult: Awaited<ReturnType<typeof list>> = await list({
           token: getToken(),
           cursor,
-          prefix: r(base),
+          prefix: listPrefix(base),
         });
         blobs.push(...listBlobResult.blobs);
         cursor = listBlobResult.cursor;

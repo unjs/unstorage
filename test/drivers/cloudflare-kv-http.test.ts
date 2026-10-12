@@ -123,3 +123,54 @@ describe("drivers: cloudflare-kv-http (key encoding)", async () => {
     ]);
   });
 });
+
+describe("drivers: cloudflare-kv-http (list prefix)", async () => {
+  const requests: { method: string; url: string; body: string }[] = [];
+  const server = createServer(async (req, res) => {
+    let body = "";
+    for await (const chunk of req) body += chunk;
+    requests.push({ method: req.method!, url: req.url!, body });
+    res.setHeader("content-type", "application/json");
+    res.end(
+      JSON.stringify({
+        success: true,
+        result: req.url!.includes("/keys") ? [{ name: "app:sub:a" }] : null,
+        result_info: {},
+      })
+    );
+  });
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  afterAll(() => new Promise<void>((resolve) => server.close(() => resolve())));
+
+  const nsPath = "/client/v4/accounts/acc/storage/kv/namespaces/ns";
+  const driver = cfKvHttpDriver({
+    accountId: "acc",
+    namespaceId: "ns",
+    apiToken: "token",
+    apiURL: `http://localhost:${(server.address() as AddressInfo).port}`,
+    base: "app",
+  });
+
+  it("lists keys under base with a trailing separator", async () => {
+    requests.length = 0;
+    await driver.getKeys("", {});
+    await driver.getKeys("sub:", {});
+    expect(requests.map((r) => r.url)).toEqual([
+      `${nsPath}/keys?prefix=app:`,
+      `${nsPath}/keys?prefix=app:sub:`,
+    ]);
+  });
+
+  it("clears only keys under the given base", async () => {
+    requests.length = 0;
+    await driver.clear!("sub:", {});
+    expect(requests).toEqual([
+      { method: "GET", url: `${nsPath}/keys?prefix=app:sub:`, body: "" },
+      {
+        method: "POST",
+        url: `${nsPath}/bulk/delete`,
+        body: JSON.stringify(["app:sub:a"]),
+      },
+    ]);
+  });
+});

@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { request } from "node:http";
 import { describe, it, expect } from "vitest";
 import { serve } from "srvx";
 import { $fetch } from "ofetch";
@@ -150,4 +151,30 @@ function createTestStorage() {
   });
 
   return storage;
+}
+
+describe("server (keys)", () => {
+  it("decodes percent-encoded keys", async () => {
+    const storage = createStorage();
+    const server = await serve({ port: 0, fetch: createStorageHandler(storage) });
+    try {
+      expect(await rawRequest(server.url!, "/a%20b/c%25d", "PUT")).toBe(200);
+      expect(await storage.getItem("a b:c%d")).toBe("x");
+    } finally {
+      await server.close();
+    }
+  });
+});
+
+// Unlike `fetch`, does not resolve `.` / `..` segments in the path
+function rawRequest(baseURL: string, path: string, method: string) {
+  const { port } = new URL(baseURL);
+  return new Promise<number | undefined>((resolve, reject) => {
+    const req = request({ hostname: "localhost", port, path, method }, (res) => {
+      res.resume();
+      resolve(res.statusCode);
+    });
+    req.on("error", reject);
+    req.end(method === "PUT" ? "x" : undefined);
+  });
 }

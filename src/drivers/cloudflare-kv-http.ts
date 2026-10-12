@@ -1,4 +1,10 @@
-import { createError, createRequiredError, type DriverFactory, joinKeys } from "./utils/index.ts";
+import {
+  createError,
+  createRequiredError,
+  type DriverFactory,
+  encodeURLSegment,
+  joinKeys,
+} from "./utils/index.ts";
 import { createFetch, FetchError } from "./utils/fetch.ts";
 
 interface KVAuthAPIToken {
@@ -110,9 +116,13 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
 
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
+  // Encode key as a single URL path segment so it can never navigate out of
+  // `/values/` or `/metadata/` (Cloudflare expects percent-encoded key names)
+  const keyPath = (key: string) => encodeURLSegment(DRIVER_NAME, r(key), key);
+
   const hasItem = async (key: string) => {
     try {
-      const res = await kvFetch(`/metadata/${r(key)}`).then((res) => res.json());
+      const res = await kvFetch(`/metadata/${keyPath(key)}`).then((res) => res.json());
       return (res as { success?: boolean })?.success === true;
     } catch (error) {
       if (error instanceof FetchError && error.status === 404) {
@@ -125,7 +135,7 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
   const getItem = async (key: string) => {
     try {
       // Cloudflare API returns with `content-type: application/octet-stream`
-      return await kvFetch(`/values/${r(key)}`).then((res) => res.text());
+      return await kvFetch(`/values/${keyPath(key)}`).then((res) => res.text());
     } catch (error) {
       if (error instanceof FetchError && error.status === 404) {
         return null;
@@ -135,7 +145,7 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
   };
 
   const setItem = async (key: string, value: any, topts: any) => {
-    await kvFetch(`/values/${r(key)}`, {
+    await kvFetch(`/values/${keyPath(key)}`, {
       method: "PUT",
       body: value,
       query: topts?.ttl ? { expiration_ttl: Math.max(topts?.ttl, opts.minTTL || 60) } : undefined,
@@ -143,7 +153,7 @@ const driver: DriverFactory<KVHTTPOptions> = (opts) => {
   };
 
   const removeItem = async (key: string) => {
-    await kvFetch(`/values/${r(key)}`, { method: "DELETE" });
+    await kvFetch(`/values/${keyPath(key)}`, { method: "DELETE" });
   };
 
   type KeysResponse = {

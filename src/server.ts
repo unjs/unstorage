@@ -59,7 +59,7 @@ async function handleRequest(
   opts: StorageServerOptions,
   req: globalThis.Request,
 ): Promise<globalThis.Response> {
-  const _path = opts.resolvePath?.(req) ?? requestPath(req.url);
+  const _path = opts.resolvePath?.(req) ?? decodePath(requestPath(req.url));
   const lastChar = _path[_path.length - 1];
   const isBaseKey = lastChar === ":" || lastChar === "/";
   const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
@@ -146,6 +146,18 @@ function requestPath(url: string): string {
   }
   const queryStart = url.indexOf("?", pathStart);
   return queryStart === -1 ? url.slice(pathStart) : url.slice(pathStart, queryStart);
+}
+
+/** Decode a percent-encoded request path (the http driver encodes each key segment). */
+function decodePath(path: string): string {
+  if (!path.includes("%")) {
+    return path;
+  }
+  try {
+    return decodeURIComponent(path);
+  } catch {
+    throw new HTTPError(400, "Invalid key");
+  }
 }
 
 /** Values a driver can return as-is. Anything else is serialized. */

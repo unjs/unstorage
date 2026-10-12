@@ -1,5 +1,5 @@
 import type { TransactionOptions } from "../types.ts";
-import { type DriverFactory } from "./utils/index.ts";
+import { type DriverFactory, encodeURLKey } from "./utils/index.ts";
 import { FetchError, fetchRequest } from "./utils/fetch.ts";
 import { joinURL } from "./utils/path.ts";
 
@@ -11,9 +11,10 @@ export interface HTTPOptions {
 const DRIVER_NAME = "http";
 
 const driver: DriverFactory<HTTPOptions> = (opts) => {
-  const r = (key: string = "") => joinURL(opts.base!, key.replace(/:/g, "/"));
+  const r = (key: string = "") => joinURL(opts.base!, encodeURLKey(DRIVER_NAME, key));
 
-  const rBase = (key: string = "") => joinURL(opts.base!, (key || "/").replace(/:/g, "/") + ":");
+  const rBase = (key: string = "") =>
+    joinURL(opts.base!, (encodeURLKey(DRIVER_NAME, key, true) || "/") + ":");
 
   const catchFetchError = (error: unknown, fallbackVal: any = null) => {
     if (error instanceof FetchError && error.status === 404) {

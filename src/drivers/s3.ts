@@ -4,6 +4,7 @@ import {
   importLib,
   type LibImport,
   normalizeKey,
+  encodeURLKey,
   createError,
   type DriverDependencies,
 } from "./utils/index.ts";
@@ -110,7 +111,7 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
 
   const baseURL = `${options.endpoint.replace(/\/$/, "")}/${options.bucket || ""}`;
 
-  const url = (key: string = "") => `${baseURL}/${normalizeKey(key, "/")}`;
+  const url = (key: string = "") => `${baseURL}/${encodeURLKey(DRIVER_NAME, key)}`;
 
   const awsFetch = async (url: string, opts?: RequestInit) => {
     const request = await (await getAwsClient()).sign(url, opts);
@@ -182,7 +183,7 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
   };
 
   // https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
-  const getObject = (key: string) => {
+  const getObject = async (key: string) => {
     return awsFetch(url(key));
   };
 

@@ -158,6 +158,7 @@ describe("drivers: s3 (listObjects)", () => {
     "",
     '<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"/>',
     "<DeleteResult><Deleted><Key>other/e.json</Key></Deleted></DeleteResult>",
+    '<s3:DeleteResult xmlns:s3="http://s3.amazonaws.com/doc/2006-03-01/"><s3:Deleted><s3:Key>other/e.json</s3:Key></s3:Deleted></s3:DeleteResult>',
   ])("accepts a successful bulk delete response: %s", async (response) => {
     deleteOverrides = [new Response(response)];
     await expect(driver().clear!("other", {})).resolves.toBeUndefined();
@@ -185,19 +186,23 @@ describe("drivers: s3 (listObjects)", () => {
     },
   );
 
-  it("stops after an object error in a later bulk delete batch", async () => {
-    pageSize = 1000;
-    objects = Array.from({ length: 2500 }, (_, i) => `bulk/key-${i}.json`);
-    deleteOverrides = [
-      new Response("<DeleteResult/>"),
-      new Response(
-        "<DeleteResult><Error><Key>bulk/key-1000.json</Key><Code>AccessDenied</Code><Message>Access Denied</Message></Error></DeleteResult>",
-      ),
-    ];
-    await expect(driver().clear!("bulk", {})).rejects.toThrow(/key-1000\.json.*AccessDenied/);
-    expect(requests.filter((r) => r.endsWith("?delete"))).toHaveLength(2);
-    expect(deleted).toHaveLength(2000);
-  });
+  it.each(["", "s3:", "s3-api.v1:"])(
+    "stops after a later bulk delete batch with %sError",
+    async (prefix) => {
+      pageSize = 1000;
+      objects = Array.from({ length: 2500 }, (_, i) => `bulk/key-${i}.json`);
+      const xmlns = prefix ? `xmlns:${prefix.slice(0, -1)}` : "xmlns";
+      deleteOverrides = [
+        new Response("<DeleteResult/>"),
+        new Response(
+          `<${prefix}DeleteResult ${xmlns}="http://s3.amazonaws.com/doc/2006-03-01/"><${prefix}Error><${prefix}Key>bulk/key-1000.json</${prefix}Key><${prefix}Code>AccessDenied</${prefix}Code><${prefix}Message>Access Denied</${prefix}Message></${prefix}Error></${prefix}DeleteResult>`,
+        ),
+      ];
+      await expect(driver().clear!("bulk", {})).rejects.toThrow(/key-1000\.json.*AccessDenied/);
+      expect(requests.filter((r) => r.endsWith("?delete"))).toHaveLength(2);
+      expect(deleted).toHaveLength(2000);
+    },
+  );
 
   it("rejects bulk delete HTTP errors", async () => {
     deleteOverrides = [

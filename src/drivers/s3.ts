@@ -235,7 +235,7 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
           body,
         }).then((r) => r?.text());
         // DeleteObjects can return HTTP 200 with per-object errors.
-        if (res && /<Error(?:\s|\/?>)/.test(res)) {
+        if (res && /<(?:[^<>\s/:]+:)?Error(?:\s|\/?>)/.test(res)) {
           throw createError(DRIVER_NAME, `Failed to delete objects: ${res}`);
         }
       }

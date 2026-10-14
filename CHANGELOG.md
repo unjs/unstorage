@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v2.0.0-alpha.11
+
+[compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.10...v2.0.0-alpha.11)
+
+### 🚀 Enhancements
+
+- **cloudflare:** ⚠️  Resolve binding names from `cloudflare:workers` env only ([0dfd172](https://github.com/unjs/unstorage/commit/0dfd172))
+- Support `getItem(key, { type })` ([#610](https://github.com/unjs/unstorage/pull/610))
+
+### 🩹 Fixes
+
+- **drivers:** Import optional dependencies without static specifiers ([#840](https://github.com/unjs/unstorage/pull/840))
+- **http, s3, cloudflare-kv-http:** Encode key segments in urls ([8655788](https://github.com/unjs/unstorage/commit/8655788))
+- **netlify-blobs, vercel-runtime-cache, redis, upstash:** Validate or escape keys used in urls and patterns ([7bb46df](https://github.com/unjs/unstorage/commit/7bb46df))
+- **cloudflare-kv-binding, cloudflare-r2-binding, cloudflare-kv-http, vercel-blob:** Use trailing separator for list prefixes ([a81c4c1](https://github.com/unjs/unstorage/commit/a81c4c1))
+- **netlify-blobs:** Reject control characters and leading/trailing spaces in keys ([8595e68](https://github.com/unjs/unstorage/commit/8595e68))
+- Reject empty keys and dot segments in storage, prefixStorage and server ([e2a6747](https://github.com/unjs/unstorage/commit/e2a6747))
+- **prefixStorage:** Reject bases containing `?` ([f2377ab](https://github.com/unjs/unstorage/commit/f2377ab))
+- **server:** Ignore query for base keys and reject HEAD/PUT on base keys ([5ab2f71](https://github.com/unjs/unstorage/commit/5ab2f71))
+- **cloudflare-cache-binding:** Encode key segments in cache urls ([884502a](https://github.com/unjs/unstorage/commit/884502a))
+- **server:** Decode paths returned by `resolvePath` ([419921c](https://github.com/unjs/unstorage/commit/419921c))
+- **vercel-runtime-cache:** Resolve the request cache on every call ([#844](https://github.com/unjs/unstorage/pull/844))
+- **memory:** Preserve TTLs beyond the native timer limit ([#845](https://github.com/unjs/unstorage/pull/845))
+
+### 💅 Refactors
+
+- **cloudflare:** Remove legacy `globalThis.__env__` ([ccddb86](https://github.com/unjs/unstorage/commit/ccddb86))
+
+### 📖 Documentation
+
+- Correct stale jest reference in contribution guide ([#839](https://github.com/unjs/unstorage/pull/839))
+
+### 🏡 Chore
+
+- Update deps ([f36828b](https://github.com/unjs/unstorage/commit/f36828b))
+- Apply automated updates ([bab8ad8](https://github.com/unjs/unstorage/commit/bab8ad8))
+- Update deps ([130b529](https://github.com/unjs/unstorage/commit/130b529))
+- Lint ([aba7648](https://github.com/unjs/unstorage/commit/aba7648))
+
+#### ⚠️ Breaking Changes
+
+- **cloudflare:** ⚠️  Resolve binding names from `cloudflare:workers` env only ([0dfd172](https://github.com/unjs/unstorage/commit/0dfd172))
+
+### ❤️ Contributors
+
+- Max ([@onmax](https://github.com/onmax))
+- Baptiste Leproux ([@larbish](https://github.com/larbish))
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- João Lucas ([@jlucaso1](https://github.com/jlucaso1))
+- Ump45nose ([@ump45nose](https://github.com/ump45nose))
+- Pi0x <x@pi0.io>
+
 ## v2.0.0-alpha.10
 
 [compare changes](https://github.com/unjs/unstorage/compare/v2.0.0-alpha.9...v2.0.0-alpha.10)

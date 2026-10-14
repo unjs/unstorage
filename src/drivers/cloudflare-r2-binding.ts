@@ -19,7 +19,9 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket | Promise<CF.R2Buck
 
   const getKeys = async (base?: string) => {
     const binding = await getR2Binding(opts.binding);
-    const kvList = await binding.list(base || opts.base ? { prefix: r(base) } : undefined);
+    // Trailing `:` so that base `app` does not also match `apple:*`
+    const prefix = joinKeys(opts.base || "", base || "");
+    const kvList = await binding.list(prefix ? { prefix: `${prefix}:` } : undefined);
     return kvList.objects.map((obj) => obj.key);
   };
 

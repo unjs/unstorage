@@ -1,4 +1,5 @@
 import {
+  assertURLPathKey,
   createError,
   createRequiredError,
   type DriverFactory,
@@ -80,6 +81,9 @@ const driver: DriverFactory<NetlifyStoreOptions, Promise<Store>> = (options) => 
       return getStore({ name: encodeURIComponent(name), fetch, ...opts });
     })());
 
+  // `@netlify/blobs` puts keys into the request URL without encoding them
+  const k = (key: string) => assertURLPathKey(DRIVER_NAME, key);
+
   // Native conditional write. Maps `ifMatch:<etag>` to `onlyIfMatch` and
   // `ifNoneMatch:"*"` to `onlyIfNew`. The remaining shapes (`ifMatch:"*"` and
   // `ifNoneMatch:<etag>`) are emulated by reading current metadata then
@@ -90,6 +94,7 @@ const driver: DriverFactory<NetlifyStoreOptions, Promise<Store>> = (options) => 
     value: string | ArrayBuffer | Blob,
     opts: { ifMatch?: string; ifNoneMatch?: string } | undefined,
   ): Promise<{ etag: string }> => {
+    key = k(key);
     const client = await getClient();
     const ifMatch = opts?.ifMatch;
     const ifNoneMatch = opts?.ifNoneMatch;
@@ -134,18 +139,18 @@ const driver: DriverFactory<NetlifyStoreOptions, Promise<Store>> = (options) => 
     options,
     getInstance: getClient,
     async hasItem(key) {
-      return (await getClient()).getMetadata(key).then(Boolean);
+      return (await getClient()).getMetadata(k(key)).then(Boolean);
     },
     getItem: async (key, tops) => {
       // @ts-expect-error has trouble with the overloaded types
-      return (await getClient()).get(key, tops as GetOptions);
+      return (await getClient()).get(k(key), tops as GetOptions);
     },
     async getMeta(key) {
-      const m = await (await getClient()).getMetadata(key);
+      const m = await (await getClient()).getMetadata(k(key));
       return m ? { ...m.metadata, etag: m.etag } : null;
     },
     async getItemRaw(key, topts) {
-      return (await getClient()).get(key, { type: topts?.type ?? "arrayBuffer" });
+      return (await getClient()).get(k(key), { type: topts?.type ?? "arrayBuffer" });
     },
     async setItem(key, value, topts?: SetOptions & { ifMatch?: string; ifNoneMatch?: string }) {
       if (topts?.ifMatch !== undefined || topts?.ifNoneMatch !== undefined) {
@@ -154,7 +159,7 @@ const driver: DriverFactory<NetlifyStoreOptions, Promise<Store>> = (options) => 
       // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
       // TODO(serhalp): Allow drivers to return a value from `setItem`. The @netlify/blobs v10
       // functionality isn't usable without this.
-      await (await getClient()).set(key, value, topts);
+      await (await getClient()).set(k(key), value, topts);
     },
     async setItemRaw(
       key,
@@ -166,10 +171,10 @@ const driver: DriverFactory<NetlifyStoreOptions, Promise<Store>> = (options) => 
       }
       // NOTE: this returns either Promise<void> (pre-v10) or Promise<WriteResult> (v10+)
       // See TODO above.
-      await (await getClient()).set(key, value, topts);
+      await (await getClient()).set(k(key), value, topts);
     },
     async removeItem(key) {
-      return (await getClient()).delete(key);
+      return (await getClient()).delete(k(key));
     },
     async getKeys(base?: string, tops?: GetKeysOptions & Omit<ListOptions, "prefix" | "paginate">) {
       return (await (await getClient()).list({ ...tops, prefix: base })).blobs.map(

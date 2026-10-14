@@ -668,3 +668,101 @@ describe("getItems() with drivers that normalize keys", () => {
     ]);
   });
 });
+
+describe("invalid keys", () => {
+  // An empty key would reach the driver's root (e.g. the item named `base`)
+  // and `.` / `..` segments could escape it
+  const createSpyStorage = () => {
+    const calls: unknown[] = [];
+    const driver = new Proxy(memory(), {
+      get(target, prop, receiver) {
+        const value = Reflect.get(target, prop, receiver);
+        return typeof value === "function"
+          ? (...args: unknown[]) => {
+              calls.push(args[0]);
+              return value.apply(target, args);
+            }
+          : value;
+      },
+    });
+    return { storage: createStorage({ driver }), calls };
+  };
+
+  const emptyKeys = ["", ":", "/", "?x", ":?x", "::"];
+  const dotKeys = [".", "..", "a:..", "../a", "a/./b", String.raw`a\..\b`];
+
+  it.each([...emptyKeys, ...dotKeys])("rejects item operations with key %j", async (key) => {
+    const { storage, calls } = createSpyStorage();
+    const invalid = "Invalid key";
+    await expect(storage.hasItem(key)).rejects.toThrow(invalid);
+    await expect(storage.getItem(key)).rejects.toThrow(invalid);
+    await expect(storage.getItemRaw(key)).rejects.toThrow(invalid);
+    await expect(storage.setItem(key, "x")).rejects.toThrow(invalid);
+    await expect(storage.setItem(key, undefined as any)).rejects.toThrow(invalid);
+    await expect(storage.setItemRaw(key, "x")).rejects.toThrow(invalid);
+    await expect(storage.removeItem(key)).rejects.toThrow(invalid);
+    await expect(storage.getMeta(key)).rejects.toThrow(invalid);
+    await expect(storage.setMeta(key, {})).rejects.toThrow(invalid);
+    await expect(storage.removeMeta(key)).rejects.toThrow(invalid);
+    await expect(storage.getItems(["a", key])).rejects.toThrow(invalid);
+    await expect(
+      storage.setItems([
+        { key: "a", value: "x" },
+        { key, value: "x" },
+      ]),
+    ).rejects.toThrow(invalid);
+    expect(calls).toEqual([]);
+  });
+
+  it.each(dotKeys)("rejects base %j", async (base) => {
+    const { storage, calls } = createSpyStorage();
+    await expect(storage.getKeys(base)).rejects.toThrow("Invalid base");
+    await expect(storage.clear(base)).rejects.toThrow("Invalid base");
+    expect(() => storage.mount(base, memory())).toThrow("Invalid base");
+    expect(calls).toEqual([]);
+  });
+
+  it("allows dots that are not whole segments", async () => {
+    const { storage } = createSpyStorage();
+    const keys = ["...", ".a", "a.", "a..b", "a:.b:c.."];
+    for (const key of keys) {
+      await storage.setItem(key, "x");
+      expect(await storage.getItem(key)).toBe("x");
+    }
+    expect((await storage.getKeys()).sort()).toEqual([...keys].sort());
+    expect(await storage.getKeys(".a")).toEqual([]);
+  });
+
+  it("still lists and clears with an empty base", async () => {
+    const { storage } = createSpyStorage();
+    await storage.setItem("a:b", "x");
+    expect(await storage.getKeys("")).toEqual(["a:b"]);
+    await storage.clear("");
+    expect(await storage.getKeys()).toEqual([]);
+  });
+
+  it.each(emptyKeys)("prefixStorage does not reach the parent item with key %j", async (key) => {
+    const storage = createStorage();
+    await storage.setItem("tenant1", "parent");
+    const pStorage = prefixStorage(storage, "tenant1");
+    const invalid = "Invalid key";
+    await expect(pStorage.getItem(key)).rejects.toThrow(invalid);
+    await expect(pStorage.get(key)).rejects.toThrow(invalid);
+    await expect(pStorage.hasItem(key)).rejects.toThrow(invalid);
+    await expect(pStorage.setItem(key, "x")).rejects.toThrow(invalid);
+    await expect(pStorage.removeItem(key)).rejects.toThrow(invalid);
+    await expect(pStorage.del(key)).rejects.toThrow(invalid);
+    await expect(pStorage.getItems([key])).rejects.toThrow(invalid);
+    await expect(pStorage.setItems([{ key, value: "x" }])).rejects.toThrow(invalid);
+    expect(await storage.getItem("tenant1")).toBe("parent");
+    // Listing the namespace still works
+    expect(await pStorage.getKeys(key.startsWith("?") ? "" : key)).toEqual([]);
+  });
+
+  it.each(["alice?x", "alice?", "?alice", "users:alice?:x"])(
+    "prefixStorage rejects base %j",
+    (base) => {
+      expect(() => prefixStorage(createStorage(), base)).toThrow("Invalid base");
+    },
+  );
+});

@@ -1,6 +1,6 @@
 import type { Storage, TransactionOptions, StorageMeta, SetItemResult } from "./types.ts";
 import { stringify } from "./_utils.ts";
-import { normalizeKey, normalizeBaseKey } from "./utils.ts";
+import { normalizeKey, normalizeBaseKey, hasDotSegment } from "./utils.ts";
 import { CASMismatchError, CASUnsupportedError } from "./errors.ts";
 
 export type StorageServerRequest = {
@@ -60,7 +60,8 @@ async function handleRequest(
   opts: StorageServerOptions,
   req: globalThis.Request,
 ): Promise<globalThis.Response> {
-  const _path = opts.resolvePath?.(req) ?? requestPath(req.url);
+  // The query is dropped (also after decoding `%3F`) so that it cannot affect `isBaseKey`
+  const _path = decodePath(opts.resolvePath?.(req) ?? requestPath(req.url)).split("?")[0]!;
   const lastChar = _path[_path.length - 1];
   const isBaseKey = lastChar === ":" || lastChar === "/";
   const key = isBaseKey ? normalizeBaseKey(_path) : normalizeKey(_path);
@@ -69,6 +70,15 @@ async function handleRequest(
   const type = MethodToTypeMap[req.method as keyof typeof MethodToTypeMap];
   if (!type) {
     throw new HTTPError(405, `Method Not Allowed: ${req.method}`);
+  }
+  // An empty item key would target the driver's root and `.` / `..` segments could escape it
+  if ((!isBaseKey && !key) || hasDotSegment(key)) {
+    throw new HTTPError(400, "Invalid key");
+  }
+  // HEAD and PUT are item operations, so a base key (e.g. `users:alice:`)
+  // would be authorized but then normalized to the item `users:alice`
+  if (isBaseKey && (req.method === "HEAD" || req.method === "PUT")) {
+    throw new HTTPError(400, `Invalid key: ${req.method} is not allowed on a base key`);
   }
   if (opts.authorize) {
     try {
@@ -184,6 +194,18 @@ function requestPath(url: string): string {
   }
   const queryStart = url.indexOf("?", pathStart);
   return queryStart === -1 ? url.slice(pathStart) : url.slice(pathStart, queryStart);
+}
+
+/** Decode a percent-encoded request path (the http driver encodes each key segment). */
+function decodePath(path: string): string {
+  if (!path.includes("%")) {
+    return path;
+  }
+  try {
+    return decodeURIComponent(path);
+  } catch {
+    throw new HTTPError(400, "Invalid key");
+  }
 }
 
 /** Values a driver can return as-is. Anything else is serialized. */

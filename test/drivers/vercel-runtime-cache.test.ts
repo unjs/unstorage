@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { createStorage } from "../../src/index.ts";
 import vercelRuntimeCacheDriver from "../../src/drivers/vercel-runtime-cache.ts";
 import { testDriver } from "./utils.ts";
 
@@ -42,5 +43,37 @@ describe("drivers: vercel-runtime-cache", async () => {
         expect(await c.storage.getItem("t:1")).toBe(null);
       });
     },
+  });
+});
+
+describe("drivers: vercel-runtime-cache (key encoding)", () => {
+  const SYMBOL_FOR_REQ_CONTEXT = Symbol.for("@vercel/request-context");
+  afterEach(() => {
+    delete (globalThis as any)[SYMBOL_FOR_REQ_CONTEXT];
+  });
+
+  it("encodes keys so they cannot escape the cache endpoint", async () => {
+    const cache = {
+      get: vi.fn(async () => undefined),
+      set: vi.fn(async () => {}),
+      delete: vi.fn(async () => {}),
+      expireTag: vi.fn(async () => {}),
+    };
+    (globalThis as any)[SYMBOL_FOR_REQ_CONTEXT] = { get: () => ({ cache }) };
+    const storage = createStorage({ driver: vercelRuntimeCacheDriver({}) });
+
+    await storage.setItem("a#b", "x");
+    await storage.setItem("%2e%2e", "x");
+    await storage.setItem("x:.\t.", "x");
+    expect(cache.set.mock.calls.map((call: any[]) => call[0])).toEqual([
+      "a%23b",
+      "%252e%252e",
+      "x:.%09.",
+    ]);
+
+    for (const key of ["", ":", ".", ".."]) {
+      await expect(storage.removeItem(key)).rejects.toThrow("Invalid key");
+    }
+    expect(cache.delete).not.toHaveBeenCalled();
   });
 });

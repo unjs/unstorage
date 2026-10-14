@@ -17,6 +17,54 @@ describe("drivers: fs", () => {
         await ctx.storage.setItem("s1:a", "test_data");
         expect(await readFile(resolve(dir, "s1/a"), "utf8")).toBe("test_data");
       });
+      it("removeItem rejects on unexpected unlink errors", async () => {
+        await ctx.storage.setItem("unlink-error:key", "value");
+        const unlinkSpy = vi
+          .spyOn(fsPromises, "unlink")
+          .mockRejectedValueOnce(Object.assign(new Error("permission denied"), { code: "EACCES" }));
+        try {
+          await expect(ctx.storage.removeItem("unlink-error:key")).rejects.toThrow(
+            "permission denied",
+          );
+        } finally {
+          unlinkSpy.mockRestore();
+        }
+        expect(await ctx.storage.hasItem("unlink-error:key")).toBe(true);
+      });
+      it("removeItem of a missing key resolves", async () => {
+        await expect(ctx.storage.removeItem("missing:key")).resolves.toBeUndefined();
+      });
+      it("getItem rejects on unexpected readFile errors", async () => {
+        await ctx.storage.setItem("read-error:key", "value");
+        const readFileSpy = vi
+          .spyOn(fsPromises, "readFile")
+          .mockRejectedValueOnce(Object.assign(new Error("permission denied"), { code: "EACCES" }));
+        try {
+          await expect(ctx.storage.getItem("read-error:key")).rejects.toThrow("permission denied");
+        } finally {
+          readFileSpy.mockRestore();
+        }
+      });
+      it("getKeys rejects on unexpected readdir errors", async () => {
+        const readdirSpy = vi
+          .spyOn(fsPromises, "readdir")
+          .mockRejectedValueOnce(Object.assign(new Error("permission denied"), { code: "EACCES" }));
+        try {
+          await expect(ctx.storage.getKeys()).rejects.toThrow("permission denied");
+        } finally {
+          readdirSpy.mockRestore();
+        }
+      });
+      it("ensuredir rethrows unexpected mkdir errors", async () => {
+        const mkdirSpy = vi
+          .spyOn(fsPromises, "mkdir")
+          .mockRejectedValueOnce(Object.assign(new Error("permission denied"), { code: "EACCES" }));
+        try {
+          await expect(ensuredir(resolve(dir, "mkdir-error"))).rejects.toThrow("permission denied");
+        } finally {
+          mkdirSpy.mockRestore();
+        }
+      });
       it("writes in place unless atomic is enabled", async () => {
         await ctx.storage.setItem("inplace:key", "original");
         const filePath = resolve(dir, "inplace/key");

@@ -8,5 +8,5 @@
   "devDependencies": {
     "undocs": "npm:undocs-nightly@0.10.1-20260922-215730-10f5034"
   },
-  "packageManager": "pnpm@11.28.3"
+  "packageManager": "pnpm@11.28.5"
 }

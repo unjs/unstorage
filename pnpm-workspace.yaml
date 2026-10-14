@@ -1,8 +1,12 @@
 packages: []
-ignoredBuiltDependencies:
-  - "@parcel/watcher"
-  - "@tailwindcss/oxide"
-  - esbuild
-  - vue-demi
-onlyBuiltDependencies:
-  - better-sqlite3
+shamefullyHoist: true
+allowBuilds:
+  "@parcel/watcher": false
+  "@tailwindcss/oxide": false
+  better-sqlite3: true
+  esbuild: false
+  mongodb-memory-server: false
+  msgpackr-extract: false
+  protobufjs: false
+  vue-demi: false
+  workerd: false

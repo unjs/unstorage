@@ -184,19 +184,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@10.17.0",
-  "pnpm": {
-    "ignoredBuiltDependencies": [
-      "@parcel/watcher",
-      "@tailwindcss/oxide",
-      "esbuild",
-      "vue-demi",
-      "workerd"
-    ],
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "esbuild",
-      "mongodb-memory-server"
-    ]
-  }
+  "packageManager": "pnpm@11.28.2"
 }

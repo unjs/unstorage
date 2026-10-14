@@ -72,45 +72,22 @@ function _scheduleExpiry(
   key: string,
   ttl?: number,
 ) {
-  if (!ttl) {
+  if (!ttl || !Number.isFinite(ttl)) {
     return;
   }
-  const ttlMs = ttl * 1000;
-  if (ttlMs > MAX_TIMER_DELAY && Number.isFinite(ttlMs)) {
-    _scheduleLongExpiry(data, timers, key, ttlMs);
-    return;
-  }
-  const timer = setTimeout(() => {
-    data.delete(key);
-    timers.delete(key);
-  }, ttlMs);
-  if (timer && typeof timer === "object" && "unref" in timer) {
-    timer.unref();
-  }
-  timers.set(key, timer);
-}
-
-function _scheduleLongExpiry(
-  data: Map<string, any>,
-  timers: Map<string, ReturnType<typeof setTimeout>>,
-  key: string,
-  ttlMs: number,
-) {
-  const clock = globalThis.performance;
-  const now = clock ? () => clock.now() : Date.now;
-  const deadline = now() + ttlMs;
+  // Delays above MAX_TIMER_DELAY overflow to 1ms, so long TTLs are split into chunks
+  let remaining = ttl * 1000;
   const schedule = () => {
-    const timer = setTimeout(
-      () => {
-        if (now() < deadline) {
-          schedule();
-          return;
-        }
-        data.delete(key);
-        timers.delete(key);
-      },
-      Math.min(deadline - now(), MAX_TIMER_DELAY),
-    );
+    const delay = Math.min(remaining, MAX_TIMER_DELAY);
+    remaining -= delay;
+    const timer = setTimeout(() => {
+      if (remaining > 0) {
+        schedule();
+        return;
+      }
+      data.delete(key);
+      timers.delete(key);
+    }, delay);
     if (timer && typeof timer === "object" && "unref" in timer) {
       timer.unref();
     }

@@ -37,6 +37,17 @@ describe("drivers: memory", () => {
     }
   });
 
+  it("treats infinite TTL as no expiry", async () => {
+    const d = driver();
+    try {
+      d.setItem!("inf", "value", { ttl: Infinity });
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      expect(d.getItem("inf")).toBe("value");
+    } finally {
+      d.dispose!();
+    }
+  });
+
   it("retains long TTL until its deadline and then proactively expires", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "performance"] });
     const d = driver();

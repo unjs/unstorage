@@ -13,6 +13,9 @@ const DRIVER_NAME = "overlay";
 const driver: DriverFactory<OverlayStorageOptions> = (options) => {
   return {
     name: DRIVER_NAME,
+    // CAS is delegated to the top (writable) layer; preconditions evaluate
+    // against its state, not the merged overlay view.
+    flags: { cas: !!options.layers[0]?.flags?.cas },
     options: options,
     async hasItem(key, opts) {
       for (const layer of options.layers) {
@@ -40,10 +43,14 @@ const driver: DriverFactory<OverlayStorageOptions> = (options) => {
       }
       return null;
     },
-    // TODO: Support native meta
-    // async getMeta (key) {},
+    async getMeta(key, opts) {
+      return (await options.layers[0]?.getMeta?.(key, opts)) ?? null;
+    },
     async setItem(key, value, opts) {
-      await options.layers[0]?.setItem?.(key, value, opts);
+      return options.layers[0]?.setItem?.(key, value, opts);
+    },
+    async setItemRaw(key, value, opts) {
+      return options.layers[0]?.setItemRaw?.(key, value, opts);
     },
     async removeItem(key, opts) {
       await options.layers[0]?.setItem?.(key, OVERLAY_REMOVED, opts);

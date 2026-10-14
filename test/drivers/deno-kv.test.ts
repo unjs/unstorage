@@ -32,5 +32,6 @@ describe.skipIf(!hasDeno)("drivers: deno-kv", async () => {
     driver: httpDriver({
       base: `http://localhost:${randomPort}`,
     }),
+    supportsCAS: true,
   });
 });

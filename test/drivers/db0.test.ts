@@ -53,6 +53,7 @@ for (const driver of drivers) {
 
     testDriver({
       driver: () => db0Driver({ database: db }),
+      supportsCAS: true,
       additionalTests: (ctx) => {
         it("does not mutate input options", () => {
           const opts = { database: db };

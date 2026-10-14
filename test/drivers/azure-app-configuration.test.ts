@@ -4,6 +4,7 @@ import { testDriver } from "./utils.ts";
 
 describe.skip("drivers: azure-app-configuration", () => {
   testDriver({
+    supportsCAS: true,
     driver: driver({
       appConfigName: "unstoragetest",
       label: "dev",

@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## v1.17.6
+
+[compare changes](https://github.com/unjs/unstorage/compare/v1.17.5...v1.17.6)
+
+### 🩹 Fixes
+
+- **vercel-runtime-cache:** Resolve the request cache on every call ([#843](https://github.com/unjs/unstorage/pull/843))
+- **fs:** Ignore globs fail under dot-prefixed directories ([#768](https://github.com/unjs/unstorage/pull/768))
+- **fs:** Ensure directory exists before watching ([#703](https://github.com/unjs/unstorage/pull/703))
+- **http, s3, cloudflare-kv-http:** Encode key segments in urls ([f203c45](https://github.com/unjs/unstorage/commit/f203c45))
+- **netlify-blobs, vercel-runtime-cache, redis, upstash, vercel-kv:** Validate or escape keys used in urls and patterns ([59127d1](https://github.com/unjs/unstorage/commit/59127d1))
+- **cloudflare-kv-binding, cloudflare-r2-binding, cloudflare-kv-http, vercel-blob:** Use trailing separator for list prefixes ([92b952b](https://github.com/unjs/unstorage/commit/92b952b))
+- **netlify-blobs:** Reject control characters and leading/trailing spaces in keys ([8dae0aa](https://github.com/unjs/unstorage/commit/8dae0aa))
+- Reject empty keys and dot segments in storage, prefixStorage and server ([c7f65b7](https://github.com/unjs/unstorage/commit/c7f65b7))
+- **prefixStorage:** Reject bases containing `?` ([4189a67](https://github.com/unjs/unstorage/commit/4189a67))
+- **server:** Ignore query for base keys and reject HEAD/PUT on base keys ([552e562](https://github.com/unjs/unstorage/commit/552e562))
+
+### 🏡 Chore
+
+- Update deps ([dc34142](https://github.com/unjs/unstorage/commit/dc34142))
+- Fix type issues ([0deae7d](https://github.com/unjs/unstorage/commit/0deae7d))
+- Update to pnpm 11 ([88d29bb](https://github.com/unjs/unstorage/commit/88d29bb))
+
+### ✅ Tests
+
+- **vercel-kv:** Lazy import driver to fix vitest 5 collection without env ([0c53506](https://github.com/unjs/unstorage/commit/0c53506))
+
+### ❤️ Contributors
+
+- Pooya Parsa ([@pi0](https://github.com/pi0))
+- Kricsleo ([@kricsleo](https://github.com/kricsleo))
+- Jan Vennemann <jan.vennemann@gmx.net>
+- Baptiste Leproux ([@larbish](https://github.com/larbish))
+
 ## v1.17.5
 
 [compare changes](https://github.com/unjs/unstorage/compare/v1.17.4...v1.17.5)

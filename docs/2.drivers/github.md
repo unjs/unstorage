@@ -4,13 +4,13 @@ icon: mdi:github
 
 # GitHub
 
-> Read files from a remote GitHub repository.
+> Read and write files in a remote GitHub repository.
 
 ## Usage
 
 **Driver name:** `github`
 
-This read-only driver fetches the repository file list and caches it for 10 minutes by default. Providing a token is strongly recommended to avoid GitHub API rate limits. File contents are fetched separately from the raw content URL, using the same token.
+This driver fetches the repository file list and caches it for 10 minutes by default. Providing a token is strongly recommended to avoid GitHub API rate limits. File contents are fetched separately from the raw content URL, using the same token.
 
 ```js
 import { createStorage } from "unstorage";
@@ -62,3 +62,16 @@ const storage = createStorage({
 ::note
 GitHub Apps are not supported — use a personal access token.
 ::
+
+## Writing files
+
+To create, update, or delete files, provide a `token` with **Contents: read and write** access to the configured repository. Writes use the existing `branch` and `dir` options.
+
+With a driver configured for a repository and branch you can write to:
+
+```js
+await storage.setItem("comments/first.json", { message: "Hello!" });
+await storage.removeItem("comments/first.json");
+```
+
+Each successful file mutation creates a commit. Operations from one driver instance are serialized; batch writes and `clear()` are not atomic multi-file commits. GitHub API errors, including conflicts with other writers, are propagated.

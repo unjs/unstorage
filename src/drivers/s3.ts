@@ -228,13 +228,17 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
     } else {
       for (let i = 0; i < keys.length; i += MAX_BULK_DELETE) {
         const body = deleteKeysReq(keys.slice(i, i + MAX_BULK_DELETE));
-        await awsFetch(`${baseURL}?delete`, {
+        const res = await awsFetch(`${baseURL}?delete`, {
           method: "POST",
           headers: {
             "x-amz-checksum-sha256": await sha256Base64(body),
           },
           body,
-        });
+        }).then((r) => r?.text());
+        // DeleteObjects can return HTTP 200 with per-object errors.
+        if (res && /<(?:[^<>\s/:]+:)?Error(?:\s|\/?>)/.test(res)) {
+          throw createError(DRIVER_NAME, `Failed to delete objects: ${res}`);
+        }
       }
     }
   };

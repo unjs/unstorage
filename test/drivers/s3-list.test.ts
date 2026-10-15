@@ -16,6 +16,7 @@ let deleted: string[] = [];
 let echoStaleToken = false;
 /** Canned list responses, consumed one per list request. A number is returned as a bare status. */
 let listOverrides: Array<string | number> = [];
+let deleteOverrides: Response[] = [];
 
 function decodeXml(value: string) {
   return value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
@@ -49,13 +50,14 @@ describe("drivers: s3 (listObjects)", () => {
     deleted = [];
     echoStaleToken = false;
     listOverrides = [];
+    deleteOverrides = [];
     vi.stubGlobal("fetch", async (req: Request) => {
       const url = new URL(req.url);
       requests.push(`${req.method} ${url.pathname}${url.search}`);
       if (url.search === "?delete") {
         const body = await req.text();
         deleted.push(...[...body.matchAll(/<Key>(.+?)<\/Key>/g)].map((m) => decodeXml(m[1]!)));
-        return new Response("", { status: 200 });
+        return deleteOverrides.shift() || new Response("", { status: 200 });
       }
       if (req.method === "DELETE") {
         deleted.push(decodeURIComponent(url.pathname.slice("/test-bucket/".length)));
@@ -150,6 +152,68 @@ describe("drivers: s3 (listObjects)", () => {
     await driver().clear!("bulk", {});
     expect(requests.filter((r) => r.endsWith("?delete")).length).toBe(3);
     expect(deleted.length).toBe(2500);
+  });
+
+  it.each([
+    "",
+    '<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"/>',
+    "<DeleteResult><Deleted><Key>other/e.json</Key></Deleted></DeleteResult>",
+    '<s3:DeleteResult xmlns:s3="http://s3.amazonaws.com/doc/2006-03-01/"><s3:Deleted><s3:Key>other/e.json</s3:Key></s3:Deleted></s3:DeleteResult>',
+  ])("accepts a successful bulk delete response: %s", async (response) => {
+    deleteOverrides = [new Response(response)];
+    await expect(driver().clear!("other", {})).resolves.toBeUndefined();
+    expect(deleted).toEqual(["other/e.json"]);
+  });
+
+  it.each([
+    "<Deleted><Key>foo/a.json</Key></Deleted><Error><Key>foo/b.json</Key><Code>AccessDenied</Code><Message>Access Denied</Message></Error>",
+    "<Error><Key>foo/a.json</Key><Code>AccessDenied</Code><Message>Access Denied</Message></Error><Error><Key>foo/b.json</Key><Code>InternalError</Code><Message>Internal error</Message></Error>",
+  ])("rejects bulk delete object errors: %s", async (result) => {
+    objects = ["foo/a.json", "foo/b.json"];
+    const response = `<?xml version="1.0"?><DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">${result}</DeleteResult>`;
+    deleteOverrides = [new Response(response)];
+    await expect(driver().clear!("foo", {})).rejects.toThrow(
+      `[unstorage] [s3] Failed to delete objects: ${response}`,
+    );
+    expect(requests.filter((r) => r.endsWith("?delete"))).toHaveLength(1);
+  });
+
+  it.each(["<Error/>", "<Error><Code>AccessDenied</Code>"])(
+    "does not ignore an incomplete bulk delete error: %s",
+    async (response) => {
+      deleteOverrides = [new Response(response)];
+      await expect(driver().clear!("foo", {})).rejects.toThrow("Failed to delete objects");
+    },
+  );
+
+  it.each(["", "s3:", "s3-api.v1:"])(
+    "stops after a later bulk delete batch with %sError",
+    async (prefix) => {
+      pageSize = 1000;
+      objects = Array.from({ length: 2500 }, (_, i) => `bulk/key-${i}.json`);
+      const xmlns = prefix ? `xmlns:${prefix.slice(0, -1)}` : "xmlns";
+      deleteOverrides = [
+        new Response("<DeleteResult/>"),
+        new Response(
+          `<${prefix}DeleteResult ${xmlns}="http://s3.amazonaws.com/doc/2006-03-01/"><${prefix}Error><${prefix}Key>bulk/key-1000.json</${prefix}Key><${prefix}Code>AccessDenied</${prefix}Code><${prefix}Message>Access Denied</${prefix}Message></${prefix}Error></${prefix}DeleteResult>`,
+        ),
+      ];
+      await expect(driver().clear!("bulk", {})).rejects.toThrow(/key-1000\.json.*AccessDenied/);
+      expect(requests.filter((r) => r.endsWith("?delete"))).toHaveLength(2);
+      expect(deleted).toHaveLength(2000);
+    },
+  );
+
+  it("rejects bulk delete HTTP errors", async () => {
+    deleteOverrides = [
+      new Response("<Error><Code>AccessDenied</Code></Error>", {
+        status: 403,
+        statusText: "Forbidden",
+      }),
+    ];
+    await expect(driver().clear!("foo", {})).rejects.toThrow(
+      "[unstorage] [s3] [POST] https://s3.test/test-bucket?delete: 403 Forbidden <Error><Code>AccessDenied</Code></Error>",
+    );
   });
 
   it("deletes objects individually when bulkDelete is disabled", async () => {

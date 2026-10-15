@@ -22,6 +22,9 @@ export function normalizeValue(value: unknown): Buffer | string | number {
   return JSON.stringify(value);
 }
 
+/**
+ * Check whether a value is a typed array (e.g. `Uint8Array`), whose bytes can be stored as a `Buffer`.
+ */
 export function isTypedArray(value: unknown): value is TypedArray {
   return (
     value instanceof Int8Array ||

@@ -26,9 +26,7 @@ describe("drivers: fs", () => {
       });
       it("throws ENOTDIR when a key prefix is an existing file", async () => {
         await ctx.storage.setItem("conflict", "value");
-        await expect(ctx.storage.setItem("conflict:child", "value")).rejects.toThrow(
-          /ENOTDIR/,
-        );
+        await expect(ctx.storage.setItem("conflict:child", "value")).rejects.toThrow(/ENOTDIR/);
       });
       it("native meta", async () => {
         await ctx.storage.setItem("s1:a", "test_data");

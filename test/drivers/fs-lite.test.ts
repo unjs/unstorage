@@ -32,9 +32,7 @@ describe("drivers: fs-lite", () => {
         // Setting key "conflict" creates a file; setting "conflict:child"
         // tries to treat the file as a directory.
         await ctx.storage.setItem("conflict", "value");
-        await expect(ctx.storage.setItem("conflict:child", "value")).rejects.toThrow(
-          /ENOTDIR/,
-        );
+        await expect(ctx.storage.setItem("conflict:child", "value")).rejects.toThrow(/ENOTDIR/);
       });
       it("native meta", async () => {
         await ctx.storage.setItem("s1:a", "test_data");

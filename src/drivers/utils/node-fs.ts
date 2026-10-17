@@ -95,9 +95,7 @@ export async function ensuredir(dir: string): Promise<void> {
       throw error;
     });
     if (dirStat && !dirStat.isDirectory()) {
-      const err: any = new Error(
-        `ENOTDIR: path is a file, not a directory, mkdir '${dir}'`,
-      );
+      const err: any = new Error(`ENOTDIR: path is a file, not a directory, mkdir '${dir}'`);
       err.code = "ENOTDIR";
       throw err;
     }

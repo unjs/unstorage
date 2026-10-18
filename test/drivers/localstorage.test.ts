@@ -28,33 +28,50 @@ describe("drivers: localstorage", () => {
         await ctx.storage.watch(watcher);
 
         // Emulate
-        // jsdom.window.localStorage.setItem('s1:random_file', 'random')
+        // jsdom.window.localStorage.setItem('test:s1:random_file', 'random')
         const ev = jsdom.window.document.createEvent("CustomEvent");
         ev.initEvent("storage", true);
         // @ts-ignore
-        ev.key = "s1:random_file";
+        ev.key = "test:s1:random_file";
         // @ts-ignore
         ev.newValue = "random";
         jsdom.window.dispatchEvent(ev);
 
         expect(watcher).toHaveBeenCalledWith("update", "s1:random_file");
       });
+      it("watch ignores keys outside of base", async () => {
+        const watcher = vi.fn();
+        const unwatch = await ctx.storage.watch(watcher);
+
+        // Emulate
+        // jsdom.window.localStorage.setItem('other:random_file', 'random')
+        const ev = jsdom.window.document.createEvent("CustomEvent");
+        ev.initEvent("storage", true);
+        // @ts-ignore
+        ev.key = "other:random_file";
+        // @ts-ignore
+        ev.newValue = "random";
+        jsdom.window.dispatchEvent(ev);
+
+        await unwatch();
+        expect(watcher).not.toHaveBeenCalled();
+      });
       it("unwatch localstorage", async () => {
         const watcher = vi.fn();
         const unwatch = await ctx.storage.watch(watcher);
 
         // Emulate
-        // jsdom.window.localStorage.setItem('s1:random_file', 'random')
+        // jsdom.window.localStorage.setItem('test:s1:random_file', 'random')
         const ev = jsdom.window.document.createEvent("CustomEvent");
         ev.initEvent("storage", true);
         // @ts-ignore
-        ev.key = "s1:random_file";
+        ev.key = "test:s1:random_file";
         // @ts-ignore
         ev.newValue = "random";
         const ev2 = jsdom.window.document.createEvent("CustomEvent");
         ev2.initEvent("storage", true);
         // @ts-ignore
-        ev2.key = "s1:random_file2";
+        ev2.key = "test:s1:random_file2";
         // @ts-ignore
         ev2.newValue = "random";
 

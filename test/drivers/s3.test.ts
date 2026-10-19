@@ -105,6 +105,8 @@ describe.skipIf(!accessKeyId || !secretAccessKey || !bucket || !endpoint || !reg
           expect(await ctx.storage.get("foo/bar:baz")).toBe("ok");
 
           const client = new AwsClient({
+            // aws4fetch only infers the service from AWS, R2 and Backblaze hostnames
+            service: "s3",
             accessKeyId: accessKeyId!,
             secretAccessKey: secretAccessKey!,
             region,

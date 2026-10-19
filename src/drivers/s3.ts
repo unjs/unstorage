@@ -26,6 +26,7 @@ export interface S3DriverOptions {
    *
    * - For AWS S3: "https://s3.[region].amazonaws.com/"
    * - For cloudflare R2: "https://[uid].r2.cloudflarestorage.com/"
+   * - For Neon Object Storage: "https://[branch-id].storage.[cell].[region].aws.neon.tech"
    */
   endpoint: string;
 
@@ -34,6 +35,7 @@ export interface S3DriverOptions {
    *
    * - For AWS S3, this is the region of the bucket.
    * - For cloudflare, this is can be set to `auto`.
+   * - For Neon Object Storage, this is the project region, such as `us-east-2`.
    */
   region: string;
 

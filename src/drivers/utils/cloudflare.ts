@@ -22,8 +22,11 @@ export interface KVNamespaceLike {
 
 /** An R2 bucket binding, from the global or the module `@cloudflare/workers-types`. */
 export interface R2BucketLike {
-  head(key: string): Promise<unknown>;
-  get(key: string, options?: any): Promise<unknown>;
+  head(key: string): Promise<{ uploaded: Date } | null>;
+  get(
+    key: string,
+    options?: any,
+  ): Promise<{ text(): Promise<string>; arrayBuffer(): Promise<ArrayBuffer> } | null>;
   put(key: string, value: any, options?: any): Promise<unknown>;
   delete(keys: string | string[]): Promise<void>;
   list(options?: { prefix?: string }): Promise<{ objects: { key: string }[] }>;

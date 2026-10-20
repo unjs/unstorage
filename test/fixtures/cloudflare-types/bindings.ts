@@ -17,3 +17,17 @@ kvBinding({ binding: moduleKV });
 r2Binding({ binding: moduleBucket });
 kvBinding({ binding: "KV" });
 r2Binding({ binding: "BUCKET" });
+
+// Objects whose results lack what the driver reads are rejected
+const r2Like = {
+  head: async () => ({ uploaded: new Date() }),
+  get: async () => ({ text: async () => "", arrayBuffer: async () => new ArrayBuffer(0) }),
+  put: async () => {},
+  delete: async () => {},
+  list: async () => ({ objects: [] }),
+};
+r2Binding({ binding: r2Like });
+// @ts-expect-error `get` must resolve to an object body
+r2Binding({ binding: { ...r2Like, get: async () => "text" } });
+// @ts-expect-error `head` must resolve to an object with `uploaded`
+r2Binding({ binding: { ...r2Like, head: async () => ({}) } });

@@ -3,6 +3,32 @@ import { createError } from "./index.ts";
 
 type Binding = KVNamespace | R2Bucket;
 
+// Bindings passed as objects are typed structurally, with only the members the drivers
+// call. The global `KVNamespace`/`R2Bucket` of `@cloudflare/workers-types` (what `env`
+// holds in a Worker) are not assignable to the module ones once the DOM lib is loaded,
+// because their `ReadableStream`/`Headers` then resolve to the DOM declarations.
+
+/** A KV namespace binding, from the global or the module `@cloudflare/workers-types`. */
+export interface KVNamespaceLike {
+  get(key: string): Promise<string | null>;
+  put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
+  delete(key: string): Promise<void>;
+  list(options?: { prefix?: string; cursor?: string }): Promise<{
+    keys: { name: string }[];
+    list_complete: boolean;
+    cursor?: string;
+  }>;
+}
+
+/** An R2 bucket binding, from the global or the module `@cloudflare/workers-types`. */
+export interface R2BucketLike {
+  head(key: string): Promise<unknown>;
+  get(key: string, options?: any): Promise<unknown>;
+  put(key: string, value: any, options?: any): Promise<unknown>;
+  delete(keys: string | string[]): Promise<void>;
+  list(options?: { prefix?: string }): Promise<{ objects: { key: string }[] }>;
+}
+
 let _env: Promise<Record<string, unknown> | undefined> | undefined;
 
 /**
@@ -42,11 +68,13 @@ function validateBinding<T extends Binding>(binding: T | undefined, bindingName:
 }
 
 export function getKVBinding(
-  binding: KVNamespace | string = "STORAGE",
+  binding: KVNamespaceLike | string = "STORAGE",
 ): KVNamespace | Promise<KVNamespace> {
-  return getBinding(binding);
+  return getBinding(binding as KVNamespace | string);
 }
 
-export function getR2Binding(binding: R2Bucket | string = "BUCKET"): R2Bucket | Promise<R2Bucket> {
-  return getBinding(binding);
+export function getR2Binding(
+  binding: R2BucketLike | string = "BUCKET",
+): R2Bucket | Promise<R2Bucket> {
+  return getBinding(binding as R2Bucket | string);
 }

@@ -1,9 +1,9 @@
 import type * as CF from "@cloudflare/workers-types";
 import { type DriverFactory, joinKeys } from "./utils/index.ts";
-import { getR2Binding } from "./utils/cloudflare.ts";
+import { getR2Binding, type R2BucketLike } from "./utils/cloudflare.ts";
 
 export interface CloudflareR2Options {
-  binding?: string | CF.R2Bucket;
+  binding?: string | R2BucketLike;
   base?: string;
 }
 

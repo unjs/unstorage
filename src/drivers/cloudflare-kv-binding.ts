@@ -1,8 +1,8 @@
 import type * as CF from "@cloudflare/workers-types";
 import { type DriverFactory, joinKeys } from "./utils/index.ts";
-import { getKVBinding } from "./utils/cloudflare.ts";
+import { getKVBinding, type KVNamespaceLike } from "./utils/cloudflare.ts";
 export interface KVOptions {
-  binding?: string | CF.KVNamespace;
+  binding?: string | KVNamespaceLike;
   /** Adds prefix to all stored keys */
   base?: string;
 

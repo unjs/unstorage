@@ -49,6 +49,9 @@ const driver: DriverFactory<void, Map<string, any>> = () => {
       timers.clear();
       data.clear();
     },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
+    },
   };
 };
 

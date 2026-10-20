@@ -145,6 +145,9 @@ const driver: DriverFactory<FSStorageOptions> = (userOptions = {}) => {
         await _watcher.close();
       }
     },
+    [Symbol.asyncDispose]() {
+      return this.dispose();
+    },
     async watch(callback) {
       if (_watcher) {
         return _unwatch;

@@ -2,12 +2,18 @@ import { Dirent, existsSync, promises as fsPromises } from "node:fs";
 import { resolve, dirname, join, basename } from "node:path";
 import { randomUUID } from "node:crypto";
 
-function ignoreNotfound(err: any) {
-  return err.code === "ENOENT" || err.code === "EISDIR" ? null : err;
+function ignoreNotfound(err: any): null {
+  if (err.code === "ENOENT" || err.code === "EISDIR") {
+    return null;
+  }
+  throw err;
 }
 
-function ignoreExists(err: any) {
-  return err.code === "EEXIST" ? null : err;
+function ignoreExists(err: any): null {
+  if (err.code === "EEXIST") {
+    return null;
+  }
+  throw err;
 }
 
 // Temp files are written next to their destination (rename is only atomic within a single

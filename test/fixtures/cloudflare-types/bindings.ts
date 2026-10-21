@@ -30,8 +30,8 @@ kvBinding({ binding: kvLike });
 const r2Body = {
   text: async () => "",
   arrayBuffer: async () => new ArrayBuffer(0),
-  body: null,
-  blob: async () => null,
+  body: new ReadableStream(),
+  blob: async () => new Blob(),
 };
 const r2Like = {
   head: async () => ({ uploaded: new Date() }),
@@ -53,3 +53,9 @@ r2Binding({ binding: { ...r2Like, get: async () => r2BodyWithoutStream } });
 const { blob: _blob, ...r2BodyWithoutBlob } = r2Body;
 // @ts-expect-error `get` results need `blob()` for blob reads
 r2Binding({ binding: { ...r2Like, get: async () => r2BodyWithoutBlob } });
+const r2BodyWithNullStream = { ...r2Body, body: null };
+// @ts-expect-error `get` results need a non-null body for stream reads
+r2Binding({ binding: { ...r2Like, get: async () => r2BodyWithNullStream } });
+const r2BodyWithNullBlob = { ...r2Body, blob: async () => null };
+// @ts-expect-error `get` results need a non-null blob for blob reads
+r2Binding({ binding: { ...r2Like, get: async () => r2BodyWithNullBlob } });

@@ -30,8 +30,8 @@ export interface R2BucketLike {
     text(): Promise<string>;
     arrayBuffer(): Promise<ArrayBuffer>;
     // `ReadableStream`/`Blob` differ between the global and module types
-    body: unknown;
-    blob(): Promise<unknown>;
+    body: object;
+    blob(): Promise<object>;
   } | null>;
   put(key: string, value: any, options?: any): Promise<unknown>;
   delete(keys: string | string[]): Promise<void>;

@@ -1,5 +1,6 @@
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import { createDatabase } from "db0";
+import { createStorage } from "../../src/index.ts";
 import db0Driver from "../../src/drivers/db0.ts";
 import { testDriver } from "./utils.ts";
 
@@ -59,6 +60,73 @@ for (const driver of drivers) {
           const instance = db0Driver(opts);
           expect(opts).toEqual({ database: db });
           expect(instance.options?.tableName).toBe("unstorage");
+        });
+        it("does not create the table when autoSetup is disabled", async () => {
+          await ctx.storage.setItem("autosetup:test", "test_data");
+
+          const sqlSpy = vi.spyOn(db, "sql");
+          try {
+            const storage = createStorage({
+              driver: db0Driver({ database: db, autoSetup: false }),
+            });
+
+            expect(await storage.getItem("autosetup:test")).toBe("test_data");
+
+            const queries = sqlSpy.mock.calls.map(([strings]) => strings.join(""));
+            expect(sqlSpy).toHaveBeenCalled();
+            expect(queries.join("\n")).not.toMatch(/\bCREATE\s+TABLE\b/i);
+          } finally {
+            sqlSpy.mockRestore();
+          }
+        });
+        it("creates the table once when autoSetup is enabled", async () => {
+          const tableName = "unstorage_auto_setup_enabled";
+          await db.sql`DROP TABLE IF EXISTS {${tableName}}`;
+
+          const sqlSpy = vi.spyOn(db, "sql");
+          try {
+            const storage = createStorage({
+              driver: db0Driver({ database: db, tableName, autoSetup: true }),
+            });
+
+            expect(await storage.getItem("autosetup:test")).toBeNull();
+            await storage.setItem("autosetup:test", "test_data");
+            expect(await storage.getItem("autosetup:test")).toBe("test_data");
+
+            const queries = sqlSpy.mock.calls.map(([strings]) => strings.join(""));
+            expect(queries.filter((query) => /\bCREATE\s+TABLE\b/i.test(query))).toHaveLength(1);
+          } finally {
+            sqlSpy.mockRestore();
+            await db.sql`DROP TABLE IF EXISTS {${tableName}}`;
+          }
+        });
+        it("propagates the SQL error when autoSetup is disabled and the table is missing", async () => {
+          const tableName = "unstorage_auto_setup_missing";
+          await db.sql`DROP TABLE IF EXISTS {${tableName}}`;
+
+          const executeSQL = db.sql;
+          let sqlError: unknown;
+          const sqlSpy = vi.spyOn(db, "sql").mockImplementation(async (strings, ...values) => {
+            try {
+              return await executeSQL(strings, ...values);
+            } catch (error) {
+              sqlError = error;
+              throw error;
+            }
+          });
+          try {
+            const storage = createStorage({
+              driver: db0Driver({ database: db, tableName, autoSetup: false }),
+            });
+
+            const read = storage.getItem("autosetup:test");
+            await expect(read).rejects.toThrow(tableName);
+            await expect(read).rejects.toBe(sqlError);
+            expect(sqlSpy).toHaveBeenCalledTimes(1);
+          } finally {
+            sqlSpy.mockRestore();
+            await db.sql`DROP TABLE IF EXISTS {${tableName}}`;
+          }
         });
         it("meta", async () => {
           await ctx.storage.setItem("meta:test", "test_data");

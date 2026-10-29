@@ -2,22 +2,34 @@ import type { Storage, StorageValue } from "./types.ts";
 import { normalizeBaseKey, normalizeKey } from "./utils.ts";
 
 /**
+ * Names of the tracing channels storage operations are published on.
+ *
+ * Subscribers can use them instead of hardcoding strings:
+ * `TRACING_CHANNELS.map((name) => tracingChannel<TraceContext>(name))`.
+ */
+export const TRACING_CHANNELS = [
+  "unstorage.hasItem",
+  "unstorage.getItem",
+  "unstorage.setItem",
+  "unstorage.setItems",
+  "unstorage.removeItem",
+  "unstorage.getKeys",
+  "unstorage.getItems",
+  "unstorage.getItemRaw",
+  "unstorage.setItemRaw",
+  "unstorage.clear",
+] as const;
+
+export type TracingChannelName = (typeof TRACING_CHANNELS)[number];
+
+type ChannelOperation = TracingChannelName extends `unstorage.${infer O}` ? O : never;
+
+/**
  * All operations that can be traced.
  * Meta operations (setMeta, removeMeta, getMeta) use the underlying operation channels
  * with meta: true in the tracing data context.
  */
-export type TracedOperation =
-  | "hasItem"
-  | "getItem"
-  | "getMeta"
-  | "setItem"
-  | "setItems"
-  | "removeItem"
-  | "getKeys"
-  | "getItems"
-  | "getItemRaw"
-  | "setItemRaw"
-  | "clear";
+export type TracedOperation = ChannelOperation | "getMeta";
 
 export interface TraceContext {
   keys: string[];
@@ -70,11 +82,16 @@ export function withTracing<T extends StorageValue>(storage: MaybeTracedStorage<
     meta?: boolean;
     forceMeta?: boolean;
     base?: boolean;
-    channel?: TracedOperation;
+    channel?: ChannelOperation;
   };
 
   // Map of operations to their tracing configuration
-  const operations: Record<TracedOperation, TracingConfig | undefined> = {
+  // Operations without a channel of their own must be published on an existing one
+  const operations: {
+    [O in TracedOperation]: O extends ChannelOperation
+      ? TracingConfig | undefined
+      : TracingConfig & { channel: ChannelOperation };
+  } = {
     getItem: { meta: true },
     getMeta: { forceMeta: true, channel: "getItem" },
     setItem: { meta: true },
@@ -89,20 +106,18 @@ export function withTracing<T extends StorageValue>(storage: MaybeTracedStorage<
   };
 
   const channels = Object.fromEntries(
-    Object.keys(operations).map(
-      (operation) => [operation, tracingChannel(`unstorage.${operation}`)] as const,
-    ),
+    TRACING_CHANNELS.map((name) => [name, tracingChannel(name)] as const),
   );
 
   /**
    * Trace a promise with a given operation and data.
    */
   async function tracePromise<T>(
-    operation: TracedOperation,
+    operation: ChannelOperation,
     exec: () => Promise<T>,
     data: TraceContext,
   ): Promise<T> {
-    const channel = channels[operation];
+    const channel = channels[`unstorage.${operation}`];
 
     return channel ? channel.tracePromise(exec, data) : exec();
   }
@@ -151,7 +166,7 @@ export function withTracing<T extends StorageValue>(storage: MaybeTracedStorage<
       const mountInfo = keys[0] ? getMountInfo(keys[0]) : undefined;
 
       return tracePromise(
-        operations[operation]?.channel ?? operation,
+        operations[operation]?.channel ?? (operation as ChannelOperation),
         () => (storage[operation] as any)(...args),
         {
           keys,

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { tracingChannel } from "node:diagnostics_channel";
 import { createStorage } from "../src/storage.ts";
-import { withTracing } from "../src/tracing.ts";
+import { TRACING_CHANNELS, withTracing } from "../src/tracing.ts";
 import type { Storage } from "../src/types.ts";
 import memory from "../src/drivers/memory.ts";
 import type { TracedOperation, TraceContext } from "../src/tracing.ts";
@@ -80,6 +80,56 @@ describe("tracing", () => {
 
   beforeEach(() => {
     storage = withTracing(createStorage<any>({ driver: memory() }));
+  });
+
+  describe("TRACING_CHANNELS", () => {
+    it("should match exactly the channels published by storage operations", async () => {
+      const calls: Record<TracedOperation, () => unknown> = {
+        hasItem: () => storage.hasItem("test:key"),
+        getItem: () => storage.getItem("test:key"),
+        getMeta: () => storage.getMeta("test:key"),
+        setItem: () => storage.setItem("test:key", "value"),
+        setItems: () => storage.setItems([{ key: "test:key", value: "value" }]),
+        removeItem: () => storage.removeItem("test:key"),
+        getKeys: () => storage.getKeys("test"),
+        getItems: () => storage.getItems(["test:key"]),
+        getItemRaw: () => storage.getItemRaw("test:key"),
+        setItemRaw: () => storage.setItemRaw("test:key", Buffer.from("value")),
+        clear: () => storage.clear("test"),
+      };
+      const candidates = new Set<string>([
+        ...TRACING_CHANNELS,
+        ...Object.keys(storage).map((name) => `unstorage.${name}`),
+      ]);
+      const published = new Set<string>();
+      let current = new Set<string>();
+      const subscriptions = [...candidates].map((name) => {
+        const channel = tracingChannel(name);
+        const handlers = {
+          start: () => {
+            published.add(name);
+            current.add(name);
+          },
+        };
+        channel.subscribe(handlers as any);
+        return () => channel.unsubscribe(handlers as any);
+      });
+
+      for (const [operation, call] of Object.entries(calls)) {
+        current = new Set();
+        await call();
+        expect(current.size, operation).toBe(1);
+      }
+      await storage.setMeta("test:key", { custom: "data" });
+      await storage.removeMeta("test:key");
+
+      for (const unsubscribe of subscriptions) {
+        unsubscribe();
+      }
+
+      expect([...published].sort()).toEqual([...TRACING_CHANNELS].sort());
+      expect(new Set(TRACING_CHANNELS).size).toBe(TRACING_CHANNELS.length);
+    });
   });
 
   describe("opt-in behavior", () => {

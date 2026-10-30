@@ -30,13 +30,11 @@ const driver: DriverFactory<IDBKeyvalOptions> = (opts = {}) => {
 
   let _lib: Promise<{ lib: typeof import("idb-keyval"); store: UseStore | undefined }> | undefined;
   const getLib = () =>
-    (_lib ??= importLib(DRIVER_NAME, "idb-keyval", opts.lib, () => import("idb-keyval")).then(
-      (lib) => ({
-        lib,
-        store:
-          opts.dbName && opts.storeName ? lib.createStore(opts.dbName, opts.storeName) : undefined,
-      }),
-    ));
+    (_lib ??= importLib(DRIVER_NAME, "idb-keyval", opts.lib).then((lib) => ({
+      lib,
+      store:
+        opts.dbName && opts.storeName ? lib.createStore(opts.dbName, opts.storeName) : undefined,
+    })));
 
   return {
     name: DRIVER_NAME,

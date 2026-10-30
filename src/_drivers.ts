@@ -227,7 +227,7 @@ export const builtinDriverDependencies: Partial<Record<BuiltinDriverName, Driver
     lib: { name: "@netlify/blobs", version: "^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0 || ^11.0.0" },
   },
   "planetscale": {
-    lib: { name: "@planetscale/database", version: "^1.19.0" },
+    lib: { name: "@planetscale/database", version: "^1.19.0 || ^2.0.0" },
   },
   "redis": {
     lib: { name: "ioredis", version: "^5.9.3 || ^6" },

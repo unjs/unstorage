@@ -1,5 +1,6 @@
 import {
   type DriverFactory,
+  escapeRedisGlob,
   importLib,
   joinKeys,
   type LibImport,
@@ -86,7 +87,7 @@ const driver: DriverFactory<RedisOptions, Promise<Redis | Cluster>> = (opts) => 
   let redisClient: Promise<Redis | Cluster> | undefined;
   const getRedisClient = () =>
     (redisClient ??= (async () => {
-      const { Redis } = await importLib(DRIVER_NAME, "ioredis", opts.lib, () => import("ioredis"));
+      const { Redis } = await importLib(DRIVER_NAME, "ioredis", opts.lib);
 
       // Set default clientInfoTag to "unstorage_vX.X.X" if not explicitly set
       const options = {
@@ -110,6 +111,11 @@ const driver: DriverFactory<RedisOptions, Promise<Redis | Cluster>> = (opts) => 
   const base = (opts.base || "").replace(/:$/, "");
   const p = (...keys: string[]) => joinKeys(base, ...keys); // Prefix a key. Uses base for backwards compatibility
   const d = (key: string) => (base ? key.replace(`${base}:`, "") : key); // Deprefix a key
+  const m = (base?: string) => {
+    // Match all keys under base (escaped so it is not interpreted as a glob)
+    const prefix = p(base || "");
+    return prefix ? `${escapeRedisGlob(prefix)}:*` : "*";
+  };
 
   if (opts.preConnect) {
     getRedisClient().catch((error) => {
@@ -228,11 +234,11 @@ const driver: DriverFactory<RedisOptions, Promise<Redis | Cluster>> = (opts) => 
       await (await getRedisClient()).unlink(p(key));
     },
     async getKeys(base) {
-      const keys = await scan(p(base, "*"));
+      const keys = await scan(m(base));
       return keys.map((key) => d(key));
     },
     async clear(base) {
-      const keys = await scan(p(base, "*"));
+      const keys = await scan(m(base));
       if (keys.length === 0) {
         return;
       }

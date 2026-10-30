@@ -4,6 +4,7 @@ import {
   type LibImport,
   normalizeKey,
   joinKeys,
+  encodeURLSegment,
   type DriverDependencies,
 } from "./utils/index.ts";
 import type { RuntimeCache } from "@vercel/functions";
@@ -41,11 +42,15 @@ const DRIVER_NAME = "vercel-runtime-cache";
 
 const driver: DriverFactory<VercelCacheOptions, Promise<RuntimeCache>> = (opts) => {
   const base = normalizeKey(opts?.base);
-  const r = (...keys: string[]) => joinKeys(base, ...keys);
+  // The cache client puts keys into a request URL as-is, so encode them
+  // (`:` is kept readable as it is safe in a URL path segment)
+  const r = (key: string) =>
+    encodeURLSegment(DRIVER_NAME, joinKeys(base, key), key).replace(/%3A/g, ":");
 
-  let _cache: Promise<RuntimeCache> | undefined;
+  let _fallback: Promise<RuntimeCache> | undefined;
 
-  const getClient = () => (_cache ??= getCache(opts));
+  const getClient = async (): Promise<RuntimeCache> =>
+    getContext()?.cache || (_fallback ??= getFallbackCache(opts));
 
   return {
     name: DRIVER_NAME,
@@ -103,20 +108,11 @@ function getContext(): Context {
   return fromSymbol[SYMBOL_FOR_REQ_CONTEXT]?.get?.() ?? {};
 }
 
-async function getCache(opts: VercelCacheOptions): Promise<RuntimeCache> {
-  const cache =
-    getContext()?.cache ||
-    (
-      await importLib(
-        DRIVER_NAME,
-        "@vercel/functions",
-        opts?.lib,
-        () => import("@vercel/functions"),
-      )
-    ).getCache?.({
-      keyHashFunction: (key) => key,
-      namespaceSeparator: ":",
-    });
+async function getFallbackCache(opts: VercelCacheOptions): Promise<RuntimeCache> {
+  const cache = (await importLib(DRIVER_NAME, "@vercel/functions", opts?.lib)).getCache?.({
+    keyHashFunction: (key) => key,
+    namespaceSeparator: ":",
+  });
   if (!cache) {
     throw new Error("Runtime cache is not available!");
   }

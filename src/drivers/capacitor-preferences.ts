@@ -31,12 +31,9 @@ const driver: DriverFactory<CapacitorPreferencesOptions, Promise<typeof Preferen
 
   let _prefs: Promise<typeof Preferences> | undefined;
   const getPreferences = () =>
-    (_prefs ??= importLib(
-      DRIVER_NAME,
-      "@capacitor/preferences",
-      opts?.lib,
-      () => import("@capacitor/preferences"),
-    ).then((lib) => lib.Preferences));
+    (_prefs ??= importLib(DRIVER_NAME, "@capacitor/preferences", opts?.lib).then(
+      (lib) => lib.Preferences,
+    ));
 
   return {
     name: DRIVER_NAME,

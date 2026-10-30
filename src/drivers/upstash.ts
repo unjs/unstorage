@@ -5,6 +5,7 @@ import {
   type LibImport,
   normalizeKey,
   joinKeys,
+  escapeRedisGlob,
   type DriverDependencies,
 } from "./utils/index.ts";
 
@@ -42,16 +43,16 @@ const DRIVER_NAME = "upstash";
 const driver: DriverFactory<UpstashOptions, Promise<Redis>> = (options) => {
   const base = normalizeKey(options?.base);
   const r = (...keys: string[]) => joinKeys(base, ...keys);
+  const m = (base?: string) => {
+    // Match all keys under base (escaped so it is not interpreted as a glob)
+    const prefix = r(base || "");
+    return prefix ? `${escapeRedisGlob(prefix)}:*` : "*";
+  };
 
   let redisClient: Promise<Redis> | undefined;
   const getClient = () =>
     (redisClient ??= (async () => {
-      const { Redis } = await importLib(
-        DRIVER_NAME,
-        "@upstash/redis",
-        options.lib,
-        () => import("@upstash/redis"),
-      );
+      const { Redis } = await importLib(DRIVER_NAME, "@upstash/redis", options.lib);
       const url = options.url || globalThis.process?.env?.UPSTASH_REDIS_REST_URL;
       const token = options.token || globalThis.process?.env?.UPSTASH_REDIS_REST_TOKEN;
       return new Redis({ url, token, ...options } as RedisConfigNodejs);
@@ -100,12 +101,12 @@ const driver: DriverFactory<UpstashOptions, Promise<Redis>> = (options) => {
       await (await getClient()).unlink(r(key));
     },
     async getKeys(_base) {
-      return await scan(r(_base, "*")).then((keys) =>
+      return await scan(m(_base)).then((keys) =>
         base ? keys.map((key) => key.slice(base.length + 1)) : keys,
       );
     },
     async clear(base) {
-      const keys = await scan(r(base, "*"));
+      const keys = await scan(m(base));
       if (keys.length === 0) {
         return;
       }

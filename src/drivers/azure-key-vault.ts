@@ -52,12 +52,7 @@ const driver: DriverFactory<AzureKeyVaultOptions, Promise<SecretClient>> = (opts
       if (pageSize > 25) {
         throw createError(DRIVER_NAME, "`pageSize` cannot be greater than `25`");
       }
-      const { SecretClient } = await importLib(
-        DRIVER_NAME,
-        "@azure/keyvault-secrets",
-        opts.lib,
-        () => import("@azure/keyvault-secrets"),
-      );
+      const { SecretClient } = await importLib(DRIVER_NAME, "@azure/keyvault-secrets", opts.lib);
       const credential = await createDefaultAzureCredential(DRIVER_NAME, opts);
       const url = `https://${vaultName}.vault.azure.net`;
       return new SecretClient(url, credential, { serviceVersion });

@@ -53,11 +53,16 @@ const driver: DriverFactory<VercelBlobOptions, Promise<typeof blob>> = (opts) =>
 
   const r = (...keys: string[]) => joinKeys(optsBase, ...keys).replace(/:/g, "/");
 
+  // Trailing `/` so that base `app` does not also match `apple/*`
+  const listPrefix = (base?: string) => {
+    const prefix = r(base || "");
+    return prefix ? `${prefix}/` : undefined;
+  };
+
   const envName = `${opts.envPrefix || "BLOB"}_READ_WRITE_TOKEN`;
 
   let _blob: Promise<typeof blob> | undefined;
-  const getBlob = () =>
-    (_blob ??= importLib(DRIVER_NAME, "@vercel/blob", opts.lib, () => import("@vercel/blob")));
+  const getBlob = () => (_blob ??= importLib(DRIVER_NAME, "@vercel/blob", opts.lib));
 
   const getToken = () => {
     const token = opts.token || globalThis.process?.env?.[envName];
@@ -135,7 +140,7 @@ const driver: DriverFactory<VercelBlobOptions, Promise<typeof blob>> = (opts) =>
         ).list({
           token: getToken(),
           cursor,
-          prefix: r(base),
+          prefix: listPrefix(base),
         });
         cursor = listBlobResult.cursor;
         for (const blob of listBlobResult.blobs) {
@@ -155,7 +160,7 @@ const driver: DriverFactory<VercelBlobOptions, Promise<typeof blob>> = (opts) =>
         ).list({
           token: getToken(),
           cursor,
-          prefix: r(base),
+          prefix: listPrefix(base),
         });
         blobs.push(...listBlobResult.blobs);
         cursor = listBlobResult.cursor;

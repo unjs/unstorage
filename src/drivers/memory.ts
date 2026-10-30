@@ -56,6 +56,8 @@ export default driver;
 
 // --- Internal helpers ---
 
+const MAX_TIMER_DELAY = 2 ** 31 - 1;
+
 function _clearTimer(timers: Map<string, ReturnType<typeof setTimeout>>, key: string) {
   const existing = timers.get(key);
   if (existing !== undefined) {
@@ -70,16 +72,26 @@ function _scheduleExpiry(
   key: string,
   ttl?: number,
 ) {
-  if (!ttl) {
+  if (!ttl || !Number.isFinite(ttl)) {
     return;
   }
-  const ttlMs = ttl * 1000;
-  const timer = setTimeout(() => {
-    data.delete(key);
-    timers.delete(key);
-  }, ttlMs);
-  if (timer && typeof timer === "object" && "unref" in timer) {
-    timer.unref();
-  }
-  timers.set(key, timer);
+  // Delays above MAX_TIMER_DELAY overflow to 1ms, so long TTLs are split into chunks
+  let remaining = ttl * 1000;
+  const schedule = () => {
+    const delay = Math.min(remaining, MAX_TIMER_DELAY);
+    remaining -= delay;
+    const timer = setTimeout(() => {
+      if (remaining > 0) {
+        schedule();
+        return;
+      }
+      data.delete(key);
+      timers.delete(key);
+    }, delay);
+    if (timer && typeof timer === "object" && "unref" in timer) {
+      timer.unref();
+    }
+    timers.set(key, timer);
+  };
+  schedule();
 }

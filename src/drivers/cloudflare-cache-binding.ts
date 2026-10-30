@@ -5,7 +5,7 @@ import type {
 } from "@cloudflare/workers-types";
 import type { TransactionOptions } from "../types.ts";
 
-import { type DriverFactory, joinKeys } from "./utils/index.ts";
+import { type DriverFactory, encodeURLKey, joinKeys } from "./utils/index.ts";
 
 export interface CacheOptions {
   /**
@@ -31,12 +31,9 @@ export interface CacheOptions {
 const DRIVER_NAME = "cloudflare-cache-binding";
 
 const driver: DriverFactory<CacheOptions, CFCache | Promise<CFCache>> = (opts) => {
-  const r = (key: string = "") => {
-    if (opts.base) {
-      key = joinKeys(opts.base, key);
-    }
-    return `unstorage://${key.replace(/:/g, "/")}`;
-  };
+  // Encode key segments so that `%2e%2e` or `#` can not change the cache URL path
+  const r = (key: string = "") =>
+    `unstorage://${encodeURLKey(DRIVER_NAME, opts.base ? joinKeys(opts.base, key) : key)}`;
 
   let _cache: CFCache | Promise<CFCache> | undefined;
   const getCache = () => {

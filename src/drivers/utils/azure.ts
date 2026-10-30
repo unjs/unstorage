@@ -17,11 +17,6 @@ export async function createDefaultAzureCredential(
   driver: string,
   opts: AzureIdentityOptions,
 ): Promise<import("@azure/identity").DefaultAzureCredential> {
-  const { DefaultAzureCredential } = await importLib(
-    driver,
-    "@azure/identity",
-    opts.identityLib,
-    () => import("@azure/identity"),
-  );
+  const { DefaultAzureCredential } = await importLib(driver, "@azure/identity", opts.identityLib);
   return new DefaultAzureCredential();
 }

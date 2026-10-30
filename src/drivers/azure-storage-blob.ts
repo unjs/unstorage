@@ -72,7 +72,6 @@ const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> =
         DRIVER_NAME,
         "@azure/storage-blob",
         opts.lib,
-        () => import("@azure/storage-blob"),
       );
       let serviceClient: BlobServiceClient;
       if (opts.accountKey) {

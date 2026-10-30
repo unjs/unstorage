@@ -31,12 +31,7 @@ const driver: DriverFactory<DenoKvNodeOptions, Promise<Kv>> = (opts) => {
   const baseDriver = denoKV({
     ...opts,
     openKv: async () => {
-      const { openKv } = await importLib(
-        DRIVER_NAME,
-        "@deno/kv",
-        opts.lib,
-        () => import("@deno/kv"),
-      );
+      const { openKv } = await importLib(DRIVER_NAME, "@deno/kv", opts.lib);
       return openKv(opts.path, opts.openKvOptions);
     },
   });

@@ -51,12 +51,7 @@ const driver: DriverFactory<MongoDbOptions, Promise<Collection>> = (opts) => {
       if (!opts.connectionString) {
         throw createRequiredError(DRIVER_NAME, "connectionString");
       }
-      const { MongoClient } = await importLib(
-        DRIVER_NAME,
-        "mongodb",
-        opts.lib,
-        () => import("mongodb"),
-      );
+      const { MongoClient } = await importLib(DRIVER_NAME, "mongodb", opts.lib);
       client = new MongoClient(opts.connectionString, opts.clientOptions);
       const db = client.db(opts.databaseName || "unstorage");
       return db.collection(opts.collectionName || "unstorage");

@@ -52,6 +52,25 @@ describe("drivers: cloudflare-r2-binding", async () => {
         const nonExistentMeta = await ctx.storage.getMeta("/s1/nonexistent");
         expect(nonExistentMeta).toEqual({});
       });
+      test("does not list or clear keys of sibling prefixes", async () => {
+        const root = createStorage({ driver: CloudflareR2Binding({}) });
+        await root.setItem("basement:a", "sibling");
+        try {
+          await ctx.storage.setItem("foo:a", "x");
+          await ctx.storage.setItem("foobar:a", "x");
+
+          expect(await ctx.storage.getKeys("foo")).toEqual(["foo:a"]);
+          await ctx.driver.clear!("foo:", {});
+          expect(await ctx.storage.getKeys()).toEqual(["foobar:a"]);
+
+          expect(await ctx.storage.getKeys()).not.toContain("ment:a");
+
+          await ctx.storage.clear();
+          expect(await root.getItem("basement:a")).toBe("sibling");
+        } finally {
+          await root.removeItem("basement:a");
+        }
+      });
     },
   });
 });

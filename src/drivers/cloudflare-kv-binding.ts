@@ -21,12 +21,16 @@ const driver: DriverFactory<KVOptions, CF.KVNamespace | Promise<CF.KVNamespace>>
   const r = (key: string = "") => (opts.base ? joinKeys(opts.base, key) : key);
 
   async function getKeys(base: string = "") {
-    base = r(base);
+    // Trailing `:` so that base `app` does not also match `apple:*`
+    const prefix = joinKeys(opts.base || "", base);
     const binding = await getKVBinding(opts.binding);
     const keys: { name: string }[] = [];
     let cursor: string | undefined = undefined;
     do {
-      const kvList = await binding.list({ prefix: base || undefined, cursor });
+      const kvList = await binding.list({
+        prefix: prefix ? `${prefix}:` : undefined,
+        cursor,
+      });
 
       keys.push(...kvList.keys);
       cursor = (kvList.list_complete ? undefined : kvList.cursor) as string | undefined;

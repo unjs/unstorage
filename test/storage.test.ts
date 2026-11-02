@@ -259,6 +259,43 @@ describe("Regression", () => {
     }
   });
 
+  it("getKeys counts maxDepth from the storage root when every mount supports it natively", async () => {
+    const storage = createStorage({ driver: fs({ base: resolve(__dirname, "tmp/fs-root") }) });
+    storage.mount("/storage_b", fs({ base: resolve(__dirname, "tmp/fs-mount") }));
+
+    try {
+      await storage.setItem("/file_depth0", "contents");
+      await storage.setItem("/storage_b/file_depth1", "contents");
+      await storage.setItem("/storage_b/depth1/file_depth2", "contents");
+
+      expect(await storage.getKeys(undefined, { maxDepth: 0 })).toMatchObject(["file_depth0"]);
+      expect((await storage.getKeys(undefined, { maxDepth: 1 })).sort()).toMatchObject([
+        "file_depth0",
+        "storage_b:file_depth1",
+      ]);
+      expect((await storage.getKeys("storage_b", { maxDepth: 2 })).sort()).toMatchObject([
+        "storage_b:depth1:file_depth2",
+        "storage_b:file_depth1",
+      ]);
+    } finally {
+      await storage.clear();
+    }
+  });
+
+  it("getKeys passes maxDepth unchanged to mounts without native support", async () => {
+    // prefixStorage forwards maxDepth to a storage that counts depth from its own root,
+    // so it must get the full maxDepth and leave the cut to the post-filter
+    const inner = createStorage({ driver: memory() });
+    await inner.setItem("pre:file_depth1", "contents");
+    await inner.setItem("pre:depth1:file_depth2", "contents");
+    const storage = createStorage({ driver: memory() });
+    storage.mount("/storage_b", prefixStorage(inner, "pre") as any);
+
+    expect(await storage.getKeys(undefined, { maxDepth: 1 })).toMatchObject([
+      "storage_b:file_depth1",
+    ]);
+  });
+
   it("prefixStorage getItems to not returns null (issue #396)", async () => {
     const storage = createStorage();
     await storage.setItem("namespace:key", "value");

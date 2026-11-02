@@ -478,7 +478,18 @@ export function createStorage<T extends StorageValue>(
         if (!mount.driver.flags?.maxDepth) {
           allMountsSupportMaxDepth = false;
         }
-        const rawKeys = await asyncCall(mount.driver.getKeys, mount.relativeBase, opts);
+        // maxDepth counts from the storage root, but a driver that supports it natively counts
+        // from its own root, so take the depth of the mount point off before passing it down
+        const mountDepth = mount.mountpoint.split(":").length - 1;
+        const driverMaxDepth = opts.maxDepth === undefined ? undefined : opts.maxDepth - mountDepth;
+        const rawKeys =
+          driverMaxDepth !== undefined && driverMaxDepth < 0
+            ? []
+            : await asyncCall(
+                mount.driver.getKeys,
+                mount.relativeBase,
+                driverMaxDepth === opts.maxDepth ? opts : { ...opts, maxDepth: driverMaxDepth },
+              );
         for (const key of rawKeys) {
           const fullKey = mount.mountpoint + normalizeKey(key);
           if (!maskedMounts.some((p) => fullKey.startsWith(p))) {

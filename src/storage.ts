@@ -479,9 +479,13 @@ export function createStorage<T extends StorageValue>(
           allMountsSupportMaxDepth = false;
         }
         // maxDepth counts from the storage root, but a driver that supports it natively counts
-        // from its own root, so take the depth of the mount point off before passing it down
+        // from its own root, so take the depth of the mount point off before passing it down.
+        // Other drivers get it unchanged and the post-filter below cuts their keys.
         const mountDepth = mount.mountpoint.split(":").length - 1;
-        const driverMaxDepth = opts.maxDepth === undefined ? undefined : opts.maxDepth - mountDepth;
+        const driverMaxDepth =
+          opts.maxDepth === undefined || !mount.driver.flags?.maxDepth
+            ? opts.maxDepth
+            : opts.maxDepth - mountDepth;
         const rawKeys =
           driverMaxDepth !== undefined && driverMaxDepth < 0
             ? []

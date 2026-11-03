@@ -47,6 +47,13 @@ export interface AzureStorageBlobOptions extends AzureIdentityOptions {
   endpointSuffix?: string;
 
   /**
+   * Allow nested paths using `/` delimiter in Azure Blob Storage instead of `:` delimiter.
+   * When enabled, `:` in keys are mapped to `/` in Azure Blob Storage, allowing virtual folder hierarchies.
+   * @default false
+   */
+  allowNestedPath?: boolean;
+
+  /**
    * Optionally provide the [`@azure/storage-blob`](https://www.npmjs.com/package/@azure/storage-blob)
    * library to avoid dynamically importing it.
    */
@@ -63,6 +70,9 @@ const DRIVER_NAME = "azure-storage-blob";
 const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> = (opts) => {
   let containerClient: Promise<ContainerClient> | undefined;
   const endpointSuffix = opts.endpointSuffix || ".blob.core.windows.net";
+  const r = (key: string) => (opts.allowNestedPath ? key.replace(/:/g, "/") : key);
+  const un_r = (key: string) => (opts.allowNestedPath ? key.replace(/\//g, ":") : key);
+
   const getContainerClient = () =>
     (containerClient ??= (async () => {
       if (!opts.connectionString && !opts.sasUrl && !opts.accountName) {
@@ -115,11 +125,11 @@ const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> =
     options: opts,
     getInstance: getContainerClient,
     async hasItem(key) {
-      return await (await getContainerClient()).getBlockBlobClient(key).exists();
+      return await (await getContainerClient()).getBlockBlobClient(r(key)).exists();
     },
     async getItem(key) {
       try {
-        const blob = await (await getContainerClient()).getBlockBlobClient(key).download();
+        const blob = await (await getContainerClient()).getBlockBlobClient(r(key)).download();
         if (isBrowser) {
           return blob.blobBody ? await blobToString(await blob.blobBody) : null;
         }
@@ -132,7 +142,7 @@ const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> =
     },
     async getItemRaw(key) {
       try {
-        const blob = await (await getContainerClient()).getBlockBlobClient(key).download();
+        const blob = await (await getContainerClient()).getBlockBlobClient(r(key)).download();
         if (isBrowser) {
           return blob.blobBody ? await blobToString(await blob.blobBody) : null;
         }
@@ -145,28 +155,30 @@ const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> =
       await (
         await getContainerClient()
       )
-        .getBlockBlobClient(key)
+        .getBlockBlobClient(r(key))
         .upload(value, Buffer.byteLength(value));
     },
     async setItemRaw(key, value) {
       await (
         await getContainerClient()
       )
-        .getBlockBlobClient(key)
+        .getBlockBlobClient(r(key))
         .upload(value, Buffer.byteLength(value));
     },
     async removeItem(key) {
       await (
         await getContainerClient()
       )
-        .getBlockBlobClient(key)
+        .getBlockBlobClient(r(key))
         .deleteIfExists({ deleteSnapshots: "include" });
     },
-    async getKeys() {
-      const iterator = (await getContainerClient()).listBlobsFlat().byPage({ maxPageSize: 1000 });
+    async getKeys(base?: string) {
+      const iterator = (await getContainerClient())
+        .listBlobsFlat(base ? { prefix: r(base) } : undefined)
+        .byPage({ maxPageSize: 1000 });
       const keys: string[] = [];
       for await (const page of iterator) {
-        const pageKeys = page.segment.blobItems.map((blob) => blob.name);
+        const pageKeys = page.segment.blobItems.map((blob) => un_r(blob.name));
         keys.push(...pageKeys);
       }
       return keys;
@@ -175,7 +187,7 @@ const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> =
       const blobProperties = await (
         await getContainerClient()
       )
-        .getBlockBlobClient(key)
+        .getBlockBlobClient(r(key))
         .getProperties();
       return {
         mtime: blobProperties.lastModified,
@@ -184,8 +196,10 @@ const driver: DriverFactory<AzureStorageBlobOptions, Promise<ContainerClient>> =
         ...blobProperties.metadata,
       };
     },
-    async clear() {
-      const iterator = (await getContainerClient()).listBlobsFlat().byPage({ maxPageSize: 1000 });
+    async clear(base?: string) {
+      const iterator = (await getContainerClient())
+        .listBlobsFlat(base ? { prefix: r(base) } : undefined)
+        .byPage({ maxPageSize: 1000 });
       for await (const page of iterator) {
         await Promise.all(
           page.segment.blobItems.map(

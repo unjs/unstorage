@@ -19,7 +19,7 @@ const driver: DriverFactory<OverlayStorageOptions> = (options) => {
         if (await layer.hasItem(key, opts)) {
           if (
             layer === options.layers[0] &&
-            (await options.layers[0]?.getItem(key)) === OVERLAY_REMOVED
+            (await options.layers[0]?.getItem(key, opts)) === OVERLAY_REMOVED
           ) {
             return false;
           }
@@ -28,9 +28,9 @@ const driver: DriverFactory<OverlayStorageOptions> = (options) => {
       }
       return false;
     },
-    async getItem(key) {
+    async getItem(key, opts) {
       for (const layer of options.layers) {
-        const value = await layer.getItem(key);
+        const value = await layer.getItem(key, opts);
         if (value === OVERLAY_REMOVED) {
           return null;
         }

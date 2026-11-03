@@ -62,10 +62,16 @@ const driver: DriverFactory<HTTPOptions> = (opts) => {
       return res ? await res.arrayBuffer() : null;
     },
     async getMeta(key, topts) {
+      // A missing key answers HEAD with 404, which every sibling method above
+      // already catches. Without the catch this rejects where getItem returns
+      // null and hasItem returns false for the same key.
       const res = await fetchRequest(r(key), {
         method: "HEAD",
         headers: getHeaders(topts),
-      });
+      }).catch(catchFetchError);
+      if (!res) {
+        return null;
+      }
       let mtime: Date | undefined;
       let ttl: number | undefined;
       const _lastModified = res.headers.get("last-modified");

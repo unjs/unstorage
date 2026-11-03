@@ -27,34 +27,54 @@ describe("drivers: localstorage", () => {
         const watcher = vi.fn();
         await ctx.storage.watch(watcher);
 
-        // Emulate
-        // jsdom.window.localStorage.setItem('s1:random_file', 'random')
+        // Emulate matching key under base ("test:")
         const ev = jsdom.window.document.createEvent("CustomEvent");
         ev.initEvent("storage", true);
         // @ts-ignore
-        ev.key = "s1:random_file";
+        ev.key = "test:s1:random_file";
         // @ts-ignore
         ev.newValue = "random";
         jsdom.window.dispatchEvent(ev);
 
         expect(watcher).toHaveBeenCalledWith("update", "s1:random_file");
+
+        // Emulate key outside base -> should be ignored
+        const unrelatedEv = jsdom.window.document.createEvent("CustomEvent");
+        unrelatedEv.initEvent("storage", true);
+        // @ts-ignore
+        unrelatedEv.key = "other:unrelated";
+        // @ts-ignore
+        unrelatedEv.newValue = "val";
+        jsdom.window.dispatchEvent(unrelatedEv);
+
+        expect(watcher).toHaveBeenCalledTimes(1);
+
+        // Emulate remove event
+        const removeEv = jsdom.window.document.createEvent("CustomEvent");
+        removeEv.initEvent("storage", true);
+        // @ts-ignore
+        removeEv.key = "test:s1:random_file";
+        // @ts-ignore
+        removeEv.newValue = null;
+        jsdom.window.dispatchEvent(removeEv);
+
+        expect(watcher).toHaveBeenCalledWith("remove", "s1:random_file");
+        expect(watcher).toHaveBeenCalledTimes(2);
       });
       it("unwatch localstorage", async () => {
         const watcher = vi.fn();
         const unwatch = await ctx.storage.watch(watcher);
 
-        // Emulate
-        // jsdom.window.localStorage.setItem('s1:random_file', 'random')
         const ev = jsdom.window.document.createEvent("CustomEvent");
         ev.initEvent("storage", true);
         // @ts-ignore
-        ev.key = "s1:random_file";
+        ev.key = "test:s1:random_file";
         // @ts-ignore
         ev.newValue = "random";
         const ev2 = jsdom.window.document.createEvent("CustomEvent");
         ev2.initEvent("storage", true);
         // @ts-ignore
-        ev2.key = "s1:random_file2";
+        ev2.key = "test:s1:random_file2";
         // @ts-ignore
         ev2.newValue = "random";
 

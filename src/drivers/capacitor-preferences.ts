@@ -1,13 +1,6 @@
 import type { Preferences } from "@capacitor/preferences";
 
-import {
-  type DriverFactory,
-  importLib,
-  joinKeys,
-  type LibImport,
-  normalizeKey,
-  type DriverDependencies,
-} from "./utils/index.ts";
+import { type DriverFactory, importLib, joinKeys, type LibImport, normalizeKey, type DriverDependencies, listPrefix, matchesPrefix, stripBase } from "./utils/index.ts";
 
 export const DRIVER_DEPENDENCIES: DriverDependencies = {
   lib: { name: "@capacitor/preferences", version: "^6 || ^7 || ^8" },
@@ -58,16 +51,19 @@ const driver: DriverFactory<CapacitorPreferencesOptions, Promise<typeof Preferen
     async removeItem(key) {
       return (await getPreferences()).remove({ key: resolveKey(key) });
     },
-    async getKeys() {
+    async getKeys(relativeBase?: string) {
       const { keys } = await (await getPreferences()).keys();
-      return keys.map((key) => key.slice(base.length));
+      const prefix = listPrefix(base, relativeBase);
+      return (keys as string[])
+        .filter((key) => matchesPrefix(key, prefix))
+        .map((key) => stripBase(key, base));
     },
     async clear(prefix) {
       const preferences = await getPreferences();
       const { keys } = await preferences.keys();
       const _prefix = resolveKey(prefix || "");
       await Promise.all(
-        keys.filter((key) => key.startsWith(_prefix)).map((key) => preferences.remove({ key })),
+        keys.filter((key) => (_prefix ? key.startsWith(`${_prefix}:`) : true)).map((key) => preferences.remove({ key })),
       );
     },
   };

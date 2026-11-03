@@ -1,9 +1,4 @@
-import {
-  type DriverFactory,
-  importLib,
-  type LibImport,
-  type DriverDependencies,
-} from "./utils/index.ts";
+import { type DriverFactory, importLib, type LibImport, type DriverDependencies, listPrefix, matchesPrefix, stripBase, normalizeKey, joinKeys } from "./utils/index.ts";
 import type { UseStore } from "idb-keyval";
 
 export interface IDBKeyvalOptions {
@@ -25,8 +20,8 @@ export const DRIVER_DEPENDENCIES: DriverDependencies = {
 const DRIVER_NAME = "idb-keyval";
 
 const driver: DriverFactory<IDBKeyvalOptions> = (opts = {}) => {
-  const base = opts.base && opts.base.length > 0 ? `${opts.base}:` : "";
-  const makeKey = (key: string) => base + key;
+  const base = opts.base ? normalizeKey(opts.base) : "";
+  const makeKey = (key: string) => joinKeys(base, key);
 
   let _lib: Promise<{ lib: typeof import("idb-keyval"); store: UseStore | undefined }> | undefined;
   const getLib = () =>
@@ -66,13 +61,23 @@ const driver: DriverFactory<IDBKeyvalOptions> = (opts = {}) => {
       const { lib, store } = await getLib();
       return lib.del(makeKey(key), store);
     },
-    async getKeys() {
+    async getKeys(relativeBase?: string) {
       const { lib, store } = await getLib();
-      return lib.keys(store);
+      const prefix = listPrefix(base, relativeBase);
+      const keys = (await lib.keys(store)) as string[];
+      return keys.filter((key) => matchesPrefix(key, prefix)).map((key) => stripBase(key, base));
     },
-    async clear() {
+    async clear(relativeBase?: string) {
       const { lib, store } = await getLib();
-      return lib.clear(store);
+      const prefix = listPrefix(base, relativeBase);
+      const keys = (await lib.keys(store)) as string[];
+      if (prefix === "") {
+        await lib.clear(store);
+        return;
+      }
+      await Promise.all(
+        keys.filter((key) => matchesPrefix(key, prefix)).map((key) => lib.del(key, store)),
+      );
     },
   };
 };

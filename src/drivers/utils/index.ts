@@ -92,6 +92,26 @@ export function joinKeys(...keys: string[]): string {
 }
 
 /**
+ * Prefix that matches every key of driver `base` under `relativeBase`, ending
+ * in the separator so that base `app` does not also match `apple:x`.
+ * Empty when neither is set, meaning "every key".
+ */
+export function listPrefix(base: string | undefined, relativeBase: string | undefined): string {
+  const prefix = joinKeys(base || "", relativeBase || "");
+  return prefix ? `${prefix}:` : "";
+}
+
+/** Whether a stored key belongs under a prefix from {@link listPrefix}. */
+export function matchesPrefix(key: string, prefix: string): boolean {
+  return prefix === "" || key.startsWith(prefix);
+}
+
+/** A stored key without the driver base and its separator; base-less keys pass through. */
+export function stripBase(key: string, base: string | undefined): string {
+  return base ? key.slice(normalizeKey(base).length + 1) : key;
+}
+
+/**
  * Percent-encode a single URL path segment.
  *
  * Throws for empty, `.` and `..` segments (that URL parsers would collapse)

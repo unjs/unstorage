@@ -1,10 +1,4 @@
-import {
-  type DriverFactory,
-  importLib,
-  type LibImport,
-  normalizeKey,
-  type DriverDependencies,
-} from "./utils/index.ts";
+import { type DriverFactory, importLib, type LibImport, normalizeKey, type DriverDependencies, listPrefix, matchesPrefix, stripBase } from "./utils/index.ts";
 import type { UTApi } from "uploadthing/server";
 
 // Reference: https://docs.uploadthing.com
@@ -48,10 +42,14 @@ const driver: DriverFactory<UploadThingOptions, Promise<UTApi>> = (opts = {}) =>
       });
     })());
 
-  const getKeys = async (base: string) => {
+  // Raw, fully-prefixed custom ids: what deleteFiles wants, never what getKeys returns.
+  const listKeys = async (relativeBase: string = "") => {
     const client = await getClient();
     const { files } = await client.listFiles({});
-    return files.map((file) => file.customId).filter((k) => k && k.startsWith(base)) as string[];
+    const prefix = listPrefix(base, relativeBase);
+    return ((files.map((file) => file.customId) as string[]) || []).filter(
+      (k) => k && matchesPrefix(k, prefix),
+    );
   };
 
   const toFile = (key: string, value: BlobPart) => {
@@ -66,8 +64,8 @@ const driver: DriverFactory<UploadThingOptions, Promise<UTApi>> = (opts = {}) =>
     getInstance() {
       return getClient();
     },
-    getKeys(base) {
-      return getKeys(r(base));
+    getKeys(relativeBase?: string) {
+      return listKeys(relativeBase || "").then((keys) => keys.map((key) => stripBase(key, base)));
     },
     async hasItem(key) {
       const client = await getClient();
@@ -102,10 +100,9 @@ const driver: DriverFactory<UploadThingOptions, Promise<UTApi>> = (opts = {}) =>
       const client = await getClient();
       await client.deleteFiles([r(key)]);
     },
-    async clear(base) {
+    async clear(relativeBase?: string) {
       const client = await getClient();
-      const keys = await getKeys(r(base));
-      await client.deleteFiles(keys);
+      await client.deleteFiles(await listKeys(relativeBase || ""));
     },
     // getMeta(key, opts) {
     //   // TODO: We don't currently have an endpoint to fetch metadata, but it does exist

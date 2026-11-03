@@ -59,7 +59,9 @@ const driver: DriverFactory<DenoKvOptions, Promise<DenoKV.Kv>> = (opts) => {
     async hasItem(key) {
       const kv = await getKv();
       const value = await kv.get(r(key));
-      return !!value.value;
+      // Presence, not the value's truthiness: an empty string is a stored value,
+      // and `!!value.value` made hasItem and getItem disagree about that key.
+      return value.value !== null;
     },
     async getItem(key) {
       const kv = await getKv();

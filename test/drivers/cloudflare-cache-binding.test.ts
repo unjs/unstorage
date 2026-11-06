@@ -10,8 +10,8 @@ Wrangler platform proxy does seems has no real implementation of caches API so i
 export default {
   async fetch(request, env, ctx) {
     const cache = caches.default
-    await cache.put("unstorage://test/key", new Response("foobar"))
-    const value = await cache.match("unstorage://test/key")
+    await cache.put("https://unstorage.local/test/key", new Response("foobar"))
+    const value = await cache.match("https://unstorage.local/test/key")
     return Response.json({
       cacheValue: await value.text()
     })

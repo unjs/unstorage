@@ -14,6 +14,13 @@ export interface CacheOptions {
   base?: string;
 
   /**
+   * Origin to use for cache URL keys.
+   * Cloudflare Cache API requires an `http:` or `https:` scheme.
+   * @default "https://unstorage.local"
+   */
+  origin?: string;
+
+  /**
    * Default TTL for all items in seconds.
    */
   ttl?: number;
@@ -31,9 +38,11 @@ export interface CacheOptions {
 const DRIVER_NAME = "cloudflare-cache-binding";
 
 const driver: DriverFactory<CacheOptions, CFCache | Promise<CFCache>> = (opts) => {
+  const origin = (opts.origin || "https://unstorage.local").replace(/\/+$/, "");
+
   // Encode key segments so that `%2e%2e` or `#` can not change the cache URL path
   const r = (key: string = "") =>
-    `unstorage://${encodeURLKey(DRIVER_NAME, opts.base ? joinKeys(opts.base, key) : key)}`;
+    `${origin}/${encodeURLKey(DRIVER_NAME, opts.base ? joinKeys(opts.base, key) : key)}`;
 
   let _cache: CFCache | Promise<CFCache> | undefined;
   const getCache = () => {

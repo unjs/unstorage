@@ -76,11 +76,11 @@ describe("drivers: cloudflare-cache-binding (fake caches)", () => {
     await storage.setItem("default-ttl", "a");
     await storage.setItem("custom", "b", { ttl: 60, tag: "my-tag" });
 
-    const defaultTTL = fakeCaches.store.get("unstorage://nitro-cache/default-ttl");
+    const defaultTTL = fakeCaches.store.get("https://unstorage.local/nitro-cache/default-ttl");
     expect(defaultTTL?.headers.get("Cache-Control")).toBe("max-age=30");
     expect(defaultTTL?.headers.get("Cache-Tag")).toBe(null);
 
-    const custom = fakeCaches.store.get("unstorage://nitro-cache/custom");
+    const custom = fakeCaches.store.get("https://unstorage.local/nitro-cache/custom");
     expect(custom?.headers.get("Cache-Control")).toBe("max-age=60");
     expect(custom?.headers.get("Cache-Tag")).toBe("my-tag");
 
@@ -99,10 +99,25 @@ describe("drivers: cloudflare-cache-binding (fake caches)", () => {
     await alice.setItem("a#b", "x");
     expect(await storage.getItem("users:bob:secret")).toBe("bob's secret");
     expect([...fakeCaches.store.keys()].sort()).toEqual([
-      "unstorage://app/users/alice/%252e%252e/bob/secret",
-      "unstorage://app/users/alice/a%23b",
-      "unstorage://app/users/bob/secret",
+      "https://unstorage.local/app/users/alice/%252e%252e/bob/secret",
+      "https://unstorage.local/app/users/alice/a%23b",
+      "https://unstorage.local/app/users/bob/secret",
     ]);
+
+    await storage.dispose();
+  });
+
+  test("supports custom origin option (issue #872)", async () => {
+    const storage = createStorage({
+      driver: CloudflareCacheBinding({
+        origin: "https://cache.internal/",
+        base: "custom-base",
+      }),
+    });
+
+    await storage.setItem("item", "val");
+    expect(fakeCaches.store.has("https://cache.internal/custom-base/item")).toBe(true);
+    expect(await storage.getItem("item")).toBe("val");
 
     await storage.dispose();
   });

@@ -27,6 +27,7 @@ const storage = createStorage({
 Options:
 
 - `base`: Prefixes all cache keys.
+- `origin`: Origin URL prefix for cache keys (defaults to `https://unstorage.local`).
 - `ttl`: Default TTL in seconds.
 - `name`: Uses a named cache from `caches.open(name)` instead of `caches.default`. Workers for Platforms namespaced scripts require a named cache.
 

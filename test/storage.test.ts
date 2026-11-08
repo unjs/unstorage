@@ -235,6 +235,45 @@ describe("Regression", () => {
     expect(await storage.getKeys()).toEqual(["baz"]);
   });
 
+  it("setItems does not pass undefined values to a driver's setItems", async () => {
+    const setItems = vi.fn();
+    const driver = memory();
+    const storage = createStorage({
+      driver: {
+        ...driver,
+        setItems: async (items) => {
+          setItems(items);
+          await Promise.all(items.map((item) => driver.setItem!(item.key, item.value, {})));
+        },
+      },
+    });
+    await storage.setItem("foo", "bar");
+
+    await storage.setItems([
+      { key: "foo", value: undefined as any },
+      { key: "baz", value: "qux" },
+    ]);
+
+    expect(setItems).toHaveBeenCalledTimes(1);
+    expect(setItems.mock.calls[0]![0]).toMatchObject([{ key: "baz", value: "qux" }]);
+    expect(await storage.hasItem("foo")).toBe(false);
+    expect(await storage.getItem("baz")).toBe("qux");
+  });
+
+  it("setItems removes nothing when a key in the batch is invalid", async () => {
+    const storage = createStorage();
+    await storage.setItem("foo", "bar");
+
+    await expect(
+      storage.setItems([
+        { key: "foo", value: undefined as any },
+        { key: "../baz", value: "qux" },
+      ]),
+    ).rejects.toThrow("Invalid key");
+
+    expect(await storage.getItem("foo")).toBe("bar");
+  });
+
   it("prefixed storage supports aliases", async () => {
     const storage = createStorage();
     const pStorage = prefixStorage(storage, "foo");

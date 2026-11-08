@@ -370,6 +370,10 @@ export function createStorage<T extends StorageValue>(
       // Same as `setItem`, an `undefined` value removes the key
       const removedItems = items.filter((item) => item.value === undefined);
       if (removedItems.length > 0) {
+        // Reject invalid keys before removing anything
+        for (const item of items) {
+          normalizeItemKey(item.key);
+        }
         items = items.filter((item) => item.value !== undefined);
         await Promise.all(
           removedItems.map((item) =>

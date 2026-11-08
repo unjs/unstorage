@@ -216,6 +216,25 @@ describe("Regression", () => {
     expect(setItems).toHaveBeenCalledTimes(1);
   });
 
+  it("setItems removes keys with an undefined value like setItem", async () => {
+    const storage = createStorage().mount("mnt", memory());
+    await storage.setItems([
+      { key: "foo", value: "bar" },
+      { key: "mnt:foo", value: "bar" },
+    ]);
+
+    await storage.setItems([
+      { key: "foo", value: undefined as any },
+      { key: "mnt:foo", value: undefined as any },
+      { key: "baz", value: "qux" },
+    ]);
+
+    expect(await storage.hasItem("foo")).toBe(false);
+    expect(await storage.getItem("foo")).toBe(null);
+    expect(await storage.hasItem("mnt:foo")).toBe(false);
+    expect(await storage.getKeys()).toEqual(["baz"]);
+  });
+
   it("prefixed storage supports aliases", async () => {
     const storage = createStorage();
     const pStorage = prefixStorage(storage, "foo");

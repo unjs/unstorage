@@ -367,6 +367,20 @@ export function createStorage<T extends StorageValue>(
       }
     },
     async setItems(items, commonOptions) {
+      // Same as `setItem`, an `undefined` value removes the key
+      const removedItems = items.filter((item) => item.value === undefined);
+      if (removedItems.length > 0) {
+        // Reject invalid keys before removing anything
+        for (const item of items) {
+          normalizeItemKey(item.key);
+        }
+        items = items.filter((item) => item.value !== undefined);
+        await Promise.all(
+          removedItems.map((item) =>
+            storage.removeItem(item.key, { ...commonOptions, ...item.options }),
+          ),
+        );
+      }
       await runBatch(items, commonOptions, async (batch) => {
         if (batch.driver.setItems) {
           return asyncCall(

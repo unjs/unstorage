@@ -59,9 +59,14 @@ export function prefixStorage<T extends StorageValue>(
           // @ts-ignore
           storage[property](itemKey(key), ...args);
   }
-  nsStorage.getKeys = (key = "", ...arguments_) =>
+  // maxDepth of the prefixed view counts from the prefix, the wrapped storage counts from its root
+  const baseDepth = base.split(":").length - 1;
+  nsStorage.getKeys = (key = "", opts = {}) =>
     storage
-      .getKeys(base + key, ...arguments_)
+      .getKeys(
+        base + key,
+        opts.maxDepth === undefined ? opts : { ...opts, maxDepth: opts.maxDepth + baseDepth },
+      )
       // Remove Prefix
       .then((keys) => keys.map((key) => key.slice(base.length)));
 

@@ -282,14 +282,13 @@ describe("Regression", () => {
     }
   });
 
-  it("getKeys leaves the maxDepth cut to the post-filter for mounts without native support", async () => {
-    // prefixStorage forwards maxDepth to a storage that counts depth from its own root,
-    // so it must not get a maxDepth at all and the post-filter does the cut
+  it("getKeys counts maxDepth through prefixStorage mounts without dropping keys", async () => {
     const inner = createStorage({ driver: memory() });
     await inner.setItem("pre:file_depth1", "contents");
     await inner.setItem("pre:depth1:file_depth2", "contents");
     await inner.setItem("pre:deep:file_depth1", "contents");
     await inner.setItem("pre:deep:depth1:file_depth2", "contents");
+    const innerGetKeys = vi.spyOn(inner, "getKeys");
     const storage = createStorage({ driver: memory() });
     storage.mount("/storage_b", prefixStorage(inner, "pre") as any);
     storage.mount("/storage_c", prefixStorage(inner, "pre:deep") as any);
@@ -299,6 +298,23 @@ describe("Regression", () => {
     ]);
     expect(await storage.getKeys("storage_c", { maxDepth: 1 })).toMatchObject([
       "storage_c:file_depth1",
+    ]);
+    // the wrapped storage still gets a depth limit instead of listing everything
+    for (const [, opts] of innerGetKeys.mock.calls) {
+      expect(opts?.maxDepth).toBeTypeOf("number");
+    }
+  });
+
+  it("prefixStorage counts getKeys maxDepth from its prefix", async () => {
+    const inner = createStorage({ driver: memory() });
+    await inner.setItem("pre:deep:file_depth0", "contents");
+    await inner.setItem("pre:deep:depth0:file_depth1", "contents");
+    const storage = prefixStorage(inner, "pre:deep");
+
+    expect(await storage.getKeys(undefined, { maxDepth: 0 })).toMatchObject(["file_depth0"]);
+    expect((await storage.getKeys(undefined, { maxDepth: 1 })).sort()).toMatchObject([
+      "depth0:file_depth1",
+      "file_depth0",
     ]);
   });
 

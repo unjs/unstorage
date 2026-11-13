@@ -60,14 +60,18 @@ const driver: DriverFactory<CapacitorPreferencesOptions, Promise<typeof Preferen
     },
     async getKeys() {
       const { keys } = await (await getPreferences()).keys();
-      return keys.map((key) => key.slice(base.length));
+      return base
+        ? keys.filter((key) => key.startsWith(`${base}:`)).map((key) => key.slice(base.length + 1))
+        : keys;
     },
     async clear(prefix) {
       const preferences = await getPreferences();
       const { keys } = await preferences.keys();
       const _prefix = resolveKey(prefix || "");
       await Promise.all(
-        keys.filter((key) => key.startsWith(_prefix)).map((key) => preferences.remove({ key })),
+        keys
+          .filter((key) => !_prefix || key.startsWith(`${_prefix}:`))
+          .map((key) => preferences.remove({ key })),
       );
     },
   };

@@ -1,4 +1,4 @@
-import { describe, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import driver from "../../src/drivers/capacitor-preferences.ts";
 import { testDriver } from "./utils.ts";
 import { afterEach } from "node:test";
@@ -34,5 +34,16 @@ describe("drivers: capacitor-preferences", () => {
 
   testDriver({
     driver: driver({ base: "test" }),
+    additionalTests: (ctx) => {
+      it("ignores keys outside of base", async () => {
+        const { Preferences } = await import("@capacitor/preferences");
+        await Preferences.set({ key: "testing:foo", value: "bar" });
+        await ctx.storage.setItem("s1:a", "test_data");
+        expect(await ctx.storage.getKeys()).toMatchObject(["s1:a"]);
+        await ctx.storage.clear();
+        expect((await Preferences.keys()).keys).toMatchObject(["testing:foo"]);
+        await Preferences.remove({ key: "testing:foo" });
+      });
+    },
   });
 });

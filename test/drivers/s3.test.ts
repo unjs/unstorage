@@ -85,6 +85,22 @@ describe("drivers: s3 (keys)", () => {
     await expect(driver.getItem("..", {})).rejects.toThrow("Invalid key");
     await expect(driver.getItemRaw!("..", {})).rejects.toThrow("Invalid key");
   });
+
+  it("retries transient 5xx responses via AwsClient.fetch", async () => {
+    let callCount = 0;
+    vi.stubGlobal("fetch", async () => {
+      callCount++;
+      if (callCount === 1) {
+        return new Response("Internal Server Error", { status: 500 });
+      }
+      return new Response("hello", { status: 200 });
+    });
+
+    const driver = createDriver("my-bucket");
+    const item = await driver.getItem("test.txt");
+    expect(item).toBe("hello");
+    expect(callCount).toBe(2);
+  });
 });
 
 describe.skipIf(!accessKeyId || !secretAccessKey || !bucket || !endpoint || !region)(

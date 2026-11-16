@@ -48,6 +48,11 @@ export interface S3DriverOptions {
   bulkDelete?: boolean;
 
   /**
+   * The number of retry attempts for transient 5xx and 429 responses (defaults to 10 in aws4fetch).
+   */
+  retries?: number;
+
+  /**
    * Optionally provide the [`aws4fetch`](https://www.npmjs.com/package/aws4fetch) library
    * to avoid dynamically importing it.
    */
@@ -106,6 +111,7 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
         accessKeyId: options.accessKeyId,
         secretAccessKey: options.secretAccessKey,
         region: options.region,
+        retries: options.retries,
       });
     })());
 
@@ -114,15 +120,14 @@ const driver: DriverFactory<S3DriverOptions> = (options) => {
   const url = (key: string = "") => `${baseURL}/${encodeURLKey(DRIVER_NAME, key)}`;
 
   const awsFetch = async (url: string, opts?: RequestInit) => {
-    const request = await (await getAwsClient()).sign(url, opts);
-    const res = await fetch(request);
+    const res = await (await getAwsClient()).fetch(url, opts);
     if (!res.ok) {
       if (res.status === 404) {
         return null;
       }
       throw createError(
         DRIVER_NAME,
-        `[${request.method}] ${url}: ${res.status} ${res.statusText} ${await res.text()}`,
+        `[${opts?.method ?? "GET"}] ${url}: ${res.status} ${res.statusText} ${await res.text()}`,
       );
     }
     return res;

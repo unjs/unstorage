@@ -20,8 +20,18 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket | Promise<CF.R2Buck
     const binding = await getR2Binding(opts.binding);
     // Trailing `:` so that base `app` does not also match `apple:*`
     const prefix = joinKeys(opts.base || "", base || "");
-    const kvList = await binding.list(prefix ? { prefix: `${prefix}:` } : undefined);
-    return kvList.objects.map((obj) => obj.key);
+    const keys: string[] = [];
+    let cursor: string | undefined;
+    // `list` returns at most 1000 objects per call, follow the cursor until done
+    do {
+      const page = await binding.list({
+        ...(prefix ? { prefix: `${prefix}:` } : {}),
+        cursor,
+      });
+      for (const obj of page.objects) keys.push(obj.key);
+      cursor = page.truncated ? page.cursor : undefined;
+    } while (cursor);
+    return keys;
   };
 
   return {
@@ -78,7 +88,10 @@ const driver: DriverFactory<CloudflareR2Options, CF.R2Bucket | Promise<CF.R2Buck
     async clear(base) {
       const binding = await getR2Binding(opts.binding);
       const keys = await getKeys(base);
-      await binding.delete(keys);
+      // `delete` accepts at most 1000 keys per call
+      for (let i = 0; i < keys.length; i += 1000) {
+        await binding.delete(keys.slice(i, i + 1000));
+      }
     },
   };
 };

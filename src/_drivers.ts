@@ -211,10 +211,10 @@ export const builtinDriverDependencies: Partial<Record<BuiltinDriverName, Driver
     lib: { name: "@deno/kv", version: ">=0.14.0" },
   },
   "firebase-firestore": {
-    lib: { name: "firebase", version: ">=11" },
+    lib: { name: "firebase", import: "firebase/firestore", version: ">=11" },
   },
   "firebaseFirestore": {
-    lib: { name: "firebase", version: ">=11" },
+    lib: { name: "firebase", import: "firebase/firestore", version: ">=11" },
   },
   "fs": {
     lib: { name: "chokidar", version: "^4 || ^5", optional: true },

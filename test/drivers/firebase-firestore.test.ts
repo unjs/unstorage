@@ -66,6 +66,49 @@ describe.skipIf(!emulatorHost)("drivers: firebase-firestore", () => {
         await ctx.driver.clear!("b:", {});
         expect(await ctx.storage.getKeys()).toMatchObject(["a:1"]);
       });
+      it("lists and clears keys with characters beyond the Basic Multilingual Plane", async () => {
+        await ctx.storage.setItems([
+          { key: "log:🥨", value: 1 },
+          { key: "log:\uFFFF", value: 2 },
+          { key: "loh", value: 3 },
+        ]);
+        expect((await ctx.storage.getKeys("log:")).sort()).toEqual(["log:\uFFFF", "log:🥨"].sort());
+        await ctx.driver.clear!("log:", {});
+        expect(await ctx.storage.getKeys()).toEqual(["loh"]);
+      });
+      it("a watch stopped while it is starting settles, and stays stopped", async () => {
+        const watcher = driver({ firestore, collection: "test", lib: firestoreLib });
+        const heard: string[] = [];
+        const starting = watcher.watch!((event, key) => heard.push(`${event} ${key}`));
+        await watcher.dispose!();
+        await expect(starting).resolves.toBeTypeOf("function");
+        await ctx.storage.setItem("after-stop", 1);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        expect(heard).toEqual([]);
+      });
+      it("unwatching an earlier watch leaves a newer one running", async () => {
+        const watcher = driver({ firestore, collection: "test", lib: firestoreLib });
+        const earlier = await watcher.watch!(() => {});
+        const heard: string[] = [];
+        const later = await watcher.watch!((event, key) => heard.push(`${event} ${key}`));
+        await earlier();
+        await ctx.storage.setItem("still-heard", 1);
+        await expect.poll(() => heard).toEqual(["update still-heard"]);
+        await later();
+      });
+      it("a batch that fails partway leaves reads matching what was stored", async () => {
+        const unwatch = await ctx.storage.watch(() => {});
+        const items: { key: string; value: unknown }[] = Array.from({ length: 502 }, (_, n) => ({
+          key: `batch:${n}`,
+          value: n,
+        }));
+        // Firestore refuses a function value while building the second batch.
+        items[501] = { key: "batch:501", value: () => {} };
+        await expect(ctx.driver.setItems!(items as any, {})).rejects.toThrow();
+        expect(await ctx.storage.getItem("batch:499")).toBe(499);
+        expect(await ctx.storage.getItem("batch:500")).toBe(null);
+        await unwatch();
+      });
       it("has mtime in meta", async () => {
         await ctx.storage.setItem("dated", 1);
         expect((await ctx.storage.getMeta("dated")).mtime).toBeInstanceOf(Date);
@@ -128,6 +171,31 @@ describe.skipIf(!emulatorHost)("drivers: firebase-firestore", () => {
         await firestoreLib.enableNetwork(cachingFirestore);
         await expect.poll(() => reopened.getItem("log:3")).toBe(3);
         expect(heard).toEqual(["update log:3"]);
+        await unwatch();
+      });
+      it("incrementally, a client that has only read some entries still gets older ones", async () => {
+        const entries = firestoreLib.collection(firestore, "test");
+        // Written well before the newer entry, as on another day.
+        await firestoreLib.setDoc(firestoreLib.doc(entries, escapeKey("old:1")), {
+          key: "old:1",
+          value: 1,
+          modifiedAt: firestoreLib.Timestamp.fromMillis(Date.now() - 600_000),
+        });
+        await ctx.storage.setItem("old:2", 2);
+        const reader = createStorage({
+          driver: driver({
+            firestore: cachingFirestore,
+            collection: "test",
+            lib: firestoreLib,
+            incremental: true,
+          }),
+        });
+        // Only the newer entry reaches this client's cache before it first watches.
+        expect(await reader.getItem("old:2")).toBe(2);
+        const unwatch = await reader.watch(() => {});
+        await expect
+          .poll(async () => (await reader.getKeys("old:")).sort())
+          .toEqual(["old:1", "old:2"]);
         await unwatch();
       });
     },

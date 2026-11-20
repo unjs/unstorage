@@ -44,7 +44,7 @@ export interface FirebaseFirestoreOptions {
 }
 
 export const DRIVER_DEPENDENCIES: DriverDependencies = {
-  lib: { name: "firebase", version: ">=11" },
+  lib: { name: "firebase", import: "firebase/firestore", version: ">=11" },
 };
 
 const DRIVER_NAME = "firebase-firestore";
@@ -65,6 +65,22 @@ export function escapeKey(key: string): string {
     /[._]/g,
     (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
   );
+}
+
+/**
+ * The first string after every string that starts with `prefix`, or nothing if there is none.
+ * Firestore orders strings by their UTF-8 bytes, which is code point order, so this bumps the
+ * last code point that can be bumped (skipping the surrogate range, which no string holds).
+ */
+function afterPrefix(prefix: string): string | undefined {
+  const points = [...prefix];
+  while (points.length > 0) {
+    const last = points.pop()!.codePointAt(0)!;
+    if (last < 0x10_ff_ff) {
+      return points.join("") + String.fromCodePoint(last + 1 === 0xd8_00 ? 0xe0_00 : last + 1);
+    }
+  }
+  return undefined;
 }
 
 function chunks<T>(items: T[], size: number): T[][] {
@@ -91,7 +107,11 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
   const underBase = async (base?: string): Promise<Query> => {
     const { query, where } = await getLib();
     const entries = await getCollection();
-    return base ? query(entries, where("key", ">=", base), where("key", "<", `${base}￿`)) : entries;
+    if (!base) return entries;
+    const end = afterPrefix(base);
+    return end
+      ? query(entries, where("key", ">=", base), where("key", "<", end))
+      : query(entries, where("key", ">=", base));
   };
 
   type Entry = { value: unknown; modifiedAt?: Timestamp };
@@ -102,12 +122,20 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
   });
 
   let unsubscribe: (() => void) | undefined;
-  // While watching, the whole collection: from the listener, plus this client's writes. Reads
-  // are answered from it, so watching costs one read per document and later reads cost nothing.
+  // While watching, the collection as this client knows it: from the listener, plus this client's
+  // writes. Reads are answered from it, so watching costs one read per document and later reads
+  // cost nothing.
   let live: Map<string, Entry> | undefined;
   let notify: WatchCallback | undefined;
+  // Each watch owns one generation; stopping moves on to the next, so a watch still starting
+  // knows it was stopped, and an old watch's stop function leaves a newer watch alone.
+  let generation = 0;
+  let settleStart: (() => void) | undefined;
 
   const stopWatching = () => {
+    generation++;
+    settleStart?.();
+    settleStart = undefined;
     unsubscribe?.();
     unsubscribe = undefined;
     live = undefined;
@@ -128,10 +156,25 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
   /** What the server is asked for when watching starts, given what is already held. */
   const watchedQuery = async (held: Map<string, Entry>): Promise<Query> => {
     const entries = await getCollection();
-    const newest = Math.max(0, ...[...held.values()].map((e) => e.modifiedAt?.toMillis() ?? 0));
+    let newest = 0;
+    for (const e of held.values()) newest = Math.max(newest, e.modifiedAt?.toMillis() ?? 0);
     if (!opts.incremental || newest === 0) return entries;
-    const { Timestamp, query, where } = await getLib();
+    const { Timestamp, getCountFromServer, query, where } = await getLib();
     const since = Timestamp.fromMillis(newest - INCREMENTAL_OVERLAP_MS);
+    // A cache can hold a newer entry without the older ones, for example after reading just that
+    // one, so check it has as many entries up to `since` as the server does. A count costs one
+    // read per 1000 entries. Offline it fails, and the cache is trusted until the next start.
+    const onServer = await getCountFromServer(
+      query(entries, where("modifiedAt", "<=", since)),
+    ).then(
+      (count) => count.data().count,
+      () => undefined,
+    );
+    let heldUpToSince = 0;
+    for (const e of held.values()) {
+      if ((e.modifiedAt?.toMillis() ?? 0) <= since.toMillis()) heldUpToSince++;
+    }
+    if (onServer !== undefined && heldUpToSince < onServer) return entries;
     return query(entries, where("modifiedAt", ">", since));
   };
 
@@ -181,8 +224,9 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
       });
     },
     // Each batch of up to 500 is atomic: its entries land together or not at all.
+    // The held copy takes each batch as it is sent, so a batch never sent is never held. A batch
+    // the server refuses is rolled back by the SDK, and the listener carries that back here.
     async setItems(items) {
-      for (const { key, value } of items) heldWrite(key, value);
       const { writeBatch, serverTimestamp } = await getLib();
       for (const group of chunks(items, BATCH_LIMIT)) {
         const batch = writeBatch(opts.firestore);
@@ -193,6 +237,7 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
             modifiedAt: serverTimestamp(),
           });
         }
+        for (const { key, value } of group) heldWrite(key, value);
         await batch.commit();
       }
     },
@@ -213,16 +258,13 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
       return modified ? { mtime: modified.toDate() } : {};
     },
     async clear(base) {
-      // Deleting from a Map while iterating it is safe: each key is still visited once.
-      for (const key of live?.keys() ?? []) {
-        if (!base || key.startsWith(base)) heldRemove(key);
-      }
       const { getDocs, writeBatch } = await getLib();
       const docs = (await getDocs(await underBase(base))).docs;
       for (const group of chunks(docs, BATCH_LIMIT)) {
         const batch = writeBatch(opts.firestore);
         for (const d of group) {
           batch.delete(d.ref);
+          heldRemove(d.get("key"));
         }
         await batch.commit();
       }
@@ -230,13 +272,20 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
     dispose() {
       stopWatching();
     },
-    // Reports changes made after watching starts, by this client or any other, and resolves once
-    // the whole collection is held. Each change is reported once: the listener's echoes of a
-    // write (pending, then confirmed with its server time) carry no new value.
+    // Resolves with the first snapshot, which may come from this client's cache, so watching
+    // starts offline too. From then on, reads see what this client knows, and everything the
+    // server adds to that, or that changes later on this client or any other, is reported as it
+    // arrives. Each change is reported once: the listener's echoes of a write (pending, then
+    // confirmed with its server time) carry no new value.
     async watch(callback) {
+      stopWatching();
+      const mine = generation;
+      const stopped = () => mine !== generation;
+      const unwatch = () => {
+        if (!stopped()) stopWatching();
+      };
       const { getDocsFromCache, onSnapshot } = await getLib();
       const entries = await getCollection();
-      stopWatching();
       const docs = new Map<string, Entry>();
       if (opts.incremental) {
         // Free: no server reads. Fails without a cache, and then everything is fetched.
@@ -244,11 +293,14 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
         for (const d of cached?.docs ?? []) docs.set(d.get("key"), fromDoc(d));
       }
       const watched = await watchedQuery(docs);
+      if (stopped()) return unwatch;
       let first = true;
       await new Promise<void>((resolve, reject) => {
+        settleStart = resolve;
         unsubscribe = onSnapshot(
           watched,
           (snapshot) => {
+            if (stopped()) return;
             for (const change of snapshot.docChanges()) {
               const key = change.doc.get("key");
               const before = docs.get(key)?.value;
@@ -262,6 +314,7 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
             }
             if (first) {
               first = false;
+              settleStart = undefined;
               live = docs;
               notify = callback;
               resolve();
@@ -269,12 +322,12 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
           },
           (error) => {
             // Reads go back to asking Firestore directly.
-            stopWatching();
+            unwatch();
             reject(error);
           },
         );
       });
-      return stopWatching;
+      return unwatch;
     },
   };
 };

@@ -121,7 +121,7 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
     modifiedAt: d.get("modifiedAt", { serverTimestamps: "estimate" }),
   });
 
-  let unsubscribe: (() => void) | undefined;
+  let unsubscribes: (() => void)[] = [];
   // While watching, the collection as this client knows it: from the listener, plus this client's
   // writes. Reads are answered from it, so watching costs one read per document and later reads
   // cost nothing.
@@ -136,8 +136,8 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
     generation++;
     settleStart?.();
     settleStart = undefined;
-    unsubscribe?.();
-    unsubscribe = undefined;
+    for (const stop of unsubscribes) stop();
+    unsubscribes = [];
     live = undefined;
     notify = undefined;
   };
@@ -152,6 +152,42 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
   const heldRemove = (key: string) => {
     if (live?.delete(key)) notify?.("remove", key);
   };
+
+  /** Holds what a document now says (or that it is gone), and reports it if the value changed. */
+  const hold = (
+    held: Map<string, Entry>,
+    key: string,
+    d: DocumentSnapshot | undefined,
+    report?: WatchCallback,
+  ) => {
+    const before = held.get(key)?.value;
+    if (d?.exists()) {
+      held.set(key, fromDoc(d));
+      if (before !== d.get("value")) report?.("update", key);
+    } else if (held.delete(key)) {
+      report?.("remove", key);
+    }
+  };
+
+  /**
+   * After the server refused writes, holds what Firestore has locally once it rolled them back.
+   * The listener may not see the rollback: an incremental watch only asks for newer entries.
+   */
+  const restoreHeld = async (keys: string[]) => {
+    if (!live) return;
+    const { getDocFromCache } = await getLib();
+    for (const key of keys) {
+      const d = await getDocFromCache(await entry(key)).catch(() => undefined);
+      if (live) hold(live, key, d, notify);
+    }
+  };
+
+  /** Commits a write; if the server refuses it, the held copy goes back to what is stored. */
+  const committed = (write: Promise<void>, keys: string[]) =>
+    write.catch(async (error) => {
+      await restoreHeld(keys);
+      throw error;
+    });
 
   /**
    * What the server is asked for when watching starts, given the server times of the entries
@@ -221,15 +257,18 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
     async setItem(key, value) {
       heldWrite(key, value);
       const { setDoc, serverTimestamp } = await getLib();
-      await setDoc(await entry(key), {
-        key,
-        value,
-        modifiedAt: serverTimestamp(),
-      });
+      await committed(
+        setDoc(await entry(key), {
+          key,
+          value,
+          modifiedAt: serverTimestamp(),
+        }),
+        [key],
+      );
     },
     // Each batch of up to 500 is atomic: its entries land together or not at all.
-    // The held copy takes each batch as it is sent, so a batch never sent is never held. A batch
-    // the server refuses is rolled back by the SDK, and the listener carries that back here.
+    // The held copy takes each batch as it is sent, so a batch never sent is never held, and goes
+    // back to what is stored if the server refuses it.
     async setItems(items) {
       const { writeBatch, serverTimestamp } = await getLib();
       for (const group of chunks(items, BATCH_LIMIT)) {
@@ -242,13 +281,16 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
           });
         }
         for (const { key, value } of group) heldWrite(key, value);
-        await batch.commit();
+        await committed(
+          batch.commit(),
+          group.map((item) => item.key),
+        );
       }
     },
     async removeItem(key) {
       heldRemove(key);
       const { deleteDoc } = await getLib();
-      await deleteDoc(await entry(key));
+      await committed(deleteDoc(await entry(key)), [key]);
     },
     async getKeys(base) {
       if (live) return [...live.keys()].filter((key) => !base || key.startsWith(base));
@@ -270,7 +312,10 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
           batch.delete(d.ref);
           heldRemove(d.get("key"));
         }
-        await batch.commit();
+        await committed(
+          batch.commit(),
+          group.map((d) => d.get("key")),
+        );
       }
     },
     dispose() {
@@ -292,6 +337,8 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
       const entries = await getCollection();
       const docs = new Map<string, Entry>();
       const heldTimes: number[] = [];
+      // Writes this client made earlier that the server has not confirmed yet.
+      const pending: DocumentSnapshot[] = [];
       if (opts.incremental) {
         // Free: no server reads. Fails without a cache, and then everything is fetched.
         const cached = await getDocsFromCache(entries).catch(() => undefined);
@@ -300,27 +347,33 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
           // Without the estimate option, a time the server has not confirmed reads as null.
           const confirmed: Timestamp | null = d.get("modifiedAt");
           if (confirmed) heldTimes.push(confirmed.toMillis());
+          else if (d.metadata.hasPendingWrites) pending.push(d);
         }
       }
       const watched = await watchedQuery(heldTimes);
       if (stopped()) return unwatch;
       let first = true;
+      const report = () => (first ? undefined : callback);
+      // An incremental query has no server time to match a pending write by, so each one is
+      // followed on its own until the server confirms it, or refuses it and it is rolled back.
+      for (const d of pending) {
+        const stop = onSnapshot(d.ref, (now) => {
+          if (stopped() || now.metadata.hasPendingWrites) return;
+          hold(docs, d.get("key"), now, report());
+          stop();
+        });
+        unsubscribes.push(stop);
+      }
       await new Promise<void>((resolve, reject) => {
         settleStart = resolve;
-        unsubscribe = onSnapshot(
+        const stop = onSnapshot(
           watched,
           (snapshot) => {
             if (stopped()) return;
             for (const change of snapshot.docChanges()) {
-              const key = change.doc.get("key");
-              const before = docs.get(key)?.value;
-              if (change.type === "removed") {
-                // Only a deletion takes an entry out: written times never go backwards.
-                if (docs.delete(key) && !first) callback("remove", key);
-              } else {
-                docs.set(key, fromDoc(change.doc));
-                if (!first && before !== change.doc.get("value")) callback("update", key);
-              }
+              // Only a deletion takes an entry out: written times never go backwards.
+              const now = change.type === "removed" ? undefined : change.doc;
+              hold(docs, change.doc.get("key"), now, report());
             }
             if (first) {
               first = false;
@@ -338,6 +391,7 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
             unwatch();
           },
         );
+        unsubscribes.push(stop);
       });
       return unwatch;
     },

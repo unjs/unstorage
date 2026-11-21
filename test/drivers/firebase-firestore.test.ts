@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { deleteApp, initializeApp } from "firebase/app";
 import * as firestoreLib from "firebase/firestore";
 import driver, { escapeKey } from "../../src/drivers/firebase-firestore.ts";
@@ -25,6 +25,22 @@ describe.skipIf(!emulatorHost)("drivers: firebase-firestore", () => {
     }),
   });
   firestoreLib.connectFirestoreEmulator(cachingFirestore, host!, Number(port));
+
+  // Everything is allowed, except writing the value "refuse me", to see how refused writes behave.
+  beforeAll(async () => {
+    const rules = `rules_version = '2';
+      service cloud.firestore {
+        match /databases/{database}/documents/{document=**} {
+          allow read: if true;
+          allow write: if request.resource == null || request.resource.data.value != "refuse me";
+        }
+      }`;
+    const response = await fetch(
+      `http://${emulatorHost}/emulator/v1/projects/demo-unstorage:securityRules`,
+      { method: "PUT", body: JSON.stringify({ rules: { files: [{ content: rules }] } }) },
+    );
+    expect(response.ok).toBe(true);
+  });
 
   afterAll(async () => {
     await Promise.all([
@@ -207,9 +223,22 @@ describe.skipIf(!emulatorHost)("drivers: firebase-firestore", () => {
         const realNow = Date.now;
         Date.now = () => realNow() + 600_000;
         const pending = reader().setItem("skew:mine", 2);
-        // The write is queued only after the driver's own awaits; keep the clock ahead until then.
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        Date.now = realNow;
+        try {
+          // Keep the clock ahead until the write is in the cache with its skewed estimate.
+          const mine = firestoreLib.doc(
+            firestoreLib.collection(cachingFirestore, "test"),
+            escapeKey("skew:mine"),
+          );
+          await expect
+            .poll(async () => {
+              const d = await firestoreLib.getDocFromCache(mine).catch(() => undefined);
+              const estimate = d?.get("modifiedAt", { serverTimestamps: "estimate" });
+              return d?.metadata.hasPendingWrites && estimate?.toMillis() > realNow() + 500_000;
+            })
+            .toBe(true);
+        } finally {
+          Date.now = realNow;
+        }
 
         const reopened = reader();
         const unwatch = await reopened.watch(() => {});
@@ -217,6 +246,66 @@ describe.skipIf(!emulatorHost)("drivers: firebase-firestore", () => {
         await firestoreLib.enableNetwork(cachingFirestore);
         await pending;
         await expect.poll(() => reopened.getItem("skew:other")).toBe(3);
+        await unwatch();
+      });
+      it("incrementally, a write the server refuses does not stay readable", async () => {
+        const reader = () =>
+          createStorage({
+            driver: driver({
+              firestore: cachingFirestore,
+              collection: "test",
+              lib: firestoreLib,
+              incremental: true,
+            }),
+          });
+        await ctx.storage.setItem("refuse:1", 1);
+        await (
+          await reader().watch(() => {})
+        )();
+        const watching = reader();
+        const heard: string[] = [];
+        const unwatch = await watching.watch((event, key) => heard.push(`${event} ${key}`));
+        await expect(watching.setItem("refuse:big", "refuse me")).rejects.toThrow();
+        expect(await watching.getItem("refuse:big")).toBe(null);
+        expect(heard.filter((e) => e.endsWith("refuse:big"))).toEqual([
+          "update refuse:big",
+          "remove refuse:big",
+        ]);
+        await unwatch();
+      });
+      it("incrementally, a refused write made offline is readable until the server refuses it", async () => {
+        const reader = () =>
+          createStorage({
+            driver: driver({
+              firestore: cachingFirestore,
+              collection: "test",
+              lib: firestoreLib,
+              incremental: true,
+            }),
+          });
+        await ctx.storage.setItem("refuse:1", 1);
+        await (
+          await reader().watch(() => {})
+        )();
+        await firestoreLib.disableNetwork(cachingFirestore);
+        const refused = reader()
+          .setItem("refuse:offline", "refuse me")
+          .catch(() => "refused");
+        const offline = firestoreLib.doc(
+          firestoreLib.collection(cachingFirestore, "test"),
+          escapeKey("refuse:offline"),
+        );
+        await expect
+          .poll(async () =>
+            (await firestoreLib.getDocFromCache(offline).catch(() => undefined))?.exists(),
+          )
+          .toBe(true);
+        const reopened = reader();
+        const unwatch = await reopened.watch(() => {});
+        expect(await reopened.getItem("refuse:offline")).toBe("refuse me");
+        await firestoreLib.enableNetwork(cachingFirestore);
+        expect(await refused).toBe("refused");
+        await expect.poll(() => reopened.getItem("refuse:offline")).toBe(null);
         await unwatch();
       });
       it("incrementally, a client that has only read some entries still gets older ones", async () => {

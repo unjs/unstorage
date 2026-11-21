@@ -153,11 +153,15 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
     if (live?.delete(key)) notify?.("remove", key);
   };
 
-  /** What the server is asked for when watching starts, given what is already held. */
-  const watchedQuery = async (held: Map<string, Entry>): Promise<Query> => {
+  /**
+   * What the server is asked for when watching starts, given the server times of the entries
+   * already held. Only times the server confirmed count: an unconfirmed write has only this
+   * client's estimate, and a clock running ahead would move the cut-off past entries to come.
+   */
+  const watchedQuery = async (heldTimes: number[]): Promise<Query> => {
     const entries = await getCollection();
     let newest = 0;
-    for (const e of held.values()) newest = Math.max(newest, e.modifiedAt?.toMillis() ?? 0);
+    for (const time of heldTimes) newest = Math.max(newest, time);
     if (!opts.incremental || newest === 0) return entries;
     const { Timestamp, getCountFromServer, query, where } = await getLib();
     const since = Timestamp.fromMillis(newest - INCREMENTAL_OVERLAP_MS);
@@ -171,8 +175,8 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
       () => undefined,
     );
     let heldUpToSince = 0;
-    for (const e of held.values()) {
-      if ((e.modifiedAt?.toMillis() ?? 0) <= since.toMillis()) heldUpToSince++;
+    for (const time of heldTimes) {
+      if (time <= since.toMillis()) heldUpToSince++;
     }
     if (onServer !== undefined && heldUpToSince < onServer) return entries;
     return query(entries, where("modifiedAt", ">", since));
@@ -287,12 +291,18 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
       const { getDocsFromCache, onSnapshot } = await getLib();
       const entries = await getCollection();
       const docs = new Map<string, Entry>();
+      const heldTimes: number[] = [];
       if (opts.incremental) {
         // Free: no server reads. Fails without a cache, and then everything is fetched.
         const cached = await getDocsFromCache(entries).catch(() => undefined);
-        for (const d of cached?.docs ?? []) docs.set(d.get("key"), fromDoc(d));
+        for (const d of cached?.docs ?? []) {
+          docs.set(d.get("key"), fromDoc(d));
+          // Without the estimate option, a time the server has not confirmed reads as null.
+          const confirmed: Timestamp | null = d.get("modifiedAt");
+          if (confirmed) heldTimes.push(confirmed.toMillis());
+        }
       }
-      const watched = await watchedQuery(docs);
+      const watched = await watchedQuery(heldTimes);
       if (stopped()) return unwatch;
       let first = true;
       await new Promise<void>((resolve, reject) => {
@@ -321,9 +331,11 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
             }
           },
           (error) => {
-            // Reads go back to asking Firestore directly.
-            unwatch();
+            // A failed start rejects, rather than being settled as stopped. Reads go back to
+            // asking Firestore directly.
+            settleStart = undefined;
             reject(error);
+            unwatch();
           },
         );
       });

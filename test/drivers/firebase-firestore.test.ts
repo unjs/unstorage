@@ -86,6 +86,20 @@ describe.skipIf(!emulatorHost)("drivers: firebase-firestore", () => {
         await new Promise((resolve) => setTimeout(resolve, 200));
         expect(heard).toEqual([]);
       });
+      it("a watch whose listener fails before its first snapshot rejects", async () => {
+        const failing = driver({
+          firestore,
+          collection: "test",
+          lib: {
+            ...firestoreLib,
+            onSnapshot: ((_query: unknown, _next: unknown, error: (e: Error) => void) => {
+              error(new Error("permission denied"));
+              return () => {};
+            }) as any,
+          },
+        });
+        await expect(failing.watch!(() => {})).rejects.toThrow("permission denied");
+      });
       it("unwatching an earlier watch leaves a newer one running", async () => {
         const watcher = driver({ firestore, collection: "test", lib: firestoreLib });
         const earlier = await watcher.watch!(() => {});
@@ -171,6 +185,38 @@ describe.skipIf(!emulatorHost)("drivers: firebase-firestore", () => {
         await firestoreLib.enableNetwork(cachingFirestore);
         await expect.poll(() => reopened.getItem("log:3")).toBe(3);
         expect(heard).toEqual(["update log:3"]);
+        await unwatch();
+      });
+      it("incrementally, a clock running ahead does not hide entries written meanwhile", async () => {
+        const reader = () =>
+          createStorage({
+            driver: driver({
+              firestore: cachingFirestore,
+              collection: "test",
+              lib: firestoreLib,
+              incremental: true,
+            }),
+          });
+        await ctx.storage.setItem("skew:1", 1);
+        await (
+          await reader().watch(() => {})
+        )();
+
+        // Offline, with a clock ten minutes ahead, this client writes: the server time is pending.
+        await firestoreLib.disableNetwork(cachingFirestore);
+        const realNow = Date.now;
+        Date.now = () => realNow() + 600_000;
+        const pending = reader().setItem("skew:mine", 2);
+        // The write is queued only after the driver's own awaits; keep the clock ahead until then.
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        Date.now = realNow;
+
+        const reopened = reader();
+        const unwatch = await reopened.watch(() => {});
+        await ctx.storage.setItem("skew:other", 3);
+        await firestoreLib.enableNetwork(cachingFirestore);
+        await pending;
+        await expect.poll(() => reopened.getItem("skew:other")).toBe(3);
         await unwatch();
       });
       it("incrementally, a client that has only read some entries still gets older ones", async () => {

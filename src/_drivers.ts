@@ -16,6 +16,7 @@ import type { CloudflareR2Options as CloudflareR2BindingOptions } from "unstorag
 import type { DB0DriverOptions as Db0Options } from "unstorage/drivers/db0";
 import type { DenoKvNodeOptions as DenoKVNodeOptions } from "unstorage/drivers/deno-kv-node";
 import type { DenoKvOptions as DenoKVOptions } from "unstorage/drivers/deno-kv";
+import type { FirebaseFirestoreOptions } from "unstorage/drivers/firebase-firestore";
 import type { FSStorageOptions as FsLiteOptions } from "unstorage/drivers/fs-lite";
 import type { FSStorageOptions as FsOptions } from "unstorage/drivers/fs";
 import type { GithubOptions } from "unstorage/drivers/github";
@@ -35,7 +36,7 @@ import type { UpstashOptions } from "unstorage/drivers/upstash";
 import type { VercelBlobOptions } from "unstorage/drivers/vercel-blob";
 import type { VercelCacheOptions as VercelRuntimeCacheOptions } from "unstorage/drivers/vercel-runtime-cache";
 
-export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-cache-binding" | "cloudflareCacheBinding" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-runtime-cache" | "vercelRuntimeCache";
+export type BuiltinDriverName = "azure-app-configuration" | "azureAppConfiguration" | "azure-cosmos" | "azureCosmos" | "azure-key-vault" | "azureKeyVault" | "azure-storage-blob" | "azureStorageBlob" | "azure-storage-table" | "azureStorageTable" | "capacitor-preferences" | "capacitorPreferences" | "cloudflare-cache-binding" | "cloudflareCacheBinding" | "cloudflare-kv-binding" | "cloudflareKVBinding" | "cloudflare-kv-http" | "cloudflareKVHttp" | "cloudflare-r2-binding" | "cloudflareR2Binding" | "db0" | "deno-kv-node" | "denoKVNode" | "deno-kv" | "denoKV" | "firebase-firestore" | "firebaseFirestore" | "fs-lite" | "fsLite" | "fs" | "github" | "http" | "indexedb" | "localstorage" | "lru-cache" | "lruCache" | "memory" | "mongodb" | "netlify-blobs" | "netlifyBlobs" | "null" | "overlay" | "planetscale" | "redis" | "s3" | "session-storage" | "sessionStorage" | "uploadthing" | "upstash" | "vercel-blob" | "vercelBlob" | "vercel-runtime-cache" | "vercelRuntimeCache";
 
 export type BuiltinDriverOptions = {
   "azure-app-configuration": AzureAppConfigurationOptions;
@@ -63,6 +64,8 @@ export type BuiltinDriverOptions = {
   "denoKVNode": DenoKVNodeOptions;
   "deno-kv": DenoKVOptions;
   "denoKV": DenoKVOptions;
+  "firebase-firestore": FirebaseFirestoreOptions;
+  "firebaseFirestore": FirebaseFirestoreOptions;
   "fs-lite": FsLiteOptions;
   "fsLite": FsLiteOptions;
   "fs": FsOptions;
@@ -115,6 +118,8 @@ export const builtinDrivers = {
   "denoKVNode": "unstorage/drivers/deno-kv-node",
   "deno-kv": "unstorage/drivers/deno-kv",
   "denoKV": "unstorage/drivers/deno-kv",
+  "firebase-firestore": "unstorage/drivers/firebase-firestore",
+  "firebaseFirestore": "unstorage/drivers/firebase-firestore",
   "fs-lite": "unstorage/drivers/fs-lite",
   "fsLite": "unstorage/drivers/fs-lite",
   "fs": "unstorage/drivers/fs",
@@ -204,6 +209,12 @@ export const builtinDriverDependencies: Partial<Record<BuiltinDriverName, Driver
   },
   "denoKVNode": {
     lib: { name: "@deno/kv", version: ">=0.14.0" },
+  },
+  "firebase-firestore": {
+    lib: { name: "firebase", import: "firebase/firestore", version: ">=11" },
+  },
+  "firebaseFirestore": {
+    lib: { name: "firebase", import: "firebase/firestore", version: ">=11" },
   },
   "fs": {
     lib: { name: "chokidar", version: "^4 || ^5", optional: true },

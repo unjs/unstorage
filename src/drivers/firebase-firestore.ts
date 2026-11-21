@@ -7,6 +7,7 @@ import {
 } from "./utils/index.ts";
 import type {
   CollectionReference,
+  DocumentReference,
   DocumentSnapshot,
   Firestore,
   Query,
@@ -142,14 +143,21 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
     notify = undefined;
   };
 
+  // How many times this client changed each held key, so a slower read of the cache can tell
+  // that a newer write to the same key came after it began.
+  const revisions = new Map<string, number>();
+  const revise = (key: string) => revisions.set(key, (revisions.get(key) ?? 0) + 1);
+
   /** Records this client's own write in the held copy, and reports it once. */
   const heldWrite = (key: string, value: unknown) => {
     if (!live) return;
+    revise(key);
     live.set(key, { value });
     notify?.("update", key);
   };
 
   const heldRemove = (key: string) => {
+    revise(key);
     if (live?.delete(key)) notify?.("remove", key);
   };
 
@@ -177,8 +185,9 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
     if (!live) return;
     const { getDocFromCache } = await getLib();
     for (const key of keys) {
+      const revision = revisions.get(key);
       const d = await getDocFromCache(await entry(key)).catch(() => undefined);
-      if (live) hold(live, key, d, notify);
+      if (live && revisions.get(key) === revision) hold(live, key, d, notify);
     }
   };
 
@@ -354,16 +363,19 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
       if (stopped()) return unwatch;
       let first = true;
       const report = () => (first ? undefined : callback);
-      // An incremental query has no server time to match a pending write by, so each one is
-      // followed on its own until the server confirms it, or refuses it and it is rolled back.
-      for (const d of pending) {
-        const stop = onSnapshot(d.ref, (now) => {
-          if (stopped() || now.metadata.hasPendingWrites) return;
-          hold(docs, d.get("key"), now, report());
-          stop();
+      // An incremental query has no server time to match a pending write by: such a write drops
+      // out of its results while the document still exists. So each one is followed on its own,
+      // holding what it says, until the server confirms it, refuses it, or it is deleted.
+      const narrowed = watched.type === "query";
+      const follow = (ref: DocumentReference, key: string) => {
+        const stop = onSnapshot(ref, (now) => {
+          if (stopped()) return;
+          hold(docs, key, now, report());
+          if (!now.metadata.hasPendingWrites) stop();
         });
         unsubscribes.push(stop);
-      }
+      };
+      for (const d of pending) follow(d.ref, d.get("key"));
       await new Promise<void>((resolve, reject) => {
         settleStart = resolve;
         const stop = onSnapshot(
@@ -371,9 +383,12 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
           (snapshot) => {
             if (stopped()) return;
             for (const change of snapshot.docChanges()) {
-              // Only a deletion takes an entry out: written times never go backwards.
-              const now = change.type === "removed" ? undefined : change.doc;
-              hold(docs, change.doc.get("key"), now, report());
+              if (stopped()) return;
+              const key = change.doc.get("key");
+              if (change.type !== "removed") hold(docs, key, change.doc, report());
+              else if (narrowed) follow(change.doc.ref, key);
+              // Without a filter, only a deletion takes an entry out.
+              else hold(docs, key, undefined, report());
             }
             if (first) {
               first = false;

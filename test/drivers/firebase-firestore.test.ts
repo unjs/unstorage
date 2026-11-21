@@ -273,6 +273,33 @@ describe.skipIf(!emulatorHost)("drivers: firebase-firestore", () => {
         ]);
         await unwatch();
       });
+      it("incrementally, rewriting an entry offline keeps it readable", async () => {
+        const reader = () =>
+          createStorage({
+            driver: driver({
+              firestore: cachingFirestore,
+              collection: "test",
+              lib: firestoreLib,
+              incremental: true,
+            }),
+          });
+        await ctx.storage.setItem("again:1", 1);
+        await (
+          await reader().watch(() => {})
+        )();
+        const watching = reader();
+        const unwatch = await watching.watch(() => {});
+        await expect.poll(() => watching.getItem("again:1")).toBe(1);
+        await firestoreLib.disableNetwork(cachingFirestore);
+        const written = watching.setItem("again:1", 2);
+        // Its new time is pending, so it no longer matches the query for entries since a time.
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        expect(await watching.getItem("again:1")).toBe(2);
+        await firestoreLib.enableNetwork(cachingFirestore);
+        await written;
+        await expect.poll(() => watching.getItem("again:1")).toBe(2);
+        await unwatch();
+      });
       it("incrementally, a refused write made offline is readable until the server refuses it", async () => {
         const reader = () =>
           createStorage({

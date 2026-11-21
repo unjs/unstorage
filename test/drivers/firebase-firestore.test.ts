@@ -273,6 +273,36 @@ describe.skipIf(!emulatorHost)("drivers: firebase-firestore", () => {
         ]);
         await unwatch();
       });
+      it("recovering from a refused write keeps a newer write made meanwhile", async () => {
+        // Holds the cache read back, as a slow read would, until a newer write is made.
+        let readStarted!: () => void;
+        const reading = new Promise<void>((resolve) => (readStarted = resolve));
+        let finishRead!: () => void;
+        const gate = new Promise<void>((resolve) => (finishRead = resolve));
+        const getDocFromCache = (async (ref: firestoreLib.DocumentReference) => {
+          const found = await firestoreLib.getDocFromCache(ref).catch(() => undefined);
+          readStarted();
+          await gate;
+          if (!found) throw new Error("not in the cache");
+          return found;
+        }) as typeof firestoreLib.getDocFromCache;
+        const watching = createStorage({
+          driver: driver({
+            firestore,
+            collection: "test",
+            lib: { ...firestoreLib, getDocFromCache },
+          }),
+        });
+        const unwatch = await watching.watch(() => {});
+        const refused = watching.setItem("race", "refuse me").catch(() => "refused");
+        await reading;
+        const newer = watching.setItem("race", "newer");
+        finishRead();
+        expect(await refused).toBe("refused");
+        expect(await watching.getItem("race")).toBe("newer");
+        await newer;
+        await unwatch();
+      });
       it("incrementally, rewriting an entry offline keeps it readable", async () => {
         const reader = () =>
           createStorage({

@@ -133,20 +133,21 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
   let generation = 0;
   let settleStart: (() => void) | undefined;
 
+  // While watching, how many times this client changed each held key, so a slower read of the
+  // cache can tell that a newer write to the same key came after it began.
+  const revisions = new Map<string, number>();
+  const revise = (key: string) => revisions.set(key, (revisions.get(key) ?? 0) + 1);
+
   const stopWatching = () => {
     generation++;
     settleStart?.();
     settleStart = undefined;
     for (const stop of unsubscribes) stop();
     unsubscribes = [];
+    revisions.clear();
     live = undefined;
     notify = undefined;
   };
-
-  // How many times this client changed each held key, so a slower read of the cache can tell
-  // that a newer write to the same key came after it began.
-  const revisions = new Map<string, number>();
-  const revise = (key: string) => revisions.set(key, (revisions.get(key) ?? 0) + 1);
 
   /** Records this client's own write in the held copy, and reports it once. */
   const heldWrite = (key: string, value: unknown) => {
@@ -157,8 +158,9 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
   };
 
   const heldRemove = (key: string) => {
+    if (!live) return;
     revise(key);
-    if (live?.delete(key)) notify?.("remove", key);
+    if (live.delete(key)) notify?.("remove", key);
   };
 
   /** Holds what a document now says (or that it is gone), and reports it if the value changed. */
@@ -183,10 +185,13 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
    */
   const restoreHeld = async (keys: string[]) => {
     if (!live) return;
+    const watching = generation;
     const { getDocFromCache } = await getLib();
     for (const key of keys) {
       const revision = revisions.get(key);
       const d = await getDocFromCache(await entry(key)).catch(() => undefined);
+      // Only into the same watch, and only if this client has not changed the key since.
+      if (generation !== watching) return;
       if (live && revisions.get(key) === revision) hold(live, key, d, notify);
     }
   };
@@ -371,7 +376,10 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
         const stop = onSnapshot(ref, (now) => {
           if (stopped()) return;
           hold(docs, key, now, report());
-          if (!now.metadata.hasPendingWrites) stop();
+          if (!now.metadata.hasPendingWrites) {
+            stop();
+            unsubscribes = unsubscribes.filter((unsubscribe) => unsubscribe !== stop);
+          }
         });
         unsubscribes.push(stop);
       };

@@ -217,7 +217,7 @@ const driver: DriverFactory<FirebaseFirestoreOptions, Promise<CollectionReferenc
     const since = Timestamp.fromMillis(newest - INCREMENTAL_OVERLAP_MS);
     // A cache can hold a newer entry without the older ones, for example after reading just that
     // one, so check it has as many entries up to `since` as the server does. A count costs one
-    // read per 1000 entries. Offline it fails, and the cache is trusted until the next start.
+    // read per 1000 entries. If it fails (offline, for example), the cache is trusted until the next start.
     const onServer = await getCountFromServer(
       query(entries, where("modifiedAt", "<=", since)),
     ).then(

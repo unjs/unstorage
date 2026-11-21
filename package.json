@@ -64,6 +64,7 @@
     "destr": "^2.0.5",
     "eslint-config-unjs": "^0.6.2",
     "fake-indexeddb": "^6.2.6",
+    "firebase": "^13.2.0",
     "get-port-please": "^3.2.0",
     "idb-keyval": "^6.3.0",
     "ioredis": "^6.0.0",

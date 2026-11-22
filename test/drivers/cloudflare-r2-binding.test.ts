@@ -71,6 +71,56 @@ describe("drivers: cloudflare-r2-binding", async () => {
           await root.removeItem("basement:a");
         }
       });
+      test("follows cursor when listing and chunks delete in clear", async () => {
+        const deletedBatches: (string | string[])[] = [];
+        const mockBinding = {
+          get: vi.fn(),
+          put: vi.fn(),
+          list: vi.fn()
+            .mockResolvedValueOnce({
+              objects: [{ key: "k1" }, { key: "k2" }],
+              truncated: true,
+              cursor: "cursor-1",
+            })
+            .mockResolvedValueOnce({
+              objects: [{ key: "k3" }],
+              truncated: false,
+              cursor: undefined,
+            }),
+          delete: vi.fn((keys) => {
+            deletedBatches.push(keys);
+            return Promise.resolve();
+          }),
+        } as unknown as CF.R2Bucket;
+
+        const driver = CloudflareR2Binding({ binding: mockBinding });
+        const keys = await driver.getKeys!("");
+        expect(keys).toEqual(["k1", "k2", "k3"]);
+        expect(mockBinding.list).toHaveBeenCalledTimes(2);
+        expect(mockBinding.list).toHaveBeenNthCalledWith(1, undefined);
+        expect(mockBinding.list).toHaveBeenNthCalledWith(2, { prefix: undefined, cursor: "cursor-1" });
+
+        // Test clear chunking over 1000 items
+        const manyKeys = Array.from({ length: 1500 }, (_, i) => ({ key: `item-${i}` }));
+        const mockClearBinding = {
+          get: vi.fn(),
+          put: vi.fn(),
+          list: vi.fn().mockResolvedValue({
+            objects: manyKeys,
+            truncated: false,
+          }),
+          delete: vi.fn((keys) => {
+            deletedBatches.push(keys);
+            return Promise.resolve();
+          }),
+        } as unknown as CF.R2Bucket;
+
+        const clearDriver = CloudflareR2Binding({ binding: mockClearBinding });
+        await clearDriver.clear!("", {});
+        expect(mockClearBinding.delete).toHaveBeenCalledTimes(2);
+        expect(mockClearBinding.delete).toHaveBeenNthCalledWith(1, manyKeys.slice(0, 1000).map(o => o.key));
+        expect(mockClearBinding.delete).toHaveBeenNthCalledWith(2, manyKeys.slice(1000).map(o => o.key));
+      });
     },
   });
 });

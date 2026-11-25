@@ -58,7 +58,7 @@
     "aws4fetch": "^1.0.20",
     "azurite": "^3.37.0",
     "changelogen": "^0.6.2",
-    "chokidar": "^5.0.0",
+    "chokidar": "^6.0.0",
     "citty": "^0.2.2",
     "db0": "^0.4.1",
     "destr": "^2.0.5",

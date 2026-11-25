@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { resolve } from "node:path";
-import { chmod, stat } from "node:fs/promises";
+import { resolve, join } from "node:path";
+import { tmpdir } from "node:os";
+import { chmod, mkdtemp, rm, stat } from "node:fs/promises";
+import { createStorage } from "../../src/index.ts";
 import { readFile } from "../../src/drivers/utils/node-fs.ts";
 import { testDriver } from "./utils.ts";
 import driver from "../../src/drivers/fs-lite.ts";
@@ -28,6 +30,30 @@ describe("drivers: fs-lite", () => {
         await ctx.storage.setItem("inplace:key", "overwritten");
         expect((await stat(filePath)).ino).toBe(before);
       });
+      it.skipIf(process.platform === "win32")(
+        "rejects removeItem when the file cannot be deleted",
+        async () => {
+          const root = await mkdtemp(join(tmpdir(), "unstorage-fs-lite-"));
+          const storage = createStorage({ driver: driver({ base: root }) });
+          try {
+            await storage.setItem("locked", "content");
+            // Removing read and traversal is still allowed, deleting a file
+            // requires write access to its parent directory.
+            await chmod(root, 0o500);
+            await expect(storage.removeItem("locked")).rejects.toThrow();
+            expect(await storage.hasItem("locked")).toBe(true);
+          } finally {
+            await chmod(root, 0o700);
+            await storage.dispose();
+            await rm(root, { recursive: true, force: true });
+          }
+        },
+      );
+
+      it("removes a missing item without throwing", async () => {
+        await expect(ctx.storage.removeItem("does-not-exist")).resolves.toBe(undefined);
+      });
+
       it("native meta", async () => {
         await ctx.storage.setItem("s1:a", "test_data");
         const meta = await ctx.storage.getMeta("/s1/a");

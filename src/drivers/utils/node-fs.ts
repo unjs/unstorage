@@ -3,7 +3,10 @@ import { resolve, dirname, join, basename } from "node:path";
 import { randomUUID } from "node:crypto";
 
 function ignoreNotfound(err: any) {
-  return err.code === "ENOENT" || err.code === "EISDIR" ? null : err;
+  if (err.code === "ENOENT" || err.code === "EISDIR") {
+    return null;
+  }
+  throw err;
 }
 
 function ignoreExists(err: any) {
